@@ -1,0 +1,41 @@
+name: Node Scraper
+
+on:
+  workflow_dispatch: {}
+  schedule:
+    - cron: "17 3 * * *" # daily 03:17 UTC
+
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: klubradio_scraper_nodejs
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+        node-version: 20
+        cache: "npm"
+        cache-dependency-path: klubradio_scraper_nodejs/package.json
+
+      - name: Install
+        run: npm ci
+
+      - name: Prepare env
+        run: |
+          cp .env.example .env
+          sed -i 's|^SUPABASE_URL=.*$|SUPABASE_URL=${{ secrets.SUPABASE_URL }}|' .env
+          sed -i 's|^SUPABASE_ANON_KEY=.*$|SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}|' .env
+          sed -i 's|^SUPABASE_BUCKET=.*$|SUPABASE_BUCKET=${{ vars.SUPABASE_BUCKET }}|' .env || true
+
+      - name: Scrape + RSS
+        run: npm run start
+
+      - name: Upload dist/ as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: rss-output
+          path: klubradio_scraper_nodejs/dist

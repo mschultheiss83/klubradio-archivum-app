@@ -1,0 +1,29 @@
+{
+  "name": "klubradio_scraper_nodejs",
+  "version": "0.1.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "start": "node index.js all",
+    "scrape": "node index.js scrape",
+    "rss": "node index.js rss",
+    "lint": "eslint .",
+    "format": "prettier -w .",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "*",
+    "axios": "*",
+    "bottleneck": "*",
+    "cheerio": "*",
+    "dotenv": "*",
+    "music-metadata": "*",
+    "pino": "*",
+    "rss": "*",
+    "rss-parser": "*"
+  },
+  "devDependencies": {
+    "eslint": "^9.11.1",
+    "prettier": "^3.3.3"
+  }
+}
