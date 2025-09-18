@@ -1,0 +1,10 @@
+requests
+beautifulsoup4
+supabase
+lxml
+python-dotenv
+mutagen
+feedgen
+pytest
+pytest-cov
+ruff
