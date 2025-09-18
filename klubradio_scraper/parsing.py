@@ -1,6 +1,6 @@
 from __future__ import annotations
-
 import logging
+from .logging_setup import setup_logging
 import re
 from datetime import datetime
 from typing import Any, Dict, List, Optional
@@ -8,7 +8,6 @@ from urllib.parse import urljoin
 
 from bs4 import BeautifulSoup, Tag
 
-from .config import settings
 
 # Ungarische Monatsnamen → Monat-Nummer
 MONTH_MAP: dict[str, str] = {
@@ -16,6 +15,7 @@ MONTH_MAP: dict[str, str] = {
     'május': '05', 'június': '06', 'július': '07', 'augusztus': '08',
     'szeptember': '09', 'október': '10', 'november': '11', 'december': '12'
 }
+setup_logging(debug_mode=True, file_name="debug.parsing.log")
 
 
 def parse_hu_date(date_text: str | None) -> Optional[str]:
@@ -86,79 +86,93 @@ def _split_concat_names(raw: str) -> List[str]:
     return parts
 
 
-def _collect_host_texts(start: Tag) -> List[str]:
+def _collect_host_texts(tag: Tag) -> List[str]:
     """
-    Sammelt Host-Namen ab dem H5-Label 'Műsorvezető' bis zum nächsten H5.
-    Berücksichtigt <a>-Links, Kommas, Newlines, Listenpunkte, etc.
+    Sammelt nur die Texte von Moderatoren und Gästen und entfernt
+    die thematischen Beschreibungen.
     """
-    names: List[str] = []
-    cur = start.find_next_sibling()
-    while isinstance(cur, Tag) and cur.name != "h5":
-        anchors = cur.find_all("a")
-        if anchors:
-            for a in anchors:
-                txt = a.get_text(separator=" ", strip=True)
-                if txt:
-                    names.append(txt)
-        else:
-            raw = cur.get_text("\n", strip=True)
-            if raw:
-                prelim = re.split(r",|\bes\b|\n|·|•|;", raw)
-                for p in prelim:
-                    p = re.sub(r"^M[űu]sorvezet[őo]:?\s*", "", p.strip(), flags=re.IGNORECASE)
-                    if not p:
-                        continue
-                    names.extend(_split_concat_names(p))
-        cur = cur.find_next_sibling()
+    hosts_text: List[str] = []
 
-    # Deduplizieren, Reihenfolge erhalten
-    out: List[str] = []
-    seen = set()
-    for n in names:
-        if n and n not in seen:
-            out.append(n)
-            seen.add(n)
-    return out
+    # Gehen wir alle <p>-Tags im relevanten Bereich durch
+    for p_tag in tag.select("p"):
+        p_text = p_tag.get_text(strip=True)
+
+        # Leere Zeilen ignorieren
+        if not p_text:
+            continue
+
+        # Suchen nach dem ersten Trennzeichen, das den Namen/Titel vom Thema trennt.
+        # Wir prüfen auf Bindestrich (–) oder Doppelpunkt (:).
+        if "–" in p_text:
+            parts = p_text.split("–", 1)
+            hosts_text.append(parts[0].strip())
+        elif ":" in p_text:
+            parts = p_text.split(":", 1)
+            # Nur hinzufügen, wenn der Teil vor dem Doppelpunkt sinnvoll ist (z.B. nicht nur eine Jahreszahl)
+            if len(parts[0]) > 4:
+                hosts_text.append(parts[0].strip())
+        else:
+            # Für Fälle ohne Trennzeichen (z.B. nur ein Name), die ganze Zeile hinzufügen
+            hosts_text.append(p_text.strip())
+
+    # Wir bereinigen die Liste von unerwünschten Elementen wie YouTube-Links oder leeren Zeilen.
+    # Dies ist eine weitere Heuristik, um die Daten zu säubern.
+    cleaned_hosts = [
+        item for item in hosts_text
+        if "YouTube" not in item and "podcast" not in item and "Spotify" not in item
+    ]
+
+    # Entferne Duplikate
+    unique_hosts = list(dict.fromkeys(cleaned_hosts))
+
+    return unique_hosts
 
 
 # ---------------- Archivseite ----------------
-def parse_archive_page(html: str) -> List[Dict[str, Any]]:
+def parse_archive_page(html: str, page_url: str) -> List[Dict[str, Any]]:
     """
-    Extrahiert Shows aus der Archivseite.
-    Liefert List[dict] mit:
-      title, hosts, description, detail_url, show_date(ISO)
+    Parst die Archivseite und extrahiert die Sendungen mit Metadaten.
     """
     soup = BeautifulSoup(html, "lxml")
+    shows: List[Dict[str, Any]] = []
     articles = soup.find_all('article', class_='program')
     logging.info(f"Found {len(articles)} article.program elements.")
-    shows: list[dict] = []
 
-    for article in articles:
-        a = article.select_one('h4 a')
-        title_strong = article.select_one('h3 a strong')
-        lead = article.select_one('div.lead')
+    for li in articles:
+        show = {}
+        link_tag = li.select_one("h3 a")
+        logging.info(f"Attempting to parse link_tag: {link_tag}")
+        if not link_tag:
+            continue
 
-        title = title_strong.get_text(strip=True) if title_strong else (a.get_text(strip=True) if a else "")
-        detail_href = a.get("href") if a else ""
-        detail_url = f"{settings.KLUBRADIO_URL}{detail_href}" if detail_href else ""
-        date_text = a.get_text(strip=True) if a else ""
-        show_date_iso = parse_hu_date(date_text)
+        # Titel extrahieren und das Datum-Span sicher entfernen
+        full_title_text = link_tag.get_text()
+        date_start_index = full_title_text.find("(")
 
-        hosts: List[str] = []
-        h5 = article.find('h5')
-        if h5 and "Műsorvezet" in h5.get_text():
-            hosts = _collect_host_texts(h5)
+        if date_start_index != -1:
+            # Den Titel am ersten '(' aufteilen
+            show_title = full_title_text[:date_start_index].strip()
+            date_text = full_title_text[date_start_index + 1:].strip().rstrip(')')
+            show_date = parse_hu_date(date_text)
+            show["title"] = show_title
+            show["show_date"] = show_date if len(show_date) else date_text
+        else:
+            # Fallback, wenn kein Datum in Klammern gefunden wird
+            show["title"] = full_title_text
+            show["show_date"] = None
 
-        shows.append({
-            "title": title,
-            "hosts": hosts,
-            "description": lead.get_text(separator=" ", strip=True) if lead else "",
-            "detail_url": detail_url,
-            "show_date": show_date_iso,
-        })
+        show["detail_url"] = urljoin(page_url, link_tag["href"])
 
-    # Nur Einträge mit Detail-URL
-    return [s for s in shows if s.get("detail_url")]
+        desc_tag = li.select_one("div.show-desc p")
+        if desc_tag:
+            show["description"] = desc_tag.get_text(strip=True)
+
+        host_list = _collect_host_texts(li)
+        show["hosts"] = host_list
+
+        shows.append(show)
+
+    return shows
 
 
 # ---------------- Detailseite ----------------

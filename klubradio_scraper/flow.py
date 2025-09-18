@@ -62,7 +62,7 @@ def get_archive_shows(session, use_cache: bool = True) -> List[Dict[str, Any]]:
     if not html:
         return []
 
-    shows = parse_archive_page(html)
+    shows = parse_archive_page(html=html, page_url=settings.KLUBRADIO_URL)
     cache_set("archive", key, shows, html=html)
     return shows
 
@@ -100,7 +100,7 @@ def run(supa_client=None, use_cache: bool = True) -> Optional[str]:
       4) RSS generieren (+ optional hochladen)
     Gibt RSS-XML zurück oder None.
     """
-    setup_logging(logging.DEBUG)
+    setup_logging()
     session = make_session()
     supa = SupaLike(supa_client)
 
