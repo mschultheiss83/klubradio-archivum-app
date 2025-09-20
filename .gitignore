@@ -1,6 +1,8 @@
 # node js
 package-lock.json
 node_modules/
+**/downloads/**.json
+cookies.json
 
 # Miscellaneous
 *.class
