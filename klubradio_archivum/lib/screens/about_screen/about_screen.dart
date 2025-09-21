@@ -29,7 +29,7 @@ class AboutScreen extends StatelessWidget {
             SizedBox(height: 12),
             Text(
               'Kapcsolat: info@klubradio.hu (tartalom), '
-              'TODO: developer@yourdomain.com (fejlesztői elérhetőség)',
+              'multilevelstudios@gmail.com (fejlesztői elérhetőség)',
             ),
           ],
         ),

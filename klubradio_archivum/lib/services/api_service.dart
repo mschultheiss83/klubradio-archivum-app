@@ -9,12 +9,12 @@ import '../models/user_profile.dart';
 import '../screens/utils/constants.dart' as constants;
 
 class ApiService {
-  ApiService({http.Client? httpClient}) : _httpClient = httpClient ?? http.Client();
+  ApiService({http.Client? httpClient})
+    : _httpClient = httpClient ?? http.Client();
 
-  static const String _supabaseUrl = 'https://TODO.supabase.co';
-  // TODO: Replace with your Supabase project URL above.
-  static const String _supabaseKey = 'TODO: Supabase anon key';
-  // TODO: Replace with your Supabase public anon API key above.
+  static const String _supabaseUrl = 'https://arakbotxgwpyyqyxjhhl.supabase.co';
+  static const String _supabaseKey =
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFyYWtib3R4Z3dweXlxeXhqaGhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgxMDE0MzUsImV4cCI6MjA3MzY3NzQzNX0.zO__rAZCmPQW26YAC3CYhq_ZSjUAx0Gh0KHXIVHhm7w';
   static const Duration _timeout = Duration(seconds: 20);
 
   final http.Client _httpClient;
@@ -23,10 +23,10 @@ class ApiService {
       !_supabaseUrl.contains('TODO') && !_supabaseKey.contains('TODO');
 
   Map<String, String> get _headers => <String, String>{
-        'apikey': _supabaseKey,
-        'Authorization': 'Bearer $_supabaseKey',
-        'Content-Type': 'application/json',
-      };
+    'apikey': _supabaseKey,
+    'Authorization': 'Bearer $_supabaseKey',
+    'Content-Type': 'application/json',
+  };
 
   Future<List<Podcast>> fetchLatestPodcasts({int limit = 20}) async {
     if (!hasValidCredentials) {
@@ -39,8 +39,9 @@ class ApiService {
       '&order=lastUpdated.desc'
       '&limit=$limit',
     );
-    final http.Response response =
-        await _httpClient.get(uri, headers: _headers).timeout(_timeout);
+    final http.Response response = await _httpClient
+        .get(uri, headers: _headers)
+        .timeout(_timeout);
 
     if (response.statusCode >= 200 && response.statusCode < 300) {
       final List<dynamic> data = jsonDecode(response.body) as List<dynamic>;
@@ -66,8 +67,9 @@ class ApiService {
       '&order=playCount.desc.nullslast'
       '&limit=$limit',
     );
-    final http.Response response =
-        await _httpClient.get(uri, headers: _headers).timeout(_timeout);
+    final http.Response response = await _httpClient
+        .get(uri, headers: _headers)
+        .timeout(_timeout);
 
     if (response.statusCode >= 200 && response.statusCode < 300) {
       final List<dynamic> data = jsonDecode(response.body) as List<dynamic>;
@@ -94,8 +96,9 @@ class ApiService {
       '&order=recommendationScore.desc.nullslast'
       '&limit=$limit',
     );
-    final http.Response response =
-        await _httpClient.get(uri, headers: _headers).timeout(_timeout);
+    final http.Response response = await _httpClient
+        .get(uri, headers: _headers)
+        .timeout(_timeout);
 
     if (response.statusCode >= 200 && response.statusCode < 300) {
       final List<dynamic> data = jsonDecode(response.body) as List<dynamic>;
@@ -124,12 +127,16 @@ class ApiService {
       '&order=publishedAt.desc'
       '&limit=$limit',
     );
-    final http.Response response =
-        await _httpClient.get(uri, headers: _headers).timeout(_timeout);
+    final http.Response response = await _httpClient
+        .get(uri, headers: _headers)
+        .timeout(_timeout);
 
     if (response.statusCode >= 200 && response.statusCode < 300) {
       final List<dynamic> data = jsonDecode(response.body) as List<dynamic>;
-      return data.whereType<Map<String, dynamic>>().map(Episode.fromJson).toList();
+      return data
+          .whereType<Map<String, dynamic>>()
+          .map(Episode.fromJson)
+          .toList();
     }
 
     throw ApiException('Unable to fetch episodes for podcast $podcastId');
@@ -137,11 +144,13 @@ class ApiService {
 
   Future<List<Episode>> fetchRecentEpisodes({int limit = 20}) async {
     if (!hasValidCredentials) {
-      final List<Episode> mocked = _mockPodcasts()
-          .expand((Podcast podcast) => _mockEpisodes(podcast.id))
-          .toList()
-        ..sort((Episode a, Episode b) =>
-            b.publishedAt.compareTo(a.publishedAt));
+      final List<Episode> mocked =
+          _mockPodcasts()
+              .expand((Podcast podcast) => _mockEpisodes(podcast.id))
+              .toList()
+            ..sort(
+              (Episode a, Episode b) => b.publishedAt.compareTo(a.publishedAt),
+            );
       return mocked.take(limit).toList();
     }
 
@@ -151,12 +160,16 @@ class ApiService {
       '&order=publishedAt.desc'
       '&limit=$limit',
     );
-    final http.Response response =
-        await _httpClient.get(uri, headers: _headers).timeout(_timeout);
+    final http.Response response = await _httpClient
+        .get(uri, headers: _headers)
+        .timeout(_timeout);
 
     if (response.statusCode >= 200 && response.statusCode < 300) {
       final List<dynamic> data = jsonDecode(response.body) as List<dynamic>;
-      return data.whereType<Map<String, dynamic>>().map(Episode.fromJson).toList();
+      return data
+          .whereType<Map<String, dynamic>>()
+          .map(Episode.fromJson)
+          .toList();
     }
 
     throw ApiException('Unable to fetch recent episodes');
@@ -169,8 +182,10 @@ class ApiService {
 
     if (!hasValidCredentials) {
       return _mockPodcasts()
-          .where((Podcast podcast) =>
-              podcast.title.toLowerCase().contains(query.toLowerCase()))
+          .where(
+            (Podcast podcast) =>
+                podcast.title.toLowerCase().contains(query.toLowerCase()),
+          )
           .toList();
     }
 
@@ -180,12 +195,16 @@ class ApiService {
       '?select=*,hosts(*)'
       '&title=ilike.%25$encodedQuery%25',
     );
-    final http.Response response =
-        await _httpClient.get(uri, headers: _headers).timeout(_timeout);
+    final http.Response response = await _httpClient
+        .get(uri, headers: _headers)
+        .timeout(_timeout);
 
     if (response.statusCode >= 200 && response.statusCode < 300) {
       final List<dynamic> data = jsonDecode(response.body) as List<dynamic>;
-      return data.whereType<Map<String, dynamic>>().map(Podcast.fromJson).toList();
+      return data
+          .whereType<Map<String, dynamic>>()
+          .map(Podcast.fromJson)
+          .toList();
     }
 
     throw ApiException('Unable to search podcasts');
@@ -212,8 +231,9 @@ class ApiService {
       '&id=eq.$userId'
       '&limit=1',
     );
-    final http.Response response =
-        await _httpClient.get(uri, headers: _headers).timeout(_timeout);
+    final http.Response response = await _httpClient
+        .get(uri, headers: _headers)
+        .timeout(_timeout);
 
     if (response.statusCode >= 200 && response.statusCode < 300) {
       final List<dynamic> data = jsonDecode(response.body) as List<dynamic>;
@@ -231,8 +251,9 @@ class ApiService {
       return;
     }
 
-    final Uri uri =
-        Uri.parse('$_supabaseUrl/rest/v1/${constants.playbackEventsTable}');
+    final Uri uri = Uri.parse(
+      '$_supabaseUrl/rest/v1/${constants.playbackEventsTable}',
+    );
     final http.Response response = await _httpClient
         .post(
           uri,
@@ -273,8 +294,7 @@ class ApiService {
         description:
             'Az Esti gyors napi közéleti összefoglalója a legfontosabb hírekkel.',
         categories: const <String>['politika', 'közélet'],
-        coverImageUrl:
-            'https://images.klubradio.hu/podcasts/esti-gyors.jpg',
+        coverImageUrl: 'https://images.klubradio.hu/podcasts/esti-gyors.jpg',
         language: 'hu',
         episodeCount: 1200,
         hosts: <ShowHost>[bolgarGyorgy],
@@ -288,8 +308,7 @@ class ApiService {
         description:
             'Bolgár György legendás betelefonálós műsora a hallgatók kérdéseivel.',
         categories: const <String>['politika', 'vélemény'],
-        coverImageUrl:
-            'https://images.klubradio.hu/podcasts/megbeszeljuk.jpg',
+        coverImageUrl: 'https://images.klubradio.hu/podcasts/megbeszeljuk.jpg',
         language: 'hu',
         episodeCount: 1800,
         hosts: <ShowHost>[bolgarGyorgy],

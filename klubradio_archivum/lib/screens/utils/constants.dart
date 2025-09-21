@@ -1,5 +1,5 @@
 const String podcastsTable = 'podcasts';
-const String episodesTable = 'episodes';
+const String episodesTable = 'show';
 const String userProfilesTable = 'user_profiles';
 const String playbackEventsTable = 'playback_events';
 
@@ -20,4 +20,4 @@ const List<String> topCategories = <String>[
 
 const List<double> playbackSpeeds = <double>[0.75, 1.0, 1.25, 1.5, 1.75, 2.0];
 
-const List<int> autoDownloadOptions = <int>[1, 3, 5, 7, 10];
+const List<int> autoDownloadOptions = <int>[1, 3, 5, 7, 10, 20, 50, 100];

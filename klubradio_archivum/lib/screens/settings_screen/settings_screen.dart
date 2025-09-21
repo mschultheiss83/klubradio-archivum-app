@@ -20,7 +20,9 @@ class SettingsScreen extends StatelessWidget {
           child: ListTile(
             leading: const Icon(Icons.favorite_outline),
             title: const Text('Támogasd a Klubrádiót'),
-            subtitle: const Text('Nyisd meg a támogatási oldalt a böngészőben.'),
+            subtitle: const Text(
+              'Nyisd meg a támogatási oldalt a böngészőben.',
+            ),
             onTap: () {
               launchUrl(
                 Uri.parse('https://www.klubradio.hu/tamogatas'),
@@ -36,9 +38,8 @@ class SettingsScreen extends StatelessWidget {
             title: const Text('Támogasd az alkalmazás fejlesztőjét'),
             subtitle: const Text('Önkéntes adomány a további fejlesztésekhez.'),
             onTap: () {
-              // TODO: Replace with a real donation URL.
               launchUrl(
-                Uri.parse('https://ko-fi.com/your-page'),
+                Uri.parse('https://buymeacoffee.com/mschultheiss83'),
                 mode: LaunchMode.externalApplication,
               );
             },
