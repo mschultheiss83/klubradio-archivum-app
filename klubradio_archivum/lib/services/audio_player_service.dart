@@ -1,59 +1,86 @@
-import 'dart:async';
-import 'dart:io';
-
-import 'package:just_audio/just_audio.dart';
+import 'package:flutter/foundation.dart';
 
 import '../models/episode.dart';
 
-class AudioPlayerService {
-  AudioPlayerService() : _player = AudioPlayer();
+class AudioPlayerService extends ChangeNotifier {
+  AudioPlayerService();
 
-  final AudioPlayer _player;
+  // TODO: Replace this in-memory implementation with just_audio integration
+  // to provide real playback, background controls, and buffering updates.
+
   Episode? _currentEpisode;
+  bool _isPlaying = false;
+  Duration _position = Duration.zero;
+  Duration _duration = Duration.zero;
 
   Episode? get currentEpisode => _currentEpisode;
+  bool get isPlaying => _isPlaying;
+  Duration get position => _position;
+  Duration get duration =>
+      _duration == Duration.zero && _currentEpisode != null
+          ? _currentEpisode!.duration
+          : _duration;
 
-  Stream<Duration?> get durationStream => _player.durationStream;
-  Stream<Duration> get positionStream => _player.positionStream;
-  Stream<Duration> get bufferedPositionStream => _player.bufferedPositionStream;
-  Stream<PlayerState> get playerStateStream => _player.playerStateStream;
+  void play(Episode episode) {
+    _currentEpisode = episode;
+    _duration = episode.duration;
+    _position = Duration.zero;
+    _isPlaying = true;
+    notifyListeners();
+  }
 
-  Future<void> setEpisode(Episode episode) async {
-    if (_currentEpisode?.id == episode.id) {
+  void togglePlayPause() {
+    if (_currentEpisode == null) {
       return;
     }
-
-    _currentEpisode = episode;
-
-    if (episode.localFilePath != null && episode.localFilePath!.isNotEmpty) {
-      final file = File(episode.localFilePath!);
-      if (await file.exists()) {
-        await _player.setFilePath(episode.localFilePath!);
-        return;
-      }
-    }
-
-    if (episode.audioUrl.isNotEmpty) {
-      await _player.setUrl(episode.audioUrl);
-    }
+    _isPlaying = !_isPlaying;
+    notifyListeners();
   }
 
-  Future<void> play() => _player.play();
-
-  Future<void> pause() => _player.pause();
-
-  Future<void> stop() => _player.stop();
-
-  Future<void> seek(Duration position) => _player.seek(position);
-
-  Future<void> seekToStart() => _player.seek(Duration.zero);
-
-  Future<void> playEpisode(Episode episode) async {
-    await setEpisode(episode);
-    await play();
+  void pause() {
+    if (!_isPlaying) {
+      return;
+    }
+    _isPlaying = false;
+    notifyListeners();
   }
 
-  Future<void> dispose() async {
-    await _player.dispose();
+  void resume() {
+    if (_currentEpisode == null) {
+      return;
+    }
+    _isPlaying = true;
+    notifyListeners();
+  }
+
+  void seek(Duration newPosition) {
+    if (_currentEpisode == null) {
+      return;
+    }
+    _position = newPosition;
+    if (_position.isNegative) {
+      _position = Duration.zero;
+    }
+    if (_position > duration) {
+      _position = duration;
+    }
+    notifyListeners();
+  }
+
+  void updateDuration(Duration newDuration) {
+    _duration = newDuration;
+    notifyListeners();
+  }
+
+  void stop() {
+    _isPlaying = false;
+    _position = Duration.zero;
+    notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    _currentEpisode = null;
+    super.dispose();
   }
 }

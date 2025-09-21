@@ -2,43 +2,21 @@ class ShowHost {
   const ShowHost({
     required this.id,
     required this.name,
-    this.bio = '',
-    this.avatarUrl = '',
-    this.socialLinks = const <String>[],
+    this.bio,
+    this.avatarUrl,
   });
 
   final String id;
   final String name;
-  final String bio;
-  final String avatarUrl;
-  final List<String> socialLinks;
-
-  ShowHost copyWith({
-    String? id,
-    String? name,
-    String? bio,
-    String? avatarUrl,
-    List<String>? socialLinks,
-  }) {
-    return ShowHost(
-      id: id ?? this.id,
-      name: name ?? this.name,
-      bio: bio ?? this.bio,
-      avatarUrl: avatarUrl ?? this.avatarUrl,
-      socialLinks: socialLinks ?? this.socialLinks,
-    );
-  }
+  final String? bio;
+  final String? avatarUrl;
 
   factory ShowHost.fromJson(Map<String, dynamic> json) {
     return ShowHost(
       id: json['id']?.toString() ?? '',
-      name: json['name']?.toString() ?? '',
-      bio: json['bio']?.toString() ?? '',
-      avatarUrl: json['avatar_url']?.toString() ?? '',
-      socialLinks: (json['social_links'] as List<dynamic>?)
-              ?.map((link) => link.toString())
-              .toList() ??
-          const <String>[],
+      name: json['name']?.toString() ?? 'Ismeretlen műsorvezető',
+      bio: json['bio']?.toString(),
+      avatarUrl: json['avatar_url']?.toString(),
     );
   }
 
@@ -46,9 +24,23 @@ class ShowHost {
     return <String, dynamic>{
       'id': id,
       'name': name,
-      'bio': bio,
-      'avatar_url': avatarUrl,
-      'social_links': socialLinks,
+      if (bio != null) 'bio': bio,
+      if (avatarUrl != null) 'avatar_url': avatarUrl,
     };
+  }
+
+  @override
+  int get hashCode => Object.hash(id, name, bio, avatarUrl);
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    return other is ShowHost &&
+        other.id == id &&
+        other.name == name &&
+        other.bio == bio &&
+        other.avatarUrl == avatarUrl;
   }
 }

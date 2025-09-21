@@ -1,10 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 
-// TODO: Declare the url_launcher dependency in pubspec.yaml if it is missing.
-
-import '../about_screen/about_screen.dart';
-import '../utils/constants.dart';
 import 'playback_settings.dart';
 import 'theme_settings.dart';
 
@@ -13,44 +8,47 @@ class SettingsScreen extends StatelessWidget {
 
   static const String routeName = '/settings';
 
-  Future<void> _launchExternalUrl(String url) async {
-    final uri = Uri.parse(url);
-    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
-      throw Exception('Nem sikerült megnyitni a hivatkozást: $url');
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Beállítások'),
-      ),
+      appBar: AppBar(title: const Text('Beállítások')),
       body: ListView(
-        padding: const EdgeInsets.all(kDefaultPadding),
-        children: <Widget>[
-          const ThemeSettings(),
-          const SizedBox(height: kDefaultPadding),
-          const PlaybackSettings(),
-          const SizedBox(height: kDefaultPadding),
-          ListTile(
-            leading: const Icon(Icons.volunteer_activism),
-            title: const Text('Támogasd a Klubrádiót'),
-            subtitle: const Text('A hivatalos Klubrádió támogatási oldalra visz.'),
-            onTap: () => _launchExternalUrl(kDonationUrlStation),
-          ),
-          ListTile(
-            leading: const Icon(Icons.favorite),
-            title: const Text('Támogasd az alkalmazás fejlesztését'),
-            subtitle: const Text('PayPal adomány a fejlesztőnek.'),
-            onTap: () => _launchExternalUrl(kDonationUrlDeveloper),
-          ),
-          ListTile(
-            leading: const Icon(Icons.info_outline),
-            title: const Text('Névjegy'),
-            onTap: () => Navigator.of(context).pushNamed(AboutScreen.routeName),
-          ),
+        padding: const EdgeInsets.all(16),
+        children: const <Widget>[
+          ThemeSettings(),
+          SizedBox(height: 24),
+          PlaybackSettings(),
+          SizedBox(height: 24),
+          _DonationSettings(),
         ],
+      ),
+    );
+  }
+}
+
+class _DonationSettings extends StatelessWidget {
+  const _DonationSettings();
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: const <Widget>[
+            Text(
+              'Támogatás',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 8),
+            Text(
+              'TODO: Adjuk hozzá a Klubrádió és a fejlesztő támogatási linkjeit '
+              'például PayPal vagy Stripe használatával.',
+              style: TextStyle(fontStyle: FontStyle.italic),
+            ),
+          ],
+        ),
       ),
     );
   }

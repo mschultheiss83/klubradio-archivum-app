@@ -1,4 +1,3 @@
-import 'episode.dart';
 import 'show_host.dart';
 
 class Podcast {
@@ -10,10 +9,9 @@ class Podcast {
     required this.coverImageUrl,
     required this.language,
     this.hosts = const <ShowHost>[],
-    this.episodes = const <Episode>[],
     this.episodeCount = 0,
-    this.isSubscribed = false,
-    this.storageRssPath,
+    this.isFeatured = false,
+    this.weeklyListens = 0,
   });
 
   final String id;
@@ -23,10 +21,9 @@ class Podcast {
   final String coverImageUrl;
   final String language;
   final List<ShowHost> hosts;
-  final List<Episode> episodes;
   final int episodeCount;
-  final bool isSubscribed;
-  final String? storageRssPath;
+  final bool isFeatured;
+  final int weeklyListens;
 
   Podcast copyWith({
     String? id,
@@ -36,10 +33,9 @@ class Podcast {
     String? coverImageUrl,
     String? language,
     List<ShowHost>? hosts,
-    List<Episode>? episodes,
     int? episodeCount,
-    bool? isSubscribed,
-    String? storageRssPath,
+    bool? isFeatured,
+    int? weeklyListens,
   }) {
     return Podcast(
       id: id ?? this.id,
@@ -49,41 +45,31 @@ class Podcast {
       coverImageUrl: coverImageUrl ?? this.coverImageUrl,
       language: language ?? this.language,
       hosts: hosts ?? this.hosts,
-      episodes: episodes ?? this.episodes,
       episodeCount: episodeCount ?? this.episodeCount,
-      isSubscribed: isSubscribed ?? this.isSubscribed,
-      storageRssPath: storageRssPath ?? this.storageRssPath,
+      isFeatured: isFeatured ?? this.isFeatured,
+      weeklyListens: weeklyListens ?? this.weeklyListens,
     );
   }
 
   factory Podcast.fromJson(Map<String, dynamic> json) {
-    final hosts = (json['hosts'] as List<dynamic>?)
-            ?.whereType<Map<String, dynamic>>()
-            .map(ShowHost.fromJson)
-            .toList() ??
-        const <ShowHost>[];
-
-    final episodes = (json['episodes'] as List<dynamic>?)
-            ?.whereType<Map<String, dynamic>>()
-            .map(Episode.fromJson)
-            .toList() ??
-        const <Episode>[];
-
     return Podcast(
       id: json['id']?.toString() ?? '',
-      title: json['title']?.toString() ?? '',
+      title: json['title']?.toString() ?? 'Ismeretlen műsor',
       description: json['description']?.toString() ?? '',
       category: json['category']?.toString() ?? 'Egyéb',
       coverImageUrl: json['cover_image_url']?.toString() ?? '',
       language: json['language']?.toString() ?? 'hu',
-      hosts: hosts,
-      episodes: episodes,
+      hosts: (json['hosts'] as List<dynamic>? ?? const <dynamic>[])
+          .whereType<Map<String, dynamic>>()
+          .map(ShowHost.fromJson)
+          .toList(),
       episodeCount: json['episode_count'] is int
           ? json['episode_count'] as int
-          : int.tryParse(json['episode_count']?.toString() ?? '') ??
-              episodes.length,
-      isSubscribed: json['is_subscribed'] == true,
-      storageRssPath: json['storage_rss_path']?.toString(),
+          : int.tryParse(json['episode_count']?.toString() ?? '') ?? 0,
+      isFeatured: json['is_featured'] == true,
+      weeklyListens: json['weekly_listens'] is int
+          ? json['weekly_listens'] as int
+          : int.tryParse(json['weekly_listens']?.toString() ?? '') ?? 0,
     );
   }
 
@@ -96,10 +82,39 @@ class Podcast {
       'cover_image_url': coverImageUrl,
       'language': language,
       'hosts': hosts.map((host) => host.toJson()).toList(),
-      'episodes': episodes.map((episode) => episode.toJson()).toList(),
       'episode_count': episodeCount,
-      'is_subscribed': isSubscribed,
-      'storage_rss_path': storageRssPath,
+      'is_featured': isFeatured,
+      'weekly_listens': weeklyListens,
     };
+  }
+
+  @override
+  int get hashCode => Object.hash(
+        id,
+        title,
+        description,
+        category,
+        coverImageUrl,
+        language,
+        episodeCount,
+        isFeatured,
+        weeklyListens,
+      );
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    return other is Podcast &&
+        other.id == id &&
+        other.title == title &&
+        other.description == description &&
+        other.category == category &&
+        other.coverImageUrl == coverImageUrl &&
+        other.language == language &&
+        other.episodeCount == episodeCount &&
+        other.isFeatured == isFeatured &&
+        other.weeklyListens == weeklyListens;
   }
 }

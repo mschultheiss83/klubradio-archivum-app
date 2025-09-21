@@ -1,40 +1,35 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 import '../../models/episode.dart';
-import '../../providers/episode_provider.dart';
-import '../../providers/podcast_provider.dart';
-import '../utils/constants.dart';
 import '../widgets/stateless/episode_list_item.dart';
 
+typedef EpisodeTapCallback = void Function(Episode episode);
+
 class SearchResultsList extends StatelessWidget {
-  const SearchResultsList({super.key, required this.episodes});
+  const SearchResultsList({
+    super.key,
+    required this.episodes,
+    required this.onEpisodeTap,
+  });
 
   final List<Episode> episodes;
+  final EpisodeTapCallback onEpisodeTap;
 
   @override
   Widget build(BuildContext context) {
-    final episodeProvider = context.read<EpisodeProvider>();
-    final podcastProvider = context.read<PodcastProvider>();
+    if (episodes.isEmpty) {
+      return const Center(child: Text('Nincs találat.'));
+    }
 
     return ListView.separated(
+      padding: const EdgeInsets.all(16),
       itemCount: episodes.length,
-      separatorBuilder: (_, __) => const SizedBox(height: kSmallPadding),
-      itemBuilder: (context, index) {
-        final episode = episodes[index];
-        final podcastTitle = podcastProvider
-                .findPodcastById(episode.podcastId)
-                ?.title ??
-            episode.podcastId;
-
+      separatorBuilder: (_, __) => const SizedBox(height: 12),
+      itemBuilder: (BuildContext context, int index) {
+        final Episode episode = episodes[index];
         return EpisodeListItem(
           episode: episode,
-          onPlay: () => episodeProvider.playEpisode(episode),
-          onDownload: () => episodeProvider.downloadEpisode(episode),
-          onRemoveDownload: () => episodeProvider.removeDownload(episode),
-          downloadProgress: episodeProvider.downloadProgress[episode.id],
-          showPodcastTitle: true,
-          podcastTitle: podcastTitle,
+          onTap: () => onEpisodeTap(episode),
         );
       },
     );

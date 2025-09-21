@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../providers/episode_provider.dart';
 import '../../providers/podcast_provider.dart';
-import '../podcast_detail_screen/podcast_detail_screen.dart';
-import '../search_screen/search_screen.dart';
 import '../utils/constants.dart';
-import '../widgets/stateless/podcast_list_item.dart';
+import '../widgets/stateful/episode_list.dart';
+import '../search_screen/search_screen.dart';
 import 'recently_played_list.dart';
 import 'subscribed_podcasts_list.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
+
+  static const String routeName = '/home';
 
   @override
   Widget build(BuildContext context) {
@@ -20,67 +22,63 @@ class HomeScreen extends StatelessWidget {
         actions: <Widget>[
           IconButton(
             icon: const Icon(Icons.search),
-            tooltip: 'Keresés',
-            onPressed: () => Navigator.of(context).pushNamed(
-              SearchScreen.routeName,
-            ),
+            onPressed: () =>
+                Navigator.of(context).pushNamed(SearchScreen.routeName),
           ),
         ],
       ),
-      body: RefreshIndicator(
-        onRefresh: () async {
-          await context.read<PodcastProvider>().loadHomeContent();
-        },
-        child: Consumer<PodcastProvider>(
-          builder: (context, provider, _) {
-            if (provider.isLoading && provider.featuredPodcasts.isEmpty) {
-              return const Center(child: CircularProgressIndicator());
-            }
+      body: Consumer2<PodcastProvider, EpisodeProvider>(
+        builder: (
+          BuildContext context,
+          PodcastProvider podcastProvider,
+          EpisodeProvider episodeProvider,
+          _,
+        ) {
+          if (podcastProvider.isLoading && podcastProvider.featured.isEmpty) {
+            return const Center(child: CircularProgressIndicator());
+          }
 
-            final featured = provider.featuredPodcasts;
-
-            return SingleChildScrollView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.all(kDefaultPadding),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  const SubscribedPodcastsList(),
-                  const SizedBox(height: kDefaultPadding),
-                  const RecentlyPlayedList(),
-                  const SizedBox(height: kDefaultPadding),
-                  Text('Kiemelt műsorok', style: kSectionTitleStyle),
-                  const SizedBox(height: kSmallPadding),
-                  if (featured.isEmpty)
-                    const Text('A kiemelt műsorok listája jelenleg üres.')
-                  else
-                    ListView.builder(
-                      physics: const NeverScrollableScrollPhysics(),
-                      shrinkWrap: true,
-                      itemCount: featured.length,
-                      itemBuilder: (context, index) {
-                        final podcast = featured[index];
-                        return PodcastListItem(
-                          podcast: podcast,
-                          onTap: () => Navigator.of(context).pushNamed(
-                            PodcastDetailScreen.routeName,
-                            arguments: PodcastDetailArguments(podcast: podcast),
-                          ),
-                          onSubscribeToggle: () {
-                            if (provider.isSubscribed(podcast.id)) {
-                              provider.unsubscribeFromPodcast(podcast.id);
-                            } else {
-                              provider.subscribeToPodcast(podcast.id);
-                            }
-                          },
-                        );
-                      },
-                    ),
+          return RefreshIndicator(
+            onRefresh: podcastProvider.loadHomeContent,
+            child: ListView(
+              padding: const EdgeInsets.all(16),
+              children: <Widget>[
+                if (podcastProvider.featured.isNotEmpty) ...<Widget>[
+                  const _SectionTitle(title: 'Kiemelt műsorok'),
+                  SubscribedPodcastsList(podcasts: podcastProvider.featured),
+                  const SizedBox(height: 24),
                 ],
-              ),
-            );
-          },
-        ),
+                const _SectionTitle(title: 'Legfrissebb epizódok'),
+                EpisodeList(episodes: podcastProvider.latestEpisodes),
+                const SizedBox(height: 24),
+                const _SectionTitle(
+                  title: 'Legutóbb hallgatott epizódok',
+                ),
+                RecentlyPlayedList(episodes: episodeProvider.recentlyPlayed),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _SectionTitle extends StatelessWidget {
+  const _SectionTitle({required this.title});
+
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Text(
+        title,
+        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: AppColors.sectionTitle,
+            ),
       ),
     );
   }

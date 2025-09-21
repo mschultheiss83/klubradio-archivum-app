@@ -1,40 +1,28 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
-import '../../providers/episode_provider.dart';
-import '../utils/constants.dart';
+typedef RecentSearchTap = void Function(String query);
 
 class RecentSearches extends StatelessWidget {
-  const RecentSearches({super.key});
+  const RecentSearches({super.key, required this.searches, required this.onTap});
+
+  final List<String> searches;
+  final RecentSearchTap onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<EpisodeProvider>(
-      builder: (context, provider, _) {
-        final searches = provider.recentSearches;
-        if (searches.isEmpty) {
-          return const SizedBox.shrink();
-        }
+    if (searches.isEmpty) {
+      return const Center(child: Text('Még nincs korábbi keresés.'));
+    }
 
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Text('Legutóbbi keresések', style: kSectionTitleStyle),
-            const SizedBox(height: kSmallPadding),
-            Wrap(
-              spacing: kSmallPadding,
-              runSpacing: kSmallPadding,
-              children: searches
-                  .map(
-                    (query) => ActionChip(
-                      label: Text(query),
-                      onPressed: () =>
-                          context.read<EpisodeProvider>().searchEpisodes(query),
-                    ),
-                  )
-                  .toList(),
-            ),
-          ],
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: searches.length,
+      itemBuilder: (BuildContext context, int index) {
+        final String query = searches[index];
+        return ListTile(
+          leading: const Icon(Icons.history),
+          title: Text(query),
+          onTap: () => onTap(query),
         );
       },
     );

@@ -1,52 +1,97 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
-import '../../providers/podcast_provider.dart';
+import '../../models/podcast.dart';
 import '../podcast_detail_screen/podcast_detail_screen.dart';
-import '../utils/constants.dart';
-import '../widgets/stateless/podcast_list_item.dart';
 
 class TrendingPodcastsList extends StatelessWidget {
-  const TrendingPodcastsList({super.key});
+  const TrendingPodcastsList({super.key, required this.podcasts});
+
+  final List<Podcast> podcasts;
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<PodcastProvider>(
-      builder: (context, provider, _) {
-        final podcasts = provider.trendingPodcasts;
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Text('Felkapott műsorok', style: kSectionTitleStyle),
-            const SizedBox(height: kSmallPadding),
-            if (podcasts.isEmpty)
-              const Text('Jelenleg nincs felkapott műsor.')
-            else
-              ListView.builder(
-                physics: const NeverScrollableScrollPhysics(),
-                shrinkWrap: true,
-                itemCount: podcasts.length,
-                itemBuilder: (context, index) {
-                  final podcast = podcasts[index];
-                  return PodcastListItem(
-                    podcast: podcast,
-                    onTap: () => Navigator.of(context).pushNamed(
-                      PodcastDetailScreen.routeName,
-                      arguments: PodcastDetailArguments(podcast: podcast),
-                    ),
-                    onSubscribeToggle: () {
-                      if (provider.isSubscribed(podcast.id)) {
-                        provider.unsubscribeFromPodcast(podcast.id);
-                      } else {
-                        provider.subscribeToPodcast(podcast.id);
-                      }
-                    },
-                  );
-                },
-              ),
-          ],
+    if (podcasts.isEmpty) {
+      return const Text('Nincs trendi műsor.');
+    }
+
+    return SizedBox(
+      height: 180,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        itemCount: podcasts.length,
+        separatorBuilder: (_, __) => const SizedBox(width: 12),
+        itemBuilder: (BuildContext context, int index) {
+          final Podcast podcast = podcasts[index];
+          return _TrendingPodcastCard(podcast: podcast);
+        },
+      ),
+    );
+  }
+}
+
+class _TrendingPodcastCard extends StatelessWidget {
+  const _TrendingPodcastCard({required this.podcast});
+
+  final Podcast podcast;
+
+  @override
+  Widget build(BuildContext context) {
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+
+    return GestureDetector(
+      onTap: () {
+        Navigator.of(context).pushNamed(
+          PodcastDetailScreen.routeName,
+          arguments: PodcastDetailArguments(podcast: podcast),
         );
       },
+      child: Container(
+        width: 220,
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: colorScheme.surfaceContainerHigh,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: <BoxShadow>[
+            BoxShadow(
+              color: colorScheme.shadow.withOpacity(0.1),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            CircleAvatar(
+              radius: 28,
+              backgroundColor: colorScheme.primaryContainer,
+              child: Text(
+                podcast.title.characters.take(2).toString().toUpperCase(),
+                style: Theme.of(context)
+                    .textTheme
+                    .titleMedium
+                    ?.copyWith(color: colorScheme.onPrimaryContainer),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              podcast.title,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              podcast.description,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

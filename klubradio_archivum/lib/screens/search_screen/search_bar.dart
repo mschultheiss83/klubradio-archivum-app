@@ -1,47 +1,51 @@
 import 'package:flutter/material.dart';
 
-import '../utils/constants.dart';
+typedef SearchCallback = void Function(String query);
 
-class SearchInputBar extends StatelessWidget {
-  const SearchInputBar({
+typedef VoidSearchCallback = void Function();
+
+class SearchField extends StatelessWidget {
+  const SearchField({
     super.key,
     required this.controller,
-    required this.onChanged,
+    required this.onSearch,
     required this.onClear,
   });
 
   final TextEditingController controller;
-  final ValueChanged<String> onChanged;
-  final VoidCallback onClear;
+  final SearchCallback onSearch;
+  final VoidSearchCallback onClear;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return ValueListenableBuilder<TextEditingValue>(
-      valueListenable: controller,
-      builder: (context, value, _) {
-        return TextField(
-          controller: controller,
-          textInputAction: TextInputAction.search,
-          onChanged: onChanged,
-          decoration: InputDecoration(
-            hintText: 'Keresés cím, téma vagy műsor alapján',
-            prefixIcon: const Icon(Icons.search),
-            suffixIcon: value.text.isEmpty
-                ? null
-                : IconButton(
-                    icon: const Icon(Icons.clear),
-                    onPressed: onClear,
-                  ),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(kDefaultPadding),
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Row(
+        children: <Widget>[
+          Expanded(
+            child: TextField(
+              controller: controller,
+              decoration: const InputDecoration(
+                hintText: 'Keress cím, dátum vagy műsor szerint',
+              ),
+              textInputAction: TextInputAction.search,
+              onSubmitted: onSearch,
             ),
-            filled: true,
-            fillColor: theme.colorScheme.surfaceVariant,
           ),
-        );
-      },
+          const SizedBox(width: 12),
+          IconButton(
+            icon: const Icon(Icons.clear),
+            onPressed: () {
+              controller.clear();
+              onClear();
+            },
+          ),
+          ElevatedButton(
+            onPressed: () => onSearch(controller.text),
+            child: const Text('Keresés'),
+          ),
+        ],
+      ),
     );
   }
 }

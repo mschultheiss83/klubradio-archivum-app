@@ -1,52 +1,54 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
-import '../../providers/episode_provider.dart';
-import '../utils/constants.dart';
-
-class PlaybackSettings extends StatelessWidget {
+class PlaybackSettings extends StatefulWidget {
   const PlaybackSettings({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Consumer<EpisodeProvider>(
-      builder: (context, provider, _) {
-        final currentValue = provider.maxAutoDownloadEpisodes.toDouble();
+  State<PlaybackSettings> createState() => _PlaybackSettingsState();
+}
 
-        return Card(
-          child: Padding(
-            padding: const EdgeInsets.all(kDefaultPadding),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Text('Lejátszás és letöltés', style: Theme.of(context).textTheme.titleLarge),
-                const SizedBox(height: kSmallPadding),
-                Text(
-                  'Állítsd be, hogy hány új epizód töltődjön le automatikusan a feliratkozott műsorokból.',
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-                const SizedBox(height: kSmallPadding),
-                Slider(
-                  value: currentValue,
-                  min: 1,
-                  max: 10,
-                  divisions: 9,
-                  label: provider.maxAutoDownloadEpisodes.toString(),
-                  onChanged: (value) => provider
-                      .setMaxAutoDownloadEpisodes(value.round()),
-                ),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: Text(
-                    '${provider.maxAutoDownloadEpisodes} epizód',
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                ),
-              ],
+class _PlaybackSettingsState extends State<PlaybackSettings> {
+  double _autoDownloadCount = 5;
+  bool _wifiOnly = true;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            const Text(
+              'Lejátszás és letöltés',
+              style: TextStyle(fontWeight: FontWeight.bold),
             ),
-          ),
-        );
-      },
+            const SizedBox(height: 8),
+            Text('Automatikus letöltés epizódonként: ${_autoDownloadCount.toInt()}'),
+            Slider(
+              min: 1,
+              max: 10,
+              divisions: 9,
+              value: _autoDownloadCount,
+              label: _autoDownloadCount.toInt().toString(),
+              onChanged: (double value) {
+                setState(() => _autoDownloadCount = value);
+              },
+            ),
+            SwitchListTile(
+              title: const Text('Csak Wi-Fi-n töltsön le'),
+              value: _wifiOnly,
+              onChanged: (bool value) => setState(() => _wifiOnly = value),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'TODO: Mentés Supabase vagy helyi Hive adatbázis segítségével, '
+              'és kapcsolódás a letöltéskezelőhöz.',
+              style: TextStyle(fontStyle: FontStyle.italic),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

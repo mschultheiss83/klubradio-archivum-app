@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 class Episode {
   const Episode({
     required this.id,
@@ -9,10 +7,8 @@ class Episode {
     required this.audioUrl,
     required this.duration,
     required this.publishedAt,
-    this.imageUrl = '',
-    this.isDownloaded = false,
+    this.thumbnailUrl,
     this.localFilePath,
-    this.playbackPosition = Duration.zero,
   });
 
   final String id;
@@ -22,10 +18,8 @@ class Episode {
   final String audioUrl;
   final Duration duration;
   final DateTime publishedAt;
-  final String imageUrl;
-  final bool isDownloaded;
+  final String? thumbnailUrl;
   final String? localFilePath;
-  final Duration playbackPosition;
 
   Episode copyWith({
     String? id,
@@ -35,10 +29,8 @@ class Episode {
     String? audioUrl,
     Duration? duration,
     DateTime? publishedAt,
-    String? imageUrl,
-    bool? isDownloaded,
+    String? thumbnailUrl,
     String? localFilePath,
-    Duration? playbackPosition,
   }) {
     return Episode(
       id: id ?? this.id,
@@ -48,10 +40,22 @@ class Episode {
       audioUrl: audioUrl ?? this.audioUrl,
       duration: duration ?? this.duration,
       publishedAt: publishedAt ?? this.publishedAt,
-      imageUrl: imageUrl ?? this.imageUrl,
-      isDownloaded: isDownloaded ?? this.isDownloaded,
+      thumbnailUrl: thumbnailUrl ?? this.thumbnailUrl,
       localFilePath: localFilePath ?? this.localFilePath,
-      playbackPosition: playbackPosition ?? this.playbackPosition,
+    );
+  }
+
+  factory Episode.fromJson(Map<String, dynamic> json) {
+    return Episode(
+      id: json['id']?.toString() ?? '',
+      podcastId: json['podcast_id']?.toString() ?? '',
+      title: json['title']?.toString() ?? 'Ismeretlen epizód',
+      description: json['description']?.toString() ?? '',
+      audioUrl: json['audio_url']?.toString() ?? '',
+      duration: _durationFromJson(json['duration'] ?? json['duration_seconds']),
+      publishedAt: _dateFromJson(json['published_at'] ?? json['date']),
+      thumbnailUrl: json['thumbnail_url']?.toString(),
+      localFilePath: json['local_file_path']?.toString(),
     );
   }
 
@@ -64,46 +68,19 @@ class Episode {
       'audio_url': audioUrl,
       'duration_seconds': duration.inSeconds,
       'published_at': publishedAt.toIso8601String(),
-      'image_url': imageUrl,
-      'is_downloaded': isDownloaded,
-      'local_file_path': localFilePath,
-      'playback_position_seconds': playbackPosition.inSeconds,
+      if (thumbnailUrl != null) 'thumbnail_url': thumbnailUrl,
+      if (localFilePath != null) 'local_file_path': localFilePath,
     };
   }
 
-  factory Episode.fromJson(Map<String, dynamic> json) {
-    final durationValue = json['duration_seconds'];
-    final playbackValue = json['playback_position_seconds'];
-
-    return Episode(
-      id: json['id']?.toString() ?? '',
-      podcastId: json['podcast_id']?.toString() ?? '',
-      title: json['title']?.toString() ?? '',
-      description: json['description']?.toString() ?? '',
-      audioUrl: json['audio_url']?.toString() ?? '',
-      duration: _parseDuration(durationValue),
-      publishedAt: _parseDate(json['published_at']),
-      imageUrl: json['image_url']?.toString() ?? '',
-      isDownloaded: json['is_downloaded'] == true,
-      localFilePath: json['local_file_path']?.toString(),
-      playbackPosition: _parseDuration(playbackValue),
-    );
-  }
-
-  static Duration _parseDuration(dynamic value) {
-    if (value == null) {
-      return Duration.zero;
+  static Duration _durationFromJson(dynamic value) {
+    if (value is Duration) {
+      return value;
     }
-
     if (value is int) {
       return Duration(seconds: value);
     }
-
-    if (value is double) {
-      return Duration(milliseconds: (value * 1000).round());
-    }
-
-    if (value is String && value.isNotEmpty) {
+    if (value is String) {
       final parsed = int.tryParse(value);
       if (parsed != null) {
         return Duration(seconds: parsed);
@@ -116,40 +93,49 @@ class Episode {
         return Duration(hours: hours, minutes: minutes, seconds: seconds);
       }
     }
-
     return Duration.zero;
   }
 
-  static DateTime _parseDate(dynamic value) {
-    if (value == null) {
-      return DateTime.fromMillisecondsSinceEpoch(0, isUtc: true).toLocal();
-    }
-
+  static DateTime _dateFromJson(dynamic value) {
     if (value is DateTime) {
-      return value.toLocal();
+      return value;
     }
-
     if (value is int) {
-      return DateTime.fromMillisecondsSinceEpoch(value * 1000, isUtc: true)
-          .toLocal();
+      return DateTime.fromMillisecondsSinceEpoch(value * 1000);
     }
-
     if (value is String && value.isNotEmpty) {
-      return DateTime.tryParse(value)?.toLocal() ?? DateTime.now();
+      return DateTime.tryParse(value) ?? DateTime.now();
     }
-
     return DateTime.now();
   }
 
-  static List<Episode> decodeList(String source) {
-    final List<dynamic> rawList = jsonDecode(source) as List<dynamic>;
-    return rawList
-        .whereType<Map<String, dynamic>>()
-        .map(Episode.fromJson)
-        .toList();
-  }
+  @override
+  int get hashCode => Object.hash(
+        id,
+        podcastId,
+        title,
+        description,
+        audioUrl,
+        duration,
+        publishedAt,
+        thumbnailUrl,
+        localFilePath,
+      );
 
-  static String encodeList(List<Episode> episodes) {
-    return jsonEncode(episodes.map((episode) => episode.toJson()).toList());
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    return other is Episode &&
+        other.id == id &&
+        other.podcastId == podcastId &&
+        other.title == title &&
+        other.description == description &&
+        other.audioUrl == audioUrl &&
+        other.duration == duration &&
+        other.publishedAt == publishedAt &&
+        other.thumbnailUrl == thumbnailUrl &&
+        other.localFilePath == localFilePath;
   }
 }

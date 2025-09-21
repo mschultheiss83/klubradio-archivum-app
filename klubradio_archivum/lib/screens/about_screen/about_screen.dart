@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../utils/constants.dart';
-
 class AboutScreen extends StatelessWidget {
   const AboutScreen({super.key});
 
@@ -9,41 +7,35 @@ class AboutScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Névjegy'),
+        title: const Text('A Klubrádió Archívum alkalmazásról'),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(kDefaultPadding),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Text(
-              'Klubrádió Archívum alkalmazás',
-              style: theme.textTheme.headlineSmall,
-            ),
-            const SizedBox(height: kDefaultPadding),
-            Text(
-              'Ez egy közösségi projekt, amely segít a Klubrádió archív tartalmainak '
-              'kényelmes elérésében, lejátszásában és RSS formátumba rendezésében.',
-              style: theme.textTheme.bodyMedium,
-            ),
-            const SizedBox(height: kDefaultPadding),
-            Text(
-              'A tartalmak mindenki számára ingyenesen hozzáférhetők. '
-              'Az alkalmazás nem áll kapcsolatban a Klubrádióval, '
-              'és nem kér semmilyen fizetést a műsorokért.',
-              style: theme.textTheme.bodyMedium,
-            ),
-            const SizedBox(height: kDefaultPadding),
-            Text(
-              'Verzió: 0.1.0 (fejlesztés alatt)\nFejlesztő: Klubrádió közösség',
-              style: theme.textTheme.bodySmall,
-            ),
-          ],
-        ),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: const <Widget>[
+          Text(
+            'A Klubrádió Archívum célja, hogy könnyen elérhetővé tegye a rádió '
+            'műsorait podcast formában. Az alkalmazás a nyilvános archívum '
+            'adataira épít, így bárki visszahallgathatja a kedvenc adásait.',
+          ),
+          SizedBox(height: 24),
+          Text(
+            'Fő funkciók:',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          SizedBox(height: 8),
+          Text('• műsorok böngészése és keresése'),
+          Text('• RSS feedek generálása podcast alkalmazásokhoz'),
+          Text('• offline letöltés és automatikus frissítés'),
+          Text('• magyar nyelvű hallgatói élmény'),
+          SizedBox(height: 24),
+          Text(
+            'TODO: Egészítsük ki hivatalos jogi nyilatkozattal és a Klubrádió '
+            'adományozási információival, amint rendelkezésre állnak.',
+            style: TextStyle(fontStyle: FontStyle.italic),
+          ),
+        ],
       ),
     );
   }

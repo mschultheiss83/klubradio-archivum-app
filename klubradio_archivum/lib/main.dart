@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:provider/single_child_widget.dart';
 
 import 'providers/episode_provider.dart';
 import 'providers/podcast_provider.dart';
@@ -14,103 +15,104 @@ import 'screens/profile_screen/profile_screen.dart';
 import 'screens/search_screen/search_screen.dart';
 import 'screens/settings_screen/settings_screen.dart';
 import 'screens/widgets/stateful/now_playing_bar.dart';
-import 'screens/widgets/stateless/app_bottom_navigation_bar.dart';
+import 'screens/widgets/stateless/bottom_navigation_bar.dart';
 import 'services/api_service.dart';
 import 'services/audio_player_service.dart';
 import 'services/download_service.dart';
 
 void main() {
-  WidgetsFlutterBinding.ensureInitialized();
   runApp(const KlubradioArchivumApp());
 }
 
-class KlubradioArchivumApp extends StatefulWidget {
+class KlubradioArchivumApp extends StatelessWidget {
   const KlubradioArchivumApp({super.key});
-
-  @override
-  State<KlubradioArchivumApp> createState() => _KlubradioArchivumAppState();
-}
-
-class _KlubradioArchivumAppState extends State<KlubradioArchivumApp> {
-  late final ApiService _apiService;
-  late final AudioPlayerService _audioPlayerService;
-  late final DownloadService _downloadService;
-
-  @override
-  void initState() {
-    super.initState();
-    _apiService = ApiService();
-    _audioPlayerService = AudioPlayerService();
-    _downloadService = DownloadService();
-  }
-
-  @override
-  void dispose() {
-    _audioPlayerService.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
-      providers: [
-        Provider<ApiService>.value(value: _apiService),
-        Provider<AudioPlayerService>.value(value: _audioPlayerService),
-        Provider<DownloadService>.value(value: _downloadService),
+      providers: <SingleChildWidget>[
+        Provider<ApiService>(
+          create: (_) => ApiService(),
+          dispose: (_, ApiService service) => service.dispose(),
+        ),
         ChangeNotifierProvider<ThemeProvider>(
           create: (_) => ThemeProvider(),
         ),
+        ChangeNotifierProvider<AudioPlayerService>(
+          create: (_) => AudioPlayerService(),
+        ),
+        ChangeNotifierProvider<DownloadService>(
+          create: (_) => DownloadService(),
+        ),
         ChangeNotifierProxyProvider<ApiService, PodcastProvider>(
-          create: (context) => PodcastProvider(apiService: _apiService),
-          update: (context, apiService, previous) =>
-              (previous ?? PodcastProvider(apiService: apiService))
-                ..updateApiService(apiService),
+          create: (BuildContext context) => PodcastProvider(
+            apiService: context.read<ApiService>(),
+          ),
+          update: (
+            BuildContext context,
+            ApiService apiService,
+            PodcastProvider? previous,
+          ) {
+            return (previous ?? PodcastProvider(apiService: apiService))
+              ..updateApiService(apiService);
+          },
         ),
         ChangeNotifierProxyProvider3<ApiService, AudioPlayerService,
             DownloadService, EpisodeProvider>(
-          create: (context) => EpisodeProvider(
-            apiService: _apiService,
-            audioPlayerService: _audioPlayerService,
-            downloadService: _downloadService,
+          create: (BuildContext context) => EpisodeProvider(
+            apiService: context.read<ApiService>(),
+            audioPlayerService: context.read<AudioPlayerService>(),
+            downloadService: context.read<DownloadService>(),
           ),
-          update:
-              (context, apiService, audioPlayerService, downloadService, previous) =>
-                  (previous ??
-                          EpisodeProvider(
-                            apiService: apiService,
-                            audioPlayerService: audioPlayerService,
-                            downloadService: downloadService,
-                          ))
-                    ..updateDependencies(
+          update: (
+            BuildContext context,
+            ApiService apiService,
+            AudioPlayerService audioService,
+            DownloadService downloadService,
+            EpisodeProvider? previous,
+          ) {
+            return (previous ??
+                    EpisodeProvider(
                       apiService: apiService,
-                      audioPlayerService: audioPlayerService,
+                      audioPlayerService: audioService,
                       downloadService: downloadService,
-                    ),
+                    ))
+              ..updateDependencies(
+                apiService: apiService,
+                audioPlayerService: audioService,
+                downloadService: downloadService,
+              );
+          },
         ),
       ],
       child: Consumer<ThemeProvider>(
-        builder: (context, themeProvider, _) {
+        builder: (BuildContext context, ThemeProvider themeProvider, _) {
           return MaterialApp(
             title: 'Klubrádió Archívum',
             debugShowCheckedModeBanner: false,
             themeMode: themeProvider.themeMode,
             theme: themeProvider.lightTheme,
             darkTheme: themeProvider.darkTheme,
-            routes: {
-              AboutScreen.routeName: (_) => const AboutScreen(),
-              SearchScreen.routeName: (_) => const SearchScreen(),
-              NowPlayingScreen.routeName: (_) => const NowPlayingScreen(),
-              SettingsScreen.routeName: (_) => const SettingsScreen(),
-            },
-            onGenerateRoute: (settings) {
+            onGenerateRoute: (RouteSettings settings) {
               if (settings.name == PodcastDetailScreen.routeName &&
                   settings.arguments is PodcastDetailArguments) {
-                final args = settings.arguments! as PodcastDetailArguments;
+                final PodcastDetailArguments args =
+                    settings.arguments! as PodcastDetailArguments;
                 return MaterialPageRoute<void>(
                   builder: (_) => PodcastDetailScreen(podcast: args.podcast),
                 );
               }
               return null;
+            },
+            routes: <String, WidgetBuilder>{
+              AboutScreen.routeName: (_) => const AboutScreen(),
+              DiscoverScreen.routeName: (_) => const DiscoverScreen(),
+              DownloadManagerScreen.routeName: (_) => const DownloadManagerScreen(),
+              HomeScreen.routeName: (_) => const HomeScreen(),
+              NowPlayingScreen.routeName: (_) => const NowPlayingScreen(),
+              ProfileScreen.routeName: (_) => const ProfileScreen(),
+              SearchScreen.routeName: (_) => const SearchScreen(),
+              SettingsScreen.routeName: (_) => const SettingsScreen(),
             },
             home: const _RootNavigationScaffold(),
           );
@@ -124,7 +126,8 @@ class _RootNavigationScaffold extends StatefulWidget {
   const _RootNavigationScaffold();
 
   @override
-  State<_RootNavigationScaffold> createState() => _RootNavigationScaffoldState();
+  State<_RootNavigationScaffold> createState() =>
+      _RootNavigationScaffoldState();
 }
 
 class _RootNavigationScaffoldState extends State<_RootNavigationScaffold> {
@@ -141,7 +144,7 @@ class _RootNavigationScaffoldState extends State<_RootNavigationScaffold> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(() {
+    Future<void>.microtask(() {
       context.read<PodcastProvider>().loadHomeContent();
     });
   }
@@ -150,7 +153,7 @@ class _RootNavigationScaffoldState extends State<_RootNavigationScaffold> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Column(
-        children: [
+        children: <Widget>[
           Expanded(
             child: IndexedStack(
               index: _currentIndex,
@@ -160,9 +163,9 @@ class _RootNavigationScaffoldState extends State<_RootNavigationScaffold> {
           const NowPlayingBar(),
         ],
       ),
-      bottomNavigationBar: AppBottomNavigationBar(
+      bottomNavigationBar: BottomNavigationBarWidget(
         currentIndex: _currentIndex,
-        onTap: (index) => setState(() => _currentIndex = index),
+        onTap: (int index) => setState(() => _currentIndex = index),
       ),
     );
   }

@@ -1,43 +1,29 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-
-import '../../providers/podcast_provider.dart';
-import '../utils/constants.dart';
 
 class TopCategoriesList extends StatelessWidget {
-  const TopCategoriesList({super.key});
+  const TopCategoriesList({super.key, required this.categories});
+
+  final List<String> categories;
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<PodcastProvider>(
-      builder: (context, provider, _) {
-        final categories = provider.topCategories;
-        if (categories.isEmpty) {
-          return const SizedBox.shrink();
-        }
+    if (categories.isEmpty) {
+      return const Text('Nincs elérhető kategória.');
+    }
 
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Text('Témakörök', style: kSectionTitleStyle),
-            const SizedBox(height: kSmallPadding),
-            Wrap(
-              spacing: kSmallPadding,
-              runSpacing: kSmallPadding,
-              children: List<Widget>.generate(categories.length, (index) {
-                final label = categories[index];
-                final icon = kCategoryIcons[index % kCategoryIcons.length];
-                return FilterChip(
-                  label: Text(label, style: kChipTextStyle),
-                  avatar: Icon(icon, size: 18),
-                  selected: false,
-                  onSelected: (_) {},
-                );
-              }),
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: categories
+          .map(
+            (String category) => ActionChip(
+              label: Text(category),
+              onPressed: () {
+                // TODO: Navigáljunk egy kategória alapú szűrő oldalra.
+              },
             ),
-          ],
-        );
-      },
+          )
+          .toList(),
     );
   }
 }
