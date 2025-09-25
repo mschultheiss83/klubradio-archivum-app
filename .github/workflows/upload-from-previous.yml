@@ -1,0 +1,70 @@
+name: Upload From Previous Artifact
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_run_id:
+        description: "Run ID of a previous 'Scrape & Upload' where the artifact was created"
+        required: true
+      artifact_suffix:
+        description: "Suffix used in artifact name (defaults to that run's run_number)"
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+jobs:
+  upload-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: klubradio_scraper_nodejs
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: |
+            klubradio_scraper_nodejs/package-lock.json
+            klubradio_scraper_nodejs/package.json
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Write .env from Secrets
+        run: |
+          cat > .env << 'EOF'
+          SUPABASE_URL=${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}
+          SUPABASE_BUCKET=${{ secrets.SUPABASE_BUCKET }}
+          BASE_URL=${{ secrets.BASE_URL }}
+          LOG_LEVEL=${{ secrets.LOG_LEVEL }}
+          EOF
+
+      - name: Download artifact from another workflow run
+        uses: actions/download-artifact@v4
+        with:
+          # If you kept the artifact name as downloads-json-${{ github.run_number }},
+          # you need to know that run_number from the source run to form the name.
+          # If you set artifact_suffix to that number, this works:
+          name: downloads-json-${{ inputs.artifact_suffix }}
+          path: klubradio_scraper_nodejs/downloads
+          run-id: ${{ inputs.source_run_id }}
+
+      - name: Upload to Supabase
+        run: node speed_upload_shows.js
+
+      - name: Upload logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-logs-${{ github.run_number }}-previous
+          path: |
+            klubradio_scraper_nodejs/*.log
+            klubradio_scraper_nodejs/downloads/*.log
+          if-no-files-found: ignore
+          retention-days: 7

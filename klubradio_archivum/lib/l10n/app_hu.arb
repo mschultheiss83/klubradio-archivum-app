@@ -1,0 +1,269 @@
+{
+  "@@locale": "hu",
+
+  "appName": "Klubrádió Archívum",
+  "@appName": {
+    "description": "The name of the application"
+  },
+
+  "downloadListTitle": "Letöltések",
+  "@downloadListTitle": {
+    "description": "A letöltések képernyő címe"
+  },
+  "downloadStatusQueued": "Várólistán",
+  "@downloadStatusQueued": {    "description": "Letöltési állapot: Az elem várólistán van a letöltéshez"
+  },
+  "downloadStatusNotDownloaded": "Nincs letöltve",
+  "@downloadStatusNotDownloaded": {
+    "description": "Letöltési állapot: Az elem még nincs letöltve"
+  },
+  "downloadStatusDownloaded": "Letöltve",
+  "@downloadStatusDownloaded": {
+    "description": "Letöltési állapot: Az elem sikeresen letöltve"
+  },
+  "downloadStatusDownloading": "Letöltés",
+  "@downloadStatusDownloading": {
+    "description": "Letöltési állapot: Az elem éppen letöltés alatt áll"
+  },
+  "downloadStatusFailed": "Sikertelen",
+  "@downloadStatusFailed": {
+    "description": "Letöltési állapot: Az elem letöltése sikertelen"
+  },
+  "downloadActionRetry": "Újra",
+  "@downloadActionRetry": {
+    "description": "Gomb felirat egy sikertelen letöltés újrapróbálásához"
+  },
+  "downloadActionCancel": "Mégse",
+  "@downloadActionCancel": {
+    "description": "Gomb felirat egy folyamatban lévő letöltés megszakításához"
+  },
+  "downloadActionDelete": "Törlés",
+  "@downloadActionDelete": {
+    "description": "Gomb felirat egy letöltött elem törléséhez"
+  },
+  "downloadProgressLabel": "{progressPercentage}%",
+  "@downloadProgressLabel": {
+    "description": "Címke, amely a letöltés százalékos előrehaladását mutatja",
+    "placeholders": {
+      "progressPercentage": {
+        "type": "int",
+        "example": "50"
+      }
+    }
+  },
+  "noDownloads": "Még nincsenek letöltések",
+  "@noDownloads": {
+    "description": "Üzenet, amely akkor jelenik meg, ha a letöltési lista üres"
+  },
+
+  "aboutScreenAppBarTitle": "Az alkalmazásról",
+  "@aboutScreenAppBarTitle": {
+    "description": "Az Alkalmazásról képernyő AppBar címe"
+  },
+  "aboutScreenAppNameDetail": "Klubrádió archívum alkalmazás",
+  "@aboutScreenAppNameDetail": {
+    "description": "Az alkalmazás neve az Alkalmazásról képernyőn"
+  },
+  "aboutScreenPurpose": "Az alkalmazás célja, hogy egyszerű hozzáférést biztosítson a Klubrádió archív műsoraihoz, és lehetőséget adjon RSS feedek létrehozására podcast lejátszók számára.",
+  "@aboutScreenPurpose": {
+    "description": "Az alkalmazás céljának leírása"
+  },
+  "aboutScreenCommunityProjectInfo": "Ez egy közösségi projekt, amely a Klubrádió támogatását szolgálja. Minden tartalom szabadon elérhető a rádió hivatalos oldalán.",
+  "@aboutScreenCommunityProjectInfo": {
+    "description": "Információ a projekt közösségi jellegéről és a tartalom elérhetőségéről"
+  },
+  "aboutScreenContactInfo": "Kapcsolat: info@klubradio.hu (tartalom), multilevelstudios@gmail.com (fejlesztői elérhetőség)",
+  "@aboutScreenContactInfo": {
+    "description": "Kapcsolatfelvételi információk"
+  },
+
+  "settingsTitle": "Beállítások",
+  "@settingsTitle": {
+    "description": "A beállítások képernyő címe"
+  },
+  "settingsTheme": "Téma",
+  "@settingsTheme": {
+    "description": "Beállítás a téma kiválasztásához (pl. világos/sötét)"
+  },
+  "settingsLanguage": "Nyelv",
+  "@settingsLanguage": {
+    "description": "Beállítás az alkalmazás nyelvének kiválasztásához"
+  },
+
+  "ok": "OK",
+  "@ok": {
+    "description": "Általános OK gomb felirat"
+  },
+  "cancel": "Mégse",
+  "@cancel": {
+    "description": "Általános Mégse gomb felirat"
+  },
+  "errorDialogTitle": "Hiba",
+  "@errorDialogTitle": {
+    "description": "Hibaüzenet párbeszédablak címe"
+  },
+  "unexpectedError": "Váratlan hiba történt. Kérjük, próbálja újra később.",
+  "@unexpectedError": {
+    "description": "Általános hibaüzenet váratlan problémák esetén"
+  },
+
+  "podcastDetailErrorLoading": "Hiba történt: {errorDetails}",
+  "@podcastDetailErrorLoading": {
+    "description": "Hibaüzenet, amikor a podcast epizódok betöltése sikertelen.",
+    "placeholders": {
+      "errorDetails": {
+        "type": "String",
+        "example": "Network connection failed"
+      }
+    }
+  },
+  "podcastDetailSubscriptionSuccess": "Feliratkozás sikeres!",
+  "@podcastDetailSubscriptionSuccess": {
+    "description": "Értesítés sikeres podcast feliratkozáskor."
+  },
+  "podcastDetailSubscribeButton": "Feliratkozás",
+  "@podcastDetailSubscribeButton": {
+    "description": "Gomb felirat a podcastre való feliratkozáshoz."
+  },
+
+  "homeScreenSubscribedPodcastsTitle": "Feliratkozott műsorok",
+  "@homeScreenSubscribedPodcastsTitle": {
+    "description": "Címsor a feliratkozott műsorok szekcióhoz a főképernyőn."
+  },
+  "homeScreenRecentEpisodesTitle": "Legutóbbi epizódok",
+  "@homeScreenRecentEpisodesTitle": {
+    "description": "Címsor a legutóbbi epizódok szekcióhoz a főképernyőn."
+  },
+  "homeScreenRecentlyPlayedTitle": "Legutóbb hallgatott",
+  "@homeScreenRecentlyPlayedTitle": {
+    "description": "Címsor a legutóbb hallgatott epizódok szekcióhoz a főképernyőn."
+  },
+
+  "themeSettingSystemDefault": "Rendszer alapértelmezett",
+  "@themeSettingSystemDefault": {
+    "description": "Opció a rendszer témabeállításának használatához."
+  },
+  "themeSettingLight": "Világos",
+  "@themeSettingLight": {
+    "description": "Opció a világos téma kiválasztásához."
+  },
+  "themeSettingDark": "Sötét",
+  "@themeSettingDark": {
+    "description": "Opció a sötét téma kiválasztásához."
+  },
+
+  "settingsScreenSupportKlubradioTitle": "Támogasd a Klubrádiót",
+  "@settingsScreenSupportKlubradioTitle": {
+    "description": "Cím a Klubrádió támogatása szekcióhoz a beállítások képernyőn."
+  },
+  "settingsScreenSupportKlubradioSubtitle": "Nyisd meg a támogatási oldalt a böngészőben.",
+  "@settingsScreenSupportKlubradioSubtitle": {
+    "description": "Alcím a Klubrádió támogatása szekcióhoz."
+  },
+  "settingsScreenSupportDeveloperTitle": "Támogasd az alkalmazás fejlesztőjét",
+  "@settingsScreenSupportDeveloperTitle": {
+    "description": "Cím az alkalmazás fejlesztőjének támogatása szekcióhoz."
+  },
+  "settingsScreenSupportDeveloperSubtitle": "Önkéntes adomány a további fejlesztésekhez.",
+  "@settingsScreenSupportDeveloperSubtitle": {
+    "description": "Alcím az alkalmazás fejlesztőjének támogatása szekcióhoz."
+  },
+  "themeSettingsSectionTitle": "Téma beállítások",
+  "@themeSettingsSectionTitle": {
+    "description": "Címsor a téma beállítások szekcióhoz."
+  },
+
+  "bottomNavHome": "Főoldal",
+  "@bottomNavHome": {
+    "description": "Navigációs fül címke: Főoldal"
+  },
+  "bottomNavDiscover": "Felfedezés",
+  "@bottomNavDiscover": {
+    "description": "Navigációs fül címke: Felfedezés"
+  },
+  "bottomNavSearch": "Keresés",
+  "@bottomNavSearch": {
+    "description": "Navigációs fül címke: Keresés"
+  },
+  "bottomNavDownloads": "Letöltések",
+  "@bottomNavDownloads": {
+    "description": "Navigációs fül címke: Letöltések"
+  },
+  "bottomNavProfile": "Profil",
+  "@bottomNavProfile": {
+    "description": "Navigációs fül címke: Profil"
+  },
+  "bottomNavSettings": "Beállítások",
+  "@bottomNavSettings": {
+    "description": "Navigációs fül címke: Beállítások"
+  },
+
+  "playbackSettingsTitle": "Lejátszási beállítások",
+  "@playbackSettingsTitle": {
+    "description": "Címsor a lejátszási beállítások szekcióhoz."
+  },
+  "playbackSettingsSpeedLabel": "Lejátszási sebesség:",
+  "@playbackSettingsSpeedLabel": {
+    "description": "Címke a lejátszási sebesség beállításhoz."
+  },
+  "playbackSettingsSpeedValue": "{speed}x",
+  "@playbackSettingsSpeedValue": {
+    "description": "Formátum a lejátszási sebesség érték megjelenítéséhez. Például: 1.5x",
+    "placeholders": {
+      "speed": {
+        "type": "double",
+        "example": "1.5"
+      }
+    }
+  },
+  "playbackSettingsAutoDownloadLabel": "Automatikus letöltések:",
+  "@playbackSettingsAutoDownloadLabel": {
+    "description": "Címke az automatikus letöltések számának beállításhoz."
+  },
+  "playbackSettingsAutoDownloadValue": "{count,plural, =0{Nincs epizód} =1{1 epizód} other{{count} epizód}}",
+  "@playbackSettingsAutoDownloadValue": {
+    "description": "Formátum az automatikusan letöltendő epizódok számának megjelenítéséhez. Például: 5 epizód",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
+
+  "showSelectedFeedback": "\"{showTitle}\" kiválasztva.",
+  "@showSelectedFeedback": {
+    "description": "Visszajelző üzenet, amikor egy műsort kiválasztanak a címkék listájából.",
+    "placeholders": {
+      "showTitle": {
+        "type": "String",
+        "example": "Reggeli gyors"
+      }
+    }
+  },
+
+  "discoverScreenFeaturedCategoriesTitle": "Kiemelt műsorok",
+  "@discoverScreenFeaturedCategoriesTitle": {
+    "description": "A Kiemelt kategóriák szekció címe a Felfedezés képernyőn."
+  },
+  "discoverScreenRecommendedShowsTitle": "Ajánlott műsorok",
+  "@discoverScreenRecommendedShowsTitle": {
+    "description": "Az Ajánlott műsorok szekció címe a Felfedezés képernyőn."
+  },
+  "discoverScreenTrendingTitle": "Felkapott",
+  "@discoverScreenTrendingTitle": {
+    "description": "A Felkapott műsorok szekció címe a Felfedezés képernyőn."
+  },
+  "discoverScreenNoTopShows": "Nincsenek kiemelt műsorok.",
+
+  "recommendedPodcastsNoRecommendations": "Nincs elérhető ajánlás. Frissítsd az adatokat később.",
+  "@recommendedPodcastsNoRecommendations": {
+    "description": "Üzenet, ami akkor jelenik meg, ha nincsenek ajánlott műsorok."
+  },
+
+  "trendingPodcastsNoShows": "Nincs felkapott műsor a listán.",
+  "@trendingPodcastsNoShows": {
+    "description": "Üzenet, ami akkor jelenik meg, ha nincsenek felkapott műsorok a listán."
+  }
+
+}

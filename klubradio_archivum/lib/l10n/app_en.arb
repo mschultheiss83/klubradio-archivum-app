@@ -1,0 +1,268 @@
+{
+  "@@locale": "en",
+
+  "appName": "Klubradio Archive",
+  "@appName": {
+    "description": "The name of the application"
+  },
+
+  "downloadListTitle": "Downloads",
+  "@downloadListTitle": {
+    "description": "Title for the downloads screen"
+  },
+  "downloadStatusQueued": "Queued",
+  "@downloadStatusQueued": {
+    "description": "Download status: Item is in queue to be downloaded"
+  },
+  "downloadStatusNotDownloaded": "Not Downloaded",
+  "@downloadStatusNotDownloaded": {
+    "description": "Download status: Item has not been downloaded yet"
+  },
+  "downloadStatusDownloaded": "Downloaded",
+  "@downloadStatusDownloaded": {
+    "description": "Download status: Item has been successfully downloaded"
+  },
+  "downloadStatusDownloading": "Downloading",
+  "@downloadStatusDownloading": {
+    "description": "Download status: Item is currently being downloaded"
+  },
+  "downloadStatusFailed": "Failed",
+  "@downloadStatusFailed": {
+    "description": "Download status: Item download has failed"
+  },
+  "downloadActionRetry": "Retry",
+  "@downloadActionRetry": {
+    "description": "Button text to retry a failed download"
+  },
+  "downloadActionCancel": "Cancel",
+  "@downloadActionCancel": {
+    "description": "Button text to cancel an ongoing download"
+  },
+  "downloadActionDelete": "Delete",
+  "@downloadActionDelete": {
+    "description": "Button text to delete a downloaded item"
+  },
+  "downloadProgressLabel": "{progressPercentage}%",
+  "@downloadProgressLabel": {
+    "description": "Label showing the download progress percentage",
+    "placeholders": {
+      "progressPercentage": {
+        "type": "int",
+        "example": "50"
+      }
+    }
+  },
+  "noDownloads": "No Downloads Yet",
+  "@noDownloads": {
+    "description": "Message shown when the download list is empty"
+  },
+
+  "aboutScreenAppBarTitle": "About the Application",
+  "@aboutScreenAppBarTitle": {
+    "description": "Title for the AppBar on the About screen"
+  },
+  "aboutScreenAppNameDetail": "Klubradio Archive Application",
+  "@aboutScreenAppNameDetail": {
+    "description": "The name of the application on the About screen"
+  },
+  "aboutScreenPurpose": "The purpose of the application is to provide easy access to Klubrádió's archived programs and to allow the creation of RSS feeds for podcast players.",
+  "@aboutScreenPurpose": {
+    "description": "Description of the application's purpose"
+  },
+  "aboutScreenCommunityProjectInfo": "This is a community project that serves to support Klubrádió. All content is freely available on the radio's official website.",
+  "@aboutScreenCommunityProjectInfo": {
+    "description": "Information about the community nature of the project and content availability"
+  },
+  "aboutScreenContactInfo": "Contact: info@klubradio.hu (content), multilevelstudios@gmail.com (developer contact)",
+  "@aboutScreenContactInfo": {
+    "description": "Contact information"
+  },
+
+  "settingsTitle": "Settings",
+  "@settingsTitle": {
+    "description": "Title for the settings screen"
+  },
+  "settingsTheme": "Theme",
+  "@settingsTheme": {
+    "description": "Setting to select the theme (e.g., Light/Dark)"
+  },
+  "settingsLanguage": "Language",
+  "@settingsLanguage": {
+    "description": "Setting to select the application language"
+  },
+
+  "ok": "OK",
+  "@ok": {
+    "description": "Generic OK button text"
+  },
+  "cancel": "Cancel",
+  "@cancel": {
+    "description": "Generic Cancel button text"
+  },
+  "errorDialogTitle": "Error",
+  "@errorDialogTitle": {
+    "description": "Error dialog window title"
+  },
+  "unexpectedError": "An unexpected error occurred. Please try again later.",
+  "@unexpectedError": {
+    "description": "Generic error message for unexpected issues"
+  },
+
+  "podcastDetailErrorLoading": "An error occurred: {errorDetails}",
+  "@podcastDetailErrorLoading": {
+    "description": "Error message when loading podcast episodes fails.",
+    "placeholders": {
+      "errorDetails": {
+        "type": "String",
+        "example": "Network connection failed"
+      }
+    }
+  },
+  "podcastDetailSubscriptionSuccess": "Subscription successful!",
+  "@podcastDetailSubscriptionSuccess": {
+    "description": "Notification on successful podcast subscription."
+  },
+  "podcastDetailSubscribeButton": "Subscribe",
+  "@podcastDetailSubscribeButton": {
+    "description": "Button label to subscribe to the podcast."
+  },
+
+  "homeScreenSubscribedPodcastsTitle": "Subscribed Shows",
+  "@homeScreenSubscribedPodcastsTitle": {
+    "description": "Section title for subscribed podcasts on the home screen."
+  },
+  "homeScreenRecentEpisodesTitle": "Recent Episodes",
+  "@homeScreenRecentEpisodesTitle": {
+    "description": "Section title for recent episodes on the home screen."
+  },
+  "homeScreenRecentlyPlayedTitle": "Recently Played",
+  "@homeScreenRecentlyPlayedTitle": {
+    "description": "Section title for recently played episodes on the home screen."
+  },
+
+  "themeSettingSystemDefault": "System Default",
+  "@themeSettingSystemDefault": {
+    "description": "Option to use the system's theme setting."
+  },
+  "themeSettingLight": "Light",
+  "@themeSettingLight": {
+    "description": "Option to select the light theme."
+  },
+  "themeSettingDark": "Dark",
+  "@themeSettingDark": {
+    "description": "Option to select the dark theme."
+  },
+
+  "settingsScreenSupportKlubradioTitle": "Support Klubradio",
+  "@settingsScreenSupportKlubradioTitle": {
+    "description": "Title for the Support Klubradio section on the settings screen."
+  },
+  "settingsScreenSupportKlubradioSubtitle": "Open the support page in your browser.",
+  "@settingsScreenSupportKlubradioSubtitle": {
+    "description": "Subtitle for the Support Klubradio section."
+  },
+  "settingsScreenSupportDeveloperTitle": "Support the App Developer",
+  "@settingsScreenSupportDeveloperTitle": {
+    "description": "Title for the Support App Developer section."
+  },
+  "settingsScreenSupportDeveloperSubtitle": "Voluntary donation for further development.",
+  "@settingsScreenSupportDeveloperSubtitle": {
+    "description": "Subtitle for the Support App Developer section."
+  },
+  "themeSettingsSectionTitle": "Theme Settings",
+  "@themeSettingsSectionTitle": {
+    "description": "Section title for theme settings."
+  },
+
+  "bottomNavHome": "Home",
+  "@bottomNavHome": {    "description": "Navigation tab label: Home"
+  },
+  "bottomNavDiscover": "Discover",
+  "@bottomNavDiscover": {
+    "description": "Navigation tab label: Discover"
+  },
+  "bottomNavSearch": "Search",
+  "@bottomNavSearch": {
+    "description": "Navigation tab label: Search"
+  },
+  "bottomNavDownloads": "Downloads",
+  "@bottomNavDownloads": {
+    "description": "Navigation tab label: Downloads"
+  },
+  "bottomNavProfile": "Profile",
+  "@bottomNavProfile": {
+    "description": "Navigation tab label: Profile"
+  },
+  "bottomNavSettings": "Settings",
+  "@bottomNavSettings": {
+    "description": "Navigation tab label: Settings"
+  },
+
+  "playbackSettingsTitle": "Playback Settings",
+  "@playbackSettingsTitle": {
+    "description": "Section title for playback settings."
+  },
+  "playbackSettingsSpeedLabel": "Playback speed:",
+  "@playbackSettingsSpeedLabel": {
+    "description": "Label for the playback speed setting."
+  },
+  "playbackSettingsSpeedValue": "{speed}x",
+  "@playbackSettingsSpeedValue": {
+    "description": "Format for displaying the playback speed value. Example: 1.5x",
+    "placeholders": {
+      "speed": {
+        "type": "double",
+        "example": "1.5"
+      }
+    }
+  },
+  "playbackSettingsAutoDownloadLabel": "Automatic downloads:",
+  "@playbackSettingsAutoDownloadLabel": {
+    "description": "Label for the automatic downloads count setting."
+  },
+  "playbackSettingsAutoDownloadValue": "{count,plural, =0{No episodes} =1{1 episode} other{{count} episodes}}",
+  "@playbackSettingsAutoDownloadValue": {
+    "description": "Format for displaying the number of episodes to auto-download. Example: 5 episodes",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
+
+  "showSelectedFeedback": "\"{showTitle}\" selected.",
+  "@showSelectedFeedback": {
+    "description": "Feedback message shown when a show is selected from a list of chips.",
+    "placeholders": {
+      "showTitle": {
+        "type": "String",
+        "example": "Morning Express"
+      }
+    }
+  },
+
+  "discoverScreenFeaturedCategoriesTitle": "Top Shows",
+  "@discoverScreenFeaturedCategoriesTitle": {
+    "description": "Title for the featured/top categories section on the Discover screen."
+  },
+  "discoverScreenRecommendedShowsTitle": "Recommended Shows",
+  "@discoverScreenRecommendedShowsTitle": {
+    "description": "Title for the recommended shows section on the Discover screen."
+  },
+  "discoverScreenTrendingTitle": "Trending",
+  "@discoverScreenTrendingTitle": {
+    "description": "Title for the trending podcasts section on the Discover screen."
+  },
+  "discoverScreenNoTopShows": "No featured shows available.",
+
+  "recommendedPodcastsNoRecommendations": "No recommendations available. Please refresh the data later.",
+  "@recommendedPodcastsNoRecommendations": {
+    "description": "Message shown when there are no recommended podcasts to display."
+  },
+
+  "trendingPodcastsNoShows": "No trending shows on the list.",
+  "@trendingPodcastsNoShows": {
+    "description": "Message shown when there are no trending podcasts to display."
+  }
+}

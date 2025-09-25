@@ -1,0 +1,269 @@
+{
+  "@@locale": "de",
+
+  "appName": "Klubrádió Archiv",
+  "@appName": {
+    "description": "Der Name der Anwendung"
+  },
+
+  "downloadListTitle": "Downloads",
+  "@downloadListTitle": {
+    "description": "Titel für den Download-Bildschirm"
+  },
+  "downloadStatusQueued": "In Warteschlange",
+  "@downloadStatusQueued": {
+    "description": "Download-Status: Element befindet sich in der Warteschlange zum Herunterladen"
+  },
+  "downloadStatusNotDownloaded": "Nicht heruntergeladen",
+  "@downloadStatusNotDownloaded": {
+    "description": "Download-Status: Element wurde noch nicht heruntergeladen"
+  },
+  "downloadStatusDownloaded": "Heruntergeladen",
+  "@downloadStatusDownloaded": {
+    "description": "Download-Status: Element wurde erfolgreich heruntergeladen"
+  },
+  "downloadStatusDownloading": "Wird heruntergeladen",
+  "@downloadStatusDownloading": {
+    "description": "Download-Status: Element wird gerade heruntergeladen"
+  },
+  "downloadStatusFailed": "Fehlgeschlagen",
+  "@downloadStatusFailed": {
+    "description": "Download-Status: Download des Elements ist fehlgeschlagen"
+  },
+  "downloadActionRetry": "Wiederholen",
+  "@downloadActionRetry": {
+    "description": "Button-Text, um einen fehlgeschlagenen Download erneut zu versuchen"
+  },
+  "downloadActionCancel": "Abbrechen",
+  "@downloadActionCancel": {
+    "description": "Button-Text, um einen laufenden Download abzubrechen"
+  },
+  "downloadActionDelete": "Löschen",
+  "@downloadActionDelete": {
+    "description": "Button-Text, um ein heruntergeladenes Element zu löschen"
+  },
+  "downloadProgressLabel": "{progressPercentage}%",
+  "@downloadProgressLabel": {
+    "description": "Label, das den Download-Fortschritt in Prozent anzeigt",
+    "placeholders": {
+      "progressPercentage": {
+        "type": "int",
+        "example": "50"
+      }
+    }
+  },
+  "noDownloads": "Noch keine Downloads",
+  "@noDownloads": {
+    "description": "Nachricht, die angezeigt wird, wenn die Download-Liste leer ist"
+  },
+
+  "aboutScreenAppBarTitle": "Über die Anwendung",
+  "@aboutScreenAppBarTitle": {
+    "description": "Titel für die AppBar auf dem Über-Bildschirm"
+  },
+  "aboutScreenAppNameDetail": "Klubrádió Archiv Anwendung",
+  "@aboutScreenAppNameDetail": {
+    "description": "Der Name der Anwendung auf dem Über-Bildschirm"
+  },
+  "aboutScreenPurpose": "Ziel der Anwendung ist es, einen einfachen Zugang zu den archivierten Sendungen von Klubrádió zu ermöglichen und die Erstellung von RSS-Feeds für Podcast-Player zu erlauben.",
+  "@aboutScreenPurpose": {
+    "description": "Beschreibung des Zwecks der Anwendung"
+  },
+  "aboutScreenCommunityProjectInfo": "Dies ist ein Gemeinschaftsprojekt, das der Unterstützung von Klubrádió dient. Alle Inhalte sind auf der offiziellen Webseite des Radios frei verfügbar.",
+  "@aboutScreenCommunityProjectInfo": {
+    "description": "Informationen über den gemeinschaftlichen Charakter des Projekts und die Verfügbarkeit der Inhalte"
+  },
+  "aboutScreenContactInfo": "Kontakt: info@klubradio.hu (Inhalt), multilevelstudios@gmail.com (Entwicklerkontakt)",
+  "@aboutScreenContactInfo": {
+    "description": "Kontaktinformationen"
+  },
+
+  "settingsTitle": "Einstellungen",
+  "@settingsTitle": {
+    "description": "Titel für den Einstellungsbildschirm"
+  },
+  "settingsTheme": "Design",
+  "@settingsTheme": {
+    "description": "Einstellung zur Auswahl des Designs (z.B. Hell/Dunkel)"
+  },
+  "settingsLanguage": "Sprache",
+  "@settingsLanguage": {
+    "description": "Einstellung zur Auswahl der Anwendungssprache"
+  },
+
+  "ok": "OK",
+  "@ok": {
+    "description": "Allgemeiner OK-Button-Text"
+  },
+  "cancel": "Abbrechen",
+  "@cancel": {
+    "description": "Allgemeiner Abbrechen-Button-Text"
+  },
+  "errorDialogTitle": "Fehler",
+  "@errorDialogTitle": {
+    "description": "Titel des Fehlerdialogfensters"
+  },
+  "unexpectedError": "Ein unerwarteter Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.",
+  "@unexpectedError": {
+    "description": "Allgemeine Fehlermeldung für unerwartete Probleme"
+  },
+
+  "podcastDetailErrorLoading": "Fehler aufgetreten: {errorDetails}",
+  "@podcastDetailErrorLoading": {
+    "description": "Fehlermeldung, wenn das Laden der Podcast-Episoden fehlschlägt.",
+    "placeholders": {
+      "errorDetails": {
+        "type": "String",
+        "example": "Netzwerkverbindung fehlgeschlagen"
+      }
+    }
+  },
+  "podcastDetailSubscriptionSuccess": "Erfolgreich abonniert!",
+  "@podcastDetailSubscriptionSuccess": {
+    "description": "Benachrichtigung bei erfolgreichem Podcast-Abonnement."
+  },
+  "podcastDetailSubscribeButton": "Abonnieren",
+  "@podcastDetailSubscribeButton": {
+    "description": "Button-Beschriftung zum Abonnieren des Podcasts."
+  },
+
+  "homeScreenSubscribedPodcastsTitle": "Abonnierte Sendungen",
+  "@homeScreenSubscribedPodcastsTitle": {
+    "description": "Überschrift für den Bereich der abonnierten Sendungen auf dem Startbildschirm."
+  },
+  "homeScreenRecentEpisodesTitle": "Neueste Episoden",
+  "@homeScreenRecentEpisodesTitle": {
+    "description": "Überschrift für den Bereich der neuesten Episoden auf dem Startbildschirm."
+  },
+  "homeScreenRecentlyPlayedTitle": "Zuletzt gehört",
+  "@homeScreenRecentlyPlayedTitle": {
+    "description": "Überschrift für den Bereich der zuletzt gehörten Episoden auf dem Startbildschirm."
+  },
+
+  "themeSettingSystemDefault": "Systemstandard",
+  "@themeSettingSystemDefault": {
+    "description": "Option zur Verwendung der System-Theme-Einstellung."
+  },
+  "themeSettingLight": "Hell",
+  "@themeSettingLight": {
+    "description": "Option zur Auswahl des hellen Designs."
+  },
+  "themeSettingDark": "Dunkel",
+  "@themeSettingDark": {
+    "description": "Option zur Auswahl des dunklen Designs."
+  },
+
+  "settingsScreenSupportKlubradioTitle": "Klubrádió unterstützen",
+  "@settingsScreenSupportKlubradioTitle": {
+    "description": "Titel für den Abschnitt 'Klubrádió unterstützen' im Einstellungsbildschirm."
+  },
+  "settingsScreenSupportKlubradioSubtitle": "Öffne die Support-Seite im Browser.",
+  "@settingsScreenSupportKlubradioSubtitle": {
+    "description": "Untertitel für den Abschnitt 'Klubrádió unterstützen'."
+  },
+  "settingsScreenSupportDeveloperTitle": "App-Entwickler unterstützen",
+  "@settingsScreenSupportDeveloperTitle": {
+    "description": "Titel für den Abschnitt 'App-Entwickler unterstützen'."
+  },
+  "settingsScreenSupportDeveloperSubtitle": "Freiwillige Spende für weitere Entwicklungen.",
+  "@settingsScreenSupportDeveloperSubtitle": {
+    "description": "Untertitel für den Abschnitt 'App-Entwickler unterstützen'."
+  },
+  "themeSettingsSectionTitle": "Design-Einstellungen",
+  "@themeSettingsSectionTitle": {
+    "description": "Überschrift für den Abschnitt Design-Einstellungen."
+  },
+
+  "bottomNavHome": "Startseite",
+  "@bottomNavHome": {
+    "description": "Beschriftung für den Navigations-Tab: Startseite"
+  },
+  "bottomNavDiscover": "Entdecken",
+  "@bottomNavDiscover": {
+    "description": "Beschriftung für den Navigations-Tab: Entdecken"
+  },
+  "bottomNavSearch": "Suche",
+  "@bottomNavSearch": {
+    "description": "Beschriftung für den Navigations-Tab: Suche"
+  },
+  "bottomNavDownloads": "Downloads",
+  "@bottomNavDownloads": {
+    "description": "Beschriftung für den Navigations-Tab: Downloads"
+  },
+  "bottomNavProfile": "Profil",
+  "@bottomNavProfile": {
+    "description": "Beschriftung für den Navigations-Tab: Profil"
+  },
+  "bottomNavSettings": "Einstellungen",
+  "@bottomNavSettings": {
+    "description": "Beschriftung für den Navigations-Tab: Einstellungen"
+  },
+
+  "playbackSettingsTitle": "Wiedergabeeinstellungen",
+  "@playbackSettingsTitle": {
+    "description": "Überschrift für den Abschnitt Wiedergabeeinstellungen."
+  },
+  "playbackSettingsSpeedLabel": "Wiedergabegeschwindigkeit:",
+  "@playbackSettingsSpeedLabel": {
+    "description": "Beschriftung für die Einstellung der Wiedergabegeschwindigkeit."
+  },
+  "playbackSettingsSpeedValue": "{speed}x",
+  "@playbackSettingsSpeedValue": {
+    "description": "Format zur Anzeige des Werts der Wiedergabegeschwindigkeit. Beispiel: 1.5x",
+    "placeholders": {
+      "speed": {
+        "type": "double",
+        "example": "1.5"
+      }
+    }
+  },
+  "playbackSettingsAutoDownloadLabel": "Automatische Downloads:",
+  "@playbackSettingsAutoDownloadLabel": {
+    "description": "Beschriftung für die Einstellung der Anzahl automatischer Downloads."
+  },
+  "playbackSettingsAutoDownloadValue": "{count,plural, =0{Keine Folgen} =1{1 Folge} other{{count} Folgen}}",
+  "@playbackSettingsAutoDownloadValue": {
+    "description": "Format zur Anzeige der Anzahl automatisch herunterzuladender Folgen. Beispiel: 5 Folgen",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
+
+  "showSelectedFeedback": "\"{showTitle}\" ausgewählt.",
+  "@showSelectedFeedback": {
+    "description": "Feedback-Nachricht, die angezeigt wird, wenn eine Sendung aus einer Liste von Chips ausgewählt wird.",
+    "placeholders": {
+      "showTitle": {
+        "type": "String",
+        "example": "Morgen Express"
+      }
+    }
+  },
+
+  "discoverScreenFeaturedCategoriesTitle": "Top-Sendungen",
+  "@discoverScreenFeaturedCategoriesTitle": {
+    "description": "Titel für den Abschnitt Top-Kategorien auf dem Entdecken-Bildschirm."
+  },
+  "discoverScreenRecommendedShowsTitle": "Empfohlene Sendungen",
+  "@discoverScreenRecommendedShowsTitle": {
+    "description": "Titel für den Abschnitt Empfohlene Sendungen auf dem Entdecken-Bildschirm."
+  },
+  "discoverScreenTrendingTitle": "Angesagt",
+  "@discoverScreenTrendingTitle": {
+    "description": "Titel für den Abschnitt Angesagte Podcasts auf dem Entdecken-Bildschirm."
+  },
+  "discoverScreenNoTopShows": "Keine vorgestellten Sendungen verfügbar.",
+
+  "recommendedPodcastsNoRecommendations": "Keine Empfehlungen verfügbar. Bitte aktualisiere die Daten später.",
+  "@recommendedPodcastsNoRecommendations": {
+    "description": "Nachricht, die angezeigt wird, wenn keine empfohlenen Podcasts vorhanden sind."
+  },
+
+  "trendingPodcastsNoShows": "Keine angesagten Sendungen auf der Liste.",
+  "@trendingPodcastsNoShows": {
+    "description": "Nachricht, die angezeigt wird, wenn keine angesagten Podcasts auf der Liste stehen."
+  }
+}
