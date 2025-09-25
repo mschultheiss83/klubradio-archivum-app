@@ -44,7 +44,6 @@ class DiscoverScreen extends StatelessWidget {
                 Center(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(vertical: 20.0),
-                    // TODO: Localize this "no data" message
                     child: Text(
                       l10n.discoverScreenNoTopShows,
                       style: Theme.of(context).textTheme.bodyMedium,

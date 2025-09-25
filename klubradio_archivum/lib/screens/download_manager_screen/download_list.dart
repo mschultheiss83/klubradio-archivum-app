@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:klubradio_archivum/l10n/app_localizations.dart';
-import '../../models/episode.dart';
-import '../../providers/podcast_provider.dart';
-import '../../services/download_service.dart';
-import '../utils/helpers.dart';
+import 'package:klubradio_archivum/models/episode.dart';
+import 'package:klubradio_archivum/providers/podcast_provider.dart';
+import 'package:klubradio_archivum/services/download_service.dart';
+import 'package:klubradio_archivum/screens/utils/helpers.dart';
 
 class DownloadList extends StatelessWidget {
   const DownloadList({super.key, required this.downloads});
@@ -25,7 +25,7 @@ class DownloadList extends StatelessWidget {
 
     return ListView.separated(
       itemCount: downloads.length,
-      separatorBuilder: (_, __) => const Divider(),
+      separatorBuilder: (_, _) => const Divider(),
       itemBuilder: (BuildContext context, int index) {
         final DownloadTask task = downloads[index];
         final statusLabel = formatDownloadStatus(context, task.status);

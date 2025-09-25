@@ -1,20 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:klubradio_archivum/l10n/app_localizations.dart';
-
-import '../../models/episode.dart';
-import '../../models/podcast.dart';
-import '../../providers/episode.provider.dart';
-import '../../providers/podcast_provider.dart';
-import '../about_screen/about_screen.dart';
-import '../discover_screen/discover_screen.dart';
-import '../download_manager_screen/download_manager_screen.dart';
-import '../profile_screen/profile_screen.dart';
-import '../search_screen/search_screen.dart';
-import '../settings_screen/settings_screen.dart';
-import '../widgets/stateful/episode_list.dart';
-import '../widgets/stateful/now_playing_bar.dart';
-import '../widgets/stateless/bottom_navigation_bar.dart';
+import 'package:klubradio_archivum/models/episode.dart';
+import 'package:klubradio_archivum/models/podcast.dart';
+import 'package:klubradio_archivum/providers/episode.provider.dart';
+import 'package:klubradio_archivum/providers/podcast_provider.dart';
+import 'package:klubradio_archivum/screens/about_screen/about_screen.dart';
+import 'package:klubradio_archivum/screens/discover_screen/discover_screen.dart';
+import 'package:klubradio_archivum/screens/download_manager_screen/download_manager_screen.dart';
+import 'package:klubradio_archivum/screens/profile_screen/profile_screen.dart';
+import 'package:klubradio_archivum/screens/search_screen/search_screen.dart';
+import 'package:klubradio_archivum/screens/settings_screen/settings_screen.dart';
+import 'package:klubradio_archivum/screens/widgets/stateful/episode_list.dart';
+import 'package:klubradio_archivum/screens/widgets/stateful/now_playing_bar.dart';
+import 'package:klubradio_archivum/screens/widgets/stateless/bottom_navigation_bar.dart';
 import 'recently_played_list.dart';
 import 'subscribed_podcasts_list.dart';
 

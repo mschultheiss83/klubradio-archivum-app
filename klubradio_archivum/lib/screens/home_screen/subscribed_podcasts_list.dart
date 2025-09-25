@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-
-import '../../models/podcast.dart';
-import '../widgets/stateless/podcast_list_item.dart';
+import 'package:klubradio_archivum/l10n/app_localizations.dart';
+import 'package:klubradio_archivum/models/podcast.dart';
+import 'package:klubradio_archivum/screens//widgets/stateless/podcast_list_item.dart';
 
 class SubscribedPodcastsList extends StatelessWidget {
   const SubscribedPodcastsList({super.key, required this.podcasts});
@@ -10,10 +10,14 @@ class SubscribedPodcastsList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Get l10n instance
+    final l10n = AppLocalizations.of(context)!;
+
     if (podcasts.isEmpty) {
       return Text(
-        'Még nem iratkoztál fel egy műsorra sem.',
+        l10n.subscribedPodcastsNoSubscriptions, // Use localized string
         style: Theme.of(context).textTheme.bodyMedium,
+        textAlign: TextAlign.center, // Optional: for better display
       );
     }
 

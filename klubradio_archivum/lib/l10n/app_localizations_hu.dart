@@ -200,4 +200,8 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get trendingPodcastsNoShows => 'Nincs felkapott műsor a listán.';
+
+  @override
+  String get subscribedPodcastsNoSubscriptions =>
+      'Még nem iratkoztál fel egy műsorra sem.';
 }

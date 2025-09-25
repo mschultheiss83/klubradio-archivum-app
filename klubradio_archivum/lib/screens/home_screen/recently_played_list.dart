@@ -22,7 +22,7 @@ class RecentlyPlayedList extends StatelessWidget {
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         itemCount: episodes.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 12),
+        separatorBuilder: (_, _) => const SizedBox(width: 12),
         itemBuilder: (BuildContext context, int index) {
           final Episode episode = episodes[index];
           return _EpisodeCard(episode: episode);
@@ -42,10 +42,8 @@ class _EpisodeCard extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     return InkWell(
       onTap: () async {
-        final EpisodeProvider episodeProvider =
-            context.read<EpisodeProvider>();
-        final PodcastProvider podcastProvider =
-            context.read<PodcastProvider>();
+        final EpisodeProvider episodeProvider = context.read<EpisodeProvider>();
+        final PodcastProvider podcastProvider = context.read<PodcastProvider>();
         await episodeProvider.playEpisode(episode);
         podcastProvider.addRecentlyPlayed(episode);
       },
