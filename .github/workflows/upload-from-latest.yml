@@ -1,0 +1,59 @@
+name: Upload From Latest Artifact
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  upload-only:
+    runs-on: ubuntu-latest
+    env:
+      HEADLESS: "true"
+    defaults:
+      run:
+        working-directory: klubradio_scraper_nodejs
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: |
+            klubradio_scraper_nodejs/package-lock.json
+            klubradio_scraper_nodejs/package.json
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Write .env from Secrets
+        run: |
+          cat > .env << 'EOF'
+          SUPABASE_URL=${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}
+          SUPABASE_BUCKET=${{ secrets.SUPABASE_BUCKET }}
+          BASE_URL=${{ secrets.BASE_URL }}
+          LOG_LEVEL=${{ secrets.LOG_LEVEL }}
+          EOF
+
+      - name: Download latest artifact (fixed name)
+        uses: actions/download-artifact@v4
+        with:
+          name: downloads-json-latest
+          path: klubradio_scraper_nodejs/downloads
+
+      - name: Upload to Supabase
+        run: node speed_upload_shows.js
+
+      - name: Upload logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-logs-${{ github.run_number }}-latest
+          path: |
+            klubradio_scraper_nodejs/*.log
+            klubradio_scraper_nodejs/downloads/*.log
+          if-no-files-found: ignore
+          retention-days: 7

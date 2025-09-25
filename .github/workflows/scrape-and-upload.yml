@@ -1,0 +1,168 @@
+# .github/workflows/scrape-and-upload.yml
+name: Scrape & Upload (Klubradio)
+
+on:
+  workflow_dispatch:
+    inputs:
+      only:
+        description: "Run only a specific stage (empty=all, options: scrape, upload)"
+        required: false
+        default: ""
+  schedule:
+    - cron: "0 */2 * * *"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: klubradio-scrape
+  cancel-in-progress: true
+
+jobs:
+  scrape:
+    if: ${{ github.event.inputs.only != 'upload' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      HEADLESS: "true"
+    defaults:
+      run:
+        working-directory: klubradio_scraper_nodejs
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: |
+            klubradio_scraper_nodejs/package-lock.json
+            klubradio_scraper_nodejs/package.json
+
+      - name: Install Chromium deps (for Puppeteer)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libnss3 libxss1 libasound2 libatk-bridge2.0-0 libgtk-3-0 \
+            libdrm2 libgbm1 libxdamage1 libxfixes3 libxkbcommon0 \
+            libpango-1.0-0 libcups2
+
+      - name: Cache Puppeteer Chromium
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/puppeteer
+          key: puppeteer-${{ runner.os }}-chromium
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Write .env from Secrets
+        run: |
+          cat > .env << 'EOF'
+          SUPABASE_URL=${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}
+          SUPABASE_BUCKET=${{ secrets.SUPABASE_BUCKET }}
+          BASE_URL=${{ secrets.BASE_URL }}
+          LOG_LEVEL=${{ secrets.LOG_LEVEL }}
+          EOF
+
+      - name: Ensure downloads dir
+        run: mkdir -p downloads
+
+      - name: 1/3 scrapeArchiv.js
+        run: node scrapeArchiv.js
+
+      - name: 2/3 scrapeArchivDetail.js
+        run: node scrapeArchivDetail.js
+
+      - name: Build artifact names
+        id: names
+        shell: bash
+        run: |
+          DATE_TAG=$(TZ=Europe/Berlin date +'%Y%m%d-%H%M%S')
+          echo "stable=downloads-json-latest" >> $GITHUB_OUTPUT
+          echo "historical=downloads-json-${DATE_TAG}-run${GITHUB_RUN_NUMBER}" >> $GITHUB_OUTPUT
+
+      - name: Upload artifact (stable latest)
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.names.outputs.stable }}
+          path: klubradio_scraper_nodejs/downloads/*.json
+          if-no-files-found: warn
+          retention-days: 30
+          compression-level: 6
+          overwrite: true
+
+      - name: Upload artifact (historical snapshot)
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.names.outputs.historical }}
+          path: klubradio_scraper_nodejs/downloads/*.json
+          if-no-files-found: warn
+          retention-days: 30
+          compression-level: 6
+
+      - name: Upload logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-logs-${{ github.run_number }}-scrape
+          path: |
+            klubradio_scraper_nodejs/*.log
+            klubradio_scraper_nodejs/downloads/*.log
+          if-no-files-found: ignore
+          retention-days: 7
+
+  upload:
+    if: ${{ github.event.inputs.only != 'scrape' }}
+    needs: [scrape]
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      HEADLESS: "true"
+    defaults:
+      run:
+        working-directory: klubradio_scraper_nodejs
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: |
+            klubradio_scraper_nodejs/package-lock.json
+            klubradio_scraper_nodejs/package.json
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Write .env from Secrets
+        run: |
+          cat > .env << 'EOF'
+          SUPABASE_URL=${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}
+          SUPABASE_BUCKET=${{ secrets.SUPABASE_BUCKET }}
+          BASE_URL=${{ secrets.BASE_URL }}
+          LOG_LEVEL=${{ secrets.LOG_LEVEL }}
+          EOF
+
+      - name: Download stable artifact (latest)
+        uses: actions/download-artifact@v4
+        with:
+          name: downloads-json-latest
+          path: klubradio_scraper_nodejs/downloads
+
+      - name: 3/3 speed_upload_shows.js
+        run: node speed_upload_shows.js
+
+      - name: Upload logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-logs-${{ github.run_number }}-upload
+          path: |
+            klubradio_scraper_nodejs/*.log
+            klubradio_scraper_nodejs/downloads/*.log
+          if-no-files-found: ignore
+          retention-days: 7
