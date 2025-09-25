@@ -175,4 +175,28 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String showSelectedFeedback(String showTitle) {
+    return '\"$showTitle\" selected.';
+  }
+
+  @override
+  String get discoverScreenFeaturedCategoriesTitle => 'Top Shows';
+
+  @override
+  String get discoverScreenRecommendedShowsTitle => 'Recommended Shows';
+
+  @override
+  String get discoverScreenTrendingTitle => 'Trending';
+
+  @override
+  String get discoverScreenNoTopShows => 'No featured shows available.';
+
+  @override
+  String get recommendedPodcastsNoRecommendations =>
+      'No recommendations available. Please refresh the data later.';
+
+  @override
+  String get trendingPodcastsNoShows => 'No trending shows on the list.';
 }

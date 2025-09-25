@@ -229,5 +229,41 @@
         "example": "5"
       }
     }
+  },
+
+  "showSelectedFeedback": "\"{showTitle}\" kiválasztva.",
+  "@showSelectedFeedback": {
+    "description": "Visszajelző üzenet, amikor egy műsort kiválasztanak a címkék listájából.",
+    "placeholders": {
+      "showTitle": {
+        "type": "String",
+        "example": "Reggeli gyors"
+      }
+    }
+  },
+
+  "discoverScreenFeaturedCategoriesTitle": "Kiemelt műsorok",
+  "@discoverScreenFeaturedCategoriesTitle": {
+    "description": "A Kiemelt kategóriák szekció címe a Felfedezés képernyőn."
+  },
+  "discoverScreenRecommendedShowsTitle": "Ajánlott műsorok",
+  "@discoverScreenRecommendedShowsTitle": {
+    "description": "Az Ajánlott műsorok szekció címe a Felfedezés képernyőn."
+  },
+  "discoverScreenTrendingTitle": "Felkapott",
+  "@discoverScreenTrendingTitle": {
+    "description": "A Felkapott műsorok szekció címe a Felfedezés képernyőn."
+  },
+  "discoverScreenNoTopShows": "Nincsenek kiemelt műsorok.",
+
+  "recommendedPodcastsNoRecommendations": "Nincs elérhető ajánlás. Frissítsd az adatokat később.",
+  "@recommendedPodcastsNoRecommendations": {
+    "description": "Üzenet, ami akkor jelenik meg, ha nincsenek ajánlott műsorok."
+  },
+
+  "trendingPodcastsNoShows": "Nincs felkapott műsor a listán.",
+  "@trendingPodcastsNoShows": {
+    "description": "Üzenet, ami akkor jelenik meg, ha nincsenek felkapott műsorok a listán."
   }
+
 }

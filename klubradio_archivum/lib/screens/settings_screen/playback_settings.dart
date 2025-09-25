@@ -11,7 +11,8 @@ class PlaybackSettings extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!; // Get l10n instance
+    final l10n = AppLocalizations.of(context)!;
+    final TextTheme textTheme = Theme.of(context).textTheme;
 
     return Card(
       child: Padding(
@@ -19,82 +20,77 @@ class PlaybackSettings extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Text(
-              l10n.playbackSettingsTitle, // Localized
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: 12),
+            Text(l10n.playbackSettingsTitle, style: textTheme.titleMedium),
+            const SizedBox(height: 16), // Consistent spacing
+            // --- Playback Speed Setting ---
+            Text(l10n.playbackSettingsSpeedLabel, style: textTheme.titleSmall),
+            const SizedBox(height: 8),
             Consumer<EpisodeProvider>(
-              builder:
-                  (
-                    BuildContext context,
-                    EpisodeProvider provider,
-                    Widget? child,
-                  ) {
-                    return Row(
-                      children: <Widget>[
-                        Text(l10n.playbackSettingsSpeedLabel), // Localized
-                        const SizedBox(width: 12),
-                        DropdownButton<double>(
-                          value: provider.playbackSpeed,
-                          items: constants.playbackSpeeds.map((double speed) {
-                            return DropdownMenuItem<double>(
-                              value: speed,
-                              child: Text(
-                                l10n.playbackSettingsSpeedValue(
-                                  speed,
-                                ), // Localized
-                              ),
-                            );
-                          }).toList(),
-                          onChanged: (double? value) {
-                            if (value != null) {
-                              provider.updatePlaybackSpeed(value);
-                            }
-                          },
-                        ),
-                      ],
-                    );
+              builder: (context, episodeProvider, child) {
+                List<bool> isSelectedSpeed = constants.playbackSpeeds
+                    .map((speed) => episodeProvider.playbackSpeed == speed)
+                    .toList();
+
+                return ToggleButtons(
+                  isSelected: isSelectedSpeed,
+                  onPressed: (int index) {
+                    if (index >= 0 && index < constants.playbackSpeeds.length) {
+                      episodeProvider.updatePlaybackSpeed(
+                        constants.playbackSpeeds[index],
+                      );
+                    }
                   },
+                  children: constants.playbackSpeeds.map((speed) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12.0,
+                      ), // Adjust padding
+                      child: Text(l10n.playbackSettingsSpeedValue(speed)),
+                    );
+                  }).toList(),
+                );
+              },
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16), // Consistent spacing
+            // --- Automatic Downloads Setting ---
+            Text(
+              l10n.playbackSettingsAutoDownloadLabel,
+              style: textTheme.titleSmall,
+            ),
+            const SizedBox(height: 8),
             Consumer<PodcastProvider>(
-              builder:
-                  (
-                    BuildContext context,
-                    PodcastProvider provider,
-                    Widget? child,
-                  ) {
-                    final autoDownload =
-                        provider.userProfile?.maxAutoDownload ??
-                        constants.defaultAutoDownloadCount;
-                    return Row(
-                      children: <Widget>[
-                        Text(
-                          l10n.playbackSettingsAutoDownloadLabel,
-                        ), // Localized
-                        const SizedBox(width: 12),
-                        DropdownButton<int>(
-                          value: autoDownload,
-                          items: constants.autoDownloadOptions.map((int count) {
-                            return DropdownMenuItem<int>(
-                              value: count,
-                              child: Text(
-                                l10n.playbackSettingsAutoDownloadValue(
-                                  count,
-                                ), // Localized
-                              ),
-                            );
-                          }).toList(),
-                          onChanged: (int? value) {
-                            if (value != null) {
-                              provider.updateAutoDownloadCount(value);
-                            }
-                          },
-                        ),
-                      ],
-                    );
+              builder: (context, podcastProvider, child) {
+                final currentAutoDownload =
+                    podcastProvider.userProfile?.maxAutoDownload ??
+                    constants.defaultAutoDownloadCount;
+
+                List<bool> isSelectedAutoDownload = constants
+                    .autoDownloadOptions
+                    .map((count) => currentAutoDownload == count)
+                    .toList();
+
+                return ToggleButtons(
+                  isSelected: isSelectedAutoDownload,
+                  onPressed: (int index) {
+                    if (index >= 0 &&
+                        index < constants.autoDownloadOptions.length) {
+                      podcastProvider.updateAutoDownloadCount(
+                        constants.autoDownloadOptions[index],
+                      );
+                    }
                   },
+                  children: constants.autoDownloadOptions.map((count) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12.0,
+                      ), // Adjust padding
+                      child: Text(
+                        l10n.playbackSettingsAutoDownloadValue(count),
+                      ),
+                    );
+                  }).toList(),
+                );
+              },
             ),
           ],
         ),

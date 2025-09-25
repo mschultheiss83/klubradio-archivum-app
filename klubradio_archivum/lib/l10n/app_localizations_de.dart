@@ -176,4 +176,30 @@ class AppLocalizationsDe extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String showSelectedFeedback(String showTitle) {
+    return '\"$showTitle\" ausgewählt.';
+  }
+
+  @override
+  String get discoverScreenFeaturedCategoriesTitle => 'Top-Sendungen';
+
+  @override
+  String get discoverScreenRecommendedShowsTitle => 'Empfohlene Sendungen';
+
+  @override
+  String get discoverScreenTrendingTitle => 'Angesagt';
+
+  @override
+  String get discoverScreenNoTopShows =>
+      'Keine vorgestellten Sendungen verfügbar.';
+
+  @override
+  String get recommendedPodcastsNoRecommendations =>
+      'Keine Empfehlungen verfügbar. Bitte aktualisiere die Daten später.';
+
+  @override
+  String get trendingPodcastsNoShows =>
+      'Keine angesagten Sendungen auf der Liste.';
 }

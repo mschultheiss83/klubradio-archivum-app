@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
-import './../../l10n/app_localizations.dart';
+import 'package:klubradio_archivum/l10n/app_localizations.dart';
+
 import 'playback_settings.dart';
 import 'theme_settings.dart';
 

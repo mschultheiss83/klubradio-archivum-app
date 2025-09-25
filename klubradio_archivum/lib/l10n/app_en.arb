@@ -229,5 +229,40 @@
         "example": "5"
       }
     }
+  },
+
+  "showSelectedFeedback": "\"{showTitle}\" selected.",
+  "@showSelectedFeedback": {
+    "description": "Feedback message shown when a show is selected from a list of chips.",
+    "placeholders": {
+      "showTitle": {
+        "type": "String",
+        "example": "Morning Express"
+      }
+    }
+  },
+
+  "discoverScreenFeaturedCategoriesTitle": "Top Shows",
+  "@discoverScreenFeaturedCategoriesTitle": {
+    "description": "Title for the featured/top categories section on the Discover screen."
+  },
+  "discoverScreenRecommendedShowsTitle": "Recommended Shows",
+  "@discoverScreenRecommendedShowsTitle": {
+    "description": "Title for the recommended shows section on the Discover screen."
+  },
+  "discoverScreenTrendingTitle": "Trending",
+  "@discoverScreenTrendingTitle": {
+    "description": "Title for the trending podcasts section on the Discover screen."
+  },
+  "discoverScreenNoTopShows": "No featured shows available.",
+
+  "recommendedPodcastsNoRecommendations": "No recommendations available. Please refresh the data later.",
+  "@recommendedPodcastsNoRecommendations": {
+    "description": "Message shown when there are no recommended podcasts to display."
+  },
+
+  "trendingPodcastsNoShows": "No trending shows on the list.",
+  "@trendingPodcastsNoShows": {
+    "description": "Message shown when there are no trending podcasts to display."
   }
 }

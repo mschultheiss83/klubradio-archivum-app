@@ -393,6 +393,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count,plural, =0{No episodes} =1{1 episode} other{{count} episodes}}'**
   String playbackSettingsAutoDownloadValue(int count);
+
+  /// Feedback message shown when a show is selected from a list of chips.
+  ///
+  /// In en, this message translates to:
+  /// **'\"{showTitle}\" selected.'**
+  String showSelectedFeedback(String showTitle);
+
+  /// Title for the featured/top categories section on the Discover screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Top Shows'**
+  String get discoverScreenFeaturedCategoriesTitle;
+
+  /// Title for the recommended shows section on the Discover screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Recommended Shows'**
+  String get discoverScreenRecommendedShowsTitle;
+
+  /// Title for the trending podcasts section on the Discover screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Trending'**
+  String get discoverScreenTrendingTitle;
+
+  /// No description provided for @discoverScreenNoTopShows.
+  ///
+  /// In en, this message translates to:
+  /// **'No featured shows available.'**
+  String get discoverScreenNoTopShows;
+
+  /// Message shown when there are no recommended podcasts to display.
+  ///
+  /// In en, this message translates to:
+  /// **'No recommendations available. Please refresh the data later.'**
+  String get recommendedPodcastsNoRecommendations;
+
+  /// Message shown when there are no trending podcasts to display.
+  ///
+  /// In en, this message translates to:
+  /// **'No trending shows on the list.'**
+  String get trendingPodcastsNoShows;
 }
 
 class _AppLocalizationsDelegate

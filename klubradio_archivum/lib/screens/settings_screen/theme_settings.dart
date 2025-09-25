@@ -14,75 +14,58 @@ class ThemeSettings extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Consumer<ThemeProvider>(
-          builder:
-              (BuildContext context, ThemeProvider provider, Widget? child) {
-                // Helper function to create each radio item
-                Widget buildRadioItem(
-                  ThemeMode value,
-                  String title,
-                  ThemeProvider provider,
-                ) {
-                  return InkWell(
-                    onTap: () {
-                      provider.setThemeMode(value);
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 8.0,
-                      ), // Adjust padding as needed
-                      child: Row(
-                        children: <Widget>[
-                          Radio<ThemeMode>.adaptive(
-                            value: value,
-                            groupValue: provider.themeMode,
-                            onChanged: (ThemeMode? newValue) {
-                              if (newValue != null) {
-                                provider.setThemeMode(newValue);
-                              }
-                            },
-                            // Optional: for better visual alignment with text
-                            visualDensity: VisualDensity.compact,
-                            activeColor: Theme.of(context).colorScheme.primary,
-                          ),
-                          const SizedBox(
-                            width: 8,
-                          ), // Spacing between radio and text
-                          Expanded(
-                            // Allow text to take available space
-                            child: Text(title),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                }
+          builder: (BuildContext context, ThemeProvider provider, Widget? child) {
+            // Determine which button is currently selected
+            // The order here must match the order of ToggleButtons children
+            List<bool> isSelected = [
+              provider.themeMode == ThemeMode.system,
+              provider.themeMode == ThemeMode.light,
+              provider.themeMode == ThemeMode.dark,
+            ];
 
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text(
+                  l10n.themeSettingsSectionTitle,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const SizedBox(height: 12), // Spacing after title
+                ToggleButtons(
+                  isSelected: isSelected,
+                  onPressed: (int index) {
+                    // Update the theme based on which button was pressed
+                    if (index == 0) {
+                      provider.setThemeMode(ThemeMode.system);
+                    } else if (index == 1) {
+                      provider.setThemeMode(ThemeMode.light);
+                    } else if (index == 2) {
+                      provider.setThemeMode(ThemeMode.dark);
+                    }
+                  },
+                  // borderRadius: BorderRadius.circular(8.0), // Optional: for rounded corners
+                  // constraints: BoxConstraints( // Optional: to make buttons fill more width if desired
+                  //   minHeight: 40.0,
+                  //   minWidth: (MediaQuery.of(context).size.width - 32 - 32) / 3, // Example: fill available width
+                  // ),
                   children: <Widget>[
-                    Text(
-                      l10n.themeSettingsSectionTitle,
-                      style: Theme.of(context).textTheme.titleMedium,
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: Text(l10n.themeSettingSystemDefault),
                     ),
-                    const SizedBox(height: 8), // Reduced spacing after title
-                    buildRadioItem(
-                      ThemeMode.system,
-                      l10n.themeSettingSystemDefault,
-                      provider,
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: Text(l10n.themeSettingLight),
                     ),
-                    buildRadioItem(
-                      ThemeMode.light,
-                      l10n.themeSettingLight,
-                      provider,
-                    ),
-                    buildRadioItem(
-                      ThemeMode.dark,
-                      l10n.themeSettingDark,
-                      provider,
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: Text(l10n.themeSettingDark),
                     ),
                   ],
-                );
-              },
+                ),
+              ],
+            );
+          },
         ),
       ),
     );

@@ -230,5 +230,40 @@
         "example": "5"
       }
     }
+  },
+
+  "showSelectedFeedback": "\"{showTitle}\" ausgewählt.",
+  "@showSelectedFeedback": {
+    "description": "Feedback-Nachricht, die angezeigt wird, wenn eine Sendung aus einer Liste von Chips ausgewählt wird.",
+    "placeholders": {
+      "showTitle": {
+        "type": "String",
+        "example": "Morgen Express"
+      }
+    }
+  },
+
+  "discoverScreenFeaturedCategoriesTitle": "Top-Sendungen",
+  "@discoverScreenFeaturedCategoriesTitle": {
+    "description": "Titel für den Abschnitt Top-Kategorien auf dem Entdecken-Bildschirm."
+  },
+  "discoverScreenRecommendedShowsTitle": "Empfohlene Sendungen",
+  "@discoverScreenRecommendedShowsTitle": {
+    "description": "Titel für den Abschnitt Empfohlene Sendungen auf dem Entdecken-Bildschirm."
+  },
+  "discoverScreenTrendingTitle": "Angesagt",
+  "@discoverScreenTrendingTitle": {
+    "description": "Titel für den Abschnitt Angesagte Podcasts auf dem Entdecken-Bildschirm."
+  },
+  "discoverScreenNoTopShows": "Keine vorgestellten Sendungen verfügbar.",
+
+  "recommendedPodcastsNoRecommendations": "Keine Empfehlungen verfügbar. Bitte aktualisiere die Daten später.",
+  "@recommendedPodcastsNoRecommendations": {
+    "description": "Nachricht, die angezeigt wird, wenn keine empfohlenen Podcasts vorhanden sind."
+  },
+
+  "trendingPodcastsNoShows": "Keine angesagten Sendungen auf der Liste.",
+  "@trendingPodcastsNoShows": {
+    "description": "Nachricht, die angezeigt wird, wenn keine angesagten Podcasts auf der Liste stehen."
   }
 }

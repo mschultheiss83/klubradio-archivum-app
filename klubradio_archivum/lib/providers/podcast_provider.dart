@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 
 import '../models/episode.dart';
 import '../models/podcast.dart';
+import '../models/show_data.dart';
 import '../models/user_profile.dart';
 import '../screens/utils/constants.dart' as constants;
 import '../services/api_service.dart';
@@ -13,10 +14,11 @@ class PodcastProvider extends ChangeNotifier {
   PodcastProvider({
     required ApiService apiService,
     required DownloadService downloadService,
-  })  : _apiService = apiService,
-        _downloadService = downloadService {
-    _downloadSubscription =
-        _downloadService.downloadStream.listen(_handleDownloadUpdate);
+  }) : _apiService = apiService,
+       _downloadService = downloadService {
+    _downloadSubscription = _downloadService.downloadStream.listen(
+      _handleDownloadUpdate,
+    );
   }
 
   ApiService _apiService;
@@ -32,6 +34,11 @@ class PodcastProvider extends ChangeNotifier {
   List<Podcast> _trendingPodcasts = <Podcast>[];
   List<Podcast> _recommendedPodcasts = <Podcast>[];
   List<Episode> _recentEpisodes = <Episode>[];
+
+  List<ShowData> _topShows = [];
+  List<ShowData> get topShows => _topShows;
+  bool _isLoadingTopShows = false;
+  bool get isLoadingTopShows => _isLoadingTopShows;
 
   UserProfile? _userProfile;
   bool _isLoading = false;
@@ -53,8 +60,10 @@ class PodcastProvider extends ChangeNotifier {
       return const <Podcast>[];
     }
     return _podcasts
-        .where((Podcast podcast) =>
-            _userProfile!.subscribedPodcastIds.contains(podcast.id))
+        .where(
+          (Podcast podcast) =>
+              _userProfile!.subscribedPodcastIds.contains(podcast.id),
+        )
         .toList();
   }
 
@@ -68,8 +77,9 @@ class PodcastProvider extends ChangeNotifier {
     if (!identical(_downloadService, downloadService)) {
       _downloadSubscription?.cancel();
       _downloadService = downloadService;
-      _downloadSubscription =
-          _downloadService.downloadStream.listen(_handleDownloadUpdate);
+      _downloadSubscription = _downloadService.downloadStream.listen(
+        _handleDownloadUpdate,
+      );
     }
   }
 
@@ -86,14 +96,15 @@ class PodcastProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final List<Podcast> fetchedPodcasts =
-          await _apiService.fetchLatestPodcasts();
-      final List<Podcast> trending =
-          await _apiService.fetchTrendingPodcasts();
-      final List<Podcast> recommended =
-          await _apiService.fetchRecommendedPodcasts();
-      final List<Episode> latestEpisodes =
-          await _apiService.fetchRecentEpisodes();
+      final List<Podcast> fetchedPodcasts = await _apiService
+          .fetchLatestPodcasts();
+      final List<Podcast> trending = await _apiService.fetchTrendingPodcasts();
+      final List<Podcast> recommended = await _apiService
+          .fetchRecommendedPodcasts();
+      final List<Episode> latestEpisodes = await _apiService
+          .fetchRecentEpisodes();
+
+      await loadTopShows(forceRefresh: forceRefresh); // Add this
 
       _podcasts = fetchedPodcasts;
       _trendingPodcasts = trending;
@@ -125,8 +136,8 @@ class PodcastProvider extends ChangeNotifier {
     }
     if (!profile.subscribedPodcastIds.contains(podcastId)) {
       _userProfile = profile.copyWith(
-        subscribedPodcastIds:
-            Set<String>.from(profile.subscribedPodcastIds)..add(podcastId),
+        subscribedPodcastIds: Set<String>.from(profile.subscribedPodcastIds)
+          ..add(podcastId),
       );
       _updatePodcastSubscription(podcastId, isSubscribed: true);
       notifyListeners();
@@ -140,8 +151,8 @@ class PodcastProvider extends ChangeNotifier {
       return;
     }
     if (profile.subscribedPodcastIds.contains(podcastId)) {
-      final Set<String> updated =
-          Set<String>.from(profile.subscribedPodcastIds)..remove(podcastId);
+      final Set<String> updated = Set<String>.from(profile.subscribedPodcastIds)
+        ..remove(podcastId);
       _userProfile = profile.copyWith(subscribedPodcastIds: updated);
       _updatePodcastSubscription(podcastId, isSubscribed: false);
       notifyListeners();
@@ -165,8 +176,10 @@ class PodcastProvider extends ChangeNotifier {
   Future<void> _scheduleAutoDownloadForPodcast(String podcastId) async {
     final int maxDownloads =
         _userProfile?.maxAutoDownload ?? constants.defaultAutoDownloadCount;
-    final List<Episode> episodes =
-        await _apiService.fetchEpisodesForPodcast(podcastId, limit: maxDownloads);
+    final List<Episode> episodes = await _apiService.fetchEpisodesForPodcast(
+      podcastId,
+      limit: maxDownloads,
+    );
     _episodesByPodcast[podcastId] = episodes;
     for (final Episode episode in episodes.take(maxDownloads)) {
       if (!_downloads.containsKey(episode.id)) {
@@ -229,8 +242,9 @@ class PodcastProvider extends ChangeNotifier {
     if (profile == null) {
       return;
     }
-    final Set<String> favourites =
-        Set<String>.from(profile.favouriteEpisodeIds);
+    final Set<String> favourites = Set<String>.from(
+      profile.favouriteEpisodeIds,
+    );
     if (favourites.contains(episode.id)) {
       favourites.remove(episode.id);
     } else {
@@ -249,7 +263,54 @@ class PodcastProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void _updatePodcastSubscription(String podcastId, {required bool isSubscribed}) {
+  Future<void> loadTopShows({bool forceRefresh = false}) async {
+    if (!forceRefresh && _topShows.isNotEmpty) {
+      // return; // Optionally return if already loaded and no force refresh
+    }
+    _isLoadingTopShows = true;
+    notifyListeners();
+
+    try {
+      // Replace with your actual data fetching logic for top shows
+      // This is where you'd call the service that executes your SQL query
+      // For example: _topShows = await _yourApiService.fetchTopShowsThisYear();
+
+      // --- Dummy Data (replace with actual fetch) ---
+      await Future.delayed(
+        const Duration(milliseconds: 800),
+      ); // Simulate network
+      final List<Map<String, dynamic>> queryResults = [
+        {"title": "A lényeg", "count": 8563},
+        {"title": "Reggeli gyors", "count": 1743},
+        {"title": "Esti gyors", "count": 1691},
+        {"title": "Megbeszéljük...", "count": 1687},
+        {"title": "Ezitta Fórum", "count": 1628},
+        {"title": "Reggeli gyors/Reggeli személy", "count": 1446},
+        {"title": "Hetes Stúdió", "count": 356},
+        {"title": "Klubdélelőtt", "count": 351},
+      ];
+      _topShows = queryResults
+          .map(
+            (row) => ShowData(
+              title: row['title'] as String,
+              count: row['count'] as int,
+            ),
+          )
+          .toList();
+      // --- End of Dummy Data ---
+    } catch (e) {
+      // Handle error, maybe set an error message
+      print('Error loading top shows: $e');
+    } finally {
+      _isLoadingTopShows = false;
+      notifyListeners();
+    }
+  }
+
+  void _updatePodcastSubscription(
+    String podcastId, {
+    required bool isSubscribed,
+  }) {
     _podcasts = _podcasts
         .map(
           (Podcast podcast) => podcast.id == podcastId
