@@ -1,297 +1,343 @@
 const puppeteer = require('puppeteer');
-const fs = require('fs');
+const fs = require('fs/promises');
 const path = require('path');
-const os = require('os'); // Importiert das OS-Modul für die CPU-Anzahl
+const os = require('os');
+require('dotenv').config();
 
-// --- Konfiguration ---
+// --- Config (env-tunable) ---
 const CONFIG = {
-  resultsFile: './downloads/result.json', // Pfad zur Datei mit den URLs
-  resultsDetailsFile: (id) => `./downloads/resultDetails-${id}.json`, // Pfad zur Datei mit den URLs
+  resultsFile: './downloads/result.json',
+  resultsDetailsFile: (id) => `./downloads/resultDetails-${id}.json`,
   headless: process.env.HEADLESS !== 'false',
-  cookieFile: 'cookies.json', // Dateipfad für Cookies
-  userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36',
-  // Die Anzahl der parallelen Prozesse wird von der CPU-Anzahl bestimmt
-  filterKeywords: ["Spotify", "Apple podcast"],
-  maxConcurrent: os.cpus().length,
-  delay: 1000 // Kurze Pause zwischen den Anfragen
+  cookieFile: 'cookies.json',
+  userAgent: null,
+  filterKeywords: ['Spotify', 'Apple podcast'],
+  downloadsPath: path.join(__dirname, 'downloads'),
+
+  // Performance knobs:
+  workers: Number(process.env.WORKERS || os.cpus().length),
+  waitUntil: process.env.WAIT_UNTIL || 'domcontentloaded', // 'domcontentloaded' is faster than 'networkidle2'
+  navTimeoutMs: Number(process.env.NAV_TIMEOUT_MS || 15000),
+  retryNavTimeoutMs: Number(process.env.RETRY_NAV_TIMEOUT_MS || 30000),
+  cleanDownloadsFirst: String(process.env.CLEAN_DOWNLOADS || '').toLowerCase() === 'true',
+  preloadStatConcurrency: Number(process.env.PRELOAD_STAT_CONCURRENCY || 64),
 };
 
-// --- Hilfsfunktionen ---
-function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+// --- Simple progress bar ---
+function makeProgress(total) {
+  const width = Number(process.env.PG_WIDTH || 30);
+  const start = Date.now();
+  let last = 0;
+
+  function render(done) {
+    const now = Date.now();
+    if (now - last < 100 && done < total) return; // throttle
+    last = now;
+
+    const pct = total ? done / total : 1;
+    const filled = Math.round(pct * width);
+    const bar = '█'.repeat(filled) + '░'.repeat(width - filled);
+    const percent = Math.floor(pct * 100);
+    const elapsed = (now - start) / 1000;
+    const rate = done / Math.max(elapsed, 0.001);
+    const remaining = Math.max(total - done, 0);
+    const eta = rate > 0 ? Math.round(remaining / rate) : 0;
+    const line = `\r[${bar}] ${percent}%  ${done}/${total}  ${rate.toFixed(1)}/s  ETA ${eta}s`;
+    process.stdout.write(line);
+  }
+
+  return {
+    update: (done) => render(done),
+    done: () => { render(total); process.stdout.write('\n'); }
+  };
 }
 
 function _getUserAgent() {
   try {
-    // Lese die package.json-Datei, um die Versionsnummer zu erhalten
-    const packageJson = require(path.join(__dirname, "package.json"));
-    const ver = packageJson.version;
-    return `KlubradioScraper/${ver} (+https://github.com/yourorg/klubradio-archivum-app)`;
+    const pkg = require(path.join(__dirname, 'package.json'));
+    return `KlubradioScraper/${pkg.version} (+https://github.com/mschultheiss83/klubradio-archivum-app)`;
   } catch (error) {
-    logger.warn(
-      `Fehler beim Lesen der package.json: ${error.message}. Verwende Fallback-User-Agent.`,
-    );
-    return "KlubradioScraper/0.0.0 (+https://github.com/yourorg/klubradio-archivum-app)";
+    console.warn(`User-Agent fallback (package.json not readable): ${error.message}`);
+    return 'KlubradioScraper/0.0.0 (+https://github.com/yourorg/klubradio-archivum-app)';
   }
 }
 
-/**
- * Speichert Cookies von der Seite in eine Datei.
- * @param {object} page Die Puppeteer-Page-Instanz.
- * @param {string} filePath Der Pfad, unter dem die Cookies gespeichert werden sollen.
- */
-async function saveCookies(page, filePath) {
-  const cookies = await page.cookies();
-  fs.writeFileSync(filePath, JSON.stringify(cookies, null, 2));
-  // console.log(`🍪 Cookies erfolgreich in ${filePath} gespeichert.`);
+async function saveCookiesFrom(page, filePath) {
+  try {
+    const cookies = await page.cookies();
+    await fs.writeFile(filePath, JSON.stringify(cookies, null, 2), 'utf-8');
+  } catch (e) {
+    console.warn('Could not save cookies:', e.message);
+  }
 }
 
-/**
- * Lädt Cookies aus einer Datei und fügt sie der Seite hinzu.
- * @param {object} page Die Puppeteer-Page-Instanz.
- * @param {string} filePath Der Pfad zur Cookie-Datei.
- */
-async function loadCookies(page, filePath) {
-  if (fs.existsSync(filePath)) {
-    try {
-      const cookiesString = fs.readFileSync(filePath);
-      const cookies = JSON.parse(cookiesString);
+async function loadCookiesTo(page, filePath) {
+  try {
+    const cookiesString = await fs.readFile(filePath, 'utf-8');
+    const cookies = JSON.parse(cookiesString);
+    if (Array.isArray(cookies) && cookies.length) {
       await page.setCookie(...cookies);
-      // console.log(`🍪 Cookies erfolgreich aus ${filePath} geladen.`);
-    } catch (error) {
-      console.error('❌ Fehler beim Laden der Cookies:', error.message);
     }
-  } else {
-    console.log(`ℹ️ Cookie-Datei nicht gefunden, beginne mit einer neuen Sitzung.`);
+  } catch (error) {
+    if (error && error.code === 'ENOENT') {
+      console.log('ℹ️ Cookie-Datei nicht gefunden, starte frisch.');
+    } else {
+      console.warn('Warnung beim Laden der Cookies:', error.message);
+    }
   }
 }
 
-/**
- * Verarbeitet eine einzelne URL. Hier kommt Ihre Logik zum Parsen der Detailseite rein.
- * @param {object} browser Die übergeordnete Puppeteer Browser-Instanz.
- * @param {string} url Die URL der Detailseite, die gescraped werden soll.
- */
-async function processUrl(browser, url) {
-  if (!url) {
-    return
-  }
+async function preloadExistingIds(dir, concurrency) {
+  const collator = new Intl.Collator(undefined, { numeric: true, sensitivity: 'base' });
+  const files = (await fs.readdir(dir))
+    .filter(f => f.startsWith('resultDetails-') && f.endsWith('.json'))
+    .sort((a, b) => collator.compare(a, b));
 
-  const id = url.split('-').pop();
-  const filePath = CONFIG.resultsDetailsFile(id);
+  const idFromName = (name) => {
+    const m = name.match(/resultDetails-(.+)\.json$/);
+    return m ? m[1] : null;
+  };
 
-  // --- 1. Prüfen, ob die Datei existiert und nicht leer ist ---
-  try {
-    if (fs.existsSync(filePath) && fs.statSync(filePath).size > 20) {
-      // console.log(`✅ Datei für ID ${id} existiert und ist nicht leer. Überspringe.`);
-      return
+  const queue = [...files];
+  const good = new Set();
+
+  const workers = Array.from({ length: Math.max(1, concurrency) }, async () => {
+    for (;;) {
+      const f = queue.pop();
+      if (!f) break;
+      const id = idFromName(f);
+      if (!id) continue;
+      try {
+        const st = await fs.stat(path.join(dir, f));
+        if (st.size > 20) good.add(id);
+      } catch {}
     }
-  } catch (error) {
-    console.error(`❌ Fehler beim Prüfen der Datei für ID ${id}:`, error.message);
-  }
+  });
 
-  let page;
+  await Promise.all(workers);
+  return good;
+}
+
+async function extractDetailsFromPage(page) {
+  let duration = -1;
   try {
-    // console.log(`Starte Verarbeitung für: ${url}`);
-    page = await browser.newPage();
-    await page.setRequestInterception(true);
-    page.on('request', request => {
-      const url = request.url();
-      const type = request.resourceType()
-      // Liste der zu blockierenden Ressourcentypen
-      const blockedResources = ['image', 'stylesheet', 'font', 'media'];
-      // Liste der zu blockierenden URL-Hostnamen oder -Muster
-      const blockedUrls = [
-        'https://pagead2.googlesyndication.com/pagead/ads'
-        // Fügen Sie hier weitere URLs hinzu, die Sie blockieren möchten
-      ];
+    duration = await page.$eval('.adas-holder .duration', el => el.innerText.trim());
+  } catch {}
 
-      if (blockedResources.includes(type) || blockedUrls.some(urlToBlock => url.startsWith(urlToBlock))) {
-        request.abort();
-      } else {
-        request.continue();
-      }
-    });
-
-    // Lade Cookies, bevor die Seite aufgerufen wird
-    await loadCookies(page, CONFIG.cookieFile);
-    // Setzt einen realistischen User-Agent, um Bot-Erkennung zu umgehen
-    await page.setUserAgent({
-      userAgent: _getUserAgent(),
-    });
-
-    await page.goto(url, { waitUntil: 'networkidle2', timeout: 5000 })
-      .catch(async ()=> {
-        await page.goto(url, { waitUntil: 'networkidle2', timeout: 15000 })
-      });
-
-    // --- Extrahieren der Daten ---
-    const duration = await page.$eval('.adas-holder .duration', el => el.innerText.trim()) || -1;
-    const titleElement = await page.$('.article-wrapper h3');
-    let title = titleElement
-      ? await page.evaluate(el => el.innerText.trim(), titleElement)
-      : null;
-    let date = ''
+  let title = null;
+  let date = '';
+  try {
+    const el = await page.$('.article-wrapper h3');
+    if (el) title = await page.evaluate(e => e.innerText.trim(), el);
     if (title) {
-      date = '(' + title.split(' (').pop().trim()
-      title = title.split(' (').shift().trim()
+      date = '(' + title.split(' (').pop().trim();
+      title = title.split(' (').shift().trim();
     }
+  } catch {}
 
-    const hostsTexts = (await page.$$eval('.article-wrapper h5', hosts =>
+  let hostsTexts = [];
+  try {
+    hostsTexts = await page.$$eval('.article-wrapper h5', hosts =>
       hosts
         .map(el => el.innerText.trim())
         .filter(text => text !== 'Tovább a műsor adásaihoz')
-    ));
+    );
+  } catch {}
 
-    const description = (await page.evaluate(() => {
+  let description = [];
+  try {
+    description = (await page.evaluate(() => {
       return [...document.querySelectorAll('.musor-description p')]
         .map(e => e.innerText.trim());
-    })).filter(text => {
-      const isKeyword = CONFIG.filterKeywords.some(keyword => text.includes(keyword));
-      const isNotEmpty = !!text;
-      return isNotEmpty && !isKeyword;
-    });
-    const rssElement = await page.$('.musor-description a');
-    const rss = rssElement
-      ? await page.evaluate(el => el.href, rssElement)
-      : null;
-    const mp3Link = await page.$eval('.musoradatlap .adas-holder div.audio-player-middle source', element => element.src);
+    })).filter(text => !!text);
+  } catch {}
 
-    // --- Speichern der Daten ---
-    const resultDetails = {
-      id,
-      date,
-      title,
-      duration,
-      description,
-      hostsTexts,
-      rss,
-      mp3Link
-    };
+  if (description.length) {
+    description = description.filter(text => !CONFIG.filterKeywords.some(k => text.includes(k)));
+  }
 
-    // --- 2. Speichern nur, wenn der mp3Link verfügbar ist ---
-    if (mp3Link && typeof mp3Link === 'string') {
-      fs.writeFileSync(filePath, JSON.stringify(resultDetails, null, 2), { encoding: 'utf-8' });
-      console.log(`✅ Daten für ID ${id} erfolgreich extrahiert und gespeichert.`);
+  let rss = null;
+  try {
+    const a = await page.$('.musor-description a');
+    if (a) rss = await page.evaluate(el => el.href, a);
+  } catch {}
+
+  let mp3Link = null;
+  try {
+    mp3Link = await page.$eval('.musoradatlap .adas-holder div.audio-player-middle source', el => el.src);
+  } catch {}
+
+  let programId = null;
+  let programImg = null;
+  try {
+    const a = await page.$('article h5.duplo a');
+    if (a) programId = ('' + await page.evaluate(el => el.href, a)).split('-').pop() || null;
+  } catch {}
+  try {
+    const img = await page.$('article > a > img');
+    if (img) programImg = '' + await page.evaluate(el => el.src, img);
+  } catch {}
+
+  return { duration, title, date, hostsTexts, description, rss, mp3Link, programId, programImg };
+}
+
+function makeRequestBlocker() {
+  const blockedTypes = new Set(['image', 'stylesheet', 'font', 'media']);
+  const blockedPrefixes = ['https://pagead2.googlesyndication.com/pagead/ads'];
+  return (request) => {
+    const url = request.url();
+    const type = request.resourceType();
+    if (blockedTypes.has(type) || blockedPrefixes.some(p => url.startsWith(p))) {
+      request.abort();
     } else {
-      console.warn(`⚠️ Kein MP3-Link für ID ${id} gefunden. Datei wird nicht gespeichert.`);
+      request.continue();
     }
-  } catch (error) {
-    console.error(`❌ Fehler beim Verarbeiten von ${url}:`, error.message);
-  } finally {
-    if (page) {
-      await saveCookies(page, CONFIG.cookieFile);
-      await page.close(); // Seite nach der Verarbeitung immer schließen
-    }
-  }
+  };
 }
 
-function shuffle(array) {
-  let currentIndex = array.length;
+async function processUrlOnPage(page, url) {
+  if (!url) return;
 
-  // While there remain elements to shuffle...
-  while (currentIndex !== 0) {
-
-    // Pick a remaining element...
-    let randomIndex = Math.floor(Math.random() * currentIndex);
-    currentIndex--;
-
-    // And swap it with the current element.
-    [array[currentIndex], array[randomIndex]] = [
-      array[randomIndex], array[currentIndex]];
-  }
-}
-
-const detailPageFound = (url) => {
   const id = url.split('-').pop();
   const filePath = CONFIG.resultsDetailsFile(id);
 
-  // --- 1. Prüfen, ob die Datei existiert und nicht leer ist ---
   try {
-    if (fs.existsSync(filePath) && fs.statSync(filePath).size > 20) {
-      // console.log(`✅ Datei für ID ${id} existiert und ist nicht leer. Überspringe.`);
-      return true;
-    }
-  } catch (error) {
-    console.error(`❌ Fehler beim Prüfen der Datei für ID ${id}:`, error.message);
+    await page.goto(url, { waitUntil: CONFIG.waitUntil, timeout: CONFIG.navTimeoutMs });
+  } catch {
+    await page.goto(url, { waitUntil: CONFIG.waitUntil, timeout: CONFIG.retryNavTimeoutMs });
   }
-  return false;
+
+  const details = await extractDetailsFromPage(page);
+
+  if (details.mp3Link && typeof details.mp3Link === 'string') {
+    const resultDetails = {
+      id,
+      date: details.date,
+      title: details.title,
+      duration: details.duration,
+      description: details.description,
+      hostsTexts: details.hostsTexts,
+      programId: details.programId,
+      programImg: details.programImg,
+      rss: details.rss,
+      mp3Link: details.mp3Link,
+    };
+    await fs.writeFile(filePath, JSON.stringify(resultDetails, null, 2), 'utf-8');
+  }
 }
 
-// --- Hauptfunktion zum Starten des parallelen Scrapings ---
+function makeIndexer(n) {
+  let i = 0;
+  return () => (i < n ? i++ : -1);
+}
+
 async function main() {
-  console.log('Starte kontinuierliches paralleles Scraping...');
+  console.log('🚀 Start parallel scraping…');
 
-  if (!fs.existsSync(CONFIG.resultsFile)) {
-    console.error('❌ Fehler: Die Datei "result.json" wurde nicht gefunden.');
+  let fileContent;
+  try {
+    fileContent = await fs.readFile(CONFIG.resultsFile, 'utf-8');
+  } catch {
+    console.error('❌ results.json not found. Abort.');
     return;
   }
-
-  const fileContent = fs.readFileSync(CONFIG.resultsFile, 'utf-8');
   const { results: urls } = JSON.parse(fileContent);
-
-  if (urls.length === 0) {
-    console.log('Keine URLs zum Verarbeiten gefunden. Beende das Skript.');
+  if (!urls || !urls.length) {
+    console.log('Keine URLs zum Verarbeiten gefunden.');
     return;
   }
-  shuffle(urls)
-  console.log(`Gefundene URLs: ${urls.length}. ${CONFIG.maxConcurrent} Prozesse werden gleichzeitig laufen.`);
+
+  if (CONFIG.cleanDownloadsFirst) {
+    const names = await fs.readdir(CONFIG.downloadsPath);
+    await Promise.all(
+      names
+        .filter(f => f.startsWith('resultDetails-') && f.endsWith('.json'))
+        .map(f => fs.rm(path.join(CONFIG.downloadsPath, f), { force: true }))
+    );
+  }
+
+  const existing = await preloadExistingIds(CONFIG.downloadsPath, CONFIG.preloadStatConcurrency);
+
+  const args = [
+    '--no-sandbox',
+    '--disable-setuid-sandbox',
+    '--disable-dev-shm-usage',
+    '--disable-gpu',
+    '--blink-settings=imagesEnabled=false',
+  ];
 
   const browser = await puppeteer.launch({
     headless: CONFIG.headless,
-    args: ['--no-sandbox', '--disable-setuid-sandbox'],
-    // slowMo: 200,
-    defaultViewport: null,
+    args,
+    defaultViewport: { width: 1200, height: 800, deviceScaleFactor: 1 },
   });
 
-  const activePromises = new Set();
-  let urlIndex = 0;
-
   try {
-    console.log(`maxConcurrent: ${CONFIG.maxConcurrent}`)
+    const bootstrap = await browser.newPage();
+    await bootstrap.setCacheEnabled(true);
+    await bootstrap.setUserAgent({userAgent: _getUserAgent()});
+    await loadCookiesTo(bootstrap, CONFIG.cookieFile);
+    await bootstrap.close();
 
-    // Fülle den Pool mit den ersten maxConcurrent URLs
-    for (let i = 0; i < CONFIG.maxConcurrent && urlIndex < urls.length; i++) {
-      const url = urls[urlIndex++];
-      if (url && !detailPageFound(url)) {
-        // console.log(`try open url ${url}`)
-        const promise = processUrl(browser, url).finally(() => activePromises.delete(promise));
-        activePromises.add(promise);
-      }
-    }
+    const todo = urls.filter(u => {
+      const id = u?.split('-').pop();
+      return id && !existing.has(id);
+    });
 
-    // Kontinuierliche Verarbeitung: Starte eine neue Aufgabe, sobald eine alte fertig ist
-    while (urlIndex < urls.length || activePromises.size > 0) {
-      // Warte auf die erste Aufgabe, die im Pool fertig wird
-      if (activePromises.size + 1 > CONFIG.maxConcurrent) {
-        await Promise.race(activePromises);
-      }
+    console.log(`🧮 URLs total: ${urls.length}, skipping existing: ${urls.length - todo.length}, scraping: ${todo.length}`);
+    if (!todo.length) return;
 
-      // Wenn noch URLs übrig sind, füge eine neue Aufgabe zum Pool hinzu
-      if (urlIndex < urls.length) {
-        const url = urls[urlIndex++];
-        if (url && !detailPageFound(url)) {
-          const promise = processUrl(browser, url).finally(() => activePromises.delete(promise));
-          activePromises.add(promise);
+    const nextIndex = makeIndexer(todo.length);
+    const requestBlocker = makeRequestBlocker();
+    const workers = Math.max(1, CONFIG.workers);
+
+    // progress
+    const progress = makeProgress(todo.length);
+    progress.update(0);
+    let completed = 0;
+
+    async function worker(workerId) {
+      const page = await browser.newPage();
+      await page.setCacheEnabled(true);
+      await page.setUserAgent({userAgent: _getUserAgent()});
+      await page.setRequestInterception(true);
+      page.on('request', requestBlocker);
+
+      for (;;) {
+        const i = nextIndex();
+        if (i === -1) break;
+        const url = todo[i];
+        try {
+          await processUrlOnPage(page, url);
+        } catch (e) {
+          console.warn(`[w${workerId}] Error on ${url}: ${e?.message || e}`);
+        } finally {
+          completed += 1;
+          progress.update(completed);
         }
       }
-      if (activePromises.size > 0) {
-        await Promise.race(activePromises);
-      }
+
+      await page.close();
     }
-  } catch (error) {
-    console.error('Ein schwerwiegender Fehler ist aufgetreten:', error);
+
+    console.log(`⚙️  Spawning ${workers} workers (headless=${CONFIG.headless})…`);
+    const t0 = Date.now();
+    await Promise.all(Array.from({ length: workers }, (_, k) => worker(k + 1)));
+    const secs = Math.round((Date.now() - t0) / 1000);
+    progress.done();
+    console.log(`✅ Done in ${secs}s`);
   } finally {
-    const page = (await browser.pages()).pop()
-    await saveCookies(page, CONFIG.cookieFile);
+    const pages = await browser.pages();
+    const last = pages[pages.length - 1];
+    if (last) await saveCookiesFrom(last, CONFIG.cookieFile);
     await browser.close();
-    console.log('Alle URLs verarbeitet. Browser geschlossen.');
   }
 }
 
 (async () => {
-  const start = new Date()
-  console.log(start.toISOString())
+  const start = new Date();
+  console.log(start.toISOString());
   await main();
-  const end = new Date()
-  console.log(end.toISOString(), Math.round((end - start)/1000))
-})()
+  const end = new Date();
+  console.log(end.toISOString(), Math.round((end - start) / 1000));
+})();

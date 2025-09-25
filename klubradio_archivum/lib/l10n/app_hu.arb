@@ -264,6 +264,11 @@
   "trendingPodcastsNoShows": "Nincs felkapott műsor a listán.",
   "@trendingPodcastsNoShows": {
     "description": "Üzenet, ami akkor jelenik meg, ha nincsenek felkapott műsorok a listán."
+  },
+
+  "subscribedPodcastsNoSubscriptions": "Még nem iratkoztál fel egy műsorra sem.",
+  "@subscribedPodcastsNoSubscriptions": {
+    "description": "Üzenet, ami akkor jelenik meg, ha a felhasználó még nem iratkozott fel egy műsorra sem."
   }
 
 }

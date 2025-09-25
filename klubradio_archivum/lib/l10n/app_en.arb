@@ -264,5 +264,10 @@
   "trendingPodcastsNoShows": "No trending shows on the list.",
   "@trendingPodcastsNoShows": {
     "description": "Message shown when there are no trending podcasts to display."
+  },
+
+  "subscribedPodcastsNoSubscriptions": "You haven't subscribed to any shows yet.",
+  "@subscribedPodcastsNoSubscriptions": {
+    "description": "Message shown when the user has not subscribed to any podcasts."
   }
 }

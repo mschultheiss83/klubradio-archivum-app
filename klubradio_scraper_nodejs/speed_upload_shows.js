@@ -93,6 +93,8 @@ async function readAllRecords() {
       show_date: parseDate(record.date),
       hosts: record.hostsTexts ?? [],
       rss_url: record.rss ?? null,
+      program_id: record.programId ?? null,
+      program_image: record.programImg ?? null,
       mp3_url: record.mp3Link ?? null,
       duration: parseDuration(record.duration),
     };

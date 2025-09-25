@@ -202,4 +202,8 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get trendingPodcastsNoShows =>
       'Keine angesagten Sendungen auf der Liste.';
+
+  @override
+  String get subscribedPodcastsNoSubscriptions =>
+      'Du hast noch keine Sendungen abonniert.';
 }

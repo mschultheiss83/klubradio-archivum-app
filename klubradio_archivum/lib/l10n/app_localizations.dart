@@ -435,6 +435,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No trending shows on the list.'**
   String get trendingPodcastsNoShows;
+
+  /// Message shown when the user has not subscribed to any podcasts.
+  ///
+  /// In en, this message translates to:
+  /// **'You haven\'t subscribed to any shows yet.'**
+  String get subscribedPodcastsNoSubscriptions;
 }
 
 class _AppLocalizationsDelegate

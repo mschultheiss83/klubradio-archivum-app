@@ -265,5 +265,10 @@
   "trendingPodcastsNoShows": "Keine angesagten Sendungen auf der Liste.",
   "@trendingPodcastsNoShows": {
     "description": "Nachricht, die angezeigt wird, wenn keine angesagten Podcasts auf der Liste stehen."
+  },
+
+  "subscribedPodcastsNoSubscriptions": "Du hast noch keine Sendungen abonniert.",
+  "@subscribedPodcastsNoSubscriptions": {
+    "description": "Nachricht, die angezeigt wird, wenn der Benutzer noch keine Podcasts abonniert hat."
   }
 }

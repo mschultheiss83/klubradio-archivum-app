@@ -199,4 +199,8 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get trendingPodcastsNoShows => 'No trending shows on the list.';
+
+  @override
+  String get subscribedPodcastsNoSubscriptions =>
+      'You haven\'t subscribed to any shows yet.';
 }
