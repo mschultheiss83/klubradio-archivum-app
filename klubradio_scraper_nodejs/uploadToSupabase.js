@@ -40,13 +40,21 @@ function parseDuration(durationString) {
   return totalMinutes;
 }
 
+const collator = new Intl.Collator(undefined, {
+  numeric: true,
+  sensitivity: 'base'
+});
+
 // --- Hauptfunktion zum Hochladen der Daten ---
 async function main() {
   console.log('Starte Upload der JSON-Dateien zu Supabase...');
+  const start = new Date()
 
   try {
-    const files = fs.readdirSync(DIRECTORY).filter(file => file.startsWith('resultDetails-') && file.endsWith('.json'));
+    const files = Array.from(fs.readdirSync(DIRECTORY).filter(file => file.startsWith('resultDetails-') && file.endsWith('.json')))
+      .sort((a, b) => collator.compare(a, b)).reverse()
 
+    let index = 0
     if (files.length === 0) {
       console.log('Keine JSON-Dateien zum Hochladen gefunden.');
       return;
@@ -56,6 +64,9 @@ async function main() {
       const filePath = path.join(DIRECTORY, file);
       const data = fs.readFileSync(filePath, 'utf-8');
       const record = JSON.parse(data);
+      if (index % 1000 === 0) {
+        console.log(`current index ${index}`, record.id, Math.round((new Date() - start)/1000), 'sec')
+      }
       // Umwandlung der Dauer vor dem Hochladen
       const durationInMinutes = parseDuration(record.duration);
       const showDate = parseDate(record.date);
@@ -78,12 +89,14 @@ async function main() {
 
       if (error) {
         console.error(`❌ Fehler beim Hochladen von ${file}:`, error.message);
-      } else {
-        if (insertedData) {
-          console.log(`✅ ${file} erfolgreich hochgeladen.`);
-          console.log(insertedData)
-        }
       }
+
+      if (insertedData) {
+        console.log(`✅ ${file} erfolgreich hochgeladen.`);
+        console.log(insertedData)
+      }
+
+      index++
     }
 
     console.log('✨ Alle Dateien wurden verarbeitet.');
@@ -93,7 +106,9 @@ async function main() {
 }
 
 (async () => {
-  console.log(new Date().toISOString())
+  const start = new Date()
+  console.log(start.toISOString())
   await main();
-  console.log(new Date().toISOString())
+  const end = new Date()
+  console.log(end.toISOString(), Math.round((end - start)/1000))
 })()

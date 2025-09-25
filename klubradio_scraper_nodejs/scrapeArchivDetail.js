@@ -7,7 +7,7 @@ const os = require('os'); // Importiert das OS-Modul für die CPU-Anzahl
 const CONFIG = {
   resultsFile: './downloads/result.json', // Pfad zur Datei mit den URLs
   resultsDetailsFile: (id) => `./downloads/resultDetails-${id}.json`, // Pfad zur Datei mit den URLs
-  headless: false,
+  headless: process.env.HEADLESS !== 'false',
   cookieFile: 'cookies.json', // Dateipfad für Cookies
   userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36',
   // Die Anzahl der parallelen Prozesse wird von der CPU-Anzahl bestimmt
@@ -73,7 +73,7 @@ async function loadCookies(page, filePath) {
  */
 async function processUrl(browser, url) {
   if (!url) {
-    return;
+    return
   }
 
   const id = url.split('-').pop();
@@ -83,7 +83,7 @@ async function processUrl(browser, url) {
   try {
     if (fs.existsSync(filePath) && fs.statSync(filePath).size > 20) {
       // console.log(`✅ Datei für ID ${id} existiert und ist nicht leer. Überspringe.`);
-      return;
+      return
     }
   } catch (error) {
     console.error(`❌ Fehler beim Prüfen der Datei für ID ${id}:`, error.message);
@@ -125,7 +125,7 @@ async function processUrl(browser, url) {
       });
 
     // --- Extrahieren der Daten ---
-    const duration = await page.$eval('.adas-holder .duration', el => el.innerText.trim());
+    const duration = await page.$eval('.adas-holder .duration', el => el.innerText.trim()) || -1;
     const titleElement = await page.$('.article-wrapper h3');
     let title = titleElement
       ? await page.evaluate(el => el.innerText.trim(), titleElement)
@@ -184,6 +184,23 @@ async function processUrl(browser, url) {
     }
   }
 }
+
+function shuffle(array) {
+  let currentIndex = array.length;
+
+  // While there remain elements to shuffle...
+  while (currentIndex !== 0) {
+
+    // Pick a remaining element...
+    let randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex--;
+
+    // And swap it with the current element.
+    [array[currentIndex], array[randomIndex]] = [
+      array[randomIndex], array[currentIndex]];
+  }
+}
+
 const detailPageFound = (url) => {
   const id = url.split('-').pop();
   const filePath = CONFIG.resultsDetailsFile(id);
@@ -216,11 +233,12 @@ async function main() {
     console.log('Keine URLs zum Verarbeiten gefunden. Beende das Skript.');
     return;
   }
-
+  shuffle(urls)
   console.log(`Gefundene URLs: ${urls.length}. ${CONFIG.maxConcurrent} Prozesse werden gleichzeitig laufen.`);
 
   const browser = await puppeteer.launch({
     headless: CONFIG.headless,
+    args: ['--no-sandbox', '--disable-setuid-sandbox'],
     // slowMo: 200,
     defaultViewport: null,
   });
@@ -235,7 +253,7 @@ async function main() {
     for (let i = 0; i < CONFIG.maxConcurrent && urlIndex < urls.length; i++) {
       const url = urls[urlIndex++];
       if (url && !detailPageFound(url)) {
-        console.log(`try open url ${url}`)
+        // console.log(`try open url ${url}`)
         const promise = processUrl(browser, url).finally(() => activePromises.delete(promise));
         activePromises.add(promise);
       }
@@ -244,7 +262,7 @@ async function main() {
     // Kontinuierliche Verarbeitung: Starte eine neue Aufgabe, sobald eine alte fertig ist
     while (urlIndex < urls.length || activePromises.size > 0) {
       // Warte auf die erste Aufgabe, die im Pool fertig wird
-      if (activePromises.size > CONFIG.maxConcurrent - 1) {
+      if (activePromises.size + 1 > CONFIG.maxConcurrent) {
         await Promise.race(activePromises);
       }
 
@@ -252,15 +270,12 @@ async function main() {
       if (urlIndex < urls.length) {
         const url = urls[urlIndex++];
         if (url && !detailPageFound(url)) {
-          console.log(`try open url ${url}`)
           const promise = processUrl(browser, url).finally(() => activePromises.delete(promise));
           activePromises.add(promise);
         }
       }
-
-      if ((await browser.pages()).length === 1) {
-        await sleep(2000)
-        break;
+      if (activePromises.size > 0) {
+        await Promise.race(activePromises);
       }
     }
   } catch (error) {
@@ -274,7 +289,9 @@ async function main() {
 }
 
 (async () => {
-  console.log(new Date().toISOString())
+  const start = new Date()
+  console.log(start.toISOString())
   await main();
-  console.log(new Date().toISOString())
+  const end = new Date()
+  console.log(end.toISOString(), Math.round((end - start)/1000))
 })()

@@ -10,7 +10,7 @@ const CONFIG = {
   archivumUrl: 'https://www.klubradio.hu/archivum/',
   cookieFile: 'cookies.json', // Dateipfad für Cookies
   userAgent: _getUserAgent(),
-  headless:  false, // true || false, // Verwende den neuen Headless-Modus
+  headless: process.env.HEADLESS !== 'false',
   outputDir: './downloads', // Verzeichnis für heruntergeladene Dateien
   resultsFile: './result.json', // Dateipfad für die Ergebnisse
   delay: 2000, // Verzögerung zwischen Aktionen (in ms)
@@ -140,6 +140,7 @@ async function scrapeKlubradio() {
   // Starte den Browser mit der konfigurierten Option
   const browser = await puppeteer.launch({
     headless: CONFIG.headless,
+    args: ['--no-sandbox', '--disable-setuid-sandbox'],
     // slowMo: 200,
     defaultViewport: null,
   });
@@ -254,8 +255,12 @@ async function scrapeKlubradio() {
 }
 
 (async () => {
+  const start = new Date()
+  console.log(start.toISOString())
   if (!fs.existsSync(CONFIG.outputDir)) {
     fs.mkdirSync(CONFIG.outputDir, { recursive: true });
   }
   await scrapeKlubradio();
+  const end = new Date()
+  console.log(end.toISOString(), Math.round((end - start)/1000))
 })()
