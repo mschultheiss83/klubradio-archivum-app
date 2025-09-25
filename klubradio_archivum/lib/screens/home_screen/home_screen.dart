@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:klubradio_archivum/l10n/app_localizations.dart';
 
 import '../../models/episode.dart';
 import '../../models/podcast.dart';
@@ -49,12 +50,13 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final EpisodeProvider episodeProvider = context.watch<EpisodeProvider>();
     final bool hasCurrentEpisode = episodeProvider.currentEpisode != null;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Klubrádió Archívum'),
+        title: Text(l10n.appName),
         actions: <Widget>[
           IconButton(
             icon: const Icon(Icons.info_outline),
@@ -100,6 +102,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildHomeTab(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Consumer<PodcastProvider>(
       builder: (BuildContext context, PodcastProvider provider, Widget? child) {
         if (provider.isLoading && provider.podcasts.isEmpty) {
@@ -130,7 +134,7 @@ class _HomeScreenState extends State<HomeScreen> {
             children: <Widget>[
               if (subscribed.isNotEmpty) ...<Widget>[
                 Text(
-                  'Feliratkozott műsorok',
+                  l10n.homeScreenSubscribedPodcastsTitle, // Localized
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
                 const SizedBox(height: 12),
@@ -138,7 +142,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 const SizedBox(height: 24),
               ],
               Text(
-                'Legutóbbi epizódok',
+                l10n.homeScreenRecentEpisodesTitle,
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: 12),
@@ -146,7 +150,7 @@ class _HomeScreenState extends State<HomeScreen> {
               if (recentlyPlayed.isNotEmpty) ...<Widget>[
                 const SizedBox(height: 24),
                 Text(
-                  'Legutóbb hallgatott',
+                  l10n.homeScreenRecentlyPlayedTitle,
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
                 const SizedBox(height: 12),

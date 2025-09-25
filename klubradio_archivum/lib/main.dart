@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'l10n/app_localizations.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
 
@@ -35,68 +37,82 @@ class KlubradioArchivumApp extends StatelessWidget {
           create: (_) => AudioPlayerService(),
           dispose: (_, AudioPlayerService service) => service.dispose(),
         ),
-        ChangeNotifierProvider<ThemeProvider>(
-          create: (_) => ThemeProvider(),
-        ),
-        ChangeNotifierProxyProvider2<ApiService, DownloadService,
-            PodcastProvider>(
+        ChangeNotifierProvider<ThemeProvider>(create: (_) => ThemeProvider()),
+        ChangeNotifierProxyProvider2<
+          ApiService,
+          DownloadService,
+          PodcastProvider
+        >(
           create: (BuildContext context) => PodcastProvider(
             apiService: context.read<ApiService>(),
             downloadService: context.read<DownloadService>(),
           ),
-          update: (
-            BuildContext context,
-            ApiService apiService,
-            DownloadService downloadService,
-            PodcastProvider? previous,
-          ) {
-            if (previous != null) {
-              previous.updateDependencies(apiService, downloadService);
-              return previous;
-            }
-            return PodcastProvider(
-              apiService: apiService,
-              downloadService: downloadService,
-            );
-          },
+          update:
+              (
+                BuildContext context,
+                ApiService apiService,
+                DownloadService downloadService,
+                PodcastProvider? previous,
+              ) {
+                if (previous != null) {
+                  previous.updateDependencies(apiService, downloadService);
+                  return previous;
+                }
+                return PodcastProvider(
+                  apiService: apiService,
+                  downloadService: downloadService,
+                );
+              },
         ),
-        ChangeNotifierProxyProvider2<ApiService, AudioPlayerService,
-            EpisodeProvider>(
+        ChangeNotifierProxyProvider2<
+          ApiService,
+          AudioPlayerService,
+          EpisodeProvider
+        >(
           create: (BuildContext context) => EpisodeProvider(
             apiService: context.read<ApiService>(),
             audioPlayerService: context.read<AudioPlayerService>(),
           ),
-          update: (
-            BuildContext context,
-            ApiService apiService,
-            AudioPlayerService audioPlayerService,
-            EpisodeProvider? previous,
-          ) {
-            if (previous != null) {
-              previous.updateDependencies(apiService, audioPlayerService);
-              return previous;
-            }
-            return EpisodeProvider(
-              apiService: apiService,
-              audioPlayerService: audioPlayerService,
-            );
-          },
+          update:
+              (
+                BuildContext context,
+                ApiService apiService,
+                AudioPlayerService audioPlayerService,
+                EpisodeProvider? previous,
+              ) {
+                if (previous != null) {
+                  previous.updateDependencies(apiService, audioPlayerService);
+                  return previous;
+                }
+                return EpisodeProvider(
+                  apiService: apiService,
+                  audioPlayerService: audioPlayerService,
+                );
+              },
         ),
       ],
       child: Consumer<ThemeProvider>(
-        builder: (
-          BuildContext context,
-          ThemeProvider themeProvider,
-          Widget? child,
-        ) {
-          return MaterialApp(
-            title: 'Klubrádió Archívum',
-            theme: themeProvider.lightTheme,
-            darkTheme: themeProvider.darkTheme,
-            themeMode: themeProvider.themeMode,
-            home: const HomeScreen(),
-          );
-        },
+        builder:
+            (BuildContext context, ThemeProvider themeProvider, Widget? child) {
+              return MaterialApp(
+                onGenerateTitle: (context) =>
+                    AppLocalizations.of(context)!.appName,
+                theme: themeProvider.lightTheme,
+                darkTheme: themeProvider.darkTheme,
+                themeMode: themeProvider.themeMode,
+                localizationsDelegates: const [
+                  AppLocalizations.delegate,
+                  GlobalMaterialLocalizations.delegate,
+                  GlobalWidgetsLocalizations.delegate,
+                  GlobalCupertinoLocalizations.delegate,
+                ],
+                supportedLocales: AppLocalizations.supportedLocales,
+                localeResolutionCallback: (locale, supportedLocales) {
+                  return locale;
+                },
+                home: const HomeScreen(),
+              );
+            },
       ),
     );
   }

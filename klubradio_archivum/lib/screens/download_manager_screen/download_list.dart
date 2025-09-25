@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
+import 'package:klubradio_archivum/l10n/app_localizations.dart';
 import '../../models/episode.dart';
 import '../../providers/podcast_provider.dart';
 import '../../services/download_service.dart';
@@ -13,10 +13,11 @@ class DownloadList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     if (downloads.isEmpty) {
       return Center(
         child: Text(
-          'Nincsenek letöltött epizódok.',
+          l10n.noDownloads,
           style: Theme.of(context).textTheme.bodyMedium,
         ),
       );
@@ -27,13 +28,13 @@ class DownloadList extends StatelessWidget {
       separatorBuilder: (_, __) => const Divider(),
       itemBuilder: (BuildContext context, int index) {
         final DownloadTask task = downloads[index];
-        final statusLabel = formatDownloadStatus(task.status);
+        final statusLabel = formatDownloadStatus(context, task.status);
         final progressLabel = formatProgress(task.progress);
         return ListTile(
           leading: Icon(_statusIcon(task.status)),
           title: Text(task.episode.title),
           subtitle: Text('$statusLabel • ${task.episode.podcastId}'),
-          trailing: _buildTrailing(context, task, progressLabel),
+          trailing: _buildTrailing(context, task, progressLabel, l10n),
         );
       },
     );
@@ -58,6 +59,7 @@ class DownloadList extends StatelessWidget {
     BuildContext context,
     DownloadTask task,
     String progressLabel,
+    AppLocalizations l10n,
   ) {
     final PodcastProvider provider = context.read<PodcastProvider>();
     switch (task.status) {
@@ -69,17 +71,20 @@ class DownloadList extends StatelessWidget {
               width: 24,
               height: 24,
               child: CircularProgressIndicator(
-                value: task.progress,
+                value: task.progress / 100,
                 strokeWidth: 3,
               ),
             ),
             const SizedBox(height: 4),
-            Text(progressLabel),
+            Text(
+              l10n.downloadProgressLabel(task.progress.toInt()),
+            ), // Using the full localized string
           ],
         );
       case DownloadStatus.downloaded:
         return IconButton(
           icon: const Icon(Icons.delete_outline),
+          tooltip: l10n.downloadActionDelete,
           onPressed: () {
             provider.removeDownload(task.episode.id);
           },
@@ -87,13 +92,14 @@ class DownloadList extends StatelessWidget {
       case DownloadStatus.failed:
         return IconButton(
           icon: const Icon(Icons.refresh),
+          tooltip: l10n.downloadActionRetry,
           onPressed: () {
             provider.downloadEpisode(task.episode);
           },
         );
       case DownloadStatus.notDownloaded:
       case DownloadStatus.queued:
-        return Text(progressLabel);
+        return Text(formatDownloadStatus(context, task.status));
     }
   }
 }

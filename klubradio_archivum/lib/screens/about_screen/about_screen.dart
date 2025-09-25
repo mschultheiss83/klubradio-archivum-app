@@ -1,36 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:klubradio_archivum/l10n/app_localizations.dart'; // Corrected package import
 
 class AboutScreen extends StatelessWidget {
   const AboutScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Az alkalmazásról')),
+      appBar: AppBar(title: Text(l10n.aboutScreenAppBarTitle)),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: ListView(
-          children: const <Widget>[
+          children: <Widget>[
             Text(
-              'Klubrádió archívum alkalmazás',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              l10n.aboutScreenAppNameDetail,
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: 12),
-            Text(
-              'Az alkalmazás célja, hogy egyszerű hozzáférést biztosítson a Klubrádió '
-              'archív műsoraihoz, és lehetőséget adjon RSS feedek létrehozására '
-              'podcast lejátszók számára.',
-            ),
-            SizedBox(height: 12),
-            Text(
-              'Ez egy közösségi projekt, amely a Klubrádió támogatását szolgálja. '
-              'Minden tartalom szabadon elérhető a rádió hivatalos oldalán.',
-            ),
-            SizedBox(height: 12),
-            Text(
-              'Kapcsolat: info@klubradio.hu (tartalom), '
-              'multilevelstudios@gmail.com (fejlesztői elérhetőség)',
-            ),
+            const SizedBox(height: 12),
+            Text(l10n.aboutScreenPurpose),
+            const SizedBox(height: 12),
+            Text(l10n.aboutScreenCommunityProjectInfo),
+            const SizedBox(height: 12),
+            Text(l10n.aboutScreenContactInfo),
           ],
         ),
       ),

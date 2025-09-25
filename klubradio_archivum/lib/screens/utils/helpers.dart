@@ -1,5 +1,6 @@
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-
+import 'package:klubradio_archivum/l10n/app_localizations.dart';
 import '../../models/episode.dart';
 
 String formatDate(DateTime dateTime, {String locale = 'hu'}) {
@@ -18,18 +19,19 @@ String formatDuration(Duration duration) {
   return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
 }
 
-String formatDownloadStatus(DownloadStatus status) {
+String formatDownloadStatus(BuildContext context, DownloadStatus status) {
+  final l10n = AppLocalizations.of(context)!;
   switch (status) {
-    case DownloadStatus.notDownloaded:
-      return 'Nincs letöltve';
-    case DownloadStatus.queued:
-      return 'Sorban';
     case DownloadStatus.downloading:
-      return 'Letöltés alatt';
+      return l10n.downloadStatusDownloading;
     case DownloadStatus.downloaded:
-      return 'Kész';
+      return l10n.downloadStatusDownloaded;
     case DownloadStatus.failed:
-      return 'Hiba történt';
+      return l10n.downloadStatusFailed;
+    case DownloadStatus.notDownloaded:
+      return l10n.downloadStatusNotDownloaded;
+    case DownloadStatus.queued:
+      return l10n.downloadStatusQueued;
   }
 }
 

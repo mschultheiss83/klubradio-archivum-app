@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 
 import '../../models/podcast.dart';
 import '../../providers/podcast_provider.dart';
-import '../widgets/stateless/podcast_list_item.dart';
 import 'recommended_podcasts_list.dart';
 import 'top_categories_list.dart';
 import 'trending_podcasts_list.dart';

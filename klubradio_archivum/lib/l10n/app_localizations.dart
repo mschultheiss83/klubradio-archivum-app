@@ -1,0 +1,432 @@
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:intl/intl.dart' as intl;
+
+import 'app_localizations_de.dart';
+import 'app_localizations_en.dart';
+import 'app_localizations_hu.dart';
+
+// ignore_for_file: type=lint
+
+/// Callers can lookup localized strings with an instance of AppLocalizations
+/// returned by `AppLocalizations.of(context)`.
+///
+/// Applications need to include `AppLocalizations.delegate()` in their app's
+/// `localizationDelegates` list, and the locales they support in the app's
+/// `supportedLocales` list. For example:
+///
+/// ```dart
+/// import 'l10n/app_localizations.dart';
+///
+/// return MaterialApp(
+///   localizationsDelegates: AppLocalizations.localizationsDelegates,
+///   supportedLocales: AppLocalizations.supportedLocales,
+///   home: MyApplicationHome(),
+/// );
+/// ```
+///
+/// ## Update pubspec.yaml
+///
+/// Please make sure to update your pubspec.yaml to include the following
+/// packages:
+///
+/// ```yaml
+/// dependencies:
+///   # Internationalization support.
+///   flutter_localizations:
+///     sdk: flutter
+///   intl: any # Use the pinned version from flutter_localizations
+///
+///   # Rest of dependencies
+/// ```
+///
+/// ## iOS Applications
+///
+/// iOS applications define key application metadata, including supported
+/// locales, in an Info.plist file that is built into the application bundle.
+/// To configure the locales supported by your app, you’ll need to edit this
+/// file.
+///
+/// First, open your project’s ios/Runner.xcworkspace Xcode workspace file.
+/// Then, in the Project Navigator, open the Info.plist file under the Runner
+/// project’s Runner folder.
+///
+/// Next, select the Information Property List item, select Add Item from the
+/// Editor menu, then select Localizations from the pop-up menu.
+///
+/// Select and expand the newly-created Localizations item then, for each
+/// locale your application supports, add a new item and select the locale
+/// you wish to add from the pop-up menu in the Value field. This list should
+/// be consistent with the languages listed in the AppLocalizations.supportedLocales
+/// property.
+abstract class AppLocalizations {
+  AppLocalizations(String locale)
+    : localeName = intl.Intl.canonicalizedLocale(locale.toString());
+
+  final String localeName;
+
+  static AppLocalizations? of(BuildContext context) {
+    return Localizations.of<AppLocalizations>(context, AppLocalizations);
+  }
+
+  static const LocalizationsDelegate<AppLocalizations> delegate =
+      _AppLocalizationsDelegate();
+
+  /// A list of this localizations delegate along with the default localizations
+  /// delegates.
+  ///
+  /// Returns a list of localizations delegates containing this delegate along with
+  /// GlobalMaterialLocalizations.delegate, GlobalCupertinoLocalizations.delegate,
+  /// and GlobalWidgetsLocalizations.delegate.
+  ///
+  /// Additional delegates can be added by appending to this list in
+  /// MaterialApp. This list does not have to be used at all if a custom list
+  /// of delegates is preferred or required.
+  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
+      <LocalizationsDelegate<dynamic>>[
+        delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ];
+
+  /// A list of this localizations delegate's supported locales.
+  static const List<Locale> supportedLocales = <Locale>[
+    Locale('de'),
+    Locale('en'),
+    Locale('hu'),
+  ];
+
+  /// The name of the application
+  ///
+  /// In en, this message translates to:
+  /// **'Klubradio Archive'**
+  String get appName;
+
+  /// Title for the downloads screen
+  ///
+  /// In en, this message translates to:
+  /// **'Downloads'**
+  String get downloadListTitle;
+
+  /// Download status: Item is in queue to be downloaded
+  ///
+  /// In en, this message translates to:
+  /// **'Queued'**
+  String get downloadStatusQueued;
+
+  /// Download status: Item has not been downloaded yet
+  ///
+  /// In en, this message translates to:
+  /// **'Not Downloaded'**
+  String get downloadStatusNotDownloaded;
+
+  /// Download status: Item has been successfully downloaded
+  ///
+  /// In en, this message translates to:
+  /// **'Downloaded'**
+  String get downloadStatusDownloaded;
+
+  /// Download status: Item is currently being downloaded
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading'**
+  String get downloadStatusDownloading;
+
+  /// Download status: Item download has failed
+  ///
+  /// In en, this message translates to:
+  /// **'Failed'**
+  String get downloadStatusFailed;
+
+  /// Button text to retry a failed download
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get downloadActionRetry;
+
+  /// Button text to cancel an ongoing download
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get downloadActionCancel;
+
+  /// Button text to delete a downloaded item
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get downloadActionDelete;
+
+  /// Label showing the download progress percentage
+  ///
+  /// In en, this message translates to:
+  /// **'{progressPercentage}%'**
+  String downloadProgressLabel(int progressPercentage);
+
+  /// Message shown when the download list is empty
+  ///
+  /// In en, this message translates to:
+  /// **'No Downloads Yet'**
+  String get noDownloads;
+
+  /// Title for the AppBar on the About screen
+  ///
+  /// In en, this message translates to:
+  /// **'About the Application'**
+  String get aboutScreenAppBarTitle;
+
+  /// The name of the application on the About screen
+  ///
+  /// In en, this message translates to:
+  /// **'Klubradio Archive Application'**
+  String get aboutScreenAppNameDetail;
+
+  /// Description of the application's purpose
+  ///
+  /// In en, this message translates to:
+  /// **'The purpose of the application is to provide easy access to Klubrádió\'s archived programs and to allow the creation of RSS feeds for podcast players.'**
+  String get aboutScreenPurpose;
+
+  /// Information about the community nature of the project and content availability
+  ///
+  /// In en, this message translates to:
+  /// **'This is a community project that serves to support Klubrádió. All content is freely available on the radio\'s official website.'**
+  String get aboutScreenCommunityProjectInfo;
+
+  /// Contact information
+  ///
+  /// In en, this message translates to:
+  /// **'Contact: info@klubradio.hu (content), multilevelstudios@gmail.com (developer contact)'**
+  String get aboutScreenContactInfo;
+
+  /// Title for the settings screen
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get settingsTitle;
+
+  /// Setting to select the theme (e.g., Light/Dark)
+  ///
+  /// In en, this message translates to:
+  /// **'Theme'**
+  String get settingsTheme;
+
+  /// Setting to select the application language
+  ///
+  /// In en, this message translates to:
+  /// **'Language'**
+  String get settingsLanguage;
+
+  /// Generic OK button text
+  ///
+  /// In en, this message translates to:
+  /// **'OK'**
+  String get ok;
+
+  /// Generic Cancel button text
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancel;
+
+  /// Error dialog window title
+  ///
+  /// In en, this message translates to:
+  /// **'Error'**
+  String get errorDialogTitle;
+
+  /// Generic error message for unexpected issues
+  ///
+  /// In en, this message translates to:
+  /// **'An unexpected error occurred. Please try again later.'**
+  String get unexpectedError;
+
+  /// Error message when loading podcast episodes fails.
+  ///
+  /// In en, this message translates to:
+  /// **'An error occurred: {errorDetails}'**
+  String podcastDetailErrorLoading(String errorDetails);
+
+  /// Notification on successful podcast subscription.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscription successful!'**
+  String get podcastDetailSubscriptionSuccess;
+
+  /// Button label to subscribe to the podcast.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscribe'**
+  String get podcastDetailSubscribeButton;
+
+  /// Section title for subscribed podcasts on the home screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscribed Shows'**
+  String get homeScreenSubscribedPodcastsTitle;
+
+  /// Section title for recent episodes on the home screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent Episodes'**
+  String get homeScreenRecentEpisodesTitle;
+
+  /// Section title for recently played episodes on the home screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Recently Played'**
+  String get homeScreenRecentlyPlayedTitle;
+
+  /// Option to use the system's theme setting.
+  ///
+  /// In en, this message translates to:
+  /// **'System Default'**
+  String get themeSettingSystemDefault;
+
+  /// Option to select the light theme.
+  ///
+  /// In en, this message translates to:
+  /// **'Light'**
+  String get themeSettingLight;
+
+  /// Option to select the dark theme.
+  ///
+  /// In en, this message translates to:
+  /// **'Dark'**
+  String get themeSettingDark;
+
+  /// Title for the Support Klubradio section on the settings screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Support Klubradio'**
+  String get settingsScreenSupportKlubradioTitle;
+
+  /// Subtitle for the Support Klubradio section.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the support page in your browser.'**
+  String get settingsScreenSupportKlubradioSubtitle;
+
+  /// Title for the Support App Developer section.
+  ///
+  /// In en, this message translates to:
+  /// **'Support the App Developer'**
+  String get settingsScreenSupportDeveloperTitle;
+
+  /// Subtitle for the Support App Developer section.
+  ///
+  /// In en, this message translates to:
+  /// **'Voluntary donation for further development.'**
+  String get settingsScreenSupportDeveloperSubtitle;
+
+  /// Section title for theme settings.
+  ///
+  /// In en, this message translates to:
+  /// **'Theme Settings'**
+  String get themeSettingsSectionTitle;
+
+  /// Navigation tab label: Home
+  ///
+  /// In en, this message translates to:
+  /// **'Home'**
+  String get bottomNavHome;
+
+  /// Navigation tab label: Discover
+  ///
+  /// In en, this message translates to:
+  /// **'Discover'**
+  String get bottomNavDiscover;
+
+  /// Navigation tab label: Search
+  ///
+  /// In en, this message translates to:
+  /// **'Search'**
+  String get bottomNavSearch;
+
+  /// Navigation tab label: Downloads
+  ///
+  /// In en, this message translates to:
+  /// **'Downloads'**
+  String get bottomNavDownloads;
+
+  /// Navigation tab label: Profile
+  ///
+  /// In en, this message translates to:
+  /// **'Profile'**
+  String get bottomNavProfile;
+
+  /// Navigation tab label: Settings
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get bottomNavSettings;
+
+  /// Section title for playback settings.
+  ///
+  /// In en, this message translates to:
+  /// **'Playback Settings'**
+  String get playbackSettingsTitle;
+
+  /// Label for the playback speed setting.
+  ///
+  /// In en, this message translates to:
+  /// **'Playback speed:'**
+  String get playbackSettingsSpeedLabel;
+
+  /// Format for displaying the playback speed value. Example: 1.5x
+  ///
+  /// In en, this message translates to:
+  /// **'{speed}x'**
+  String playbackSettingsSpeedValue(double speed);
+
+  /// Label for the automatic downloads count setting.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic downloads:'**
+  String get playbackSettingsAutoDownloadLabel;
+
+  /// Format for displaying the number of episodes to auto-download. Example: 5 episodes
+  ///
+  /// In en, this message translates to:
+  /// **'{count,plural, =0{No episodes} =1{1 episode} other{{count} episodes}}'**
+  String playbackSettingsAutoDownloadValue(int count);
+}
+
+class _AppLocalizationsDelegate
+    extends LocalizationsDelegate<AppLocalizations> {
+  const _AppLocalizationsDelegate();
+
+  @override
+  Future<AppLocalizations> load(Locale locale) {
+    return SynchronousFuture<AppLocalizations>(lookupAppLocalizations(locale));
+  }
+
+  @override
+  bool isSupported(Locale locale) =>
+      <String>['de', 'en', 'hu'].contains(locale.languageCode);
+
+  @override
+  bool shouldReload(_AppLocalizationsDelegate old) => false;
+}
+
+AppLocalizations lookupAppLocalizations(Locale locale) {
+  // Lookup logic when only language code is specified.
+  switch (locale.languageCode) {
+    case 'de':
+      return AppLocalizationsDe();
+    case 'en':
+      return AppLocalizationsEn();
+    case 'hu':
+      return AppLocalizationsHu();
+  }
+
+  throw FlutterError(
+    'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
+    'an issue with the localizations generation tool. Please file an issue '
+    'on GitHub with a reproducible sample app and the gen-l10n configuration '
+    'that was used.',
+  );
+}
