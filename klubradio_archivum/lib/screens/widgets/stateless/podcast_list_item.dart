@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../../models/podcast.dart';
-import '../../../providers/podcast_provider.dart';
-import '../../podcast_detail_screen/podcast_detail_screen.dart';
+import 'package:klubradio_archivum/models/podcast.dart';
+import 'package:klubradio_archivum/providers/podcast_provider.dart';
+import 'package:klubradio_archivum/screens/podcast_detail_screen/podcast_detail_screen.dart';
 
 class PodcastListItem extends StatelessWidget {
   const PodcastListItem({
@@ -19,8 +19,8 @@ class PodcastListItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final PodcastProvider provider = context.watch<PodcastProvider>();
-    final bool isSubscribed = provider.userProfile?.subscribedPodcastIds
-            .contains(podcast.id) ??
+    final bool isSubscribed =
+        provider.userProfile?.subscribedPodcastIds.contains(podcast.id) ??
         podcast.isSubscribed;
     final String subtitle = podcast.hosts.isNotEmpty
         ? podcast.hosts.map((host) => host.name).join(', ')
@@ -32,9 +32,8 @@ class PodcastListItem extends StatelessWidget {
         onTap: () {
           Navigator.of(context).push(
             MaterialPageRoute<void>(
-              builder: (BuildContext context) => PodcastDetailScreen(
-                podcast: podcast,
-              ),
+              builder: (BuildContext context) =>
+                  PodcastDetailScreen(podcast: podcast),
             ),
           );
         },
@@ -49,15 +48,9 @@ class PodcastListItem extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    Text(
-                      podcast.title,
-                      style: theme.textTheme.titleMedium,
-                    ),
+                    Text(podcast.title, style: theme.textTheme.titleMedium),
                     const SizedBox(height: 4),
-                    Text(
-                      subtitle,
-                      style: theme.textTheme.bodyMedium,
-                    ),
+                    Text(subtitle, style: theme.textTheme.bodyMedium),
                     const SizedBox(height: 4),
                     Text(
                       podcast.description,
@@ -123,13 +116,13 @@ class _CoverArt extends StatelessWidget {
               fit: BoxFit.cover,
               errorBuilder:
                   (BuildContext context, Object error, StackTrace? stackTrace) {
-                return Container(
-                  width: 72,
-                  height: 72,
-                  color: Theme.of(context).colorScheme.primaryContainer,
-                  child: const Icon(Icons.radio),
-                );
-              },
+                    return Container(
+                      width: 72,
+                      height: 72,
+                      color: Theme.of(context).colorScheme.primaryContainer,
+                      child: const Icon(Icons.radio),
+                    );
+                  },
             ),
     );
   }

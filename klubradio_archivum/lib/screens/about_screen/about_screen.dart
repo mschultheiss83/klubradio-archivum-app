@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:klubradio_archivum/l10n/app_localizations.dart'; // Corrected package import
+import 'package:klubradio_archivum/l10n/app_localizations.dart';
 
 class AboutScreen extends StatelessWidget {
   const AboutScreen({super.key});

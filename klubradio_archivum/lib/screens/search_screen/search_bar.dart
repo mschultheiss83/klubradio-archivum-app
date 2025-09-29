@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:klubradio_archivum/l10n/app_localizations.dart';
 
 class SearchBarWidget extends StatefulWidget {
   const SearchBarWidget({super.key, required this.onSubmitted});
@@ -20,26 +21,32 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return TextField(
       controller: _controller,
       decoration: InputDecoration(
         prefixIcon: const Icon(Icons.search),
-        hintText: 'Műsorok, műsorvezetők, kulcsszavak...',
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(24),
-        ),
+        hintText: l10n.searchBarHintText,
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(24)),
         suffixIcon: _controller.text.isEmpty
             ? null
             : IconButton(
                 icon: const Icon(Icons.clear),
+                // Tooltip for the clear button (accessibility and discoverability)
+                tooltip: MaterialLocalizations.of(
+                  context,
+                ).deleteButtonTooltip, // Using built-in Material localization
                 onPressed: () {
                   _controller.clear();
+                  // widget.onSubmitted(''); // Optionally submit an empty string to clear results
                   setState(() {});
                 },
               ),
       ),
       textInputAction: TextInputAction.search,
-      onChanged: (_) => setState(() {}),
+      onChanged: (_) =>
+          setState(() {}), // To rebuild and show/hide the clear icon
       onSubmitted: widget.onSubmitted,
     );
   }

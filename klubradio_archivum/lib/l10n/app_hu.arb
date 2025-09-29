@@ -269,6 +269,82 @@
   "subscribedPodcastsNoSubscriptions": "Még nem iratkoztál fel egy műsorra sem.",
   "@subscribedPodcastsNoSubscriptions": {
     "description": "Üzenet, ami akkor jelenik meg, ha a felhasználó még nem iratkozott fel egy műsorra sem."
+  },
+
+  "recentSearchesNoHistory": "Még nincs keresési előzmény.",
+  "@recentSearchesNoHistory": {
+    "description": "Üzenet, ami akkor jelenik meg, ha még nincsenek korábbi keresések."
+  },
+
+  "searchBarHintText": "Műsorok, műsorvezetők, kulcsszavak...",
+  "@searchBarHintText": {
+    "description": "Súgószöveg a keresősávban."
+  },
+
+  "searchResultsNoResults": "Nincs találat a megadott keresésre.",
+  "@searchResultsNoResults": {
+    "description": "Üzenet, ami akkor jelenik meg, ha a keresés nem hozott eredményt."
+  },
+
+  "searchScreenInitialPrompt": "Keresd meg kedvenc műsoraidat vagy műsorvezetőidet.",
+  "@searchScreenInitialPrompt": {
+    "description": "Kezdeti útmutató üzenet a keresőképernyőn, mielőtt keresés történne."
+  },
+  "searchScreenErrorMessage": "Hiba történt: {errorDetails}",
+  "@searchScreenErrorMessage": {
+    "description": "Hibaüzenet a keresőképernyőn, ha egy keresés sikertelen.",
+    "placeholders": {        "errorDetails": {
+      "type": "String",
+      "example": "Hálózati időtúllépés"
+    }
+    }
+  },
+  "errorParsingData": "Hiba történt az adatok feldolgozása során.",
+  "@errorParsingData": {
+    "description": "Hibaüzenet, ami adatfeldolgozási hiba esetén jelenik meg."
+  },
+  "errorUnknown": "Ismeretlen hiba történt.",
+  "@errorUnknown": {
+    "description": "Ismeretlen hibaüzenet."
+  },
+
+  "profileScreenNoEmail": "Nincs megadva e-mail cím",
+  "@profileScreenNoEmail": {
+    "description": "Szöveg a profil képernyőn, ha a felhasználó email címe nem érhető el."
+  },
+  "profileScreenDownloadSettingsTitle": "Letöltési beállítások",
+  "@profileScreenDownloadSettingsTitle": {
+    "description": "A letöltési beállítások szekció címe a profil képernyőn."
+  },
+  "profileScreenAutoDownloadsTitle": "Automatikus letöltések",
+  "@profileScreenAutoDownloadsTitle": {
+    "description": "Az automatikus letöltések opció címe a profil beállításokban."
+  },
+  "profileScreenAutoDownloadsSubtitle": "Epizódok száma: {count}",
+  "@profileScreenAutoDownloadsSubtitle": {
+    "description": "Alcím, ami az automatikus letöltésre beállított epizódok számát jelzi.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
+  "profileScreenRecentlyPlayedTitle": "Legutóbb hallgatott epizódok",
+  "@profileScreenRecentlyPlayedTitle": {
+    "description": "A legutóbb hallgatott epizódok szekció címe a profil képernyőn."
+  },
+  "profileScreenFavoritesTitle": "Kedvencek",
+  "@profileScreenFavoritesTitle": {
+    "description": "A kedvencek szekció címe a profil képernyőn."
+  },
+  "profileScreenNoFavoriteEpisodes": "Nincsenek kedvenc epizódok.",
+  "@profileScreenNoFavoriteEpisodes": {
+    "description": "Üzenet, ami akkor jelenik meg, ha a felhasználónak nincsenek kedvenc epizódjai."
+  },
+  "profileScreenGuestUserDisplayName": "Vendég felhasználó",
+  "@profileScreenGuestUserDisplayName": {
+    "description": "Alapértelmezett megjelenítési név vendég felhasználóknak, vagy ha a név nincs beállítva."
   }
 
 }

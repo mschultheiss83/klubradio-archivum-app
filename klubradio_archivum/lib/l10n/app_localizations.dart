@@ -441,6 +441,96 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'You haven\'t subscribed to any shows yet.'**
   String get subscribedPodcastsNoSubscriptions;
+
+  /// Message shown when there are no recent searches to display.
+  ///
+  /// In en, this message translates to:
+  /// **'No search history yet.'**
+  String get recentSearchesNoHistory;
+
+  /// Hint text displayed in the search bar.
+  ///
+  /// In en, this message translates to:
+  /// **'Shows, hosts, keywords...'**
+  String get searchBarHintText;
+
+  /// Message shown when a search yields no results.
+  ///
+  /// In en, this message translates to:
+  /// **'No results found for your search.'**
+  String get searchResultsNoResults;
+
+  /// Initial prompt message on the search screen before any search is performed.
+  ///
+  /// In en, this message translates to:
+  /// **'Find your favorite shows or hosts.'**
+  String get searchScreenInitialPrompt;
+
+  /// Error message displayed on the search screen if a search fails.
+  ///
+  /// In en, this message translates to:
+  /// **'An error occurred: {errorDetails}'**
+  String searchScreenErrorMessage(String errorDetails);
+
+  /// Error message shown when data parsing fails.
+  ///
+  /// In en, this message translates to:
+  /// **'There was an issue processing the data.'**
+  String get errorParsingData;
+
+  /// Generic error message for unknown issues.
+  ///
+  /// In en, this message translates to:
+  /// **'An unknown error occurred.'**
+  String get errorUnknown;
+
+  /// Text shown on the profile screen when the user's email is not available.
+  ///
+  /// In en, this message translates to:
+  /// **'No email address provided'**
+  String get profileScreenNoEmail;
+
+  /// Title for the download settings section on the profile screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Download Settings'**
+  String get profileScreenDownloadSettingsTitle;
+
+  /// Title for the automatic downloads option in profile settings.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic Downloads'**
+  String get profileScreenAutoDownloadsTitle;
+
+  /// Subtitle indicating the number of episodes set for automatic download.
+  ///
+  /// In en, this message translates to:
+  /// **'Number of episodes: {count}'**
+  String profileScreenAutoDownloadsSubtitle(int count);
+
+  /// Title for the recently played episodes section on the profile screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Recently Played Episodes'**
+  String get profileScreenRecentlyPlayedTitle;
+
+  /// Title for the favorites section on the profile screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Favorites'**
+  String get profileScreenFavoritesTitle;
+
+  /// Message shown when the user has no favorite episodes.
+  ///
+  /// In en, this message translates to:
+  /// **'No favorite episodes yet.'**
+  String get profileScreenNoFavoriteEpisodes;
+
+  /// Default display name for a guest user or when the name is not set.
+  ///
+  /// In en, this message translates to:
+  /// **'Guest User'**
+  String get profileScreenGuestUserDisplayName;
 }
 
 class _AppLocalizationsDelegate

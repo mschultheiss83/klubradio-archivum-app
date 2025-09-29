@@ -204,4 +204,54 @@ class AppLocalizationsHu extends AppLocalizations {
   @override
   String get subscribedPodcastsNoSubscriptions =>
       'Még nem iratkoztál fel egy műsorra sem.';
+
+  @override
+  String get recentSearchesNoHistory => 'Még nincs keresési előzmény.';
+
+  @override
+  String get searchBarHintText => 'Műsorok, műsorvezetők, kulcsszavak...';
+
+  @override
+  String get searchResultsNoResults => 'Nincs találat a megadott keresésre.';
+
+  @override
+  String get searchScreenInitialPrompt =>
+      'Keresd meg kedvenc műsoraidat vagy műsorvezetőidet.';
+
+  @override
+  String searchScreenErrorMessage(String errorDetails) {
+    return 'Hiba történt: $errorDetails';
+  }
+
+  @override
+  String get errorParsingData => 'Hiba történt az adatok feldolgozása során.';
+
+  @override
+  String get errorUnknown => 'Ismeretlen hiba történt.';
+
+  @override
+  String get profileScreenNoEmail => 'Nincs megadva e-mail cím';
+
+  @override
+  String get profileScreenDownloadSettingsTitle => 'Letöltési beállítások';
+
+  @override
+  String get profileScreenAutoDownloadsTitle => 'Automatikus letöltések';
+
+  @override
+  String profileScreenAutoDownloadsSubtitle(int count) {
+    return 'Epizódok száma: $count';
+  }
+
+  @override
+  String get profileScreenRecentlyPlayedTitle => 'Legutóbb hallgatott epizódok';
+
+  @override
+  String get profileScreenFavoritesTitle => 'Kedvencek';
+
+  @override
+  String get profileScreenNoFavoriteEpisodes => 'Nincsenek kedvenc epizódok.';
+
+  @override
+  String get profileScreenGuestUserDisplayName => 'Vendég felhasználó';
 }
