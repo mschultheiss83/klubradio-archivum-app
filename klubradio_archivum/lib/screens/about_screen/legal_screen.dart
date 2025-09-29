@@ -49,43 +49,8 @@ class LegalScreen extends StatelessWidget {
                 padding: const EdgeInsets.all(16),
                 child: MarkdownWidget(
                   data: snap.data!,
-                  styleConfig: StyleConfig(
-                    titleConfig: TitleConfig(
-                      h1: textTheme.headlineMedium!.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: cs.onSurface,
-                      ),
-                      h2: textTheme.titleLarge!.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: cs.onSurface,
-                      ),
-                      divider: Divider(color: cs.outlineVariant),
-                    ),
-                    blockQuoteConfig: BlockQuoteConfig(),
-                    codeConfig: CodeConfig(
-                      codeStyle: textTheme.bodySmall?.copyWith(
-                        fontFamily: 'monospace',
-                        color: cs.onPrimaryContainer,
-                        backgroundColor: _alpha(cs.primary, 0.15),
-                      ),
-                    ),
-                    hrConfig: HrConfig(color: cs.outlineVariant),
-                    preConfig: PreConfig(
-                      textStyle: textTheme.bodyMedium?.copyWith(
-                        color: cs.onSurface,
-                      ),
-                    ),
-                    ulConfig: UlConfig(
-                      textStyle: TextStyle(color: cs.onSurfaceVariant),
-                    ),
-                    olConfig: OlConfig(
-                      textStyle: TextStyle(color: cs.onSurfaceVariant),
-                    ),
-                    pConfig: PConfig(
-                      textStyle: textTheme.bodyMedium?.copyWith(
-                        color: cs.onSurface,
-                      ),
-                    ),
+                  config: MarkdownConfig(
+                    // TODO MarkdownConfig
                   ),
                 ),
               ),
