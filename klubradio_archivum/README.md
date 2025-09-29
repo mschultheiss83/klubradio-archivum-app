@@ -7,6 +7,9 @@ TODO
 
 `flutter gen-l10n`
 
+### app icon update
+`dart run flutter_launcher_icons`
+
 
 ### Setup Note:
 For a podcast app, ensure you configure the storage location to a directory
