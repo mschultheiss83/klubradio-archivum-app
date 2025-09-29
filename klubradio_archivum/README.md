@@ -1,9 +1,9 @@
 # klubradio_archivum
+## SETUP
 
 
 
-
-### Project Summary: Offline Podcast Download and Playback
+## Project Summary: Offline Podcast Download and Playback
 1. Feature Goal
    To enable users to download podcast episodes for persistent offline playback. This feature requires stable background downloading, secure metadata storage, and robust local file management across various platforms.
 
@@ -12,31 +12,37 @@
 
 2.1 Core Setup & Dependencies
 
-| Task | Details |
-| Package Integration | Integrate background_downloader for asynchronous, resilient downloads and path_provider for reliable cross-platform file path resolution. |
-| Firebase Auth Setup | Ensure the Firebase SDK is initialized and the current user's unique identifier (userId) is available for securing private data in Firestore. |
+| Task | Details                                                                                                                                                                |
+|------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Package Integration | Integrate background_downloader for asynchronous, resilient downloads and path_provider for reliable cross-platform file path resolution.                              |
+| Firebase Auth Setup | Ensure the Firebase SDK is initialized and the current user's unique identifier (userId) is available for securing private data in Firestore.                          |
 | Permissions Handling | Implement run-time permission requests to secure necessary storage access, crucial for Android (especially scoped storage) and defining desktop file access locations. |
-| Define Storage Path | Utilize path_provider to establish a dedicated, permanent storage directory for all downloaded media files. |
+| Define Storage Path | Utilize path_provider to establish a dedicated, permanent storage directory for all downloaded media files.                                                            |
 
 2.2 Download Orchestration
-| Task | Details |
-| Batch Download Logic | Develop a function to automatically enqueue a default batch of 25 tasks (5 latest episodes from 5 selected podcasts) for immediate background download. |
+
+| Task | Details                                                                                                                                                                                                                |
+|------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Batch Download Logic | Develop a function to automatically enqueue a default batch of 25 tasks (5 latest episodes from 5 selected podcasts) for immediate background download.                                                                |
 | Task Monitoring | Implement a dedicated listener (using background_downloader's capabilities) to continuously monitor the progress, status, and completion of all queued and active downloads, updating the user interface in real-time. |
 
 2.3 Data Persistence & State
-| Task | Details |
+
+| Task | Details                                                                                                                                                                                                                                                              |
+|------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | Firestore Metadata | For each download task, persist crucial metadata (original URL, local file path, and download task ID) in a private user collection: /artifacts/__app_id/users/{userId}/downloads. This ensures download state and file locations are preserved across app sessions. |
-| Playback Integration | Modify the core media playback logic to prioritize the local file path stored in Firestore metadata over network streaming when an episode is marked as fully downloaded. |
+| Playback Integration | Modify the core media playback logic to prioritize the local file path stored in Firestore metadata over network streaming when an episode is marked as fully downloaded.                                                                                            |
 
 2.4 User Experience & Management
-| Task | Details |
-| Error/Resume UI | Design and implement UI components within the download manager to clearly indicate failed downloads and allow users to manually pause, resume, or retry specific tasks. |
+
+| Task | Details                                                                                                                                                                        |
+|------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Error/Resume UI | Design and implement UI components within the download manager to clearly indicate failed downloads and allow users to manually pause, resume, or retry specific tasks.        |
 | Storage Management | Create a feature that allows users to selectively delete local episode files and concurrently remove the corresponding metadata from Firestore to free up local storage space. |
 
 
 
-###
-# Project Focus: Supabase-Backed Download Manager
+## Project Focus: Supabase-Backed Download Manager
 
 This revised plan focuses on integrating the `background_downloader` package with Supabase for user authentication and persistent task storage.
 
