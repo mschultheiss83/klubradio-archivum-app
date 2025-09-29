@@ -259,4 +259,19 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get profileScreenGuestUserDisplayName => 'Gastbenutzer';
+
+  @override
+  String get aboutScreenLicenseTitle => 'Lizenz / Rechtliches';
+
+  @override
+  String get aboutScreenLicenseSummary =>
+      'Lizenz- und rechtliche Hinweise öffnen.';
+
+  @override
+  String get aboutScreenVersionTitle => 'Version';
+
+  @override
+  String aboutScreenVersionFormat(String version, String build) {
+    return '$version (Build $build)';
+  }
 }

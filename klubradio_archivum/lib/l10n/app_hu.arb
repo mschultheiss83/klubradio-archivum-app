@@ -345,6 +345,30 @@
   "profileScreenGuestUserDisplayName": "Vendég felhasználó",
   "@profileScreenGuestUserDisplayName": {
     "description": "Alapértelmezett megjelenítési név vendég felhasználóknak, vagy ha a név nincs beállítva."
+  },
+
+  "aboutScreenLicenseTitle": "Licenc / Jogi információk",
+  "@aboutScreenLicenseTitle": {
+    "description": "Kártya címe, amely a licencet és jogi információkat nyitja meg."
+  },
+
+  "aboutScreenLicenseSummary": "Licenc és jogi információk megnyitása.",
+  "@aboutScreenLicenseSummary": {
+    "description": "Rövid alcím/összefoglaló a licenc kártya címe alatt."
+  },
+
+  "aboutScreenVersionTitle": "Verzió",
+  "@aboutScreenVersionTitle": {
+    "description": "Kártya címe, amely az aktuális alkalmazás verzióját/buildjét mutatja."
+  },
+
+  "aboutScreenVersionFormat": "{version} (Build {build})",
+  "@aboutScreenVersionFormat": {
+    "description": "Formázott verziószöveg verzió és build helyőrzőkkel.",
+    "placeholders": {
+      "version": { "type": "String", "example": "1.0.0" },
+      "build": { "type": "String", "example": "42" }
+    }
   }
 
 }

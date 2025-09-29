@@ -347,5 +347,29 @@
   "profileScreenGuestUserDisplayName": "Gastbenutzer",
   "@profileScreenGuestUserDisplayName": {
     "description": "Standardanzeigename für einen Gastbenutzer oder wenn der Name nicht festgelegt ist."
+  },
+
+  "aboutScreenLicenseTitle": "Lizenz / Rechtliches",
+  "@aboutScreenLicenseTitle": {
+    "description": "Titel der Karte, die die Lizenz-/Rechtsinformationen öffnet."
+  },
+
+  "aboutScreenLicenseSummary": "Lizenz- und rechtliche Hinweise öffnen.",
+  "@aboutScreenLicenseSummary": {
+    "description": "Kurze Unterzeile/Zusammenfassung unter dem Lizenz-Kartentitel."
+  },
+
+  "aboutScreenVersionTitle": "Version",
+  "@aboutScreenVersionTitle": {
+    "description": "Titel der Karte, die die aktuelle App-Version/Build zeigt."
+  },
+
+  "aboutScreenVersionFormat": "{version} (Build {build})",
+  "@aboutScreenVersionFormat": {
+    "description": "Formatierte Versionszeile mit Platzhaltern für Version und Buildnummer.",
+    "placeholders": {
+      "version": { "type": "String", "example": "1.0.0" },
+      "build": { "type": "String", "example": "42" }
+    }
   }
 }

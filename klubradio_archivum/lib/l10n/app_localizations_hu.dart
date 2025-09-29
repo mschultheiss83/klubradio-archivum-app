@@ -254,4 +254,19 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get profileScreenGuestUserDisplayName => 'Vendég felhasználó';
+
+  @override
+  String get aboutScreenLicenseTitle => 'Licenc / Jogi információk';
+
+  @override
+  String get aboutScreenLicenseSummary =>
+      'Licenc és jogi információk megnyitása.';
+
+  @override
+  String get aboutScreenVersionTitle => 'Verzió';
+
+  @override
+  String aboutScreenVersionFormat(String version, String build) {
+    return '$version (Build $build)';
+  }
 }

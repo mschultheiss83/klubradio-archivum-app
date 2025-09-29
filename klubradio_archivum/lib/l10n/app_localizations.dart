@@ -531,6 +531,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Guest User'**
   String get profileScreenGuestUserDisplayName;
+
+  /// Title for the card that opens the license/legal information.
+  ///
+  /// In en, this message translates to:
+  /// **'License / Legal'**
+  String get aboutScreenLicenseTitle;
+
+  /// Short subtitle/summary shown under the license card title.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the license and legal information.'**
+  String get aboutScreenLicenseSummary;
+
+  /// Title for the card that shows the current app version/build.
+  ///
+  /// In en, this message translates to:
+  /// **'Version'**
+  String get aboutScreenVersionTitle;
+
+  /// Formatted version string with placeholders for version and build number.
+  ///
+  /// In en, this message translates to:
+  /// **'{version} (Build {build})'**
+  String aboutScreenVersionFormat(String version, String build);
 }
 
 class _AppLocalizationsDelegate
