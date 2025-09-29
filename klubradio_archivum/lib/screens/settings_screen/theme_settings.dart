@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:klubradio_archivum/l10n/app_localizations.dart';
-import '../../providers/theme_provider.dart';
+import 'package:klubradio_archivum/providers/theme_provider.dart';
 
 class ThemeSettings extends StatelessWidget {
   const ThemeSettings({super.key});
@@ -9,18 +9,25 @@ class ThemeSettings extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final textTheme = Theme.of(context).textTheme;
+    final cs = Theme.of(context).colorScheme;
 
     return Card(
+      clipBehavior: Clip.antiAlias,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Consumer<ThemeProvider>(
-          builder: (BuildContext context, ThemeProvider provider, Widget? child) {
-            // Determine which button is currently selected
-            // The order here must match the order of ToggleButtons children
-            List<bool> isSelected = [
-              provider.themeMode == ThemeMode.system,
-              provider.themeMode == ThemeMode.light,
-              provider.themeMode == ThemeMode.dark,
+          builder: (context, provider, _) {
+            final items = <_ThemeOption>[
+              _ThemeOption(
+                label: l10n.themeSettingSystemDefault,
+                mode: ThemeMode.system,
+              ),
+              _ThemeOption(
+                label: l10n.themeSettingLight,
+                mode: ThemeMode.light,
+              ),
+              _ThemeOption(label: l10n.themeSettingDark, mode: ThemeMode.dark),
             ];
 
             return Column(
@@ -28,40 +35,32 @@ class ThemeSettings extends StatelessWidget {
               children: <Widget>[
                 Text(
                   l10n.themeSettingsSectionTitle,
-                  style: Theme.of(context).textTheme.titleMedium,
+                  style: textTheme.titleMedium,
                 ),
-                const SizedBox(height: 12), // Spacing after title
-                ToggleButtons(
-                  isSelected: isSelected,
-                  onPressed: (int index) {
-                    // Update the theme based on which button was pressed
-                    if (index == 0) {
-                      provider.setThemeMode(ThemeMode.system);
-                    } else if (index == 1) {
-                      provider.setThemeMode(ThemeMode.light);
-                    } else if (index == 2) {
-                      provider.setThemeMode(ThemeMode.dark);
-                    }
-                  },
-                  // borderRadius: BorderRadius.circular(8.0), // Optional: for rounded corners
-                  // constraints: BoxConstraints( // Optional: to make buttons fill more width if desired
-                  //   minHeight: 40.0,
-                  //   minWidth: (MediaQuery.of(context).size.width - 32 - 32) / 3, // Example: fill available width
-                  // ),
-                  children: <Widget>[
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Text(l10n.themeSettingSystemDefault),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Text(l10n.themeSettingLight),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Text(l10n.themeSettingDark),
-                    ),
-                  ],
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: items.map((opt) {
+                    final selected = provider.themeMode == opt.mode;
+                    return ChoiceChip(
+                      label: Text(opt.label),
+                      selected: selected,
+                      onSelected: (_) => provider.setThemeMode(opt.mode),
+                      selectedColor: cs.primary.withOpacity(0.16),
+                      labelStyle: TextStyle(
+                        color: selected ? cs.onPrimaryContainer : cs.onSurface,
+                        fontWeight: selected
+                            ? FontWeight.w600
+                            : FontWeight.w400,
+                      ),
+                      side: BorderSide(
+                        color: selected
+                            ? cs.primary
+                            : cs.outlineVariant.withOpacity(0.7),
+                      ),
+                    );
+                  }).toList(),
                 ),
               ],
             );
@@ -70,4 +69,10 @@ class ThemeSettings extends StatelessWidget {
       ),
     );
   }
+}
+
+class _ThemeOption {
+  const _ThemeOption({required this.label, required this.mode});
+  final String label;
+  final ThemeMode mode;
 }

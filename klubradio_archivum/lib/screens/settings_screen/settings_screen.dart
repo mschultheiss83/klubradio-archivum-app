@@ -15,17 +15,16 @@ class SettingsScreen extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: <Widget>[
-        const ThemeSettings(), // ThemeSettings will handle its own localization
+        const ThemeSettings(),
         const SizedBox(height: 16),
-        const PlaybackSettings(), // Assuming PlaybackSettings handles its own
+        const PlaybackSettings(),
         const SizedBox(height: 16),
         Card(
+          clipBehavior: Clip.antiAlias,
           child: ListTile(
             leading: const Icon(Icons.favorite_outline),
-            title: Text(l10n.settingsScreenSupportKlubradioTitle), // Localized
-            subtitle: Text(
-              l10n.settingsScreenSupportKlubradioSubtitle,
-            ), // Localized
+            title: Text(l10n.settingsScreenSupportKlubradioTitle),
+            subtitle: Text(l10n.settingsScreenSupportKlubradioSubtitle),
             onTap: () {
               launchUrl(
                 Uri.parse('https://www.klubradio.hu/tamogatas'),
@@ -36,12 +35,11 @@ class SettingsScreen extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         Card(
+          clipBehavior: Clip.antiAlias,
           child: ListTile(
             leading: const Icon(Icons.coffee),
-            title: Text(l10n.settingsScreenSupportDeveloperTitle), // Localized
-            subtitle: Text(
-              l10n.settingsScreenSupportDeveloperSubtitle,
-            ), // Localized
+            title: Text(l10n.settingsScreenSupportDeveloperTitle),
+            subtitle: Text(l10n.settingsScreenSupportDeveloperSubtitle),
             onTap: () {
               launchUrl(
                 Uri.parse('https://buymeacoffee.com/mschultheiss83'),
