@@ -206,4 +206,57 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get subscribedPodcastsNoSubscriptions =>
       'Du hast noch keine Sendungen abonniert.';
+
+  @override
+  String get recentSearchesNoHistory => 'Noch kein Suchverlauf vorhanden.';
+
+  @override
+  String get searchBarHintText => 'Sendungen, Moderatoren, Schlüsselwörter...';
+
+  @override
+  String get searchResultsNoResults =>
+      'Keine Ergebnisse für Ihre Suche gefunden.';
+
+  @override
+  String get searchScreenInitialPrompt =>
+      'Finde deine Lieblingssendungen oder Moderatoren.';
+
+  @override
+  String searchScreenErrorMessage(String errorDetails) {
+    return 'Ein Fehler ist aufgetreten: $errorDetails';
+  }
+
+  @override
+  String get errorParsingData =>
+      'Bei der Verarbeitung der Daten ist ein Problem aufgetreten.';
+
+  @override
+  String get errorUnknown => 'Ein unbekannter Fehler ist aufgetreten.';
+
+  @override
+  String get profileScreenNoEmail => 'Keine E-Mail-Adresse angegeben';
+
+  @override
+  String get profileScreenDownloadSettingsTitle => 'Downloadeinstellungen';
+
+  @override
+  String get profileScreenAutoDownloadsTitle => 'Automatische Downloads';
+
+  @override
+  String profileScreenAutoDownloadsSubtitle(int count) {
+    return 'Anzahl der Episoden: $count';
+  }
+
+  @override
+  String get profileScreenRecentlyPlayedTitle => 'Zuletzt abgespielte Episoden';
+
+  @override
+  String get profileScreenFavoritesTitle => 'Favoriten';
+
+  @override
+  String get profileScreenNoFavoriteEpisodes =>
+      'Noch keine Favoriten vorhanden.';
+
+  @override
+  String get profileScreenGuestUserDisplayName => 'Gastbenutzer';
 }

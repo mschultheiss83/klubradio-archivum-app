@@ -270,5 +270,82 @@
   "subscribedPodcastsNoSubscriptions": "Du hast noch keine Sendungen abonniert.",
   "@subscribedPodcastsNoSubscriptions": {
     "description": "Nachricht, die angezeigt wird, wenn der Benutzer noch keine Podcasts abonniert hat."
+  },
+
+  "recentSearchesNoHistory": "Noch kein Suchverlauf vorhanden.",
+  "@recentSearchesNoHistory": {
+    "description": "Nachricht, die angezeigt wird, wenn kein Suchverlauf zum Anzeigen vorhanden ist."
+  },
+
+  "searchBarHintText": "Sendungen, Moderatoren, Schlüsselwörter...",
+  "@searchBarHintText": {
+    "description": "Hinweistext, der in der Suchleiste angezeigt wird."
+  },
+
+  "searchResultsNoResults": "Keine Ergebnisse für Ihre Suche gefunden.",
+  "@searchResultsNoResults": {
+    "description": "Nachricht, die angezeigt wird, wenn eine Suche keine Ergebnisse liefert."
+  },
+
+  "searchScreenInitialPrompt": "Finde deine Lieblingssendungen oder Moderatoren.",
+  "@searchScreenInitialPrompt": {
+    "description": "Anfängliche Aufforderung auf dem Suchbildschirm, bevor eine Suche durchgeführt wird."
+  },
+  "searchScreenErrorMessage": "Ein Fehler ist aufgetreten: {errorDetails}",
+  "@searchScreenErrorMessage": {
+    "description": "Fehlermeldung, die auf dem Suchbildschirm angezeigt wird, wenn eine Suche fehlschlägt.",
+    "placeholders": {
+      "errorDetails": {
+        "type": "String",
+        "example": "Netzwerküberschreitung"
+      }
+    }
+  },
+  "errorParsingData": "Bei der Verarbeitung der Daten ist ein Problem aufgetreten.",
+  "@errorParsingData": {
+    "description": "Fehlermeldung, die bei einem Datenverarbeitungsfehler angezeigt wird."
+  },
+  "errorUnknown": "Ein unbekannter Fehler ist aufgetreten.",
+  "@errorUnknown": {
+    "description": "Allgemeine Fehlermeldung für unbekannte Probleme."
+  },
+
+  "profileScreenNoEmail": "Keine E-Mail-Adresse angegeben",
+  "@profileScreenNoEmail": {
+    "description": "Text, der auf dem Profilbildschirm angezeigt wird, wenn die E-Mail des Benutzers nicht verfügbar ist."
+  },
+  "profileScreenDownloadSettingsTitle": "Downloadeinstellungen",
+  "@profileScreenDownloadSettingsTitle": {
+    "description": "Titel für den Abschnitt Downloadeinstellungen auf dem Profilbildschirm."
+  },
+  "profileScreenAutoDownloadsTitle": "Automatische Downloads",
+  "@profileScreenAutoDownloadsTitle": {
+    "description": "Titel für die Option Automatische Downloads in den Profileinstellungen."
+  },
+  "profileScreenAutoDownloadsSubtitle": "Anzahl der Episoden: {count}",
+  "@profileScreenAutoDownloadsSubtitle": {
+    "description": "Untertitel, der die Anzahl der für den automatischen Download festgelegten Episoden angibt.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
+  "profileScreenRecentlyPlayedTitle": "Zuletzt abgespielte Episoden",
+  "@profileScreenRecentlyPlayedTitle": {
+    "description": "Titel für den Abschnitt Zuletzt abgespielte Episoden auf dem Profilbildschirm."
+  },
+  "profileScreenFavoritesTitle": "Favoriten",
+  "@profileScreenFavoritesTitle": {
+    "description": "Titel für den Abschnitt Favoriten auf dem Profilbildschirm."
+  },
+  "profileScreenNoFavoriteEpisodes": "Noch keine Favoriten vorhanden.",
+  "@profileScreenNoFavoriteEpisodes": {
+    "description": "Nachricht, die angezeigt wird, wenn der Benutzer keine Favoriten hat."
+  },
+  "profileScreenGuestUserDisplayName": "Gastbenutzer",
+  "@profileScreenGuestUserDisplayName": {
+    "description": "Standardanzeigename für einen Gastbenutzer oder wenn der Name nicht festgelegt ist."
   }
 }

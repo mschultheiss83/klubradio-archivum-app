@@ -203,4 +203,53 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get subscribedPodcastsNoSubscriptions =>
       'You haven\'t subscribed to any shows yet.';
+
+  @override
+  String get recentSearchesNoHistory => 'No search history yet.';
+
+  @override
+  String get searchBarHintText => 'Shows, hosts, keywords...';
+
+  @override
+  String get searchResultsNoResults => 'No results found for your search.';
+
+  @override
+  String get searchScreenInitialPrompt => 'Find your favorite shows or hosts.';
+
+  @override
+  String searchScreenErrorMessage(String errorDetails) {
+    return 'An error occurred: $errorDetails';
+  }
+
+  @override
+  String get errorParsingData => 'There was an issue processing the data.';
+
+  @override
+  String get errorUnknown => 'An unknown error occurred.';
+
+  @override
+  String get profileScreenNoEmail => 'No email address provided';
+
+  @override
+  String get profileScreenDownloadSettingsTitle => 'Download Settings';
+
+  @override
+  String get profileScreenAutoDownloadsTitle => 'Automatic Downloads';
+
+  @override
+  String profileScreenAutoDownloadsSubtitle(int count) {
+    return 'Number of episodes: $count';
+  }
+
+  @override
+  String get profileScreenRecentlyPlayedTitle => 'Recently Played Episodes';
+
+  @override
+  String get profileScreenFavoritesTitle => 'Favorites';
+
+  @override
+  String get profileScreenNoFavoriteEpisodes => 'No favorite episodes yet.';
+
+  @override
+  String get profileScreenGuestUserDisplayName => 'Guest User';
 }

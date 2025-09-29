@@ -269,5 +269,83 @@
   "subscribedPodcastsNoSubscriptions": "You haven't subscribed to any shows yet.",
   "@subscribedPodcastsNoSubscriptions": {
     "description": "Message shown when the user has not subscribed to any podcasts."
+  },
+
+  "recentSearchesNoHistory": "No search history yet.",
+  "@recentSearchesNoHistory": {
+    "description": "Message shown when there are no recent searches to display."
+  },
+
+  "searchBarHintText": "Shows, hosts, keywords...",
+  "@searchBarHintText": {
+    "description": "Hint text displayed in the search bar."
+  },
+
+  "searchResultsNoResults": "No results found for your search.",
+  "@searchResultsNoResults": {
+    "description": "Message shown when a search yields no results."
+  },
+
+  "searchScreenInitialPrompt": "Find your favorite shows or hosts.",
+  "@searchScreenInitialPrompt": {
+    "description": "Initial prompt message on the search screen before any search is performed."
+  },
+  "searchScreenErrorMessage": "An error occurred: {errorDetails}",
+  "@searchScreenErrorMessage": {
+    "description": "Error message displayed on the search screen if a search fails.",
+    "placeholders": {
+      "errorDetails": {
+        "type": "String",
+        "example": "Network timeout"
+      }
+    }
+  },
+  "errorParsingData": "There was an issue processing the data.",
+  "@errorParsingData": {
+    "description": "Error message shown when data parsing fails."
+  },
+  "errorUnknown": "An unknown error occurred.",
+  "@errorUnknown": {
+    "description": "Generic error message for unknown issues."
+  },
+
+  "profileScreenNoEmail": "No email address provided",
+  "@profileScreenNoEmail": {
+    "description": "Text shown on the profile screen when the user's email is not available."
+  },
+  "profileScreenDownloadSettingsTitle": "Download Settings",
+  "@profileScreenDownloadSettingsTitle": {
+    "description": "Title for the download settings section on the profile screen."
+  },
+  "profileScreenAutoDownloadsTitle": "Automatic Downloads",
+  "@profileScreenAutoDownloadsTitle": {
+    "description": "Title for the automatic downloads option in profile settings."
+  },
+  "profileScreenAutoDownloadsSubtitle": "Number of episodes: {count}",
+  "@profileScreenAutoDownloadsSubtitle": {
+    "description": "Subtitle indicating the number of episodes set for automatic download.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
+  "profileScreenRecentlyPlayedTitle": "Recently Played Episodes",
+  "@profileScreenRecentlyPlayedTitle": {
+    "description": "Title for the recently played episodes section on the profile screen."
+  },
+  "profileScreenFavoritesTitle": "Favorites",
+  "@profileScreenFavoritesTitle": {
+    "description": "Title for the favorites section on the profile screen."
+  },
+  "profileScreenNoFavoriteEpisodes": "No favorite episodes yet.",
+  "@profileScreenNoFavoriteEpisodes": {
+    "description": "Message shown when the user has no favorite episodes."
+  },
+  "profileScreenGuestUserDisplayName": "Guest User",
+  "@profileScreenGuestUserDisplayName": {
+    "description": "Default display name for a guest user or when the name is not set."
   }
+
 }
