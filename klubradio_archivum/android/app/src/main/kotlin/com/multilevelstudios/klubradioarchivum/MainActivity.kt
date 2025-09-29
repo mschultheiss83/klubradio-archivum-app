@@ -1,4 +1,4 @@
-package com.example.klubradio_archivum
+package com.multilevelstudios.klubradioarchivum
 
 import io.flutter.embedding.android.FlutterActivity
 
