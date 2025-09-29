@@ -39,7 +39,9 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
                 ).deleteButtonTooltip, // Using built-in Material localization
                 onPressed: () {
                   _controller.clear();
-                  // widget.onSubmitted(''); // Optionally submit an empty string to clear results
+                  widget.onSubmitted(
+                    '',
+                  ); // Optionally submit an empty string to clear results
                   setState(() {});
                 },
               ),

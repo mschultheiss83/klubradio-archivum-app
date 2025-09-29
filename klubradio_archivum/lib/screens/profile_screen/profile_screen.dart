@@ -46,9 +46,7 @@ class ProfileScreen extends StatelessWidget {
                       ) // Ensure icon size is appropriate
                     : null,
               ),
-              title: Text(
-                profile.displayName ?? l10n.profileScreenGuestUserDisplayName,
-              ), // Use localized guest name if display name is null
+              title: Text(profile.displayName),
               subtitle: Text(
                 profile.email ?? l10n.profileScreenNoEmail,
               ), // Localized

@@ -346,6 +346,30 @@
   "profileScreenGuestUserDisplayName": "Guest User",
   "@profileScreenGuestUserDisplayName": {
     "description": "Default display name for a guest user or when the name is not set."
+  },
+
+  "aboutScreenLicenseTitle": "License / Legal",
+  "@aboutScreenLicenseTitle": {
+    "description": "Title for the card that opens the license/legal information."
+  },
+
+  "aboutScreenLicenseSummary": "Open the license and legal information.",
+  "@aboutScreenLicenseSummary": {
+    "description": "Short subtitle/summary shown under the license card title."
+  },
+
+  "aboutScreenVersionTitle": "Version",
+  "@aboutScreenVersionTitle": {
+    "description": "Title for the card that shows the current app version/build."
+  },
+
+  "aboutScreenVersionFormat": "{version} (Build {build})",
+  "@aboutScreenVersionFormat": {
+    "description": "Formatted version string with placeholders for version and build number.",
+    "placeholders": {
+      "version": { "type": "String", "example": "1.0.0" },
+      "build": { "type": "String", "example": "42" }
+    }
   }
 
 }
