@@ -37,7 +37,17 @@ class KlubradioArchivumApp extends StatelessWidget {
           create: (_) => AudioPlayerService(),
           dispose: (_, AudioPlayerService service) => service.dispose(),
         ),
-        ChangeNotifierProvider<ThemeProvider>(create: (_) => ThemeProvider()),
+        ChangeNotifierProvider<ThemeProvider>(
+          create: (_) => ThemeProvider(),
+          child: Consumer<ThemeProvider>(
+            builder: (_, theme, _) => MaterialApp(
+              theme: theme.lightTheme,
+              darkTheme: theme.darkTheme,
+              themeMode: theme.themeMode,
+              // ... TODO revisit
+            ),
+          ),
+        ),
         ChangeNotifierProxyProvider2<
           ApiService,
           DownloadService,
