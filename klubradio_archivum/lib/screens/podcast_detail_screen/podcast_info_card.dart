@@ -40,10 +40,7 @@ class PodcastInfoCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      Text(
-                        podcast.title,
-                        style: theme.textTheme.titleLarge,
-                      ),
+                      Text(podcast.title, style: theme.textTheme.titleLarge),
                       const SizedBox(height: 8),
                       Text(
                         podcast.description,
@@ -59,14 +56,6 @@ class PodcastInfoCard extends StatelessWidget {
                   ),
                 ),
               ],
-            ),
-            const SizedBox(height: 12),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: podcast.categories
-                  .map((String category) => Chip(label: Text(category)))
-                  .toList(),
             ),
           ],
         ),

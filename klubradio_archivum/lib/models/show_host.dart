@@ -6,7 +6,6 @@ class ShowHost {
     required this.name,
     this.bio,
     this.avatarUrl,
-    this.socialLinks = const <String, String>{},
   });
 
   factory ShowHost.fromJson(Map<String, dynamic> json) {
@@ -16,12 +15,6 @@ class ShowHost {
       name: json['name'] as String? ?? 'Ismeretlen műsorvezető',
       bio: json['bio'] as String?,
       avatarUrl: json['avatarUrl'] as String?,
-      socialLinks: social is Map
-          ? social.map(
-              (dynamic key, dynamic value) =>
-                  MapEntry(key.toString(), value.toString()),
-            )
-          : const <String, String>{},
     );
   }
 
@@ -29,7 +22,6 @@ class ShowHost {
   final String name;
   final String? bio;
   final String? avatarUrl;
-  final Map<String, String> socialLinks;
 
   ShowHost copyWith({
     String? id,
@@ -43,7 +35,6 @@ class ShowHost {
       name: name ?? this.name,
       bio: bio ?? this.bio,
       avatarUrl: avatarUrl ?? this.avatarUrl,
-      socialLinks: socialLinks ?? Map<String, String>.from(this.socialLinks),
     );
   }
 
@@ -53,7 +44,6 @@ class ShowHost {
       'name': name,
       'bio': bio,
       'avatarUrl': avatarUrl,
-      'socialLinks': socialLinks,
     };
   }
 
