@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'package:klubradio_archivum/l10n/app_localizations.dart'; // Import l10n
+import 'package:klubradio_archivum/l10n/app_localizations.dart';
 import 'package:klubradio_archivum/models/podcast.dart';
 import 'package:klubradio_archivum/models/show_data.dart';
 import 'package:klubradio_archivum/providers/podcast_provider.dart';
@@ -10,8 +10,26 @@ import 'recommended_podcasts_list.dart';
 import 'top_shows_list.dart';
 import 'trending_podcasts_list.dart';
 
-class DiscoverScreen extends StatelessWidget {
+class DiscoverScreen extends StatefulWidget {
   const DiscoverScreen({super.key});
+
+  @override
+  State<DiscoverScreen> createState() => _DiscoverScreenState();
+}
+
+class _DiscoverScreenState extends State<DiscoverScreen> {
+  bool _bootstrapped = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_bootstrapped) {
+      _bootstrapped = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        context.read<PodcastProvider>().loadInitialData();
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +47,7 @@ class DiscoverScreen extends StatelessWidget {
             padding: const EdgeInsets.all(16),
             children: <Widget>[
               Text(
-                l10n.discoverScreenFeaturedCategoriesTitle, // Localized
+                l10n.discoverScreenFeaturedCategoriesTitle,
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: 8),
@@ -55,14 +73,15 @@ class DiscoverScreen extends StatelessWidget {
 
               const SizedBox(height: 24),
               Text(
-                l10n.discoverScreenRecommendedShowsTitle, // Localized
+                l10n.discoverScreenRecommendedShowsTitle,
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: 12),
               RecommendedPodcastsList(podcasts: recommended),
+
               const SizedBox(height: 24),
               Text(
-                l10n.discoverScreenTrendingTitle, // Localized
+                l10n.discoverScreenTrendingTitle,
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: 12),

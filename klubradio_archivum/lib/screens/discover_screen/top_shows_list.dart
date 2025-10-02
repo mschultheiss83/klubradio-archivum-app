@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 
 import 'package:klubradio_archivum/models/show_data.dart';
 import 'package:klubradio_archivum/l10n/app_localizations.dart';
-import 'package:klubradio_archivum/providers/podcast_provider.dart'; // Assuming you still want to add to recent searches or similar
+import 'package:klubradio_archivum/providers/podcast_provider.dart';
 
 class TopShowsList extends StatelessWidget {
   final List<ShowData> topShows;

@@ -1,5 +1,5 @@
 const String podcastsTable = 'podcasts';
-const String episodesTable = 'show';
+const String episodesTable = 'episodes';
 const String userProfilesTable = 'user_profiles';
 const String playbackEventsTable = 'playback_events';
 

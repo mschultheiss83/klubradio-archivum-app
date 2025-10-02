@@ -293,9 +293,7 @@ class ApiService {
         title: 'Esti gyors',
         description:
             'Az Esti gyors napi közéleti összefoglalója a legfontosabb hírekkel.',
-        categories: const <String>['politika', 'közélet'],
         coverImageUrl: 'https://images.klubradio.hu/podcasts/esti-gyors.jpg',
-        language: 'hu',
         episodeCount: 1200,
         hosts: <ShowHost>[bolgarGyorgy],
         latestEpisode: _mockEpisodes('esti-gyors').first,
@@ -307,9 +305,7 @@ class ApiService {
         title: 'Megbeszéljük',
         description:
             'Bolgár György legendás betelefonálós műsora a hallgatók kérdéseivel.',
-        categories: const <String>['politika', 'vélemény'],
         coverImageUrl: 'https://images.klubradio.hu/podcasts/megbeszeljuk.jpg',
-        language: 'hu',
         episodeCount: 1800,
         hosts: <ShowHost>[bolgarGyorgy],
         latestEpisode: _mockEpisodes('megbeszeljuk').first,
@@ -321,10 +317,8 @@ class ApiService {
         title: 'Hangos irodalom',
         description:
             'Kulturális műsor irodalmi érdekességekkel és felolvasásokkal.',
-        categories: const <String>['kultúra'],
         coverImageUrl:
             'https://images.klubradio.hu/podcasts/hangos-irodalom.jpg',
-        language: 'hu',
         episodeCount: 540,
         hosts: <ShowHost>[szenteVeronika],
         latestEpisode: _mockEpisodes('hangos-irodalom').first,
