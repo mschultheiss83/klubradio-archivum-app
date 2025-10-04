@@ -370,6 +370,83 @@
       "version": { "type": "String", "example": "1.0.0" },
       "build": { "type": "String", "example": "42" }
     }
+  },
+
+  "podcastInfoCardHostsLabel": "{hostNames}",
+  "@podcastInfoCardHostsLabel": {
+    "description": "Label for the list of hosts on the podcast info card.",
+    "placeholders": {
+      "hostNames": {
+        "type": "String",
+        "example": "John Doe, Jane Smith"
+      }
+    }
+  },
+
+  "podcastDetailScreenErrorMessage": "An error occurred while loading episodes: {errorDetails}",
+  "@podcastDetailScreenErrorMessage": {
+    "description": "Error message when episodes for a podcast fail to load.",
+    "placeholders": {
+      "errorDetails": {
+        "type": "String",
+        "example": "Network failed"
+      }
+    }
+  },
+  "podcastDetailScreenSubscribeButton": "Subscribe",
+  "@podcastDetailScreenSubscribeButton": {
+    "description": "Text for the button to subscribe to a podcast."
+  },
+  "podcastDetailScreenUnsubscribeButton": "Unsubscribe",
+  "@podcastDetailScreenUnsubscribeButton": {
+    "description": "Text for the button to unsubscribe from a podcast."
+  },
+  "podcastDetailScreenSubscribeSuccess": "Subscribed successfully!",
+  "@podcastDetailScreenSubscribeSuccess": {
+    "description": "Snackbar message shown after successfully subscribing to a podcast."
+  },
+  "podcastDetailScreenUnsubscribeSuccess": "Unsubscribed successfully!",
+  "@podcastDetailScreenUnsubscribeSuccess": {
+    "description": "Snackbar message shown after successfully unsubscribing from a podcast."
+  },
+
+  "nowPlayingScreenTitle": "Now Playing",
+  "@nowPlayingScreenTitle": {
+    "description": "Title for the 'Now Playing' screen."
+  },
+  "nowPlayingScreenNoEpisode": "No episode is currently playing.",
+  "@nowPlayingScreenNoEpisode": {
+    "description": "Message shown on the 'Now Playing' screen when no episode has been selected."
+  },
+
+  "durationInHoursAndMinutes": "{hours}h {minutes}m",
+  "@durationInHoursAndMinutes": {
+    "description": "Formats a duration with hours and minutes. Example: 1h 23m",
+    "placeholders": {
+      "hours": {
+        "type": "int",
+        "example": "1"
+      },
+      "minutes": {
+        "type": "int",
+        "example": "23"
+      }
+    }
+  },
+  "durationInMinutes": "{minutes}m",
+  "@durationInMinutes": {
+    "description": "Formats a duration with only minutes. Example: 45m",
+    "placeholders": {
+      "minutes": {
+        "type": "int",
+        "example": "45"
+      }
+    }
+  },
+
+  "podcastNotFoundError": "Sorry, the selected show could not be found.",
+  "@podcastNotFoundError": {
+    "description": "Error message when a podcast selected from a list can't be fetched."
   }
 
 }

@@ -25,25 +25,25 @@ class Podcast {
       id: json['id']?.toString() ?? '',
       title: json['title'] as String? ?? 'Ismeretlen műsor',
       description: json['description'] as String? ?? '',
-      coverImageUrl: json['coverImageUrl'] as String? ?? '',
-      episodeCount: json['episodeCount'] is int
-          ? json['episodeCount'] as int
-          : int.tryParse(json['episodeCount']?.toString() ?? '') ?? 0,
+      coverImageUrl: json['cover_image_url'] as String? ?? '',
+      episodeCount: json['episode_count'] is int
+          ? json['episode_count'] as int
+          : int.tryParse(json['episode_count']?.toString() ?? '') ?? 0,
       hosts: hostsJson is List
           ? hostsJson
                 .whereType<Map<String, dynamic>>()
                 .map(ShowHost.fromJson)
                 .toList()
           : const <ShowHost>[],
-      latestEpisode: json['latestEpisode'] is Map<String, dynamic>
-          ? Episode.fromJson(json['latestEpisode'] as Map<String, dynamic>)
+      latestEpisode: json['latest_episode'] is Map<String, dynamic>
+          ? Episode.fromJson(json['latest_episode'] as Map<String, dynamic>)
           : null,
-      lastUpdated: json['lastUpdated'] != null
-          ? DateTime.tryParse(json['lastUpdated'].toString())
+      lastUpdated: json['last_updated'] != null
+          ? DateTime.tryParse(json['last_updated'].toString())
           : null,
-      isSubscribed: json['isSubscribed'] as bool? ?? false,
-      isTrending: json['isTrending'] as bool? ?? false,
-      isRecommended: json['isRecommended'] as bool? ?? false,
+      isSubscribed: json['is_subscribed'] as bool? ?? false,
+      isTrending: json['is_trending'] as bool? ?? false,
+      isRecommended: json['is_recommended'] as bool? ?? false,
     );
   }
 

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../../../models/episode.dart';
-import '../../utils/helpers.dart';
+import 'package:klubradio_archivum/models/episode.dart';
+import 'package:klubradio_archivum/screens/utils/helpers.dart';
+import 'package:klubradio_archivum/screens/widgets/stateless/image_url.dart';
 
 class EpisodeListItem extends StatelessWidget {
   const EpisodeListItem({
@@ -21,13 +22,13 @@ class EpisodeListItem extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 4),
       child: ListTile(
-        leading: const Icon(Icons.podcasts_outlined),
+        leading: CoverArt(imageUrl: episode.imageUrl ?? ""),
         title: Text(
-          episode.title,
+          '${episode.id} ${episode.title}',
           style: theme.textTheme.titleMedium,
         ),
         subtitle: Text(
-          '${formatDate(episode.publishedAt)} • ${formatDuration(episode.duration)}',
+          '${episode.showDate} • ${formatDuration(context, episode.duration)}',
         ),
         onTap: onTap,
         trailing: trailing,

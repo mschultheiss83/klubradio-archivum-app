@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
+import 'package:klubradio_archivum/models/show_data.dart';
 
 import '../models/episode.dart';
 import '../models/podcast.dart';
@@ -16,6 +17,7 @@ class ApiService {
   static const String _supabaseKey =
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFyYWtib3R4Z3dweXlxeXhqaGhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgxMDE0MzUsImV4cCI6MjA3MzY3NzQzNX0.zO__rAZCmPQW26YAC3CYhq_ZSjUAx0Gh0KHXIVHhm7w';
   static const Duration _timeout = Duration(seconds: 20);
+  static const Duration _longTimeout = Duration(minutes: 1);
 
   final http.Client _httpClient;
 
@@ -26,22 +28,25 @@ class ApiService {
     'apikey': _supabaseKey,
     'Authorization': 'Bearer $_supabaseKey',
     'Content-Type': 'application/json',
+    'Accept': 'application/json',
   };
 
-  Future<List<Podcast>> fetchLatestPodcasts({int limit = 20}) async {
+  Future<List<Podcast>> fetchLatestPodcasts({int limit = 10}) async {
     if (!hasValidCredentials) {
       return _mockPodcasts();
     }
 
-    final Uri uri = Uri.parse(
-      '$_supabaseUrl/rest/v1/${constants.podcastsTable}'
-      '?select=*,hosts(*),latestEpisode:episodes(*)'
-      '&order=lastUpdated.desc'
-      '&limit=$limit',
-    );
+    final Uri uri =
+        Uri.parse('$_supabaseUrl/rest/v1/${constants.podcastsTable}').replace(
+          queryParameters: {
+            'select': '*',
+            'order': 'last_updated.desc',
+            'limit': limit.toString(),
+          },
+        );
     final http.Response response = await _httpClient
         .get(uri, headers: _headers)
-        .timeout(_timeout);
+        .timeout(_longTimeout);
 
     if (response.statusCode >= 200 && response.statusCode < 300) {
       final List<dynamic> data = jsonDecode(response.body) as List<dynamic>;
@@ -51,7 +56,11 @@ class ApiService {
           .toList();
     }
 
-    throw ApiException('Unable to fetch podcasts (${response.statusCode})');
+    String serverMsg = getServerErrorMessage(response);
+
+    throw ApiException(
+      'Unable to fetch podcasts (${response.statusCode})\n$serverMsg',
+    );
   }
 
   Future<List<Podcast>> fetchTrendingPodcasts({int limit = 10}) async {
@@ -61,12 +70,14 @@ class ApiService {
       }).toList();
     }
 
-    final Uri uri = Uri.parse(
-      '$_supabaseUrl/rest/v1/${constants.podcastsTable}'
-      '?select=*,hosts(*)'
-      '&order=playCount.desc.nullslast'
-      '&limit=$limit',
-    );
+    final Uri uri =
+        Uri.parse('$_supabaseUrl/rest/v1/${constants.podcastsTable}').replace(
+          queryParameters: {
+            'select': '*',
+            // 'order': 'play_count.desc.nullslast',
+            'limit': limit.toString(),
+          },
+        );
     final http.Response response = await _httpClient
         .get(uri, headers: _headers)
         .timeout(_timeout);
@@ -79,8 +90,8 @@ class ApiService {
           .map((Podcast podcast) => podcast.copyWith(isTrending: true))
           .toList();
     }
-
-    throw ApiException('Unable to fetch trending podcasts');
+    String serverMsg = getServerErrorMessage(response);
+    throw ApiException('Unable to fetch trending podcasts\n$serverMsg');
   }
 
   Future<List<Podcast>> fetchRecommendedPodcasts({int limit = 10}) async {
@@ -89,16 +100,18 @@ class ApiService {
         return podcast.copyWith(isRecommended: true);
       }).toList();
     }
-
-    final Uri uri = Uri.parse(
-      '$_supabaseUrl/rest/v1/${constants.podcastsTable}'
-      '?select=*,hosts(*)'
-      '&order=recommendationScore.desc.nullslast'
-      '&limit=$limit',
-    );
+    final Uri uri =
+        Uri.parse('$_supabaseUrl/rest/v1/${constants.podcastsTable}').replace(
+          queryParameters: {
+            'select': '*',
+            'order': 'last_updated.desc.nullslast',
+            // 'order': 'recommendation_score.desc.nullslast',
+            'limit': limit.toString(),
+          },
+        );
     final http.Response response = await _httpClient
         .get(uri, headers: _headers)
-        .timeout(_timeout);
+        .timeout(_longTimeout);
 
     if (response.statusCode >= 200 && response.statusCode < 300) {
       final List<dynamic> data = jsonDecode(response.body) as List<dynamic>;
@@ -108,13 +121,14 @@ class ApiService {
           .map((Podcast podcast) => podcast.copyWith(isRecommended: true))
           .toList();
     }
+    String serverMsg = getServerErrorMessage(response);
 
-    throw ApiException('Unable to fetch recommended podcasts');
+    throw ApiException('Unable to fetch recommended podcasts\n$serverMsg');
   }
 
   Future<List<Episode>> fetchEpisodesForPodcast(
     String podcastId, {
-    int limit = 50,
+    int limit = 500,
   }) async {
     if (!hasValidCredentials) {
       return _mockEpisodes(podcastId).take(limit).toList();
@@ -124,7 +138,6 @@ class ApiService {
       '$_supabaseUrl/rest/v1/${constants.episodesTable}'
       '?select=*'
       '&podcastId=eq.$podcastId'
-      '&order=publishedAt.desc'
       '&limit=$limit',
     );
     final http.Response response = await _httpClient
@@ -139,10 +152,12 @@ class ApiService {
           .toList();
     }
 
-    throw ApiException('Unable to fetch episodes for podcast $podcastId');
+    throw ApiException(
+      'Unable to fetch episodes for podcast $podcastId, statusCode ${response.statusCode}',
+    );
   }
 
-  Future<List<Episode>> fetchRecentEpisodes({int limit = 20}) async {
+  Future<List<Episode>> fetchRecentEpisodes({int limit = 8}) async {
     if (!hasValidCredentials) {
       final List<Episode> mocked =
           _mockPodcasts()
@@ -157,7 +172,7 @@ class ApiService {
     final Uri uri = Uri.parse(
       '$_supabaseUrl/rest/v1/${constants.episodesTable}'
       '?select=*'
-      '&order=publishedAt.desc'
+      '&order=id.desc'
       '&limit=$limit',
     );
     final http.Response response = await _httpClient
@@ -171,8 +186,9 @@ class ApiService {
           .map(Episode.fromJson)
           .toList();
     }
-
-    throw ApiException('Unable to fetch recent episodes');
+    final errorMessage =
+        'Unable to fetch recent episodes statusCode: ${response.statusCode}';
+    throw ApiException(errorMessage);
   }
 
   Future<List<Podcast>> searchPodcasts(String query) async {
@@ -192,7 +208,7 @@ class ApiService {
     final encodedQuery = query.replaceAll("'", "''");
     final Uri uri = Uri.parse(
       '$_supabaseUrl/rest/v1/${constants.podcastsTable}'
-      '?select=*,hosts(*)'
+      '?select=*'
       '&title=ilike.%25$encodedQuery%25',
     );
     final http.Response response = await _httpClient
@@ -208,6 +224,67 @@ class ApiService {
     }
 
     throw ApiException('Unable to search podcasts');
+  }
+
+  Future<List<ShowData>> fetchTopShowsThisYear() async {
+    if (!hasValidCredentials) {
+      final List<Map<String, dynamic>> queryResults = [
+        {"id": "3", "title": "A lényeg", "count": 8563}, //8605
+        {"id": "38", "title": "Reggeli gyors", "count": 1743},
+        {"id": "14", "title": "Esti gyors", "count": 1691},
+        {"id": "34", "title": "Megbeszéljük...", "count": 1687},
+        {"id": "91", "title": "Ezitta Fórum", "count": 1628},
+        {"id": "78", "title": "Reggeli gyors/Reggeli személy", "count": 1446},
+        {"id": "22", "title": "Hetes Stúdió", "count": 356},
+        {"id": "29", "title": "Klubdélelőtt", "count": 351},
+      ];
+      return queryResults
+          .map(
+            (row) => ShowData(
+              id: row['id'] as String,
+              title: row['title'] as String,
+              count: row['count'] as int,
+            ),
+          )
+          .toList();
+    }
+    final Uri uri = Uri.parse(
+      '$_supabaseUrl/rest/v1/${constants.topShowsTable}',
+    );
+    final http.Response response = await _httpClient
+        .get(uri, headers: _headers)
+        .timeout(_longTimeout);
+
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      final List<dynamic> data = jsonDecode(response.body) as List<dynamic>;
+      return data
+          .whereType<Map<String, dynamic>>()
+          .map(ShowData.fromJson)
+          .toList();
+    }
+
+    throw ApiException('Unable to fetch top shows');
+  }
+
+  // In your ApiService class
+  Future<Podcast?> fetchPodcastById(String podcastId) async {
+    final Uri uri = Uri.parse(
+      '$_supabaseUrl/rest/v1/${constants.podcastsTable}'
+      '?select=*' // Select all necessary fields
+      '&id=eq.$podcastId'
+      '&limit=1',
+    );
+    final http.Response response = await _httpClient
+        .get(uri, headers: _headers)
+        .timeout(_longTimeout);
+
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      final List<dynamic> data = jsonDecode(response.body) as List<dynamic>;
+      if (data.isNotEmpty) {
+        return Podcast.fromJson(data.first as Map<String, dynamic>);
+      }
+    }
+    return null; // Return null if not found or if there's an error
   }
 
   Future<UserProfile> fetchUserProfile(String userId) async {
@@ -275,17 +352,8 @@ class ApiService {
   }
 
   List<Podcast> _mockPodcasts() {
-    final ShowHost bolgarGyorgy = ShowHost(
-      id: '1',
-      name: 'Bolgár György',
-      bio:
-          'Ikonikus újságíró és műsorvezető, a Klubrádió egyik legismertebb hangja.',
-    );
-    final ShowHost szenteVeronika = ShowHost(
-      id: '2',
-      name: 'Szente Veronika',
-      bio: 'Kultúra és közélet szakértő.',
-    );
+    final ShowHost bolgarGyorgy = ShowHost(name: 'Bolgár György');
+    final ShowHost szenteVeronika = ShowHost(name: 'Szente Veronika');
 
     final List<Podcast> podcasts = <Podcast>[
       Podcast(
@@ -339,10 +407,27 @@ class ApiService {
             'Ez egy mintapélda epizód leírása a(z) $podcastId műsorhoz.',
         audioUrl: 'https://cdn.klubradio.hu/audio/$podcastId/$index.mp3',
         publishedAt: DateTime.now().subtract(Duration(days: index)),
+        showDate: '2023-01-01',
         duration: Duration(minutes: 55 - index.clamp(0, 20)),
         hosts: const <String>['Klubrádió stáb'],
       );
     }
+  }
+
+  String getServerErrorMessage(http.Response response) {
+    String serverMsg = 'status ${response.statusCode}';
+    try {
+      final decoded = jsonDecode(response.body);
+      if (decoded is Map<String, dynamic>) {
+        final msg = decoded['message'] ?? decoded['error'] ?? decoded['hint'];
+        serverMsg = '$serverMsg — ${msg ?? response.body}';
+      } else {
+        serverMsg = '$serverMsg — ${response.body}';
+      }
+    } catch (_) {
+      serverMsg = '$serverMsg — ${response.body}';
+    }
+    return serverMsg;
   }
 }
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../models/podcast.dart';
+import 'package:klubradio_archivum/l10n/app_localizations.dart';
+import 'package:klubradio_archivum/models/podcast.dart';
 
 class PodcastInfoCard extends StatelessWidget {
   const PodcastInfoCard({super.key, required this.podcast});
@@ -10,6 +11,8 @@ class PodcastInfoCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -40,7 +43,10 @@ class PodcastInfoCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      Text(podcast.title, style: theme.textTheme.titleLarge),
+                      Text(
+                        '${podcast.id} - ${podcast.title}',
+                        style: theme.textTheme.titleLarge,
+                      ),
                       const SizedBox(height: 8),
                       Text(
                         podcast.description,
@@ -49,7 +55,10 @@ class PodcastInfoCard extends StatelessWidget {
                       const SizedBox(height: 8),
                       if (podcast.hosts.isNotEmpty)
                         Text(
-                          'Műsorvezetők: ${podcast.hosts.map((host) => host.name).join(', ')}',
+                          // Use localized string with placeholder
+                          l10n.podcastInfoCardHostsLabel(
+                            podcast.hosts.map((host) => host.name).join(', '),
+                          ),
                           style: theme.textTheme.bodySmall,
                         ),
                     ],

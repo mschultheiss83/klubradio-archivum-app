@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:klubradio_archivum/models/podcast.dart';
 import 'package:klubradio_archivum/providers/podcast_provider.dart';
 import 'package:klubradio_archivum/screens/podcast_detail_screen/podcast_detail_screen.dart';
+import 'package:klubradio_archivum/screens/widgets/stateless/image_url.dart';
 
 class PodcastListItem extends StatelessWidget {
   const PodcastListItem({
@@ -42,7 +43,7 @@ class PodcastListItem extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              _CoverArt(imageUrl: podcast.coverImageUrl),
+              CoverArt(imageUrl: podcast.coverImageUrl),
               const SizedBox(width: 16),
               Expanded(
                 child: Column(
@@ -89,41 +90,6 @@ class PodcastListItem extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-}
-
-class _CoverArt extends StatelessWidget {
-  const _CoverArt({required this.imageUrl});
-
-  final String imageUrl;
-
-  @override
-  Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(12),
-      child: imageUrl.isEmpty
-          ? Container(
-              width: 72,
-              height: 72,
-              color: Theme.of(context).colorScheme.primaryContainer,
-              child: const Icon(Icons.radio),
-            )
-          : Image.network(
-              imageUrl,
-              width: 72,
-              height: 72,
-              fit: BoxFit.cover,
-              errorBuilder:
-                  (BuildContext context, Object error, StackTrace? stackTrace) {
-                    return Container(
-                      width: 72,
-                      height: 72,
-                      color: Theme.of(context).colorScheme.primaryContainer,
-                      child: const Icon(Icons.radio),
-                    );
-                  },
-            ),
     );
   }
 }

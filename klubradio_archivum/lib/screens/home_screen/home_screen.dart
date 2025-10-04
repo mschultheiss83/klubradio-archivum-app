@@ -34,7 +34,7 @@ class _HomeScreenState extends State<HomeScreen> {
       final PodcastProvider podcastProvider = context.read<PodcastProvider>();
       final EpisodeProvider episodeProvider = context.read<EpisodeProvider>();
       await podcastProvider.loadInitialData();
-      await podcastProvider.loadUserProfile();
+      // await podcastProvider.loadUserProfile();
       if (episodeProvider.currentEpisode == null &&
           podcastProvider.recentEpisodes.isNotEmpty) {
         // Preload the latest episode without autoplay to provide metadata for UI.

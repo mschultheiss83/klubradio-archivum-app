@@ -269,4 +269,46 @@ class AppLocalizationsHu extends AppLocalizations {
   String aboutScreenVersionFormat(String version, String build) {
     return '$version (Build $build)';
   }
+
+  @override
+  String podcastInfoCardHostsLabel(String hostNames) {
+    return '$hostNames';
+  }
+
+  @override
+  String podcastDetailScreenErrorMessage(String errorDetails) {
+    return 'Hiba történt az epizódok betöltésekor: $errorDetails';
+  }
+
+  @override
+  String get podcastDetailScreenSubscribeButton => 'Feliratkozás';
+
+  @override
+  String get podcastDetailScreenUnsubscribeButton => 'Leiratkozás';
+
+  @override
+  String get podcastDetailScreenSubscribeSuccess => 'Feliratkozás sikeres!';
+
+  @override
+  String get podcastDetailScreenUnsubscribeSuccess => 'Leiratkozás sikeres!';
+
+  @override
+  String get nowPlayingScreenTitle => 'Most szól';
+
+  @override
+  String get nowPlayingScreenNoEpisode => 'Jelenleg nincs lejátszott epizód.';
+
+  @override
+  String durationInHoursAndMinutes(int hours, int minutes) {
+    return '$hours óra $minutes perc';
+  }
+
+  @override
+  String durationInMinutes(int minutes) {
+    return '$minutes perc';
+  }
+
+  @override
+  String get podcastNotFoundError =>
+      'Sajnos a kiválasztott műsor nem található.';
 }

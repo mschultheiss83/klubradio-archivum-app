@@ -274,4 +274,48 @@ class AppLocalizationsDe extends AppLocalizations {
   String aboutScreenVersionFormat(String version, String build) {
     return '$version (Build $build)';
   }
+
+  @override
+  String podcastInfoCardHostsLabel(String hostNames) {
+    return '$hostNames';
+  }
+
+  @override
+  String podcastDetailScreenErrorMessage(String errorDetails) {
+    return 'Fehler beim Laden der Episoden: $errorDetails';
+  }
+
+  @override
+  String get podcastDetailScreenSubscribeButton => 'Abonnieren';
+
+  @override
+  String get podcastDetailScreenUnsubscribeButton => 'Deabonnieren';
+
+  @override
+  String get podcastDetailScreenSubscribeSuccess => 'Erfolgreich abonniert!';
+
+  @override
+  String get podcastDetailScreenUnsubscribeSuccess =>
+      'Abonnement erfolgreich beendet!';
+
+  @override
+  String get nowPlayingScreenTitle => 'Aktuelle Wiedergabe';
+
+  @override
+  String get nowPlayingScreenNoEpisode =>
+      'Aktuell wird keine Episode abgespielt.';
+
+  @override
+  String durationInHoursAndMinutes(int hours, int minutes) {
+    return '$hours Std. $minutes Min.';
+  }
+
+  @override
+  String durationInMinutes(int minutes) {
+    return '$minutes Min.';
+  }
+
+  @override
+  String get podcastNotFoundError =>
+      'Die ausgewählte Sendung konnte leider nicht gefunden werden.';
 }

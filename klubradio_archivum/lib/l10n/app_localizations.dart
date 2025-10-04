@@ -555,6 +555,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{version} (Build {build})'**
   String aboutScreenVersionFormat(String version, String build);
+
+  /// Label for the list of hosts on the podcast info card.
+  ///
+  /// In en, this message translates to:
+  /// **'{hostNames}'**
+  String podcastInfoCardHostsLabel(String hostNames);
+
+  /// Error message when episodes for a podcast fail to load.
+  ///
+  /// In en, this message translates to:
+  /// **'An error occurred while loading episodes: {errorDetails}'**
+  String podcastDetailScreenErrorMessage(String errorDetails);
+
+  /// Text for the button to subscribe to a podcast.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscribe'**
+  String get podcastDetailScreenSubscribeButton;
+
+  /// Text for the button to unsubscribe from a podcast.
+  ///
+  /// In en, this message translates to:
+  /// **'Unsubscribe'**
+  String get podcastDetailScreenUnsubscribeButton;
+
+  /// Snackbar message shown after successfully subscribing to a podcast.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscribed successfully!'**
+  String get podcastDetailScreenSubscribeSuccess;
+
+  /// Snackbar message shown after successfully unsubscribing from a podcast.
+  ///
+  /// In en, this message translates to:
+  /// **'Unsubscribed successfully!'**
+  String get podcastDetailScreenUnsubscribeSuccess;
+
+  /// Title for the 'Now Playing' screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Now Playing'**
+  String get nowPlayingScreenTitle;
+
+  /// Message shown on the 'Now Playing' screen when no episode has been selected.
+  ///
+  /// In en, this message translates to:
+  /// **'No episode is currently playing.'**
+  String get nowPlayingScreenNoEpisode;
+
+  /// Formats a duration with hours and minutes. Example: 1h 23m
+  ///
+  /// In en, this message translates to:
+  /// **'{hours}h {minutes}m'**
+  String durationInHoursAndMinutes(int hours, int minutes);
+
+  /// Formats a duration with only minutes. Example: 45m
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes}m'**
+  String durationInMinutes(int minutes);
+
+  /// Error message when a podcast selected from a list can't be fetched.
+  ///
+  /// In en, this message translates to:
+  /// **'Sorry, the selected show could not be found.'**
+  String get podcastNotFoundError;
 }
 
 class _AppLocalizationsDelegate

@@ -2,6 +2,7 @@ const String podcastsTable = 'podcasts';
 const String episodesTable = 'episodes';
 const String userProfilesTable = 'user_profiles';
 const String playbackEventsTable = 'playback_events';
+const String topShowsTable = 'top_shows_this_year';
 
 const int defaultAutoDownloadCount = 5;
 const int maxRecentSearches = 10;

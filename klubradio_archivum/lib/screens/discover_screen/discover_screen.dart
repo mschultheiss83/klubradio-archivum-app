@@ -38,7 +38,8 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
     return Consumer<PodcastProvider>(
       builder: (BuildContext context, PodcastProvider provider, Widget? child) {
         final List<ShowData> topShowsData = provider.topShows;
-        final List<Podcast> trending = provider.trendingPodcasts;
+        // todo use in future TrendingTitle with discoverScreenTrendingTitle
+        // final List<Podcast> trending = provider.trendingPodcasts;
         final List<Podcast> recommended = provider.recommendedPodcasts;
 
         return RefreshIndicator(
@@ -78,14 +79,14 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
               ),
               const SizedBox(height: 12),
               RecommendedPodcastsList(podcasts: recommended),
-
-              const SizedBox(height: 24),
-              Text(
-                l10n.discoverScreenTrendingTitle,
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-              const SizedBox(height: 12),
-              TrendingPodcastsList(podcasts: trending),
+              // TODO to use in future TrendingTitle with discoverScreenTrendingTitle and TrendingPodcastsList
+              // const SizedBox(height: 24),
+              // Text(
+              //   l10n.discoverScreenTrendingTitle,
+              //   style: Theme.of(context).textTheme.titleLarge,
+              // ),
+              // const SizedBox(height: 12),
+              // TrendingPodcastsList(podcasts: trending),
             ],
           ),
         );

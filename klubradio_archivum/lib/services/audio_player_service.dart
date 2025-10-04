@@ -6,8 +6,9 @@ import '../models/episode.dart';
 
 class AudioPlayerService {
   AudioPlayerService() {
-    _playerStateSubscription =
-        _player.playerStateStream.listen(_handlePlayerStateChange);
+    _playerStateSubscription = _player.playerStateStream.listen(
+      _handlePlayerStateChange,
+    );
   }
 
   final AudioPlayer _player = AudioPlayer();
@@ -56,7 +57,9 @@ class AudioPlayerService {
   Future<void> setVolume(double volume) => _player.setVolume(volume);
 
   void _handlePlayerStateChange(PlayerState state) {
-    _bufferingController.add(state.processingState == ProcessingState.buffering);
+    _bufferingController.add(
+      state.processingState == ProcessingState.buffering,
+    );
   }
 
   Future<void> dispose() async {

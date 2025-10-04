@@ -6,11 +6,16 @@ The Klubrádió Archive App is a cross-platform mobile application built with Fl
 
 TODO
 
+### test api
+
+`flutter test --dart-define API_SERVICE_LIVE_TESTS=true .\test\services\api_service_live_test.dart`
+
 ### update i10n run
 
 `flutter gen-l10n`
 
 ### app icon update
+
 `dart run flutter_launcher_icons`
 
 
