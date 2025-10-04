@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../../providers/episode.provider.dart';
-import '../../now_playing_screen/now_playing_screen.dart';
-import '../../utils/helpers.dart';
+import 'package:klubradio_archivum/providers/episode.provider.dart';
+import 'package:klubradio_archivum/screens/now_playing_screen/now_playing_screen.dart';
+import 'package:klubradio_archivum/screens/utils/helpers.dart';
+import 'package:klubradio_archivum/screens/widgets/stateless/image_url.dart';
 
 class NowPlayingBar extends StatelessWidget {
   const NowPlayingBar({super.key});
@@ -11,18 +12,13 @@ class NowPlayingBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Consumer<EpisodeProvider>(
-      builder: (
-        BuildContext context,
-        EpisodeProvider provider,
-        Widget? child,
-      ) {
+      builder: (BuildContext context, EpisodeProvider provider, Widget? child) {
         final currentEpisode = provider.currentEpisode;
         final Duration? total = provider.totalDuration;
         final Duration position = provider.currentPosition;
-        final double progress =
-            total == null || total.inMilliseconds == 0
-                ? 0
-                : position.inMilliseconds / total.inMilliseconds;
+        final double progress = total == null || total.inMilliseconds == 0
+            ? 0
+            : position.inMilliseconds / total.inMilliseconds;
 
         if (currentEpisode == null) {
           return const SizedBox.shrink();
@@ -70,8 +66,12 @@ class NowPlayingBar extends StatelessWidget {
                               style: Theme.of(context).textTheme.titleMedium,
                             ),
                             Text(
-                              formatDuration(position),
+                              '${formatDurationPrecise(position)} - ${currentEpisode.showDate}',
                               style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                            Text(
+                              '${currentEpisode.description}',
+                              style: Theme.of(context).textTheme.bodyMedium,
                             ),
                           ],
                         ),
@@ -114,14 +114,30 @@ class _QueueSheet extends StatelessWidget {
       itemBuilder: (BuildContext context, int index) {
         final episode = provider.queue[index];
         final bool isCurrent = provider.currentEpisode?.id == episode.id;
+        final hosts = episode.hosts
+            .join('')
+            .split('\n')
+            .where((s) => s.isNotEmpty)
+            .join(' ');
         return ListTile(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadiusGeometry.all(Radius.circular(8)),
+          ),
           leading: Icon(isCurrent ? Icons.play_arrow : Icons.queue_music),
-          title: Text(episode.title),
-          subtitle: Text(formatDuration(episode.duration)),
+          trailing: CoverArt(imageUrl: episode.imageUrl ?? ""),
+          title: Text('${episode.title}, ${episode.showDate}'),
+          subtitle: Text(
+            '${formatDuration(context, episode.duration)} - $hosts',
+          ),
           onTap: () async {
             Navigator.of(context).pop();
             await provider.playEpisode(episode, queue: provider.queue);
           },
+          // TODO fix colors
+          // tileColor: isCurrent
+          //     ? Theme.of(context).colorScheme.primaryContainer
+          //     : Theme.of(context).colorScheme.surface,
+          hoverColor: Theme.of(context).colorScheme.secondaryContainer,
         );
       },
     );

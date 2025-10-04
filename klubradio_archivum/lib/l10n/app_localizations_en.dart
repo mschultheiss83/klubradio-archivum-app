@@ -267,4 +267,47 @@ class AppLocalizationsEn extends AppLocalizations {
   String aboutScreenVersionFormat(String version, String build) {
     return '$version (Build $build)';
   }
+
+  @override
+  String podcastInfoCardHostsLabel(String hostNames) {
+    return '$hostNames';
+  }
+
+  @override
+  String podcastDetailScreenErrorMessage(String errorDetails) {
+    return 'An error occurred while loading episodes: $errorDetails';
+  }
+
+  @override
+  String get podcastDetailScreenSubscribeButton => 'Subscribe';
+
+  @override
+  String get podcastDetailScreenUnsubscribeButton => 'Unsubscribe';
+
+  @override
+  String get podcastDetailScreenSubscribeSuccess => 'Subscribed successfully!';
+
+  @override
+  String get podcastDetailScreenUnsubscribeSuccess =>
+      'Unsubscribed successfully!';
+
+  @override
+  String get nowPlayingScreenTitle => 'Now Playing';
+
+  @override
+  String get nowPlayingScreenNoEpisode => 'No episode is currently playing.';
+
+  @override
+  String durationInHoursAndMinutes(int hours, int minutes) {
+    return '${hours}h ${minutes}m';
+  }
+
+  @override
+  String durationInMinutes(int minutes) {
+    return '${minutes}m';
+  }
+
+  @override
+  String get podcastNotFoundError =>
+      'Sorry, the selected show could not be found.';
 }

@@ -8,7 +8,7 @@ String formatDate(DateTime dateTime, {String locale = 'hu'}) {
   return formatter.format(dateTime.toLocal());
 }
 
-String formatDuration(Duration duration) {
+String formatDurationPrecise(Duration duration) {
   final int hours = duration.inHours;
   final int minutes = duration.inMinutes.remainder(60);
   final int seconds = duration.inSeconds.remainder(60);
@@ -17,6 +17,22 @@ String formatDuration(Duration duration) {
         '${seconds.toString().padLeft(2, '0')}';
   }
   return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+}
+
+String formatDuration(BuildContext context, Duration duration) {
+  final l10n = AppLocalizations.of(context)!;
+  final int hours = duration.inHours;
+  final int minutes = duration.inMinutes.remainder(60);
+
+  if (duration.inMinutes < 1) {
+    return l10n.durationInMinutes(1);
+  }
+
+  if (hours > 0) {
+    return l10n.durationInHoursAndMinutes(hours, minutes);
+  }
+
+  return l10n.durationInMinutes(minutes);
 }
 
 String formatDownloadStatus(BuildContext context, DownloadStatus status) {

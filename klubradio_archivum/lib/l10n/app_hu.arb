@@ -369,6 +369,83 @@
       "version": { "type": "String", "example": "1.0.0" },
       "build": { "type": "String", "example": "42" }
     }
+  },
+
+  "podcastInfoCardHostsLabel": "{hostNames}",
+  "@podcastInfoCradHostsLabel": {
+    "description": "A műsorvezetők listájának címkéje a podcast információs kártyán.",
+    "placeholders": {
+      "hostNames": {
+        "type": "String",
+        "example": "Nagy János, Kiss Mária"
+      }
+    }
+  },
+
+  "podcastDetailScreenErrorMessage": "Hiba történt az epizódok betöltésekor: {errorDetails}",
+  "@podcastDetailScreenErrorMessage": {
+    "description": "Hibaüzenet, ha a podcast epizódjainak betöltése sikertelen.",
+    "placeholders": {
+      "errorDetails": {
+        "type": "String",
+        "example": "Hálózati hiba"
+      }
+    }
+  },
+  "podcastDetailScreenSubscribeButton": "Feliratkozás",
+  "@podcastDetailScreenSubscribeButton": {
+    "description": "A podcastra való feliratkozás gomb szövege."
+  },
+  "podcastDetailScreenUnsubscribeButton": "Leiratkozás",
+  "@podcastDetailScreenUnsubscribeButton": {
+    "description": "A podcastról való leiratkozás gomb szövege."
+  },
+  "podcastDetailScreenSubscribeSuccess": "Feliratkozás sikeres!",
+  "@podcastDetailScreenSubscribeSuccess": {
+    "description": "Snackbar üzenet sikeres feliratkozás után."
+  },
+  "podcastDetailScreenUnsubscribeSuccess": "Leiratkozás sikeres!",
+  "@podcastDetailScreenUnsubscribeSuccess": {
+    "description": "Snackbar üzenet sikeres leiratkozás után."
+  },
+
+  "nowPlayingScreenTitle": "Most szól",
+  "@nowPlayingScreenTitle": {
+    "description": "A 'Most szól' képernyő címe."
+  },
+  "nowPlayingScreenNoEpisode": "Jelenleg nincs lejátszott epizód.",
+  "@nowPlayingScreenNoEpisode": {
+    "description": "Üzenet a 'Most szól' képernyőn, ha nincs kiválasztott epizód."
+  },
+
+  "durationInHoursAndMinutes": "{hours} óra {minutes} perc",
+  "@durationInHoursAndMinutes": {
+    "description": "Formátum egy időtartamhoz órákkal és percekkel. Példa: 1 óra 23 perc",
+    "placeholders": {
+      "hours": {
+        "type": "int",
+        "example": "1"
+      },
+      "minutes": {
+        "type": "int",
+        "example": "23"
+      }
+    }
+  },
+  "durationInMinutes": "{minutes} perc",
+  "@durationInMinutes": {
+    "description": "Formátum egy időtartamhoz, ami csak perceket tartalmaz. Példa: 45 perc",
+    "placeholders": {
+      "minutes": {
+        "type": "int",
+        "example": "45"
+      }
+    }
+  },
+
+  "podcastNotFoundError": "Sajnos a kiválasztott műsor nem található.",
+  "@podcastNotFoundError": {
+    "description": "Hibaüzenet, ha egy listából kiválasztott műsort nem sikerül lekérni."
   }
 
 }

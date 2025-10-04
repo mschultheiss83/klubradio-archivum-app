@@ -1,0 +1,985 @@
+{
+  "generatedAt": "2025-10-03T22:07:35.645210",
+  "latestPodcasts": [
+    {
+      "id": "14",
+      "title": "Esti gyors-részlet",
+      "description": "Nemes Dániel kiberbiztonsági szakértő, Izrael-szakértő – Míg Izrael a közvetítő számos javaslatát elfogadta a tűzszünetre vonatkozóan, a palesztinok mindegyikre nemet mondtak",
+      "coverImageUrl": "https://www.klubradio.hu/data/szenasisandora2_focuspoint_340x340.jpg",
+      "episodeCount": 1715,
+      "hosts": [],
+      "latestEpisode": {
+        "id": "2417",
+        "podcastId": "null",
+        "title": "Esti gyors-részlet",
+        "description": "",
+        "audioUrl": "",
+        "publishedAt": "2025-10-03T22:07:28.440427",
+        "showDate": "",
+        "duration": 2,
+        "imageUrl": null,
+        "hosts": [],
+        "isFavourite": false,
+        "downloadStatus": "notDownloaded",
+        "downloadProgress": 0.0,
+        "localFilePath": null
+      },
+      "lastUpdated": "2025-10-03T19:16:07.755328Z",
+      "isSubscribed": false,
+      "isTrending": false,
+      "isRecommended": false
+    },
+    {
+      "id": "3",
+      "title": "Szaniszló Sándor - Fővárosi Közgyűlés 2024.10.04.",
+      "description": "A Klubrádió hírműsora. Tudósítások, hírek, interjúk, riportok.",
+      "coverImageUrl": "https://www.klubradio.hu/data/Klubradio_musorok_boritoi/KR-adasok-borito.001-a-lenyeg_focuspoint_340x340.jpeg",
+      "episodeCount": 8611,
+      "hosts": [],
+      "latestEpisode": {
+        "id": "44125",
+        "podcastId": "null",
+        "title": "Szaniszló Sándor - Fővárosi Közgyűlés 2024.10.04.",
+        "description": "",
+        "audioUrl": "",
+        "publishedAt": "2025-10-03T22:07:28.447425",
+        "showDate": "",
+        "duration": 0,
+        "imageUrl": null,
+        "hosts": [],
+        "isFavourite": false,
+        "downloadStatus": "notDownloaded",
+        "downloadProgress": 0.0,
+        "localFilePath": null
+      },
+      "lastUpdated": "2025-10-03T18:27:52.148560Z",
+      "isSubscribed": false,
+      "isTrending": false,
+      "isRecommended": false
+    },
+    {
+      "id": "201",
+      "title": "Világháló",
+      "description": "És a koronás fők hol nyaraltak?\n\nBalhék a holland uralkodóház hosszú üdülése kapcsán – Kárpáti János, újságíró, a Klubrádió munkatársa\n\nA brit királyi család görög vakációja, és Vancék viharosabb angliai pihenése  – R. Hahn Veronika a Népszava londoni tudósítója\n\nMerre pihennek a skandináv monarchák? – György Gábor, a Klubrádió svédországi tudósítója",
+      "coverImageUrl": "https://www.klubradio.hu/data/Klubradio_musorok_boritoi/ujmusorok.003_focuspoint_340x340.jpeg",
+      "episodeCount": 134,
+      "hosts": [],
+      "latestEpisode": {
+        "id": "52391",
+        "podcastId": "null",
+        "title": "Világháló",
+        "description": "",
+        "audioUrl": "",
+        "publishedAt": "2025-10-03T22:07:28.447425",
+        "showDate": "",
+        "duration": 24,
+        "imageUrl": null,
+        "hosts": [
+          "Műsorvezető:\n\nBenda László"
+        ],
+        "isFavourite": false,
+        "downloadStatus": "notDownloaded",
+        "downloadProgress": 0.0,
+        "localFilePath": null
+      },
+      "lastUpdated": "2025-10-03T16:24:22.242657Z",
+      "isSubscribed": false,
+      "isTrending": false,
+      "isRecommended": false
+    },
+    {
+      "id": "34",
+      "title": "Megbeszéljük-részlet/ Interjú Haraszti Miklóssal, 2020.05.13.",
+      "description": "Bolgár György és a hallgatók negyed évszázados műsora, amely 2002 januárja óta hallható a Klubrádióban. Beszéljük meg mi történt az utcánkban, a városunkban, az országban, a nagyvilágban...\n\nA műsor telefonszámai: +36 1 387-8452 és +36 1 387-8453",
+      "coverImageUrl": "https://www.klubradio.hu/data/kuncze_focuspoint_340x340.jpg?key=OWUxNWUxYWFhYjQ1MDY3OTY2ZDg4NTBkMTUwODc5YTU4YWY1NTdlYjgyN2YzZTQ3NjgxZTMyODRiZDUzMjRhNg==",
+      "episodeCount": 1710,
+      "hosts": [],
+      "latestEpisode": {
+        "id": "10537",
+        "podcastId": "null",
+        "title": "Megbeszéljük-részlet/ Interjú Haraszti Miklóssal, 2020.05.13.",
+        "description": "",
+        "audioUrl": "",
+        "publishedAt": "2025-10-03T22:07:28.447425",
+        "showDate": "",
+        "duration": 12,
+        "imageUrl": null,
+        "hosts": [],
+        "isFavourite": false,
+        "downloadStatus": "notDownloaded",
+        "downloadProgress": 0.0,
+        "localFilePath": null
+      },
+      "lastUpdated": "2025-10-03T16:24:22.242657Z",
+      "isSubscribed": false,
+      "isTrending": false,
+      "isRecommended": false
+    },
+    {
+      "id": "217",
+      "title": "A jövő hangjai - generációk találkozása",
+      "description": "A hetente egy órában jelentkező műsor a 30 év alattiak, vagyis elsősorban a Z- és Alfa-generáció magyarországi helyzetével foglalkozik. Az egyes adások témái olyan jelenségek, amik a mai tizen- és huszonévesek mindennapjait érintik, mint a munkavállalás, a fenntarthatóság és környezetvédelem, a mentális egészség, szórakoztatóipar, közösségi média, stb. A műsor célja, hogy a beszélgetéseken keresztül személyes benyomásokon és tapasztalatokon alapuló képet adhasson a fiatal felnőttek gondolatairól és helyéről a világban. A meghívott vendégek olyan fiatal felnőttek, akik kapcsolódnak az aktuális témához, és lehetőség szerint inkább beszélgetőpartnerként vannak jelen, mint interjúalanyként, ahogyan a műsorvezető is kilép a klasszikus kérdező-szerepből, hogy egy kötetlen beszélgetés legyen a végeredmény.",
+      "coverImageUrl": "https://www.klubradio.hu/data/musorkepek/jovohangjai_ma_solat.002_focuspoint_340x340.jpeg",
+      "episodeCount": 87,
+      "hosts": [],
+      "latestEpisode": {
+        "id": "52389",
+        "podcastId": "null",
+        "title": "A jövő hangjai - generációk találkozása",
+        "description": "",
+        "audioUrl": "",
+        "publishedAt": "2025-10-03T22:07:28.447425",
+        "showDate": "",
+        "duration": 51,
+        "imageUrl": null,
+        "hosts": [
+          "Műsorvezető:\n\nPenke Bence"
+        ],
+        "isFavourite": false,
+        "downloadStatus": "notDownloaded",
+        "downloadProgress": 0.0,
+        "localFilePath": null
+      },
+      "lastUpdated": "2025-10-03T16:24:22.242657Z",
+      "isSubscribed": false,
+      "isTrending": false,
+      "isRecommended": false
+    }
+  ],
+  "trendingPodcasts": [
+    {
+      "id": "75",
+      "title": "Ötös - Péterfyékkel",
+      "description": "Irodalom, kultúra, közélet... és minden ami belefér. Próbáltunk a zárt stúdióból kilépni a világba...",
+      "coverImageUrl": "https://www.klubradio.hu/data/peterffygergely1_focuspoint_340x340.jpg",
+      "episodeCount": 57,
+      "hosts": [],
+      "latestEpisode": {
+        "id": "8538",
+        "podcastId": "null",
+        "title": "Ötös - Péterfyékkel",
+        "description": "",
+        "audioUrl": "",
+        "publishedAt": "2025-10-03T22:07:28.833181",
+        "showDate": "",
+        "duration": 91,
+        "imageUrl": null,
+        "hosts": [
+          "Műsorvezető:\n\nPéterfy Gergely"
+        ],
+        "isFavourite": false,
+        "downloadStatus": "notDownloaded",
+        "downloadProgress": 0.0,
+        "localFilePath": null
+      },
+      "lastUpdated": "2025-09-25T12:38:39.299090Z",
+      "isSubscribed": false,
+      "isTrending": true,
+      "isRecommended": false
+    },
+    {
+      "id": "2083",
+      "title": "Y - Galavits Patrik generációs műsora",
+      "description": "",
+      "coverImageUrl": "",
+      "episodeCount": 1,
+      "hosts": [],
+      "latestEpisode": {
+        "id": "2083",
+        "podcastId": "null",
+        "title": "Y - Galavits Patrik generációs műsora",
+        "description": "",
+        "audioUrl": "",
+        "publishedAt": "2025-10-03T22:07:28.833181",
+        "showDate": "",
+        "duration": 46,
+        "imageUrl": null,
+        "hosts": [
+          "Műsorvezető:\n\nGalavits Patrik"
+        ],
+        "isFavourite": false,
+        "downloadStatus": "notDownloaded",
+        "downloadProgress": 0.0,
+        "localFilePath": null
+      },
+      "lastUpdated": "2025-09-25T12:38:39.078539Z",
+      "isSubscribed": false,
+      "isTrending": true,
+      "isRecommended": false
+    },
+    {
+      "id": "2042",
+      "title": "Ez itt a kérdés",
+      "description": "",
+      "coverImageUrl": "",
+      "episodeCount": 1,
+      "hosts": [],
+      "latestEpisode": {
+        "id": "2042",
+        "podcastId": "null",
+        "title": "Ez itt a kérdés",
+        "description": "",
+        "audioUrl": "",
+        "publishedAt": "2025-10-03T22:07:28.833181",
+        "showDate": "",
+        "duration": 20,
+        "imageUrl": null,
+        "hosts": [
+          "Műsorvezetők:\n\nLampé Ágnes\nNeuman Gábor"
+        ],
+        "isFavourite": false,
+        "downloadStatus": "notDownloaded",
+        "downloadProgress": 0.0,
+        "localFilePath": null
+      },
+      "lastUpdated": "2025-09-25T12:38:39.078539Z",
+      "isSubscribed": false,
+      "isTrending": true,
+      "isRecommended": false
+    },
+    {
+      "id": "13",
+      "title": "Élőben a városból 190612",
+      "description": "Az Élőben a városból 2.0 egy autós és egy közlekedési műsor egyvelege. Alcíme sokat elárul: Autótól a Zebráig, A-tól Z-ig minden benne van, ami aktuális és érdekes kérdés a közlekedésünkkel kapcsolatban.",
+      "coverImageUrl": "https://www.klubradio.hu/data/tanulovezeto_focuspoint_340x340.jpg",
+      "episodeCount": 348,
+      "hosts": [],
+      "latestEpisode": {
+        "id": "3934",
+        "podcastId": "null",
+        "title": "Élőben a városból 190612",
+        "description": "",
+        "audioUrl": "",
+        "publishedAt": "2025-10-03T22:07:28.833181",
+        "showDate": "",
+        "duration": 46,
+        "imageUrl": null,
+        "hosts": [],
+        "isFavourite": false,
+        "downloadStatus": "notDownloaded",
+        "downloadProgress": 0.0,
+        "localFilePath": null
+      },
+      "lastUpdated": "2025-10-01T14:26:03.798258Z",
+      "isSubscribed": false,
+      "isTrending": true,
+      "isRecommended": false
+    },
+    {
+      "id": "5375",
+      "title": "Y - Galavits Patrik generációs műsora",
+      "description": "",
+      "coverImageUrl": "",
+      "episodeCount": 1,
+      "hosts": [],
+      "latestEpisode": {
+        "id": "5375",
+        "podcastId": "null",
+        "title": "Y - Galavits Patrik generációs műsora",
+        "description": "",
+        "audioUrl": "",
+        "publishedAt": "2025-10-03T22:07:28.833181",
+        "showDate": "",
+        "duration": 48,
+        "imageUrl": null,
+        "hosts": [
+          "Műsorvezető:\n\nGalavits Patrik"
+        ],
+        "isFavourite": false,
+        "downloadStatus": "notDownloaded",
+        "downloadProgress": 0.0,
+        "localFilePath": null
+      },
+      "lastUpdated": "2025-09-25T12:38:38.107640Z",
+      "isSubscribed": false,
+      "isTrending": true,
+      "isRecommended": false
+    },
+    {
+      "id": "144",
+      "title": "A szabadság hangjai 2.",
+      "description": "A Klubrrádió 1956-os emlékműsora.",
+      "coverImageUrl": "https://www.klubradio.hu/data/1956okt23_fortepan_focuspoint_340x340.jpg",
+      "episodeCount": 2,
+      "hosts": [],
+      "latestEpisode": {
+        "id": "13717",
+        "podcastId": "null",
+        "title": "A szabadság hangjai 2.",
+        "description": "",
+        "audioUrl": "",
+        "publishedAt": "2025-10-03T22:07:28.833181",
+        "showDate": "",
+        "duration": 47,
+        "imageUrl": null,
+        "hosts": [],
+        "isFavourite": false,
+        "downloadStatus": "notDownloaded",
+        "downloadProgress": 0.0,
+        "localFilePath": null
+      },
+      "lastUpdated": "2025-09-25T12:38:35.792237Z",
+      "isSubscribed": false,
+      "isTrending": true,
+      "isRecommended": false
+    },
+    {
+      "id": "1817",
+      "title": "Y - Galavits Patrik generációs műsora",
+      "description": "",
+      "coverImageUrl": "",
+      "episodeCount": 1,
+      "hosts": [],
+      "latestEpisode": {
+        "id": "1817",
+        "podcastId": "null",
+        "title": "Y - Galavits Patrik generációs műsora",
+        "description": "",
+        "audioUrl": "",
+        "publishedAt": "2025-10-03T22:07:28.833181",
+        "showDate": "",
+        "duration": 47,
+        "imageUrl": null,
+        "hosts": [
+          "Műsorvezető:\n\nGalavits Patrik"
+        ],
+        "isFavourite": false,
+        "downloadStatus": "notDownloaded",
+        "downloadProgress": 0.0,
+        "localFilePath": null
+      },
+      "lastUpdated": "2025-09-25T12:38:39.299090Z",
+      "isSubscribed": false,
+      "isTrending": true,
+      "isRecommended": false
+    },
+    {
+      "id": "93",
+      "title": "Művészbejáró",
+      "description": "A Művészbejáró elsősorban színházi magazin, amiben minden színpadi műfaj, a próza, az opera, a musical, az operett, a tánc, a báb, a varieté, a cirkusz, képviselteti magát. Neves művészek, feltörekvő ifjak ugyanúgy megszólalnak benne mint nélkülözhetetlen háttéremberek. Törekszünk az oldott hangulatú, tartalmas beszélgetésekre, fontos teljesítmények, életutak bemutatására, színházi szakmák megismertetésére. Bóta Gábor műsora.",
+      "coverImageUrl": "https://www.klubradio.hu/data/kristofkrisztiancirkuszc2_focuspoint_340x340.jpg",
+      "episodeCount": 338,
+      "hosts": [],
+      "latestEpisode": {
+        "id": "52425",
+        "podcastId": "null",
+        "title": "Művészbejáró",
+        "description": "",
+        "audioUrl": "",
+        "publishedAt": "2025-10-03T22:07:28.833181",
+        "showDate": "",
+        "duration": 53,
+        "imageUrl": null,
+        "hosts": [
+          "Műsorvezető:\n\nBóta Gábor"
+        ],
+        "isFavourite": false,
+        "downloadStatus": "notDownloaded",
+        "downloadProgress": 0.0,
+        "localFilePath": null
+      },
+      "lastUpdated": "2025-09-28T18:31:20.319965Z",
+      "isSubscribed": false,
+      "isTrending": true,
+      "isRecommended": false
+    },
+    {
+      "id": "94",
+      "title": "Katonadolog",
+      "description": "A Katonadolog a Klubrádió egykori műsora, amelynek utolsó adását 2019. szeptember 8-án sugároztuk.",
+      "coverImageUrl": "https://www.klubradio.hu/data/discover_focuspoint_340x340.jpg",
+      "episodeCount": 25,
+      "hosts": [],
+      "latestEpisode": {
+        "id": "5722",
+        "podcastId": "null",
+        "title": "Katonadolog",
+        "description": "",
+        "audioUrl": "",
+        "publishedAt": "2025-10-03T22:07:28.834181",
+        "showDate": "",
+        "duration": 52,
+        "imageUrl": null,
+        "hosts": [
+          "Műsorvezető:\n\nBorgula András"
+        ],
+        "isFavourite": false,
+        "downloadStatus": "notDownloaded",
+        "downloadProgress": 0.0,
+        "localFilePath": null
+      },
+      "lastUpdated": "2025-09-25T12:38:39.078539Z",
+      "isSubscribed": false,
+      "isTrending": true,
+      "isRecommended": false
+    },
+    {
+      "id": "34",
+      "title": "Megbeszéljük-részlet/ Interjú Haraszti Miklóssal, 2020.05.13.",
+      "description": "Bolgár György és a hallgatók negyed évszázados műsora, amely 2002 januárja óta hallható a Klubrádióban. Beszéljük meg mi történt az utcánkban, a városunkban, az országban, a nagyvilágban...\n\nA műsor telefonszámai: +36 1 387-8452 és +36 1 387-8453",
+      "coverImageUrl": "https://www.klubradio.hu/data/kuncze_focuspoint_340x340.jpg?key=OWUxNWUxYWFhYjQ1MDY3OTY2ZDg4NTBkMTUwODc5YTU4YWY1NTdlYjgyN2YzZTQ3NjgxZTMyODRiZDUzMjRhNg==",
+      "episodeCount": 1710,
+      "hosts": [],
+      "latestEpisode": {
+        "id": "10537",
+        "podcastId": "null",
+        "title": "Megbeszéljük-részlet/ Interjú Haraszti Miklóssal, 2020.05.13.",
+        "description": "",
+        "audioUrl": "",
+        "publishedAt": "2025-10-03T22:07:28.834181",
+        "showDate": "",
+        "duration": 12,
+        "imageUrl": null,
+        "hosts": [],
+        "isFavourite": false,
+        "downloadStatus": "notDownloaded",
+        "downloadProgress": 0.0,
+        "localFilePath": null
+      },
+      "lastUpdated": "2025-10-03T16:24:22.242657Z",
+      "isSubscribed": false,
+      "isTrending": true,
+      "isRecommended": false
+    }
+  ],
+  "recommendedPodcasts": [
+    {
+      "id": "14",
+      "title": "Esti gyors-részlet",
+      "description": "Nemes Dániel kiberbiztonsági szakértő, Izrael-szakértő – Míg Izrael a közvetítő számos javaslatát elfogadta a tűzszünetre vonatkozóan, a palesztinok mindegyikre nemet mondtak",
+      "coverImageUrl": "https://www.klubradio.hu/data/szenasisandora2_focuspoint_340x340.jpg",
+      "episodeCount": 1715,
+      "hosts": [],
+      "latestEpisode": {
+        "id": "2417",
+        "podcastId": "null",
+        "title": "Esti gyors-részlet",
+        "description": "",
+        "audioUrl": "",
+        "publishedAt": "2025-10-03T22:07:35.086738",
+        "showDate": "",
+        "duration": 2,
+        "imageUrl": null,
+        "hosts": [],
+        "isFavourite": false,
+        "downloadStatus": "notDownloaded",
+        "downloadProgress": 0.0,
+        "localFilePath": null
+      },
+      "lastUpdated": "2025-10-03T19:16:07.755328Z",
+      "isSubscribed": false,
+      "isTrending": false,
+      "isRecommended": true
+    },
+    {
+      "id": "3",
+      "title": "Szaniszló Sándor - Fővárosi Közgyűlés 2024.10.04.",
+      "description": "A Klubrádió hírműsora. Tudósítások, hírek, interjúk, riportok.",
+      "coverImageUrl": "https://www.klubradio.hu/data/Klubradio_musorok_boritoi/KR-adasok-borito.001-a-lenyeg_focuspoint_340x340.jpeg",
+      "episodeCount": 8611,
+      "hosts": [],
+      "latestEpisode": {
+        "id": "44125",
+        "podcastId": "null",
+        "title": "Szaniszló Sándor - Fővárosi Közgyűlés 2024.10.04.",
+        "description": "",
+        "audioUrl": "",
+        "publishedAt": "2025-10-03T22:07:35.086738",
+        "showDate": "",
+        "duration": 0,
+        "imageUrl": null,
+        "hosts": [],
+        "isFavourite": false,
+        "downloadStatus": "notDownloaded",
+        "downloadProgress": 0.0,
+        "localFilePath": null
+      },
+      "lastUpdated": "2025-10-03T18:27:52.148560Z",
+      "isSubscribed": false,
+      "isTrending": false,
+      "isRecommended": true
+    },
+    {
+      "id": "201",
+      "title": "Világháló",
+      "description": "És a koronás fők hol nyaraltak?\n\nBalhék a holland uralkodóház hosszú üdülése kapcsán – Kárpáti János, újságíró, a Klubrádió munkatársa\n\nA brit királyi család görög vakációja, és Vancék viharosabb angliai pihenése  – R. Hahn Veronika a Népszava londoni tudósítója\n\nMerre pihennek a skandináv monarchák? – György Gábor, a Klubrádió svédországi tudósítója",
+      "coverImageUrl": "https://www.klubradio.hu/data/Klubradio_musorok_boritoi/ujmusorok.003_focuspoint_340x340.jpeg",
+      "episodeCount": 134,
+      "hosts": [],
+      "latestEpisode": {
+        "id": "52391",
+        "podcastId": "null",
+        "title": "Világháló",
+        "description": "",
+        "audioUrl": "",
+        "publishedAt": "2025-10-03T22:07:35.086738",
+        "showDate": "",
+        "duration": 24,
+        "imageUrl": null,
+        "hosts": [
+          "Műsorvezető:\n\nBenda László"
+        ],
+        "isFavourite": false,
+        "downloadStatus": "notDownloaded",
+        "downloadProgress": 0.0,
+        "localFilePath": null
+      },
+      "lastUpdated": "2025-10-03T16:24:22.242657Z",
+      "isSubscribed": false,
+      "isTrending": false,
+      "isRecommended": true
+    },
+    {
+      "id": "200",
+      "title": "Azt beszélik",
+      "description": "A Borsod-Abaúj-Zemplén megyei Csenyéte évtizedek óta őrzi az ország legszegényebb települése címet. Idén sem történt másként, a lista megjelenése után Bethlen Tamás, a borsod24.hu munkatársa járt ott.",
+      "coverImageUrl": "https://www.klubradio.hu/data/Klubradio_musorok_boritoi/ujmusorok.001_focuspoint_340x340.jpeg",
+      "episodeCount": 134,
+      "hosts": [],
+      "latestEpisode": {
+        "id": "52390",
+        "podcastId": "null",
+        "title": "Azt beszélik",
+        "description": "",
+        "audioUrl": "",
+        "publishedAt": "2025-10-03T22:07:35.086738",
+        "showDate": "",
+        "duration": 25,
+        "imageUrl": null,
+        "hosts": [],
+        "isFavourite": false,
+        "downloadStatus": "notDownloaded",
+        "downloadProgress": 0.0,
+        "localFilePath": null
+      },
+      "lastUpdated": "2025-10-03T16:24:22.242657Z",
+      "isSubscribed": false,
+      "isTrending": false,
+      "isRecommended": true
+    },
+    {
+      "id": "15",
+      "title": "Eurozóna - részlet 08.27. Csicsmann László",
+      "description": "A Klubrádió külpolitikai magazinműsora. Állandó témáink az Európai Unió, benne Magyarország jelene és jövője, valamint a nagyvilág politikai, gazdasági, és társadalmi folyamatai.",
+      "coverImageUrl": "https://www.klubradio.hu/data/Vladimir_Putin_wiki2_focuspoint_340x340.jpg",
+      "episodeCount": 353,
+      "hosts": [],
+      "latestEpisode": {
+        "id": "19519",
+        "podcastId": "null",
+        "title": "Eurozóna - részlet 08.27. Csicsmann László",
+        "description": "",
+        "audioUrl": "",
+        "publishedAt": "2025-10-03T22:07:35.086738",
+        "showDate": "",
+        "duration": 18,
+        "imageUrl": null,
+        "hosts": [],
+        "isFavourite": false,
+        "downloadStatus": "notDownloaded",
+        "downloadProgress": 0.0,
+        "localFilePath": null
+      },
+      "lastUpdated": "2025-10-03T16:24:22.242657Z",
+      "isSubscribed": false,
+      "isTrending": false,
+      "isRecommended": true
+    },
+    {
+      "id": "34",
+      "title": "Megbeszéljük-részlet/ Interjú Haraszti Miklóssal, 2020.05.13.",
+      "description": "Bolgár György és a hallgatók negyed évszázados műsora, amely 2002 januárja óta hallható a Klubrádióban. Beszéljük meg mi történt az utcánkban, a városunkban, az országban, a nagyvilágban...\n\nA műsor telefonszámai: +36 1 387-8452 és +36 1 387-8453",
+      "coverImageUrl": "https://www.klubradio.hu/data/kuncze_focuspoint_340x340.jpg?key=OWUxNWUxYWFhYjQ1MDY3OTY2ZDg4NTBkMTUwODc5YTU4YWY1NTdlYjgyN2YzZTQ3NjgxZTMyODRiZDUzMjRhNg==",
+      "episodeCount": 1710,
+      "hosts": [],
+      "latestEpisode": {
+        "id": "10537",
+        "podcastId": "null",
+        "title": "Megbeszéljük-részlet/ Interjú Haraszti Miklóssal, 2020.05.13.",
+        "description": "",
+        "audioUrl": "",
+        "publishedAt": "2025-10-03T22:07:35.086738",
+        "showDate": "",
+        "duration": 12,
+        "imageUrl": null,
+        "hosts": [],
+        "isFavourite": false,
+        "downloadStatus": "notDownloaded",
+        "downloadProgress": 0.0,
+        "localFilePath": null
+      },
+      "lastUpdated": "2025-10-03T16:24:22.242657Z",
+      "isSubscribed": false,
+      "isTrending": false,
+      "isRecommended": true
+    },
+    {
+      "id": "217",
+      "title": "A jövő hangjai - generációk találkozása",
+      "description": "A hetente egy órában jelentkező műsor a 30 év alattiak, vagyis elsősorban a Z- és Alfa-generáció magyarországi helyzetével foglalkozik. Az egyes adások témái olyan jelenségek, amik a mai tizen- és huszonévesek mindennapjait érintik, mint a munkavállalás, a fenntarthatóság és környezetvédelem, a mentális egészség, szórakoztatóipar, közösségi média, stb. A műsor célja, hogy a beszélgetéseken keresztül személyes benyomásokon és tapasztalatokon alapuló képet adhasson a fiatal felnőttek gondolatairól és helyéről a világban. A meghívott vendégek olyan fiatal felnőttek, akik kapcsolódnak az aktuális témához, és lehetőség szerint inkább beszélgetőpartnerként vannak jelen, mint interjúalanyként, ahogyan a műsorvezető is kilép a klasszikus kérdező-szerepből, hogy egy kötetlen beszélgetés legyen a végeredmény.",
+      "coverImageUrl": "https://www.klubradio.hu/data/musorkepek/jovohangjai_ma_solat.002_focuspoint_340x340.jpeg",
+      "episodeCount": 87,
+      "hosts": [],
+      "latestEpisode": {
+        "id": "52389",
+        "podcastId": "null",
+        "title": "A jövő hangjai - generációk találkozása",
+        "description": "",
+        "audioUrl": "",
+        "publishedAt": "2025-10-03T22:07:35.086738",
+        "showDate": "",
+        "duration": 51,
+        "imageUrl": null,
+        "hosts": [
+          "Műsorvezető:\n\nPenke Bence"
+        ],
+        "isFavourite": false,
+        "downloadStatus": "notDownloaded",
+        "downloadProgress": 0.0,
+        "localFilePath": null
+      },
+      "lastUpdated": "2025-10-03T16:24:22.242657Z",
+      "isSubscribed": false,
+      "isTrending": false,
+      "isRecommended": true
+    },
+    {
+      "id": "216",
+      "title": "Ötös – Murányi Tündével és Kálid Artúrral",
+      "description": "Elsőként Juhász Nóra képzőművészt láttuk vendégül, aki festményein és installációiban játékosan ötvözi a tervezettséget és a fantáziát. Legújabb kiállítása, az Érzelmi Erőforrások Minisztériuma, a hétköznapi abszurditást és a társadalmi kérdéseket egyaránt ironikus, interaktív formában mutatja be. Erről beszélgettünk vele.",
+      "coverImageUrl": "https://www.klubradio.hu/data/Klubradio_musorok_boritoi/ujadasok-KR-podcast-covers.002_focuspoint_340x340.jpeg",
+      "episodeCount": 92,
+      "hosts": [],
+      "latestEpisode": {
+        "id": "52384",
+        "podcastId": "null",
+        "title": "Ötös – Murányi Tündével és Kálid Artúrral",
+        "description": "",
+        "audioUrl": "",
+        "publishedAt": "2025-10-03T22:07:35.086738",
+        "showDate": "",
+        "duration": 97,
+        "imageUrl": null,
+        "hosts": [
+          "Műsorvezetők:\n\nMurányi Tünde\nKálid Artúr"
+        ],
+        "isFavourite": false,
+        "downloadStatus": "notDownloaded",
+        "downloadProgress": 0.0,
+        "localFilePath": null
+      },
+      "lastUpdated": "2025-10-03T12:36:51.047654Z",
+      "isSubscribed": false,
+      "isTrending": false,
+      "isRecommended": true
+    },
+    {
+      "id": "91",
+      "title": "Ez itt a forum 190612",
+      "description": "Ossza meg véleményét velünk a minden hétköznap más-más felvetett témáról. Hívjon minket és beszélgessen műsorvezetőnkkel!",
+      "coverImageUrl": "https://www.klubradio.hu/data/sound-speaker-radio-microphone_focuspoint_340x340.jpg",
+      "episodeCount": 1635,
+      "hosts": [],
+      "latestEpisode": {
+        "id": "3931",
+        "podcastId": "null",
+        "title": "Ez itt a forum 190612",
+        "description": "",
+        "audioUrl": "",
+        "publishedAt": "2025-10-03T22:07:35.086738",
+        "showDate": "",
+        "duration": 35,
+        "imageUrl": null,
+        "hosts": [],
+        "isFavourite": false,
+        "downloadStatus": "notDownloaded",
+        "downloadProgress": 0.0,
+        "localFilePath": null
+      },
+      "lastUpdated": "2025-10-03T12:36:51.047654Z",
+      "isSubscribed": false,
+      "isTrending": false,
+      "isRecommended": true
+    },
+    {
+      "id": "78",
+      "title": "Reggeli személy 19.02.27 Simon Gergely",
+      "description": "Para-Kovács Imre vendége Kovách Imre szociológus, a Társadalomtudományi Kutatóközpont kutatóprofesszora, az MTA levelező tagja.",
+      "coverImageUrl": "https://www.klubradio.hu/data/Vladimir_Putin_wiki2_focuspoint_340x340.jpg",
+      "episodeCount": 1677,
+      "hosts": [],
+      "latestEpisode": {
+        "id": "2017",
+        "podcastId": "null",
+        "title": "Reggeli személy 19.02.27 Simon Gergely",
+        "description": "",
+        "audioUrl": "",
+        "publishedAt": "2025-10-03T22:07:35.086738",
+        "showDate": "",
+        "duration": 34,
+        "imageUrl": null,
+        "hosts": [],
+        "isFavourite": false,
+        "downloadStatus": "notDownloaded",
+        "downloadProgress": 0.0,
+        "localFilePath": null
+      },
+      "lastUpdated": "2025-10-03T10:20:23.079452Z",
+      "isSubscribed": false,
+      "isTrending": false,
+      "isRecommended": true
+    }
+  ],
+  "latestEpisodes": [
+    {
+      "id": "52572",
+      "podcastId": "14",
+      "title": "Esti gyors",
+      "description": "Mi történt ma? \nNapzáró objektív hírháttér műsor hétköznaponként 18 órától 19 óráig. Minden, ami mai, friss és ropogós, legyen az belpolitika, külpolitika, gazdaság, kultúra vagy éppen sport…",
+      "audioUrl": "https://www.klubradio.hu/data/hanganyagok/2025/10/3/archivum_estigyors_251003.mp3",
+      "publishedAt": "2025-10-03T19:16:07.755328Z",
+      "showDate": "2025. október 03., péntek 18:15",
+      "duration": 3000,
+      "imageUrl": "https://www.klubradio.hu/data/Klubradio_musorok_boritoi/KR-adasok-borito.012-esti-gyors_focuspoint_340x340.jpeg",
+      "hosts": [
+        "Műsorvezetők:\n\nKárpáti Iván\nSelmeci János\nKárpáti János\nHardy Mihály\nDési János\nSzénási Sándor\nRózsa Péter"
+      ],
+      "isFavourite": false,
+      "downloadStatus": "notDownloaded",
+      "downloadProgress": 0.0,
+      "localFilePath": null
+    },
+    {
+      "id": "52543",
+      "podcastId": "14",
+      "title": "Esti gyors",
+      "description": "Juhász Péter, az Együtt Korszakváltók Pártja volt elnöke, korábbi V. kerületi önkormányzati képviselő, influenszer – Házkutatást tartottak nála, elvették a telefonját is",
+      "audioUrl": "https://www.klubradio.hu/data/hanganyagok/2025/10/2/archivum_estigyors_251002.mp3",
+      "publishedAt": "2025-10-02T18:34:58.068145Z",
+      "showDate": "2025. október 02., csütörtök 18:15",
+      "duration": 2880,
+      "imageUrl": "https://www.klubradio.hu/data/Klubradio_musorok_boritoi/KR-adasok-borito.012-esti-gyors_focuspoint_340x340.jpeg",
+      "hosts": [
+        "Műsorvezetők:\n\nKárpáti Iván\nSelmeci János\nKárpáti János\nHardy Mihály\nDési János\nSzénási Sándor\nRózsa Péter"
+      ],
+      "isFavourite": false,
+      "downloadStatus": "notDownloaded",
+      "downloadProgress": 0.0,
+      "localFilePath": null
+    },
+    {
+      "id": "52511",
+      "podcastId": "14",
+      "title": "Esti gyors",
+      "description": "Angyal József okleveles adószakértő – Adómentessé váltak a háromgyerekes anyák",
+      "audioUrl": "https://www.klubradio.hu/data/hanganyagok/2025/10/1/archivum_estigyors_251001.mp3",
+      "publishedAt": "2025-10-01T18:35:40.794928Z",
+      "showDate": "2025. október 01., szerda 18:15",
+      "duration": 3060,
+      "imageUrl": "https://www.klubradio.hu/data/Klubradio_musorok_boritoi/KR-adasok-borito.012-esti-gyors_focuspoint_340x340.jpeg",
+      "hosts": [
+        "Műsorvezetők:\n\nKárpáti Iván\nSelmeci János\nKárpáti János\nHardy Mihály\nDési János\nSzénási Sándor\nRózsa Péter"
+      ],
+      "isFavourite": false,
+      "downloadStatus": "notDownloaded",
+      "downloadProgress": 0.0,
+      "localFilePath": null
+    },
+    {
+      "id": "52482",
+      "podcastId": "14",
+      "title": "Esti gyors",
+      "description": "Mi történt ma? \nNapzáró objektív hírháttér műsor hétköznaponként 18 órától 19 óráig. Minden, ami mai, friss és ropogós, legyen az belpolitika, külpolitika, gazdaság, kultúra vagy éppen sport…",
+      "audioUrl": "https://www.klubradio.hu/data/hanganyagok/2025/9/30/archivum_estigyors_250930.mp3",
+      "publishedAt": "2025-09-30T20:27:53.754634Z",
+      "showDate": "2025. szeptember 30., kedd 18:15",
+      "duration": 3060,
+      "imageUrl": "https://www.klubradio.hu/data/Klubradio_musorok_boritoi/KR-adasok-borito.012-esti-gyors_focuspoint_340x340.jpeg",
+      "hosts": [
+        "Műsorvezetők:\n\nKárpáti Iván\nSelmeci János\nKárpáti János\nHardy Mihály\nDési János\nSzénási Sándor\nRózsa Péter"
+      ],
+      "isFavourite": false,
+      "downloadStatus": "notDownloaded",
+      "downloadProgress": 0.0,
+      "localFilePath": null
+    },
+    {
+      "id": "52457",
+      "podcastId": "14",
+      "title": "Esti gyors",
+      "description": "Herczog Mária szociológus, gyermekvédelmi szakember, a Család, Gyermek, Ifjúság Közhasznú Egyesület elnöke – Gyermekotthonok a botrányok fényében",
+      "audioUrl": "https://www.klubradio.hu/data/hanganyagok/2025/9/29/archivum_estigyors_250929.mp3",
+      "publishedAt": "2025-09-29T18:36:25.630542Z",
+      "showDate": "2025. szeptember 29., hétfő 18:15",
+      "duration": 2940,
+      "imageUrl": "https://www.klubradio.hu/data/Klubradio_musorok_boritoi/KR-adasok-borito.012-esti-gyors_focuspoint_340x340.jpeg",
+      "hosts": [
+        "Műsorvezetők:\n\nKárpáti Iván\nSelmeci János\nKárpáti János\nHardy Mihály\nDési János\nSzénási Sándor\nRózsa Péter"
+      ],
+      "isFavourite": false,
+      "downloadStatus": "notDownloaded",
+      "downloadProgress": 0.0,
+      "localFilePath": null
+    },
+    {
+      "id": "52396",
+      "podcastId": "14",
+      "title": "Esti gyors",
+      "description": "Szent-Iványi István külpolitikai szakértő, a Connecte Europe elnöke, volt külügyi államtitkár, egykori szlovén nagykövet – Donald Trump amerikai elnök szerint Magyarország nehéz helyzetben van + Volodimir Zelenszkij ukrán elnök azt állította, hogy magyar felderítő drónok sértették meg Ukrajna légterét",
+      "audioUrl": "https://www.klubradio.hu/data/hanganyagok/2025/9/26/archivum_estigyors_250926.mp3",
+      "publishedAt": "2025-09-26T18:33:58.700904Z",
+      "showDate": "2025. szeptember 26., péntek 18:15",
+      "duration": 2880,
+      "imageUrl": "https://www.klubradio.hu/data/Klubradio_musorok_boritoi/KR-adasok-borito.012-esti-gyors_focuspoint_340x340.jpeg",
+      "hosts": [
+        "Műsorvezetők:\n\nKárpáti Iván\nSelmeci János\nKárpáti János\nHardy Mihály\nDési János\nSzénási Sándor\nRózsa Péter"
+      ],
+      "isFavourite": false,
+      "downloadStatus": "notDownloaded",
+      "downloadProgress": 0.0,
+      "localFilePath": null
+    },
+    {
+      "id": "52366",
+      "podcastId": "14",
+      "title": "Esti gyors",
+      "description": "Polyák Gábor médiajogász, a Mérték Médiaelemző Műhely vezetője – Szőlő utcai-botrány",
+      "audioUrl": "https://www.klubradio.hu/data/hanganyagok/2025/9/25/archivum_estigyors_250925.mp3",
+      "publishedAt": "2025-09-25T20:50:03.831377Z",
+      "showDate": "2025. szeptember 25., csütörtök 18:15",
+      "duration": 3240,
+      "imageUrl": "https://www.klubradio.hu/data/Klubradio_musorok_boritoi/KR-adasok-borito.012-esti-gyors_focuspoint_340x340.jpeg",
+      "hosts": [
+        "Műsorvezetők:\n\nKárpáti Iván\nSelmeci János\nKárpáti János\nHardy Mihály\nDési János\nSzénási Sándor\nRózsa Péter"
+      ],
+      "isFavourite": false,
+      "downloadStatus": "notDownloaded",
+      "downloadProgress": 0.0,
+      "localFilePath": null
+    },
+    {
+      "id": "52339",
+      "podcastId": "14",
+      "title": "Esti gyors",
+      "description": "Józsa Márta, a Klubrádió szerkesztő-műsorvezetője – Blokád az utcákon, heves viták az ülésteremben – a Budapesti közgyűlés is a Szőlő utcai pedofil-botránytól volt hangos",
+      "audioUrl": "https://www.klubradio.hu/data/hanganyagok/2025/9/24/archivum_estigyors_250924.mp3",
+      "publishedAt": "2025-09-25T12:38:22.462023Z",
+      "showDate": "2025. szeptember 24., szerda 18:15",
+      "duration": 2880,
+      "imageUrl": "https://www.klubradio.hu/data/Klubradio_musorok_boritoi/KR-adasok-borito.012-esti-gyors_focuspoint_340x340.jpeg",
+      "hosts": [
+        "Műsorvezetők:\n\nKárpáti Iván\nSelmeci János\nKárpáti János\nHardy Mihály\nDési János\nSzénási Sándor\nRózsa Péter"
+      ],
+      "isFavourite": false,
+      "downloadStatus": "notDownloaded",
+      "downloadProgress": 0.0,
+      "localFilePath": null
+    },
+    {
+      "id": "52312",
+      "podcastId": "14",
+      "title": "Esti gyors",
+      "description": "Jámbor András, a Párbeszéd országgyűlési képviselője – Szőlő utcai pedofilügy",
+      "audioUrl": "https://www.klubradio.hu/data/hanganyagok/2025/9/23/archivum_estigyors_250923.mp3",
+      "publishedAt": "2025-09-25T12:38:22.462023Z",
+      "showDate": "2025. szeptember 23., kedd 18:15",
+      "duration": 2820,
+      "imageUrl": "https://www.klubradio.hu/data/Klubradio_musorok_boritoi/KR-adasok-borito.012-esti-gyors_focuspoint_340x340.jpeg",
+      "hosts": [
+        "Műsorvezetők:\n\nKárpáti Iván\nSelmeci János\nKárpáti János\nHardy Mihály\nDési János\nSzénási Sándor\nRózsa Péter"
+      ],
+      "isFavourite": false,
+      "downloadStatus": "notDownloaded",
+      "downloadProgress": 0.0,
+      "localFilePath": null
+    },
+    {
+      "id": "52288",
+      "podcastId": "14",
+      "title": "Esti gyors",
+      "description": "Tordai Bence országgyűlési képviselő – Felfüggesztette az Országgyűlés hat momentumos képviselő és a párbeszédes Tordai Bence mentelmi jogát",
+      "audioUrl": "https://www.klubradio.hu/data/hanganyagok/2025/9/22/archivum_estigyors_250922.mp3",
+      "publishedAt": "2025-09-25T12:38:22.462023Z",
+      "showDate": "2025. szeptember 22., hétfő 18:15",
+      "duration": 2940,
+      "imageUrl": "https://www.klubradio.hu/data/Klubradio_musorok_boritoi/KR-adasok-borito.012-esti-gyors_focuspoint_340x340.jpeg",
+      "hosts": [
+        "Műsorvezetők:\n\nKárpáti Iván\nSelmeci János\nKárpáti János\nHardy Mihály\nDési János\nSzénási Sándor\nRózsa Péter"
+      ],
+      "isFavourite": false,
+      "downloadStatus": "notDownloaded",
+      "downloadProgress": 0.0,
+      "localFilePath": null
+    }
+  ],
+  "topShows": [
+    {
+      "id": "3",
+      "title": "A lényeg",
+      "count": 8605
+    },
+    {
+      "id": "38",
+      "title": "Reggeli gyors",
+      "count": 1746
+    },
+    {
+      "id": "14",
+      "title": "Esti gyors",
+      "count": 1698
+    },
+    {
+      "id": "34",
+      "title": "Megbeszéljük...",
+      "count": 1694
+    },
+    {
+      "id": "91",
+      "title": "Ezitta Fórum",
+      "count": 1634
+    },
+    {
+      "id": "78",
+      "title": "Reggeli gyors/Reggeli személy",
+      "count": 1446
+    },
+    {
+      "id": "22",
+      "title": "Hetes Stúdió",
+      "count": 357
+    },
+    {
+      "id": "29",
+      "title": "Klubdélelőtt",
+      "count": 352
+    }
+  ],
+  "podcastById": {
+    "id": "3",
+    "title": "Szaniszló Sándor - Fővárosi Közgyűlés 2024.10.04.",
+    "description": "A Klubrádió hírműsora. Tudósítások, hírek, interjúk, riportok.",
+    "coverImageUrl": "https://www.klubradio.hu/data/Klubradio_musorok_boritoi/KR-adasok-borito.001-a-lenyeg_focuspoint_340x340.jpeg",
+    "episodeCount": 8611,
+    "hosts": [],
+    "latestEpisode": {
+      "id": "44125",
+      "podcastId": "null",
+      "title": "Szaniszló Sándor - Fővárosi Közgyűlés 2024.10.04.",
+      "description": "",
+      "audioUrl": "",
+      "publishedAt": "2025-10-03T22:07:35.645210",
+      "showDate": "",
+      "duration": 0,
+      "imageUrl": null,
+      "hosts": [],
+      "isFavourite": false,
+      "downloadStatus": "notDownloaded",
+      "downloadProgress": 0.0,
+      "localFilePath": null
+    },
+    "lastUpdated": "2025-10-03T18:27:52.148560Z",
+    "isSubscribed": false,
+    "isTrending": false,
+    "isRecommended": false
+  }
+}

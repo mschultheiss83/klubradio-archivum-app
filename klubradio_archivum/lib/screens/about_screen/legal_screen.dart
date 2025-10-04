@@ -13,15 +13,6 @@ class LegalScreen extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final textTheme = Theme.of(context).textTheme;
     final cs = Theme.of(context).colorScheme;
-    // Helper for alpha (supports both withValues and withOpacity)
-    Color _alpha(Color c, double a) {
-      try {
-        // ignore: deprecated_member_use
-        return c.withValues(alpha: a);
-      } catch (_) {
-        return c.withOpacity(a);
-      }
-    }
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.aboutScreenLicenseTitle)),

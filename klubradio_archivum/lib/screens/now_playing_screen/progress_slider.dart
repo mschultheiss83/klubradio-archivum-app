@@ -12,8 +12,12 @@ class ProgressSlider extends StatelessWidget {
   Widget build(BuildContext context) {
     final Duration position = provider.currentPosition;
     final Duration total = provider.totalDuration ?? Duration.zero;
-    final double maxSeconds = total.inSeconds > 0 ? total.inSeconds.toDouble() : 1;
-    final double value = position.inSeconds.clamp(0, total.inSeconds).toDouble();
+    final double maxSeconds = total.inSeconds > 0
+        ? total.inSeconds.toDouble()
+        : 1;
+    final double value = position.inSeconds
+        .clamp(0, total.inSeconds)
+        .toDouble();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -28,8 +32,8 @@ class ProgressSlider extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
-            Text(formatDuration(position)),
-            Text(formatDuration(total)),
+            Text(formatDurationPrecise(position)),
+            Text(formatDurationPrecise(total)),
           ],
         ),
       ],

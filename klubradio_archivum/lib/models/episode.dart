@@ -10,6 +10,7 @@ class Episode {
     required this.description,
     required this.audioUrl,
     required this.publishedAt,
+    required this.showDate,
     required this.duration,
     this.imageUrl,
     this.hosts = const <String>[],
@@ -30,6 +31,7 @@ class Episode {
       publishedAt: json['publishedAt'] != null
           ? DateTime.tryParse(json['publishedAt'].toString()) ?? DateTime.now()
           : DateTime.now(),
+      showDate: json['showDate'] as String? ?? '',
       duration: json['duration'] is int
           ? Duration(seconds: json['duration'] as int)
           : _durationFromString(json['duration']?.toString()),
@@ -50,6 +52,7 @@ class Episode {
   final String description;
   final String audioUrl;
   final DateTime publishedAt;
+  final String showDate;
   final Duration duration;
   final String? imageUrl;
   final List<String> hosts;
@@ -65,6 +68,7 @@ class Episode {
     String? description,
     String? audioUrl,
     DateTime? publishedAt,
+    String? showDate,
     Duration? duration,
     String? imageUrl,
     List<String>? hosts,
@@ -80,6 +84,7 @@ class Episode {
       description: description ?? this.description,
       audioUrl: audioUrl ?? this.audioUrl,
       publishedAt: publishedAt ?? this.publishedAt,
+      showDate: showDate ?? this.showDate,
       duration: duration ?? this.duration,
       imageUrl: imageUrl ?? this.imageUrl,
       hosts: hosts ?? List<String>.from(this.hosts),
@@ -98,6 +103,7 @@ class Episode {
       'description': description,
       'audioUrl': audioUrl,
       'publishedAt': publishedAt.toIso8601String(),
+      'showDate': showDate,
       'duration': duration.inSeconds,
       'imageUrl': imageUrl,
       'hosts': hosts,

@@ -371,5 +371,81 @@
       "version": { "type": "String", "example": "1.0.0" },
       "build": { "type": "String", "example": "42" }
     }
+  },
+
+  "podcastInfoCardHostsLabel": "{hostNames}",
+  "@podcastInfoCardHostsLabel": {
+    "description": "Beschriftung für die Liste der Moderatoren auf der Podcast-Informationskarte.",
+    "placeholders": {
+      "hostNames": {
+        "type": "String",
+        "example": "Max Mustermann, Erika Mustermann"
+      }
+    }
+  },
+
+  "podcastDetailScreenErrorMessage": "Fehler beim Laden der Episoden: {errorDetails}",
+  "@podcastDetailScreenErrorMessage": {
+    "description": "Fehlermeldung, wenn das Laden von Episoden für einen Podcast fehlschlägt.",
+    "placeholders": {
+      "errorDetails": {
+        "type": "String",
+        "example": "Netzwerkfehler"
+      }
+    }
+  },
+  "podcastDetailScreenSubscribeButton": "Abonnieren",
+  "@podcastDetailScreenSubscribeButton": {
+    "description": "Text für die Schaltfläche zum Abonnieren eines Podcasts."
+  },
+  "podcastDetailScreenUnsubscribeButton": "Deabonnieren",
+  "@podcastDetailScreenUnsubscribeButton": {
+    "description": "Text für die Schaltfläche zum Deabonnieren eines Podcasts."
+  },
+  "podcastDetailScreenSubscribeSuccess": "Erfolgreich abonniert!",
+  "@podcastDetailScreenSubscribeSuccess": {
+    "description": "Snackbar-Nachricht, die nach erfolgreichem Abonnieren eines Podcasts angezeigt wird."
+  },
+  "podcastDetailScreenUnsubscribeSuccess": "Abonnement erfolgreich beendet!",
+  "@podcastDetailScreenUnsubscribeSuccess": {
+    "description": "Snackbar-Nachricht, die nach erfolgreichem Beenden eines Abonnements angezeigt wird."
+  },
+
+  "nowPlayingScreenTitle": "Aktuelle Wiedergabe",
+  "@nowPlayingScreenTitle": {"description": "Titel für den Bildschirm 'Aktuelle Wiedergabe'."
+  },
+  "nowPlayingScreenNoEpisode": "Aktuell wird keine Episode abgespielt.",
+  "@nowPlayingScreenNoEpisode": {
+    "description": "Nachricht, die auf dem 'Aktuelle Wiedergabe'-Bildschirm angezeigt wird, wenn keine Episode ausgewählt wurde."
+  },
+
+  "durationInHoursAndMinutes": "{hours} Std. {minutes} Min.",
+  "@durationInHoursAndMinutes": {
+    "description": "Formatiert eine Dauer mit Stunden und Minuten. Beispiel: 1 Std. 23 Min.",
+    "placeholders": {
+      "hours": {
+        "type": "int",
+        "example": "1"
+      },
+      "minutes": {
+        "type": "int",
+        "example": "23"
+      }
+    }
+  },
+  "durationInMinutes": "{minutes} Min.",
+  "@durationInMinutes": {
+    "description": "Formatiert eine Dauer nur mit Minuten. Beispiel: 45 Min.",
+    "placeholders": {
+      "minutes": {
+        "type": "int",
+        "example": "45"
+      }
+    }
+  },
+
+  "podcastNotFoundError": "Die ausgewählte Sendung konnte leider nicht gefunden werden.",
+  "@podcastNotFoundError": {
+    "description": "Fehlermeldung, wenn ein aus einer Liste ausgewählter Podcast nicht abgerufen werden kann."
   }
 }

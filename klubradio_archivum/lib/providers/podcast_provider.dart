@@ -263,41 +263,26 @@ class PodcastProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  // In your PodcastProvider class
+  Future<Podcast?> fetchPodcastById(String podcastId) async {
+    try {
+      final podcast = await _apiService.fetchPodcastById(podcastId);
+      return podcast;
+    } catch (e) {
+      print('Error fetching podcast by ID: $e');
+      return null;
+    }
+  }
+
   Future<void> loadTopShows({bool forceRefresh = false}) async {
     if (!forceRefresh && _topShows.isNotEmpty) {
-      // return; // Optionally return if already loaded and no force refresh
+      return; // Optionally return if already loaded and no force refresh
     }
     _isLoadingTopShows = true;
     notifyListeners();
 
     try {
-      // Replace with your actual data fetching logic for top shows
-      // This is where you'd call the service that executes your SQL query
-      // For example: _topShows = await _yourApiService.fetchTopShowsThisYear();
-
-      // --- Dummy Data (replace with actual fetch) ---
-      await Future.delayed(
-        const Duration(milliseconds: 800),
-      ); // Simulate network
-      final List<Map<String, dynamic>> queryResults = [
-        {"title": "A lényeg", "count": 8563},
-        {"title": "Reggeli gyors", "count": 1743},
-        {"title": "Esti gyors", "count": 1691},
-        {"title": "Megbeszéljük...", "count": 1687},
-        {"title": "Ezitta Fórum", "count": 1628},
-        {"title": "Reggeli gyors/Reggeli személy", "count": 1446},
-        {"title": "Hetes Stúdió", "count": 356},
-        {"title": "Klubdélelőtt", "count": 351},
-      ];
-      _topShows = queryResults
-          .map(
-            (row) => ShowData(
-              title: row['title'] as String,
-              count: row['count'] as int,
-            ),
-          )
-          .toList();
-      // --- End of Dummy Data ---
+      _topShows = await _apiService.fetchTopShowsThisYear();
     } catch (e) {
       // Handle error, maybe set an error message
       print('Error loading top shows: $e');
@@ -331,5 +316,13 @@ class PodcastProvider extends ChangeNotifier {
   void dispose() {
     _downloadSubscription?.cancel();
     super.dispose();
+  }
+
+  bool isSubscribed(String podcastId) {
+    final UserProfile? profile = _userProfile;
+    if (profile == null) {
+      return false;
+    }
+    return profile.subscribedPodcastIds.contains(podcastId);
   }
 }

@@ -64,7 +64,7 @@ class _EpisodeCard extends StatelessWidget {
               style: theme.textTheme.titleMedium,
             ),
             const Spacer(),
-            Text(formatDuration(episode.duration)),
+            Text(formatDuration(context, episode.duration)),
             Text(
               formatDate(episode.publishedAt),
               style: theme.textTheme.bodySmall,
