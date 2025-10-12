@@ -1,5 +1,5 @@
+// lib/providers/podcast_provider.dart
 import 'dart:async';
-
 import 'package:flutter/foundation.dart';
 
 import '../models/episode.dart';
@@ -8,26 +8,22 @@ import '../models/show_data.dart';
 import '../models/user_profile.dart';
 import '../screens/utils/constants.dart' as constants;
 import '../services/api_service.dart';
-import '../services/download_service.dart';
+
+// ALT entfernt: import '../services/download_service.dart';
+import '../providers/download_provider.dart'; // NEU
 
 class PodcastProvider extends ChangeNotifier {
   PodcastProvider({
     required ApiService apiService,
-    required DownloadService downloadService,
+    required DownloadProvider downloadProvider, // NEU
   }) : _apiService = apiService,
-       _downloadService = downloadService {
-    _downloadSubscription = _downloadService.downloadStream.listen(
-      _handleDownloadUpdate,
-    );
-  }
+       _downloadProvider = downloadProvider;
 
   ApiService _apiService;
-  DownloadService _downloadService;
-  StreamSubscription<DownloadTask>? _downloadSubscription;
+  DownloadProvider _downloadProvider; // NEU
 
   final Map<String, List<Episode>> _episodesByPodcast =
       <String, List<Episode>>{};
-  final Map<String, DownloadTask> _downloads = <String, DownloadTask>{};
   final List<String> _recentSearches = <String>[];
 
   List<Podcast> _podcasts = <Podcast>[];
@@ -53,58 +49,41 @@ class PodcastProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
   List<String> get recentSearches => List<String>.unmodifiable(_recentSearches);
-  List<DownloadTask> get downloads => _downloads.values.toList();
 
   List<Podcast> get subscribedPodcasts {
-    if (_userProfile == null) {
-      return const <Podcast>[];
-    }
+    if (_userProfile == null) return const <Podcast>[];
     return _podcasts
-        .where(
-          (Podcast podcast) =>
-              _userProfile!.subscribedPodcastIds.contains(podcast.id),
-        )
+        .where((p) => _userProfile!.subscribedPodcastIds.contains(p.id))
         .toList();
   }
 
   void updateDependencies(
     ApiService apiService,
-    DownloadService downloadService,
+    DownloadProvider downloadProvider, // NEU
   ) {
     if (!identical(_apiService, apiService)) {
       _apiService = apiService;
     }
-    if (!identical(_downloadService, downloadService)) {
-      _downloadSubscription?.cancel();
-      _downloadService = downloadService;
-      _downloadSubscription = _downloadService.downloadStream.listen(
-        _handleDownloadUpdate,
-      );
+    if (!identical(_downloadProvider, downloadProvider)) {
+      _downloadProvider = downloadProvider;
     }
   }
 
   Future<void> loadInitialData({bool forceRefresh = false}) async {
-    if (_isLoading) {
-      return;
-    }
-    if (_initialised && !forceRefresh) {
-      return;
-    }
+    if (_isLoading) return;
+    if (_initialised && !forceRefresh) return;
 
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
 
     try {
-      final List<Podcast> fetchedPodcasts = await _apiService
-          .fetchLatestPodcasts();
-      final List<Podcast> trending = await _apiService.fetchTrendingPodcasts();
-      final List<Podcast> recommended = await _apiService
-          .fetchRecommendedPodcasts();
-      final List<Episode> latestEpisodes = await _apiService
-          .fetchRecentEpisodes();
+      final fetchedPodcasts = await _apiService.fetchLatestPodcasts();
+      final trending = await _apiService.fetchTrendingPodcasts();
+      final recommended = await _apiService.fetchRecommendedPodcasts();
+      final latestEpisodes = await _apiService.fetchRecentEpisodes();
 
-      await loadTopShows(forceRefresh: forceRefresh); // Add this
+      await loadTopShows(forceRefresh: forceRefresh);
 
       _podcasts = fetchedPodcasts;
       _trendingPodcasts = trending;
@@ -130,10 +109,9 @@ class PodcastProvider extends ChangeNotifier {
   }
 
   Future<void> subscribe(String podcastId) async {
-    final UserProfile? profile = _userProfile;
-    if (profile == null) {
-      return;
-    }
+    final profile = _userProfile;
+    if (profile == null) return;
+
     if (!profile.subscribedPodcastIds.contains(podcastId)) {
       _userProfile = profile.copyWith(
         subscribedPodcastIds: Set<String>.from(profile.subscribedPodcastIds)
@@ -146,12 +124,11 @@ class PodcastProvider extends ChangeNotifier {
   }
 
   Future<void> unsubscribe(String podcastId) async {
-    final UserProfile? profile = _userProfile;
-    if (profile == null) {
-      return;
-    }
+    final profile = _userProfile;
+    if (profile == null) return;
+
     if (profile.subscribedPodcastIds.contains(podcastId)) {
-      final Set<String> updated = Set<String>.from(profile.subscribedPodcastIds)
+      final updated = Set<String>.from(profile.subscribedPodcastIds)
         ..remove(podcastId);
       _userProfile = profile.copyWith(subscribedPodcastIds: updated);
       _updatePodcastSubscription(podcastId, isSubscribed: false);
@@ -161,36 +138,36 @@ class PodcastProvider extends ChangeNotifier {
 
   Future<void> downloadEpisode(Episode episode) async {
     try {
-      await _downloadService.downloadEpisode(episode);
+      await _downloadProvider.enqueue(episode); // NEU: DownloadProvider nutzen
     } catch (_) {
-      // Errors are surfaced via the download stream and UI indicators.
+      // Fehler werden über UI/DB sichtbar; hier keine Exception werfen
     }
   }
 
   Future<void> removeDownload(String episodeId) async {
-    await _downloadService.removeDownload(episodeId);
-    _downloads.remove(episodeId);
+    await _downloadProvider.removeLocalFile(episodeId); // NEU
     notifyListeners();
   }
 
   Future<void> _scheduleAutoDownloadForPodcast(String podcastId) async {
-    final int maxDownloads =
+    final maxDownloads =
         _userProfile?.maxAutoDownload ?? constants.defaultAutoDownloadCount;
-    final List<Episode> episodes = await _apiService.fetchEpisodesForPodcast(
+    final episodes = await _apiService.fetchEpisodesForPodcast(
       podcastId,
       limit: maxDownloads,
     );
     _episodesByPodcast[podcastId] = episodes;
-    for (final Episode episode in episodes.take(maxDownloads)) {
-      if (!_downloads.containsKey(episode.id)) {
-        unawaited(_downloadService.downloadEpisode(episode));
-      }
+
+    for (final episode in episodes.take(maxDownloads)) {
+      // Start nur, wenn nicht bereits lokal vorhanden – das prüft DownloadService/DB ohnehin,
+      // hier vereinfachen wir und starten immer; Retention regelt den Rest.
+      unawaited(_downloadProvider.enqueue(episode));
     }
     notifyListeners();
   }
 
   Future<List<Episode>> fetchEpisodesForPodcast(String podcastId) async {
-    List<Episode>? episodes = _episodesByPodcast[podcastId];
+    var episodes = _episodesByPodcast[podcastId];
     if (episodes == null || episodes.isEmpty) {
       episodes = await _apiService.fetchEpisodesForPodcast(podcastId);
       _episodesByPodcast[podcastId] = episodes;
@@ -199,10 +176,8 @@ class PodcastProvider extends ChangeNotifier {
   }
 
   void addRecentSearch(String query) {
-    final String trimmed = query.trim();
-    if (trimmed.isEmpty) {
-      return;
-    }
+    final trimmed = query.trim();
+    if (trimmed.isEmpty) return;
     _recentSearches.remove(trimmed);
     _recentSearches.insert(0, trimmed);
     if (_recentSearches.length > constants.maxRecentSearches) {
@@ -223,12 +198,11 @@ class PodcastProvider extends ChangeNotifier {
   }
 
   void addRecentlyPlayed(Episode episode) {
-    final UserProfile? profile = _userProfile;
-    if (profile == null) {
-      return;
-    }
-    final List<Episode> updated = List<Episode>.from(profile.recentlyPlayed);
-    updated.removeWhere((Episode item) => item.id == episode.id);
+    final profile = _userProfile;
+    if (profile == null) return;
+
+    final updated = List<Episode>.from(profile.recentlyPlayed);
+    updated.removeWhere((e) => e.id == episode.id);
     updated.insert(0, episode);
     if (updated.length > constants.maxRecentlyPlayed) {
       updated.removeLast();
@@ -238,13 +212,10 @@ class PodcastProvider extends ChangeNotifier {
   }
 
   void toggleFavourite(Episode episode) {
-    final UserProfile? profile = _userProfile;
-    if (profile == null) {
-      return;
-    }
-    final Set<String> favourites = Set<String>.from(
-      profile.favouriteEpisodeIds,
-    );
+    final profile = _userProfile;
+    if (profile == null) return;
+
+    final favourites = Set<String>.from(profile.favouriteEpisodeIds);
     if (favourites.contains(episode.id)) {
       favourites.remove(episode.id);
     } else {
@@ -255,37 +226,32 @@ class PodcastProvider extends ChangeNotifier {
   }
 
   void updateAutoDownloadCount(int count) {
-    final UserProfile? profile = _userProfile;
-    if (profile == null) {
-      return;
-    }
+    final profile = _userProfile;
+    if (profile == null) return;
     _userProfile = profile.copyWith(maxAutoDownload: count);
     notifyListeners();
   }
 
-  // In your PodcastProvider class
   Future<Podcast?> fetchPodcastById(String podcastId) async {
     try {
       final podcast = await _apiService.fetchPodcastById(podcastId);
       return podcast;
     } catch (e) {
-      print('Error fetching podcast by ID: $e');
+      debugPrint('Error fetching podcast by ID: $e');
       return null;
     }
   }
 
   Future<void> loadTopShows({bool forceRefresh = false}) async {
-    if (!forceRefresh && _topShows.isNotEmpty) {
-      return; // Optionally return if already loaded and no force refresh
-    }
+    if (!forceRefresh && _topShows.isNotEmpty) return;
+
     _isLoadingTopShows = true;
     notifyListeners();
 
     try {
       _topShows = await _apiService.fetchTopShowsThisYear();
     } catch (e) {
-      // Handle error, maybe set an error message
-      print('Error loading top shows: $e');
+      debugPrint('Error loading top shows: $e');
     } finally {
       _isLoadingTopShows = false;
       notifyListeners();
@@ -298,31 +264,14 @@ class PodcastProvider extends ChangeNotifier {
   }) {
     _podcasts = _podcasts
         .map(
-          (Podcast podcast) => podcast.id == podcastId
-              ? podcast.copyWith(isSubscribed: isSubscribed)
-              : podcast,
+          (p) => p.id == podcastId ? p.copyWith(isSubscribed: isSubscribed) : p,
         )
         .toList();
   }
 
-  void _handleDownloadUpdate(DownloadTask task) {
-    _downloads[task.episode.id] = task;
-    notifyListeners();
-  }
-
-  DownloadTask? getDownloadTask(String episodeId) => _downloads[episodeId];
-
-  @override
-  void dispose() {
-    _downloadSubscription?.cancel();
-    super.dispose();
-  }
-
   bool isSubscribed(String podcastId) {
-    final UserProfile? profile = _userProfile;
-    if (profile == null) {
-      return false;
-    }
+    final profile = _userProfile;
+    if (profile == null) return false;
     return profile.subscribedPodcastIds.contains(podcastId);
   }
 }

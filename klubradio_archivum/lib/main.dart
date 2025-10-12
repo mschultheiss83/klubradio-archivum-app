@@ -4,13 +4,14 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
 
 import 'l10n/app_localizations.dart';
+import 'db/app_database.dart';
+import 'providers/download_provider.dart';
 import 'providers/episode.provider.dart';
 import 'providers/podcast_provider.dart';
 import 'providers/theme_provider.dart';
 import 'services/api_service.dart';
 import 'services/audio_player_service.dart';
 import 'services/download_service.dart';
-
 import 'screens/app_shell/app_shell.dart';
 
 Future<void> main() async {
@@ -24,15 +25,16 @@ class KlubradioArchivumApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final db = AppDatabase();
+
     return MultiProvider(
       providers: [
         Provider<ApiService>(
           create: (_) => ApiService(),
           dispose: (_, ApiService service) => service.dispose(),
         ),
-        Provider<DownloadService>(
-          create: (_) => DownloadService(),
-          dispose: (_, DownloadService service) => service.dispose(),
+        ChangeNotifierProvider<DownloadProvider>(
+          create: (_) => DownloadProvider(db: db),
         ),
         Provider<AudioPlayerService>(
           create: (_) => AudioPlayerService(),
@@ -45,19 +47,26 @@ class KlubradioArchivumApp extends StatelessWidget {
         // PodcastProvider depends on ApiService + DownloadService
         ChangeNotifierProxyProvider2<
           ApiService,
-          DownloadService,
+          DownloadProvider,
           PodcastProvider
         >(
           create: (context) => PodcastProvider(
             apiService: context.read<ApiService>(),
-            downloadService: context.read<DownloadService>(),
+            downloadProvider: context
+                .read<DownloadProvider>(), // NEU: Param-Name anpassen
           ),
-          update: (context, api, dl, previous) {
+          update: (context, api, dlProv, previous) {
             if (previous != null) {
-              previous.updateDependencies(api, dl);
+              previous.updateDependencies(
+                api,
+                dlProv, // NEU
+              );
               return previous;
             }
-            return PodcastProvider(apiService: api, downloadService: dl);
+            return PodcastProvider(
+              apiService: api,
+              downloadProvider: dlProv, // NEU
+            );
           },
         ),
 
