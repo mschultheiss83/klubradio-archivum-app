@@ -1,54 +1,65 @@
 import 'package:flutter/material.dart';
 
-class CoverArt extends StatelessWidget {
-  const CoverArt({
+class ImageUrl extends StatelessWidget {
+  const ImageUrl({
     super.key,
-    required this.imageUrl,
-    this.icon,
+    required this.url,
     this.width,
     this.height,
+    this.borderRadius = 12,
+    this.icon = Icons.podcasts_outlined,
+    this.fit = BoxFit.cover,
   });
 
-  final String imageUrl;
-  final IconData? icon;
+  final String url;
   final double? width;
   final double? height;
+  final double borderRadius;
+  final IconData icon;
+  final BoxFit fit;
+
+  bool get _looksValid =>
+      url.isNotEmpty &&
+      Uri.tryParse(url)?.hasScheme == true &&
+      Uri.tryParse(url)?.hasAuthority == true;
 
   @override
   Widget build(BuildContext context) {
-    final double displayWidth = width ?? 72;
-    final double displayHeight = height ?? 72;
+    final w = width ?? 72.0;
+    final h = height ?? 72.0;
+
+    Widget fallback([Color? color]) => Container(
+      width: w,
+      height: h,
+      color: color ?? Theme.of(context).colorScheme.primaryContainer,
+      child: Icon(icon, size: w * 0.5),
+    );
+
+    // Guard against empty / malformed URLs early.
+    if (!_looksValid) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(borderRadius),
+        child: fallback(),
+      );
+    }
 
     return ClipRRect(
-      borderRadius: BorderRadius.circular(12),
-      child: imageUrl.isEmpty
-          ? Container(
-              width: displayWidth,
-              height: displayHeight,
-              color: Theme.of(context).colorScheme.primaryContainer,
-              child: Icon(
-                icon ?? Icons.podcasts_outlined,
-                size: displayWidth * 0.5,
-              ),
-            )
-          : Image.network(
-              imageUrl,
-              width: displayWidth,
-              height: displayHeight,
-              fit: BoxFit.cover,
-              errorBuilder:
-                  (BuildContext context, Object error, StackTrace? stackTrace) {
-                    return Container(
-                      width: displayWidth,
-                      height: displayHeight,
-                      color: Theme.of(context).colorScheme.primaryContainer,
-                      child: Icon(
-                        icon ?? Icons.podcasts_outlined,
-                        size: displayWidth * 0.5,
-                      ),
-                    );
-                  },
-            ),
+      borderRadius: BorderRadius.circular(borderRadius),
+      child: Image.network(
+        url,
+        width: w,
+        height: h,
+        fit: fit,
+
+        // While loading: show a lightweight placeholder.
+        loadingBuilder: (ctx, child, progress) {
+          if (progress == null) return child;
+          return fallback(Theme.of(ctx).colorScheme.surfaceVariant);
+        },
+
+        // On 404 / network / decode errors: show fallback instead of red error box.
+        errorBuilder: (ctx, error, stack) => fallback(),
+      ),
     );
   }
 }

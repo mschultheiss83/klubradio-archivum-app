@@ -43,7 +43,7 @@ class PodcastListItem extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              CoverArt(imageUrl: podcast.coverImageUrl),
+              ImageUrl(url: podcast.coverImageUrl),
               const SizedBox(width: 16),
               Expanded(
                 child: Column(

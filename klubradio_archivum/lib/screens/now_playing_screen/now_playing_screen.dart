@@ -1,3 +1,4 @@
+// lib/screens/now_playing/now_playing_screen.dart
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -50,8 +51,8 @@ class NowPlayingScreen extends StatelessWidget {
                         runSpacing: 16,
                         children: [
                           // Left: cover art
-                          CoverArt(
-                            imageUrl: episode.imageUrl ?? "",
+                          ImageUrl(
+                            url: episode.imageUrl ?? "",
                             width: coverSize,
                             height: coverSize,
                           ),
@@ -70,7 +71,6 @@ class NowPlayingScreen extends StatelessWidget {
                                 ),
                                 const SizedBox(height: 12),
 
-                                // Hosts label + list (robust to empty/duplicate labels)
                                 if (episode.hosts.isNotEmpty) ...[
                                   Text(
                                     episode.hosts.join('\n'),
@@ -81,8 +81,6 @@ class NowPlayingScreen extends StatelessWidget {
                                   ),
                                   const SizedBox(height: 12),
                                 ],
-
-                                // Description (long text is fine; it scrolls with the section)
                                 Text(
                                   episode.description,
                                   style: Theme.of(context).textTheme.bodyMedium,

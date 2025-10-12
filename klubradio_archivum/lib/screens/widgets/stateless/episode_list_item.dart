@@ -22,7 +22,7 @@ class EpisodeListItem extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 4),
       child: ListTile(
-        leading: CoverArt(imageUrl: episode.imageUrl ?? ""),
+        leading: ImageUrl(url: episode.imageUrl ?? ""),
         title: Text(
           '${episode.id} ${episode.title}',
           style: theme.textTheme.titleMedium,
