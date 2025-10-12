@@ -478,6 +478,16 @@
   "settings_max_parallel": "Párhuzamos letöltések (max.)",
   "settings_keep_latest": "Legutóbbi epizódok megtartása",
   "settings_delete_after_hours": "Törlés ennyi óra után",
-  "settings_zero_off": "0 = kikapcsolva"
+  "settings_zero_off": "0 = kikapcsolva",
+  "settings_wifi_only_mobile_default": "Alapértelmezett mobilon: BE",
+  "settings_wifi_only_desktop_default": "Alapértelmezett asztali gépen: KI",
+  "settings_retention_section": "Megőrzés",
+  "settings_keep_all": "Mindet megtartani",
+  "settings_keep_latest_label": "Csak az utolsó n",
+  "settings_keep_latest_hint": "Tartsd meg a legutóbbi n epizódot.",
+  "settings_delete_after_heard_label": "Lejátszás után törlés x órán belül",
+  "settings_delete_after_hint": "Ha egy epizód le lett játszva, x óra múlva automatikusan törlődik."
+
+
 
 }

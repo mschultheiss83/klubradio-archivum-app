@@ -789,6 +789,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'0 = off'**
   String get settings_zero_off;
+
+  /// No description provided for @settings_wifi_only_mobile_default.
+  ///
+  /// In en, this message translates to:
+  /// **'Default on mobile: ON'**
+  String get settings_wifi_only_mobile_default;
+
+  /// No description provided for @settings_wifi_only_desktop_default.
+  ///
+  /// In en, this message translates to:
+  /// **'Default on desktop: OFF'**
+  String get settings_wifi_only_desktop_default;
+
+  /// No description provided for @settings_retention_section.
+  ///
+  /// In en, this message translates to:
+  /// **'Retention'**
+  String get settings_retention_section;
+
+  /// No description provided for @settings_keep_all.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep all'**
+  String get settings_keep_all;
+
+  /// No description provided for @settings_keep_latest_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep latest n'**
+  String get settings_keep_latest_label;
+
+  /// No description provided for @settings_keep_latest_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep the most recent n episodes.'**
+  String get settings_keep_latest_hint;
+
+  /// No description provided for @settings_delete_after_heard_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete after “played” in x hours'**
+  String get settings_delete_after_heard_label;
+
+  /// No description provided for @settings_delete_after_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Once an episode was played, remove it automatically after x hours.'**
+  String get settings_delete_after_hint;
 }
 
 class _AppLocalizationsDelegate

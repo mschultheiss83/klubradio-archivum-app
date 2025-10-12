@@ -1,9 +1,12 @@
+import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'package:klubradio_archivum/l10n/app_localizations.dart';
 import 'package:klubradio_archivum/db/app_database.dart';
 import 'package:klubradio_archivum/db/daos.dart';
+
+enum RetentionMode { keepAll, keepLatestN, deleteAfterHeard }
 
 class DownloadSettingsPanel extends StatefulWidget {
   const DownloadSettingsPanel({super.key});
@@ -19,7 +22,13 @@ class _DownloadSettingsPanelState extends State<DownloadSettingsPanel> {
     super.initState();
     final db = context.read<AppDatabase>();
     _dao = SettingsDao(db);
-    _dao.ensureDefaults();
+    _dao.ensureDefaults(); // setzt plattformabhängige WLAN-Defaults, siehe DAO unten
+  }
+
+  RetentionMode _modeFrom(Setting s) {
+    if ((s.keepLatestN ?? 0) > 0) return RetentionMode.keepLatestN;
+    if ((s.deleteAfterHours ?? 0) > 0) return RetentionMode.deleteAfterHeard;
+    return RetentionMode.keepAll;
   }
 
   @override
@@ -39,6 +48,8 @@ class _DownloadSettingsPanelState extends State<DownloadSettingsPanel> {
         final s = snap.data;
         if (s == null) return const SizedBox.shrink();
 
+        final mode = _modeFrom(s);
+
         return Card(
           clipBehavior: Clip.antiAlias,
           child: Padding(
@@ -56,6 +67,11 @@ class _DownloadSettingsPanelState extends State<DownloadSettingsPanel> {
                 SwitchListTile.adaptive(
                   contentPadding: EdgeInsets.zero,
                   title: Text(l10n.settings_wifi_only),
+                  subtitle: Text(
+                    Platform.isAndroid || Platform.isIOS
+                        ? l10n.settings_wifi_only_mobile_default
+                        : l10n.settings_wifi_only_desktop_default,
+                  ),
                   value: s.wifiOnly,
                   onChanged: (v) => _dao.setWifiOnly(v),
                 ),
@@ -71,40 +87,119 @@ class _DownloadSettingsPanelState extends State<DownloadSettingsPanel> {
                   onPlus: () => _dao.setMaxParallel(s.maxParallel + 1),
                   cs: cs,
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 16),
 
-                // Letzte Episoden behalten (global)
-                _StepperRow(
-                  label: l10n.settings_keep_latest,
-                  hint: l10n.settings_zero_off, // „0 = aus“
-                  valueText: '${s.keepLatestN ?? 0}',
-                  onMinus: (s.keepLatestN ?? 0) > 0
-                      ? () => _dao.setKeepLatestN((s.keepLatestN ?? 0) - 1)
-                      : null,
-                  onPlus: () => _dao.setKeepLatestN((s.keepLatestN ?? 0) + 1),
-                  cs: cs,
+                Text(
+                  l10n.settings_retention_section,
+                  style: textTheme.titleSmall,
                 ),
                 const SizedBox(height: 8),
 
-                // Löschen nach (Stunden)
-                _StepperRow(
-                  label: l10n.settings_delete_after_hours,
-                  hint: l10n.settings_zero_off,
-                  valueText: '${s.deleteAfterHours ?? 0}',
-                  onMinus: (s.deleteAfterHours ?? 0) > 0
-                      ? () => _dao.setDeleteAfterHours(
-                          (s.deleteAfterHours ?? 0) - 1,
-                        )
-                      : null,
-                  onPlus: () =>
-                      _dao.setDeleteAfterHours((s.deleteAfterHours ?? 0) + 1),
-                  cs: cs,
+                // Retention-Modus wie Theme-ChoiceChips
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    _ModeChip(
+                      label: l10n.settings_keep_all,
+                      selected: mode == RetentionMode.keepAll,
+                      onSelected: () async {
+                        await _dao.setKeepLatestN(null);
+                        await _dao.setDeleteAfterHours(null);
+                      },
+                    ),
+                    _ModeChip(
+                      label: l10n
+                          .settings_keep_latest_label, // „Nur die letzten n“
+                      selected: mode == RetentionMode.keepLatestN,
+                      onSelected: () async {
+                        // wenn aktivieren und noch 0/null → auf 5 setzen als Startwert
+                        final next = (s.keepLatestN ?? 0) > 0
+                            ? s.keepLatestN
+                            : 5;
+                        await _dao.setDeleteAfterHours(null);
+                        await _dao.setKeepLatestN(next);
+                      },
+                    ),
+                    _ModeChip(
+                      label: l10n
+                          .settings_delete_after_heard_label, // „Nach gehört in x h“
+                      selected: mode == RetentionMode.deleteAfterHeard,
+                      onSelected: () async {
+                        final next = (s.deleteAfterHours ?? 0) > 0
+                            ? s.deleteAfterHours
+                            : 24;
+                        await _dao.setKeepLatestN(null);
+                        await _dao.setDeleteAfterHours(next);
+                      },
+                    ),
+                  ],
                 ),
+                const SizedBox(height: 12),
+
+                // Nur die zugehörige Zahl editierbar machen
+                if (mode == RetentionMode.keepLatestN)
+                  _StepperRow(
+                    label: l10n.settings_keep_latest,
+                    hint: l10n
+                        .settings_keep_latest_hint, // z.B. „Behalte die neuesten n Episoden“
+                    valueText: '${s.keepLatestN ?? 0}',
+                    onMinus: (s.keepLatestN ?? 0) > 1
+                        ? () => _dao.setKeepLatestN((s.keepLatestN ?? 0) - 1)
+                        : null,
+                    onPlus: () => _dao.setKeepLatestN((s.keepLatestN ?? 0) + 1),
+                    cs: cs,
+                  ),
+                if (mode == RetentionMode.deleteAfterHeard)
+                  _StepperRow(
+                    label: l10n.settings_delete_after_hours,
+                    hint: l10n
+                        .settings_delete_after_hint, // „Nach gehört, erst nach x h löschen“
+                    valueText: '${s.deleteAfterHours ?? 0}',
+                    onMinus: (s.deleteAfterHours ?? 0) > 1
+                        ? () => _dao.setDeleteAfterHours(
+                            (s.deleteAfterHours ?? 0) - 1,
+                          )
+                        : null,
+                    onPlus: () =>
+                        _dao.setDeleteAfterHours((s.deleteAfterHours ?? 0) + 1),
+                    cs: cs,
+                  ),
               ],
             ),
           ),
         );
       },
+    );
+  }
+}
+
+class _ModeChip extends StatelessWidget {
+  const _ModeChip({
+    required this.label,
+    required this.selected,
+    required this.onSelected,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return ChoiceChip(
+      label: Text(label),
+      selected: selected,
+      onSelected: (_) => onSelected(),
+      selectedColor: cs.primary.withOpacity(0.16),
+      labelStyle: TextStyle(
+        color: selected ? cs.onPrimaryContainer : cs.onSurface,
+        fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+      ),
+      side: BorderSide(
+        color: selected ? cs.primary : cs.outlineVariant.withOpacity(0.7),
+      ),
     );
   }
 }

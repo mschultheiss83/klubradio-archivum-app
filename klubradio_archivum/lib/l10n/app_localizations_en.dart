@@ -394,4 +394,30 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settings_zero_off => '0 = off';
+
+  @override
+  String get settings_wifi_only_mobile_default => 'Default on mobile: ON';
+
+  @override
+  String get settings_wifi_only_desktop_default => 'Default on desktop: OFF';
+
+  @override
+  String get settings_retention_section => 'Retention';
+
+  @override
+  String get settings_keep_all => 'Keep all';
+
+  @override
+  String get settings_keep_latest_label => 'Keep latest n';
+
+  @override
+  String get settings_keep_latest_hint => 'Keep the most recent n episodes.';
+
+  @override
+  String get settings_delete_after_heard_label =>
+      'Delete after “played” in x hours';
+
+  @override
+  String get settings_delete_after_hint =>
+      'Once an episode was played, remove it automatically after x hours.';
 }

@@ -402,4 +402,31 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get settings_zero_off => '0 = aus';
+
+  @override
+  String get settings_wifi_only_mobile_default =>
+      'Standard auf mobilen Geräten: AN';
+
+  @override
+  String get settings_wifi_only_desktop_default => 'Standard auf Desktop: AUS';
+
+  @override
+  String get settings_retention_section => 'Aufbewahrung';
+
+  @override
+  String get settings_keep_all => 'Alle behalten';
+
+  @override
+  String get settings_keep_latest_label => 'Nur die letzten n';
+
+  @override
+  String get settings_keep_latest_hint => 'Behalte die neuesten n Episoden.';
+
+  @override
+  String get settings_delete_after_heard_label =>
+      'Nach „gehört“ in x Stunden löschen';
+
+  @override
+  String get settings_delete_after_hint =>
+      'Wenn eine Episode gehört wurde, nach x Stunden automatisch entfernen.';
 }

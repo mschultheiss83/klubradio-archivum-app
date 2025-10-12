@@ -30,7 +30,7 @@ class DownloadList extends StatelessWidget {
     final completedStream =
         (db.select(db.episodes)
               ..where((e) => e.status.equals(3))
-              // ..where((e) => e.localPath.isNotNull())
+              ..where((e) => e.localPath.isNotNull())
               ..orderBy([(e) => d.OrderingTerm.desc(e.completedAt)]))
             .watch();
 
@@ -165,17 +165,37 @@ class _CompletedDownloads extends StatelessWidget {
           separatorBuilder: (_, __) => const Divider(height: 1),
           itemBuilder: (context, i) {
             final ep = items[i];
+
             return ListTile(
               leading: const Icon(Icons.audio_file_outlined),
-              title: Text(ep.title),
-              subtitle: Text('${l10n.downloads_status_done} • ${ep.podcastId}'),
+              title: Text('${ep.podcastId} • ${ep.title}'),
+              subtitle: Text(
+                '${l10n.downloads_status_done} • ${ep.id} - ${ep.localPath} - ${ep.publishedAt}',
+              ),
               trailing: IconButton(
                 tooltip: l10n.downloads_action_delete,
                 icon: const Icon(Icons.delete_outline),
                 onPressed: () => provider.removeLocalFile(ep.id),
               ),
               onTap: () {
-                // optional: abspielen via localPath
+                final m = model.Episode(
+                  id: ep.id,
+                  podcastId: ep.podcastId,
+                  title: ep.title,
+                  description: '',
+                  audioUrl: ep.audioUrl,
+                  publishedAt: ep.publishedAt ?? DateTime.now(),
+                  duration: Duration.zero,
+                  hosts: const [],
+                  showDate: '',
+                );
+
+                // bevorzugt lokalen Pfad verwenden (EpisodeProvider prüft DB & localPath)
+                context.read<EpisodeProvider>().playEpisode(
+                  m,
+                  queue: [m], // optional: Queue nur diese eine
+                  preferLocal: true, // explizit
+                );
               },
             );
           },

@@ -395,4 +395,31 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get settings_zero_off => '0 = kikapcsolva';
+
+  @override
+  String get settings_wifi_only_mobile_default => 'Alapértelmezett mobilon: BE';
+
+  @override
+  String get settings_wifi_only_desktop_default =>
+      'Alapértelmezett asztali gépen: KI';
+
+  @override
+  String get settings_retention_section => 'Megőrzés';
+
+  @override
+  String get settings_keep_all => 'Mindet megtartani';
+
+  @override
+  String get settings_keep_latest_label => 'Csak az utolsó n';
+
+  @override
+  String get settings_keep_latest_hint => 'Tartsd meg a legutóbbi n epizódot.';
+
+  @override
+  String get settings_delete_after_heard_label =>
+      'Lejátszás után törlés x órán belül';
+
+  @override
+  String get settings_delete_after_hint =>
+      'Ha egy epizód le lett játszva, x óra múlva automatikusan törlődik.';
 }

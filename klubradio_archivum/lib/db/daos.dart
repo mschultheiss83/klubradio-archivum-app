@@ -1,7 +1,8 @@
 // lib/db/daos.dart
 import 'dart:async';
-import 'package:drift/drift.dart';
+import 'dart:io' show Platform;
 
+import 'package:drift/drift.dart';
 import 'app_database.dart';
 
 part 'daos.g.dart';
@@ -226,13 +227,14 @@ class SettingsDao extends DatabaseAccessor<AppDatabase>
       (select(settings)..where((s) => s.id.equals(1))).getSingleOrNull();
 
   Future<void> ensureDefaults() async {
+    final wifiDefault = Platform.isAndroid || Platform.isIOS ? true : false;
     await into(settings).insertOnConflictUpdate(
-      const SettingsCompanion(
-        id: Value(1),
-        wifiOnly: Value(true),
-        maxParallel: Value(2),
-        deleteAfterHours: Value(24),
-        keepLatestN: Value(0),
+      SettingsCompanion(
+        id: const Value(1),
+        wifiOnly: Value(wifiDefault), // mobil: an, desktop: aus
+        maxParallel: const Value(2),
+        deleteAfterHours: const Value(null), // AUS
+        keepLatestN: const Value(null), // AUS
       ),
     );
   }
@@ -248,12 +250,12 @@ class SettingsDao extends DatabaseAccessor<AppDatabase>
 
   Future<int> setDeleteAfterHours(int? h) =>
       (update(settings)..where((s) => s.id.equals(1))).write(
-        SettingsCompanion(deleteAfterHours: Value(h)),
+        SettingsCompanion(deleteAfterHours: Value((h ?? 0) <= 0 ? null : h)),
       );
 
   Future<int> setKeepLatestN(int? n) =>
       (update(settings)..where((s) => s.id.equals(1))).write(
-        SettingsCompanion(keepLatestN: Value(n)),
+        SettingsCompanion(keepLatestN: Value((n ?? 0) <= 0 ? null : n)),
       );
 }
 
@@ -287,9 +289,11 @@ class RetentionDao {
 
     // 1) deleteAfterHours-Regel (global)
     final s = await settingsDao.getOne();
-    if (s?.deleteAfterHours != null) {
+
+    // deleteAfterHours nur wenn > 0
+    if (s?.deleteAfterHours != null && s!.deleteAfterHours! > 0) {
       final threshold = DateTime.now().subtract(
-        Duration(hours: s!.deleteAfterHours!),
+        Duration(hours: s.deleteAfterHours!),
       );
       final oldPlayed = await episodesDao.playedBefore(threshold);
       for (final ep in oldPlayed.where((e) => e.podcastId == podcastId)) {
@@ -297,15 +301,14 @@ class RetentionDao {
       }
     }
 
-    // 2) keepLatestN-Regel pro Podcast
+    // keepLatestN nur wenn > 0
     final sub = await subscriptionsDao.getById(podcastId);
     final global = await settingsDao.getOne();
     final keepN = sub?.keepLatestN ?? global?.keepLatestN;
-    if (keepN != null) {
+    if (keepN != null && keepN > 0) {
       final done = await episodesDao.completedWithFileDesc(podcastId);
       if (done.length > keepN) {
-        final extra = done.sublist(keepN);
-        planIds.addAll(extra.map((e) => e.id));
+        planIds.addAll(done.sublist(keepN).map((e) => e.id));
       }
     }
 

@@ -1114,6 +1114,7 @@ class Episode extends DataClass implements Insertable<Episode> {
     updatedAt,
     resumable,
   );
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
