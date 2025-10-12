@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-
-import '../../providers/episode.provider.dart';
-import '../utils/constants.dart' as constants;
+import 'package:klubradio_archivum/providers/episode.provider.dart';
+import 'package:klubradio_archivum/screens/utils/constants.dart' as constants;
 
 class AudioPlayerControls extends StatelessWidget {
   const AudioPlayerControls({super.key, required this.provider});
@@ -12,58 +11,200 @@ class AudioPlayerControls extends StatelessWidget {
   Widget build(BuildContext context) {
     final bool hasPrevious = provider.getPreviousEpisode() != null;
     final bool hasNext = provider.getNextEpisode() != null;
+    final bool canSeek = provider.currentEpisode != null;
+
+    final List<_SeekOption> seekOptions = const [
+      _SeekOption(label: '-2 min', delta: Duration(minutes: -2)),
+      _SeekOption(label: '-30 s', delta: Duration(seconds: -30)),
+      _SeekOption(label: '-5 s', delta: Duration(seconds: -5)),
+      _SeekOption(label: '+5 s', delta: Duration(seconds: 5)),
+      _SeekOption(label: '+30 s', delta: Duration(seconds: 30)),
+      _SeekOption(label: '+2 min', delta: Duration(minutes: 2)),
+    ];
+
+    final List<_SeekOption> leftSeek = seekOptions
+        .where((o) => o.delta.isNegative)
+        .toList();
+    final List<_SeekOption> rightSeek = seekOptions
+        .where((o) => !o.delta.isNegative)
+        .toList();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
-      children: <Widget>[
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            IconButton(
-              iconSize: 36,
-              icon: const Icon(Icons.skip_previous),
-              onPressed: hasPrevious
-                  ? () {
-                      provider.playPrevious();
-                    }
-                  : null,
-            ),
-            IconButton(
-              iconSize: 48,
-              icon: Icon(
-                provider.isPlaying ? Icons.pause_circle : Icons.play_circle,
+      children: [
+        Center(
+          child: Wrap(
+            alignment: WrapAlignment.center,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 24,
+            runSpacing: 12,
+            children: [
+              // 1️⃣ Left seek cluster
+              _SeekCluster(
+                options: leftSeek,
+                canSeek: canSeek,
+                onTap: (d) => provider.seekRelative(d),
               ),
-              onPressed: () {
-                provider.togglePlayPause();
-              },
-            ),
-            IconButton(
-              iconSize: 36,
-              icon: const Icon(Icons.skip_next),
-              onPressed: hasNext
-                  ? () {
-                      provider.playNext();
-                    }
-                  : null,
-            ),
-          ],
+
+              // 2️⃣ Transport cluster
+              _TransportCluster(
+                hasPrevious: hasPrevious,
+                hasNext: hasNext,
+                isPlaying: provider.isPlaying,
+                onPrev: hasPrevious ? provider.playPrevious : null,
+                onPlayPause: provider.togglePlayPause,
+                onNext: hasNext ? provider.playNext : null,
+              ),
+
+              // 3️⃣ Right seek cluster
+              _SeekCluster(
+                options: rightSeek,
+                canSeek: canSeek,
+                onTap: (d) => provider.seekRelative(d),
+              ),
+              // 4️⃣ Speed cluster
+              _SpeedCluster(
+                speed: provider.playbackSpeed,
+                onChanged: (v) => provider.updatePlaybackSpeed(v),
+              ),
+            ],
+          ),
         ),
-        const SizedBox(height: 16),
+      ],
+    );
+  }
+}
+
+class _SeekOption {
+  final String label;
+  final Duration delta;
+  const _SeekOption({required this.label, required this.delta});
+}
+
+class _SeekCluster extends StatelessWidget {
+  const _SeekCluster({
+    super.key,
+    required this.options,
+    required this.canSeek,
+    required this.onTap,
+  });
+
+  final List<_SeekOption> options;
+  final bool canSeek;
+  final void Function(Duration) onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      alignment: WrapAlignment.center,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      spacing: 16,
+      runSpacing: 8,
+      children: [
+        for (final opt in options)
+          _SeekButton(
+            label: opt.label,
+            onPressed: canSeek ? () => onTap(opt.delta) : null,
+          ),
+      ],
+    );
+  }
+}
+
+class _TransportCluster extends StatelessWidget {
+  const _TransportCluster({
+    super.key,
+    required this.hasPrevious,
+    required this.hasNext,
+    required this.isPlaying,
+    required this.onPrev,
+    required this.onPlayPause,
+    required this.onNext,
+  });
+
+  final bool hasPrevious;
+  final bool hasNext;
+  final bool isPlaying;
+  final VoidCallback? onPrev;
+  final VoidCallback onPlayPause;
+  final VoidCallback? onNext;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        IconButton(
+          iconSize: 36,
+          tooltip: 'Previous Episode',
+          icon: const Icon(Icons.skip_previous),
+          onPressed: onPrev,
+        ),
+        IconButton(
+          iconSize: 48,
+          tooltip: isPlaying ? 'Pause' : 'Play',
+          icon: Icon(isPlaying ? Icons.pause_circle : Icons.play_circle),
+          onPressed: onPlayPause,
+        ),
+        IconButton(
+          iconSize: 36,
+          tooltip: 'Next Episode',
+          icon: const Icon(Icons.skip_next),
+          onPressed: onNext,
+        ),
+      ],
+    );
+  }
+}
+
+class _SpeedCluster extends StatelessWidget {
+  const _SpeedCluster({
+    super.key,
+    required this.speed,
+    required this.onChanged,
+  });
+
+  final double speed;
+  final void Function(double) onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const SizedBox(width: 16), // Adjusted spacing
+        const Icon(Icons.speed, size: 36),
+        const SizedBox(width: 8),
         DropdownButton<double>(
-          value: provider.playbackSpeed,
-          onChanged: (double? value) {
-            if (value != null) {
-              provider.updatePlaybackSpeed(value);
-            }
+          value: speed,
+          underline: const SizedBox.shrink(),
+          onChanged: (double? v) {
+            if (v != null) onChanged(v);
           },
-          items: constants.playbackSpeeds.map((double speed) {
-            return DropdownMenuItem<double>(
-              value: speed,
-              child: Text('${speed}x'),
-            );
+          items: constants.playbackSpeeds.map((double s) {
+            return DropdownMenuItem<double>(value: s, child: Text('${s}x'));
           }).toList(),
         ),
       ],
+    );
+  }
+}
+
+class _SeekButton extends StatelessWidget {
+  const _SeekButton({required this.label, required this.onPressed, super.key});
+  final String label;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextButton(
+      onPressed: onPressed,
+      child: Text(
+        label,
+        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+      ),
     );
   }
 }
