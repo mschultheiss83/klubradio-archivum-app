@@ -50,7 +50,7 @@ class SubscriptionsDao extends DatabaseAccessor<AppDatabase>
 @DriftAccessor(tables: [Episodes, Subscriptions])
 class EpisodesDao extends DatabaseAccessor<AppDatabase>
     with _$EpisodesDaoMixin {
-  EpisodesDao(AppDatabase db) : super(db);
+  EpisodesDao(super.db);
 
   // Upsert einzelner Episode
   Future<void> upsert(EpisodesCompanion data) =>
@@ -116,17 +116,21 @@ class EpisodesDao extends DatabaseAccessor<AppDatabase>
     String localPath, {
     int? bytes,
     int? total,
-  }) => (update(episodes)..where((e) => e.id.equals(id))).write(
-    EpisodesCompanion(
-      status: const Value(3), // completed
-      progress: const Value(1.0),
-      localPath: Value(localPath),
-      bytesDownloaded: bytes == null ? const Value.absent() : Value(bytes),
-      totalBytes: total == null ? const Value.absent() : Value(total),
-      completedAt: Value(DateTime.now()),
-      updatedAt: Value(DateTime.now()),
-    ),
-  );
+  }) async {
+    print('DAO.setCompleted id=$id path=$localPath');
+    return (update(episodes)..where((e) => e.id.equals(id))).write(
+      EpisodesCompanion(
+        status: const Value(3),
+        // completed
+        progress: const Value(1.0),
+        localPath: Value(localPath),
+        bytesDownloaded: bytes == null ? const Value.absent() : Value(bytes),
+        totalBytes: total == null ? const Value.absent() : Value(total),
+        completedAt: Value(DateTime.now()),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+  }
 
   Future<int> setFailed(String id) =>
       (update(episodes)..where((e) => e.id.equals(id))).write(
@@ -228,6 +232,7 @@ class SettingsDao extends DatabaseAccessor<AppDatabase>
         wifiOnly: Value(true),
         maxParallel: Value(2),
         deleteAfterHours: Value(24),
+        keepLatestN: Value(0),
       ),
     );
   }
@@ -244,6 +249,11 @@ class SettingsDao extends DatabaseAccessor<AppDatabase>
   Future<int> setDeleteAfterHours(int? h) =>
       (update(settings)..where((s) => s.id.equals(1))).write(
         SettingsCompanion(deleteAfterHours: Value(h)),
+      );
+
+  Future<int> setKeepLatestN(int? n) =>
+      (update(settings)..where((s) => s.id.equals(1))).write(
+        SettingsCompanion(keepLatestN: Value(n)),
       );
 }
 
@@ -289,7 +299,8 @@ class RetentionDao {
 
     // 2) keepLatestN-Regel pro Podcast
     final sub = await subscriptionsDao.getById(podcastId);
-    final keepN = sub?.keepLatestN;
+    final global = await settingsDao.getOne();
+    final keepN = sub?.keepLatestN ?? global?.keepLatestN;
     if (keepN != null) {
       final done = await episodesDao.completedWithFileDesc(podcastId);
       if (done.length > keepN) {

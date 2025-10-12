@@ -13,8 +13,9 @@ class Subscriptions extends Table {
   TextColumn get podcastId => text()(); // Primary Key
   TextColumn get title => text()();
   TextColumn get imageUrl => text().nullable()();
-  IntColumn  get autoDownloadN => integer().withDefault(const Constant(5))(); // 1/3/5/20/100
-  IntColumn  get keepLatestN => integer().nullable()(); // z.B. 5
+  IntColumn get autoDownloadN =>
+      integer().withDefault(const Constant(5))(); // 1/3/5/20/100
+  IntColumn get keepLatestN => integer().nullable()(); // z.B. 5
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
 
@@ -38,17 +39,19 @@ class Episodes extends Table {
   IntColumn get totalBytes => integer().nullable()();
 
   /// Nutzung/Retention
-  DateTimeColumn get playedAt => dateTime().nullable()();     // gehört?
-  DateTimeColumn get completedAt => dateTime().nullable()();  // fertig geladen
+  DateTimeColumn get playedAt => dateTime().nullable()(); // gehört?
+  DateTimeColumn get completedAt => dateTime().nullable()(); // fertig geladen
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
+
+  BoolColumn get resumable => boolean().nullable()(); // true/false/null
 
   @override
   Set<Column> get primaryKey => {id};
 
   @override
   List<String> get customConstraints => [
-    'FOREIGN KEY(podcast_id) REFERENCES subscriptions(podcast_id) ON DELETE CASCADE'
+    'FOREIGN KEY(podcast_id) REFERENCES subscriptions(podcast_id) ON DELETE CASCADE',
   ];
 }
 
@@ -56,7 +59,9 @@ class Settings extends Table {
   IntColumn get id => integer()(); // stets 1
   BoolColumn get wifiOnly => boolean().withDefault(const Constant(true))();
   IntColumn get maxParallel => integer().withDefault(const Constant(2))();
-  IntColumn get deleteAfterHours => integer().nullable()(); // z.B. 24 (am nächsten Tag)
+  IntColumn get deleteAfterHours =>
+      integer().nullable()(); // z.B. 24 (am nächsten Tag)
+  IntColumn get keepLatestN => integer().nullable()();
 
   @override
   Set<Column> get primaryKey => {id};
@@ -80,12 +85,26 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 3;
+
+  @override
+  MigrationStrategy get migration => MigrationStrategy(
+    onCreate: (m) async => await m.createAll(),
+    onUpgrade: (m, from, to) async {
+      if (from < 2) {
+        await m.addColumn(settings, settings.keepLatestN);
+      }
+      if (from < 3) {
+        await m.addColumn(episodes, episodes.resumable);
+      }
+    },
+  );
 
   /// Convenience: Timestamps aktualisieren
   Future<int> touchEpisode(String id) =>
-      (update(episodes)..where((e) => e.id.equals(id)))
-          .write(EpisodesCompanion(updatedAt: Value(DateTime.now())));
+      (update(episodes)..where((e) => e.id.equals(id))).write(
+        EpisodesCompanion(updatedAt: Value(DateTime.now())),
+      );
 
   Future<int> touchSubscription(String podcastId) =>
       (update(subscriptions)..where((s) => s.podcastId.equals(podcastId)))

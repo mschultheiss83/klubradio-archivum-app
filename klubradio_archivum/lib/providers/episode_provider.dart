@@ -1,17 +1,21 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:just_audio/just_audio.dart';
 
-import '../models/episode.dart';
-import '../services/api_service.dart';
-import '../services/audio_player_service.dart';
+import 'package:klubradio_archivum/db/app_database.dart' as db;
+import 'package:klubradio_archivum/models/episode.dart' as model;
+import 'package:klubradio_archivum/services/api_service.dart';
+import 'package:klubradio_archivum/services/audio_player_service.dart';
 
 class EpisodeProvider extends ChangeNotifier {
   EpisodeProvider({
     required ApiService apiService,
     required AudioPlayerService audioPlayerService,
+    required db.AppDatabase db,
   }) : _apiService = apiService,
+       _db = db,
        _audioPlayerService = audioPlayerService {
     _positionSubscription = _audioPlayerService.positionStream.listen(
       _onPositionChanged,
@@ -24,6 +28,7 @@ class EpisodeProvider extends ChangeNotifier {
     );
   }
 
+  late db.AppDatabase _db;
   ApiService _apiService;
   AudioPlayerService _audioPlayerService;
 
@@ -31,27 +36,29 @@ class EpisodeProvider extends ChangeNotifier {
   StreamSubscription<PlayerState>? _playerStateSubscription;
   StreamSubscription<bool>? _bufferingSubscription;
 
-  Episode? _currentEpisode;
-  List<Episode> _queue = <Episode>[];
+  model.Episode? _currentEpisode;
+  List<model.Episode> _queue = <model.Episode>[];
   Duration _currentPosition = Duration.zero;
   bool _isBuffering = false;
   double _playbackSpeed = 1.0;
 
-  Episode? get currentEpisode => _currentEpisode;
+  model.Episode? get currentEpisode => _currentEpisode;
   Duration get currentPosition => _currentPosition;
   bool get isPlaying => _audioPlayerService.isPlaying;
   bool get isBuffering => _isBuffering;
   Duration? get totalDuration => _audioPlayerService.totalDuration;
-  List<Episode> get queue => List<Episode>.unmodifiable(_queue);
+  List<model.Episode> get queue => List<model.Episode>.unmodifiable(_queue);
   double get playbackSpeed => _playbackSpeed;
 
   void updateDependencies(
     ApiService apiService,
     AudioPlayerService audioPlayerService,
+    db.AppDatabase db,
   ) {
     if (!identical(_apiService, apiService)) {
       _apiService = apiService;
     }
+    if (!identical(_db, db)) _db = db;
     if (!identical(_audioPlayerService, audioPlayerService)) {
       _positionSubscription?.cancel();
       _playerStateSubscription?.cancel();
@@ -69,15 +76,19 @@ class EpisodeProvider extends ChangeNotifier {
     }
   }
 
-  Future<List<Episode>> fetchEpisodes(String podcastId) async {
+  Future<List<model.Episode>> fetchEpisodes(String podcastId) async {
     return _apiService.fetchEpisodesForPodcast(podcastId);
   }
 
-  Future<void> playEpisode(Episode episode, {List<Episode>? queue}) async {
+  Future<void> playEpisode(
+    model.Episode episode, {
+    List<model.Episode>? queue,
+    bool preferLocal = true,
+  }) async {
     _currentEpisode = episode;
     if (queue != null) {
       _queue = queue;
-    } else if (!_queue.any((Episode item) => item.id == episode.id)) {
+    } else if (!_queue.any((model.Episode item) => item.id == episode.id)) {
       _queue.insert(0, episode);
     }
     await _audioPlayerService.loadEpisode(episode);
@@ -114,25 +125,25 @@ class EpisodeProvider extends ChangeNotifier {
   }
 
   Future<void> playNext() async {
-    final Episode? nextEpisode = getNextEpisode();
+    final model.Episode? nextEpisode = getNextEpisode();
     if (nextEpisode != null) {
       await playEpisode(nextEpisode);
     }
   }
 
   Future<void> playPrevious() async {
-    final Episode? previousEpisode = getPreviousEpisode();
+    final model.Episode? previousEpisode = getPreviousEpisode();
     if (previousEpisode != null) {
       await playEpisode(previousEpisode);
     }
   }
 
-  Episode? getNextEpisode() {
+  model.Episode? getNextEpisode() {
     if (_currentEpisode == null) {
       return null;
     }
     final int index = _queue.indexWhere(
-      (Episode episode) => episode.id == _currentEpisode!.id,
+      (model.Episode episode) => episode.id == _currentEpisode!.id,
     );
     if (index != -1 && index + 1 < _queue.length) {
       return _queue[index + 1];
@@ -140,12 +151,12 @@ class EpisodeProvider extends ChangeNotifier {
     return null;
   }
 
-  Episode? getPreviousEpisode() {
+  model.Episode? getPreviousEpisode() {
     if (_currentEpisode == null) {
       return null;
     }
     final int index = _queue.indexWhere(
-      (Episode episode) => episode.id == _currentEpisode!.id,
+      (model.Episode episode) => episode.id == _currentEpisode!.id,
     );
     if (index > 0) {
       return _queue[index - 1];
@@ -163,8 +174,8 @@ class EpisodeProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void addToQueue(Episode episode) {
-    if (_queue.any((Episode item) => item.id == episode.id)) {
+  void addToQueue(model.Episode episode) {
+    if (_queue.any((model.Episode item) => item.id == episode.id)) {
       return;
     }
     _queue.add(episode);
@@ -172,7 +183,7 @@ class EpisodeProvider extends ChangeNotifier {
   }
 
   void removeFromQueue(String episodeId) {
-    _queue.removeWhere((Episode episode) => episode.id == episodeId);
+    _queue.removeWhere((model.Episode episode) => episode.id == episodeId);
     notifyListeners();
   }
 

@@ -322,4 +322,76 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get podcastListItem_openDetails => 'Open podcast details';
+
+  @override
+  String get downloads_tab_active => 'Active';
+
+  @override
+  String get downloads_tab_done => 'Completed';
+
+  @override
+  String get downloads_empty_active => 'No active downloads';
+
+  @override
+  String get downloads_empty_done => 'No completed downloads';
+
+  @override
+  String get downloads_status_waiting => 'Waiting';
+
+  @override
+  String get downloads_status_running => 'Downloading';
+
+  @override
+  String get downloads_status_done => 'Completed';
+
+  @override
+  String get downloads_status_failed => 'Failed';
+
+  @override
+  String get downloads_status_canceled => 'Canceled';
+
+  @override
+  String get downloads_status_unknown => 'Unknown';
+
+  @override
+  String get downloads_action_pause => 'Pause';
+
+  @override
+  String get downloads_action_resume => 'Resume';
+
+  @override
+  String get downloads_action_cancel => 'Cancel';
+
+  @override
+  String get downloads_action_delete => 'Delete';
+
+  @override
+  String get ep_action_resume => 'Resume';
+
+  @override
+  String get ep_action_downloaded => 'Downloaded';
+
+  @override
+  String get ep_action_retry => 'Retry';
+
+  @override
+  String get ep_action_download => 'Download';
+
+  @override
+  String get settings_title_downloads => 'Downloads';
+
+  @override
+  String get settings_wifi_only => 'Wi-Fi only';
+
+  @override
+  String get settings_max_parallel => 'Max parallel downloads';
+
+  @override
+  String get settings_keep_latest => 'Keep latest episodes';
+
+  @override
+  String get settings_delete_after_hours => 'Delete after (hours)';
+
+  @override
+  String get settings_zero_off => '0 = off';
 }

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:klubradio_archivum/providers/episode.provider.dart';
+import 'package:klubradio_archivum/providers/episode_provider.dart';
 import 'package:klubradio_archivum/screens/utils/constants.dart' as constants;
 
 class AudioPlayerControls extends StatelessWidget {

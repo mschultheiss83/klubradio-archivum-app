@@ -323,4 +323,76 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get podcastListItem_openDetails => 'Műsor részleteinek megnyitása';
+
+  @override
+  String get downloads_tab_active => 'Aktív';
+
+  @override
+  String get downloads_tab_done => 'Kész';
+
+  @override
+  String get downloads_empty_active => 'Nincs aktív letöltés';
+
+  @override
+  String get downloads_empty_done => 'Nincsenek kész letöltések';
+
+  @override
+  String get downloads_status_waiting => 'Várakozik';
+
+  @override
+  String get downloads_status_running => 'Letöltés';
+
+  @override
+  String get downloads_status_done => 'Kész';
+
+  @override
+  String get downloads_status_failed => 'Hiba';
+
+  @override
+  String get downloads_status_canceled => 'Megszakítva';
+
+  @override
+  String get downloads_status_unknown => 'Ismeretlen';
+
+  @override
+  String get downloads_action_pause => 'Szünet';
+
+  @override
+  String get downloads_action_resume => 'Folytatás';
+
+  @override
+  String get downloads_action_cancel => 'Megállítás';
+
+  @override
+  String get downloads_action_delete => 'Törlés';
+
+  @override
+  String get ep_action_resume => 'Folytatás';
+
+  @override
+  String get ep_action_downloaded => 'Letöltve';
+
+  @override
+  String get ep_action_retry => 'Újra';
+
+  @override
+  String get ep_action_download => 'Letöltés';
+
+  @override
+  String get settings_title_downloads => 'Letöltések';
+
+  @override
+  String get settings_wifi_only => 'Csak Wi-Fi';
+
+  @override
+  String get settings_max_parallel => 'Párhuzamos letöltések (max.)';
+
+  @override
+  String get settings_keep_latest => 'Legutóbbi epizódok megtartása';
+
+  @override
+  String get settings_delete_after_hours => 'Törlés ennyi óra után';
+
+  @override
+  String get settings_zero_off => '0 = kikapcsolva';
 }

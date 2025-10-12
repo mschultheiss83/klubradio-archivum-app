@@ -645,6 +645,150 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Open podcast details'**
   String get podcastListItem_openDetails;
+
+  /// No description provided for @downloads_tab_active.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get downloads_tab_active;
+
+  /// No description provided for @downloads_tab_done.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get downloads_tab_done;
+
+  /// No description provided for @downloads_empty_active.
+  ///
+  /// In en, this message translates to:
+  /// **'No active downloads'**
+  String get downloads_empty_active;
+
+  /// No description provided for @downloads_empty_done.
+  ///
+  /// In en, this message translates to:
+  /// **'No completed downloads'**
+  String get downloads_empty_done;
+
+  /// No description provided for @downloads_status_waiting.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting'**
+  String get downloads_status_waiting;
+
+  /// No description provided for @downloads_status_running.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading'**
+  String get downloads_status_running;
+
+  /// No description provided for @downloads_status_done.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get downloads_status_done;
+
+  /// No description provided for @downloads_status_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed'**
+  String get downloads_status_failed;
+
+  /// No description provided for @downloads_status_canceled.
+  ///
+  /// In en, this message translates to:
+  /// **'Canceled'**
+  String get downloads_status_canceled;
+
+  /// No description provided for @downloads_status_unknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown'**
+  String get downloads_status_unknown;
+
+  /// No description provided for @downloads_action_pause.
+  ///
+  /// In en, this message translates to:
+  /// **'Pause'**
+  String get downloads_action_pause;
+
+  /// No description provided for @downloads_action_resume.
+  ///
+  /// In en, this message translates to:
+  /// **'Resume'**
+  String get downloads_action_resume;
+
+  /// No description provided for @downloads_action_cancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get downloads_action_cancel;
+
+  /// No description provided for @downloads_action_delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get downloads_action_delete;
+
+  /// No description provided for @ep_action_resume.
+  ///
+  /// In en, this message translates to:
+  /// **'Resume'**
+  String get ep_action_resume;
+
+  /// No description provided for @ep_action_downloaded.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloaded'**
+  String get ep_action_downloaded;
+
+  /// No description provided for @ep_action_retry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get ep_action_retry;
+
+  /// No description provided for @ep_action_download.
+  ///
+  /// In en, this message translates to:
+  /// **'Download'**
+  String get ep_action_download;
+
+  /// No description provided for @settings_title_downloads.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloads'**
+  String get settings_title_downloads;
+
+  /// No description provided for @settings_wifi_only.
+  ///
+  /// In en, this message translates to:
+  /// **'Wi-Fi only'**
+  String get settings_wifi_only;
+
+  /// No description provided for @settings_max_parallel.
+  ///
+  /// In en, this message translates to:
+  /// **'Max parallel downloads'**
+  String get settings_max_parallel;
+
+  /// No description provided for @settings_keep_latest.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep latest episodes'**
+  String get settings_keep_latest;
+
+  /// No description provided for @settings_delete_after_hours.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete after (hours)'**
+  String get settings_delete_after_hours;
+
+  /// No description provided for @settings_zero_off.
+  ///
+  /// In en, this message translates to:
+  /// **'0 = off'**
+  String get settings_zero_off;
 }
 
 class _AppLocalizationsDelegate

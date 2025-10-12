@@ -1,14 +1,18 @@
-import 'dart:io';
-import 'package:path_provider/path_provider.dart';
+// lib/services/download_service.dart
 import 'dart:async';
+import 'dart:io';
+
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
 import 'package:drift/drift.dart' show Value;
 import 'package:background_downloader/background_downloader.dart';
+import 'package:http/http.dart' as http;
 
 import 'package:klubradio_archivum/db/app_database.dart';
 import 'package:klubradio_archivum/db/daos.dart';
 import 'package:klubradio_archivum/models/episode.dart' as model;
 
-/// Mappt unsere integer-Statuswerte aus der DB
+/// Integer-Status in der DB
 class EpisodeStatusDB {
   static const none = 0;
   static const queued = 1;
@@ -27,8 +31,22 @@ class DownloadService {
     required this.retentionDao,
   });
 
-  // <-- NEU: getrennte Initialisierung
+  final AppDatabase db;
+  final EpisodesDao episodesDao;
+  final SubscriptionsDao subscriptionsDao;
+  final SettingsDao settingsDao;
+  final RetentionDao retentionDao;
+
+  late FileDownloader _downloader;
+  StreamSubscription<TaskUpdate>? _sub;
+
+  final Map<String, DownloadTask> _tasksByEpisodeId = {};
+  final Completer<void> _ready = Completer<void>();
+  bool _disposed = false;
+
+  /// Muss genau einmal aufgerufen werden. Lädt Konfig & startet Eventstream.
   Future<void> init() async {
+    if (_disposed) return;
     _downloader = FileDownloader();
 
     _downloader.configureNotification(
@@ -37,27 +55,31 @@ class DownloadService {
       progressBar: true,
     );
 
-    _sub = _downloader.updates.listen(_onUpdate);
-    await _downloader.start(); // DB/Reschedule aktivieren
+    _sub = _downloader.updates.listen(_onUpdate, onError: (_) {});
+    await _downloader.start();
+
+    if (!_ready.isCompleted) _ready.complete();
   }
 
-  final AppDatabase db;
-  final EpisodesDao episodesDao;
-  final SubscriptionsDao subscriptionsDao;
-  final SettingsDao settingsDao;
-  final RetentionDao retentionDao;
-
-  late FileDownloader _downloader;
-  late StreamSubscription<TaskUpdate> _sub;
-
-  // Wichtig: Map speichert DownloadTask (für pause/resume)
-  final Map<String, DownloadTask> _tasksByEpisodeId = {};
-
   Future<void> dispose() async {
-    await _sub.cancel();
+    _disposed = true;
+    await _sub?.cancel();
+  }
+
+  static const _relDir = 'Klubradio';
+
+  Future<String> _composeLocalPath(String filename) async {
+    final base =
+        await getApplicationSupportDirectory(); // Win/macOS/Linux/iOS/Android
+    final path = '${base.path}/$_relDir/$filename';
+    return path;
   }
 
   Future<void> enqueueEpisode(model.Episode ep) async {
+    await _ready.future;
+    if (_disposed) return;
+    final isResumable = await _checkResumable(ep.audioUrl);
+
     await episodesDao.upsert(
       EpisodesCompanion(
         id: Value(ep.id),
@@ -67,45 +89,60 @@ class DownloadService {
         publishedAt: Value(ep.publishedAt),
         status: Value(EpisodeStatusDB.queued),
         progress: const Value(0),
+        resumable: Value(isResumable),
       ),
     );
 
     final settings = await settingsDao.getOne();
     final wifiOnly = settings?.wifiOnly ?? true;
-
-    final saveDir = await _resolveSaveDir();
     final filename = '${ep.id}.mp3';
 
     final task = DownloadTask(
       url: ep.audioUrl,
       filename: filename,
-      directory: saveDir,
+      baseDirectory: BaseDirectory.applicationSupport,
+      directory: _relDir,
       updates: Updates.statusAndProgress,
       retries: 3,
-      allowPause: true,
+      allowPause: isResumable,
       requiresWiFi: wifiOnly,
       metaData: 'episodeId=${ep.id}',
     );
 
-    _tasksByEpisodeId[ep.id] = task; // ok: DownloadTask
+    _tasksByEpisodeId[ep.id] = task;
+    if (task.baseDirectory == BaseDirectory.applicationSupport) {
+      final base = await getApplicationSupportDirectory();
+      final absDir = p.join(base.path, task.directory!);
+      await Directory(absDir).create(recursive: true);
+    }
+
     await _downloader.enqueue(task);
   }
 
   Future<void> pause(String episodeId) async {
+    await _ready.future;
+    if (_disposed) return;
+
     final task = _tasksByEpisodeId[episodeId];
     if (task != null) {
-      await _downloader.pause(task); // erwartet DownloadTask
+      await _downloader.pause(task);
     }
   }
 
   Future<void> resume(String episodeId) async {
+    await _ready.future;
+    if (_disposed) return;
+
     final task = _tasksByEpisodeId[episodeId];
     if (task != null) {
-      await _downloader.resume(task); // erwartet DownloadTask
+      await _downloader.resume(task);
     }
   }
 
   Future<void> cancel(String episodeId) async {
+    await _ready.future;
+    if (_disposed) return;
+
     final task = _tasksByEpisodeId[episodeId];
     if (task != null) {
       await _downloader.cancel(task);
@@ -114,12 +151,15 @@ class DownloadService {
   }
 
   Future<void> _onUpdate(TaskUpdate u) async {
+    if (_disposed) return;
+
     final task = u.task;
 
-    // episodeId aus metaData oder Dateiname herausziehen
+    // episodeId aus metaData oder Dateiname herausziehen (null-sicher)
     String? episodeId;
-    if (task.metaData.contains('episodeId=')) {
-      episodeId = task.metaData.split('episodeId=').last;
+    final meta = task.metaData;
+    if (meta.contains('episodeId=')) {
+      episodeId = meta.split('episodeId=').last;
     } else {
       final name = task.filename;
       if (name.endsWith('.mp3')) {
@@ -128,7 +168,6 @@ class DownloadService {
     }
     if (episodeId == null) return;
 
-    // ⬇️ FIX: Nur speichern, wenn es wirklich ein DownloadTask ist
     if (task is DownloadTask) {
       _tasksByEpisodeId[episodeId] = task;
     }
@@ -148,7 +187,8 @@ class DownloadService {
           await episodesDao.setFailed(episodeId);
           break;
         case TaskStatus.complete:
-          final localPath = '${task.directory}/${task.filename}';
+          final localPath = await _finalPathForTask(task as DownloadTask);
+          final exists = await File(localPath).exists();
           await episodesDao.setCompleted(episodeId, localPath);
           final epRow = await episodesDao.getById(episodeId);
           if (epRow != null) {
@@ -159,6 +199,8 @@ class DownloadService {
               await removeLocalFile(id);
             }
           }
+          print('COMPLETE id=$episodeId path: $localPath exists=$exists');
+
           break;
         default:
           break;
@@ -182,7 +224,32 @@ class DownloadService {
     }
   }
 
+  Future<String> _finalPathForTask(DownloadTask task) async {
+    // 1) map BaseDirectory -> echtes Basis-Verzeichnis vom OS
+    Directory base;
+    switch (task.baseDirectory) {
+      case BaseDirectory.applicationSupport:
+        base = await getApplicationSupportDirectory();
+        break;
+      case BaseDirectory.applicationDocuments:
+        base = await getApplicationDocumentsDirectory();
+        break;
+      case BaseDirectory.temporary:
+        base = await getTemporaryDirectory();
+        break;
+      default:
+        base = await getApplicationSupportDirectory();
+    }
+
+    // 2) zusammensetzen: base + (relatives) directory + filename
+    final relDir = task.directory ?? '';
+    return p.join(base.path, relDir, task.filename);
+  }
+
   Future<void> removeLocalFile(String episodeId) async {
+    await _ready.future;
+    if (_disposed) return;
+
     final ep = await episodesDao.getById(episodeId);
     if (ep?.localPath != null) {
       try {
@@ -195,5 +262,15 @@ class DownloadService {
       }
     }
     await episodesDao.clearLocalFile(episodeId);
+  }
+
+  Future<bool> _checkResumable(String url) async {
+    try {
+      final resp = await http.head(Uri.parse(url));
+      final ar = resp.headers['accept-ranges'] ?? resp.headers['Accept-Ranges'];
+      return (ar ?? '').toLowerCase().contains('bytes');
+    } catch (_) {
+      return false;
+    }
   }
 }

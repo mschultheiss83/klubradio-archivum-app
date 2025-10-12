@@ -1,4 +1,5 @@
 // lib/providers/download_provider.dart
+import 'dart:async' show unawaited;
 import 'package:flutter/foundation.dart';
 import 'package:drift/drift.dart' show Value;
 
@@ -8,7 +9,6 @@ import 'package:klubradio_archivum/db/daos.dart';
 import 'package:klubradio_archivum/services/download_service.dart';
 
 /// Einfacher ChangeNotifier-Provider rund um den DownloadService.
-/// Bindet man in der App mit Provider/GetIt ein.
 class DownloadProvider extends ChangeNotifier {
   DownloadProvider({required AppDatabase db})
     : episodesDao = EpisodesDao(db),
@@ -27,7 +27,8 @@ class DownloadProvider extends ChangeNotifier {
       settingsDao: settingsDao,
       retentionDao: retentionDao,
     );
-    service.init();
+    // init bewusst nicht awaiten – der Service wartet intern auf _ready
+    unawaited(service.init());
   }
 
   late final DownloadService service;
@@ -63,22 +64,14 @@ class DownloadProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  @override
-  void dispose() {
-    service.dispose();
-    super.dispose();
-  }
-}
-
-extension AutoDownload on DownloadProvider {
   Future<void> autoEnqueueLatestN(
     String podcastId,
     int n,
     List<model.Episode> candidates,
   ) async {
     final latest = candidates.take(n).toList();
+
     for (final ep in latest) {
-      // DB-Zustand prüfen: schon vorhanden?
       final row = await episodesDao.getById(ep.id);
       final alreadyDone = row?.status == 3 && (row?.localPath ?? '').isNotEmpty;
       final alreadyQueuedOrRunning = row?.status == 1 || row?.status == 2;
@@ -87,7 +80,6 @@ extension AutoDownload on DownloadProvider {
         continue;
       }
 
-      // Episode (falls noch nicht da) minimal in DB anlegen, damit UI-Stream sie kennt
       if (row == null) {
         await episodesDao.upsert(
           EpisodesCompanion(
@@ -95,18 +87,23 @@ extension AutoDownload on DownloadProvider {
             podcastId: Value(ep.podcastId),
             title: Value(ep.title),
             audioUrl: Value(ep.audioUrl),
-            publishedAt: ep.publishedAt == null
-                ? const Value.absent()
-                : Value(ep.publishedAt!),
+            publishedAt: Value(ep.publishedAt),
             status: const Value(0), // none
             progress: const Value(0),
           ),
         );
       }
 
-      // Enqueue im Service (startet echten Download)
       await service.enqueueEpisode(ep);
     }
+
     notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    // Stream sauber abmelden, damit nach Widget-Dispose keine Events mehr ankommen
+    unawaited(service.dispose());
+    super.dispose();
   }
 }

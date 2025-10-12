@@ -452,6 +452,33 @@
   "podcastListItem_subscribed": "Subscribed",
   "podcastListItem_subscribe": "Subscribe",
   "podcastListItem_subtitleFallback": "Klubrádió show",
-  "podcastListItem_openDetails": "Open podcast details"
+  "podcastListItem_openDetails": "Open podcast details",
+
+  "downloads_tab_active": "Active",
+  "downloads_tab_done": "Completed",
+  "downloads_empty_active": "No active downloads",
+  "downloads_empty_done": "No completed downloads",
+  "downloads_status_waiting": "Waiting",
+  "downloads_status_running": "Downloading",
+  "downloads_status_done": "Completed",
+  "downloads_status_failed": "Failed",
+  "downloads_status_canceled": "Canceled",
+  "downloads_status_unknown": "Unknown",
+  "downloads_action_pause": "Pause",
+  "downloads_action_resume": "Resume",
+  "downloads_action_cancel": "Cancel",
+  "downloads_action_delete": "Delete",
+
+  "ep_action_resume": "Resume",
+  "ep_action_downloaded": "Downloaded",
+  "ep_action_retry": "Retry",
+  "ep_action_download": "Download",
+
+  "settings_title_downloads": "Downloads",
+  "settings_wifi_only": "Wi-Fi only",
+  "settings_max_parallel": "Max parallel downloads",
+  "settings_keep_latest": "Keep latest episodes",
+  "settings_delete_after_hours": "Delete after (hours)",
+  "settings_zero_off": "0 = off"
 
 }

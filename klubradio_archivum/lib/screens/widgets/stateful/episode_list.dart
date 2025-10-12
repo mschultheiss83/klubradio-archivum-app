@@ -2,8 +2,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'package:klubradio_archivum/l10n/app_localizations.dart';
 import 'package:klubradio_archivum/models/episode.dart' as model;
-import 'package:klubradio_archivum/providers/episode.provider.dart';
+import 'package:klubradio_archivum/providers/episode_provider.dart';
 import 'package:klubradio_archivum/providers/podcast_provider.dart';
 import 'package:klubradio_archivum/db/app_database.dart';
 import 'package:klubradio_archivum/providers/download_provider.dart'
@@ -52,7 +53,7 @@ class _EpisodeListState extends State<EpisodeList> {
                     podcastProvider.addRecentlyPlayed(ep);
                   },
                   trailing: widget.enableDownloads
-                      ? _DownloadButton(episode: ep)
+                      ? _DownloadButton(episode: ep, queue: widget.episodes)
                       : null,
                 );
               },
@@ -63,8 +64,9 @@ class _EpisodeListState extends State<EpisodeList> {
 }
 
 class _DownloadButton extends StatelessWidget {
-  const _DownloadButton({required this.episode});
+  const _DownloadButton({required this.episode, this.queue, super.key});
   final model.Episode episode;
+  final List<model.Episode>? queue;
 
   @override
   Widget build(BuildContext context) {
@@ -75,6 +77,7 @@ class _DownloadButton extends StatelessWidget {
     final stream = (db.select(
       db.episodes,
     )..where((e) => e.id.equals(episode.id))).watchSingleOrNull();
+    final l10n = AppLocalizations.of(context)!;
 
     return StreamBuilder<Episode?>(
       stream: stream,
@@ -86,6 +89,7 @@ class _DownloadButton extends StatelessWidget {
             row?.status ??
             0; // 0=none,1=queued,2=downloading,3=completed,4=failed,5=canceled
         final progress = row?.progress ?? 0.0;
+        final canPause = row?.resumable ?? false;
 
         switch (status) {
           case 2: // downloading
@@ -99,25 +103,34 @@ class _DownloadButton extends StatelessWidget {
             );
 
           case 1: // queued (als "wartet/pausiert")
-            return IconButton(
-              tooltip: 'Fortsetzen',
-              icon: const Icon(Icons.play_arrow),
-              onPressed: () => dl.resume(episode.id),
-            );
+            return canPause
+                ? IconButton(
+                    tooltip: l10n.ep_action_resume,
+                    icon: const Icon(Icons.play_arrow),
+                    onPressed: () => dl.resume(episode.id),
+                  )
+                : IconButton(
+                    tooltip: l10n
+                        .ep_action_download, // kein Resume → normaler Download-Button
+                    icon: const Icon(Icons.download_for_offline_outlined),
+                    onPressed: () => dl.enqueue(episode),
+                  );
 
           case 3: // completed
             return IconButton(
-              tooltip: 'Heruntergeladen',
+              tooltip: l10n.ep_action_downloaded,
               icon: const Icon(Icons.check_circle_outline),
               onPressed: () {
-                // Optional: lokalen Player mit row?.localPath öffnen
-                // openLocalPlayer(row?.localPath);
+                context.read<EpisodeProvider>().playEpisode(
+                  episode,
+                  queue: queue,
+                );
               },
             );
 
           case 4: // failed
             return IconButton(
-              tooltip: 'Erneut versuchen',
+              tooltip: l10n.ep_action_retry,
               icon: const Icon(Icons.refresh),
               onPressed: () => dl.enqueue(episode),
             );
@@ -126,7 +139,7 @@ class _DownloadButton extends StatelessWidget {
           case 0: // none / unbekannt
           default:
             return IconButton(
-              tooltip: 'Download',
+              tooltip: l10n.ep_action_download,
               icon: const Icon(Icons.download_for_offline_outlined),
               onPressed: () => dl.enqueue(episode),
             );

@@ -633,6 +633,20 @@ class $EpisodesTable extends Episodes with TableInfo<$EpisodesTable, Episode> {
     requiredDuringInsert: false,
     defaultValue: currentDateAndTime,
   );
+  static const VerificationMeta _resumableMeta = const VerificationMeta(
+    'resumable',
+  );
+  @override
+  late final GeneratedColumn<bool> resumable = GeneratedColumn<bool>(
+    'resumable',
+    aliasedName,
+    true,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("resumable" IN (0, 1))',
+    ),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -649,6 +663,7 @@ class $EpisodesTable extends Episodes with TableInfo<$EpisodesTable, Episode> {
     completedAt,
     createdAt,
     updatedAt,
+    resumable,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -760,6 +775,12 @@ class $EpisodesTable extends Episodes with TableInfo<$EpisodesTable, Episode> {
         updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
       );
     }
+    if (data.containsKey('resumable')) {
+      context.handle(
+        _resumableMeta,
+        resumable.isAcceptableOrUnknown(data['resumable']!, _resumableMeta),
+      );
+    }
     return context;
   }
 
@@ -825,6 +846,10 @@ class $EpisodesTable extends Episodes with TableInfo<$EpisodesTable, Episode> {
         DriftSqlType.dateTime,
         data['${effectivePrefix}updated_at'],
       )!,
+      resumable: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}resumable'],
+      ),
     );
   }
 
@@ -854,6 +879,7 @@ class Episode extends DataClass implements Insertable<Episode> {
   final DateTime? completedAt;
   final DateTime createdAt;
   final DateTime updatedAt;
+  final bool? resumable;
   const Episode({
     required this.id,
     required this.podcastId,
@@ -869,6 +895,7 @@ class Episode extends DataClass implements Insertable<Episode> {
     this.completedAt,
     required this.createdAt,
     required this.updatedAt,
+    this.resumable,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -899,6 +926,9 @@ class Episode extends DataClass implements Insertable<Episode> {
     }
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || resumable != null) {
+      map['resumable'] = Variable<bool>(resumable);
+    }
     return map;
   }
 
@@ -930,6 +960,9 @@ class Episode extends DataClass implements Insertable<Episode> {
           : Value(completedAt),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
+      resumable: resumable == null && nullToAbsent
+          ? const Value.absent()
+          : Value(resumable),
     );
   }
 
@@ -953,6 +986,7 @@ class Episode extends DataClass implements Insertable<Episode> {
       completedAt: serializer.fromJson<DateTime?>(json['completedAt']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      resumable: serializer.fromJson<bool?>(json['resumable']),
     );
   }
   @override
@@ -973,6 +1007,7 @@ class Episode extends DataClass implements Insertable<Episode> {
       'completedAt': serializer.toJson<DateTime?>(completedAt),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'resumable': serializer.toJson<bool?>(resumable),
     };
   }
 
@@ -991,6 +1026,7 @@ class Episode extends DataClass implements Insertable<Episode> {
     Value<DateTime?> completedAt = const Value.absent(),
     DateTime? createdAt,
     DateTime? updatedAt,
+    Value<bool?> resumable = const Value.absent(),
   }) => Episode(
     id: id ?? this.id,
     podcastId: podcastId ?? this.podcastId,
@@ -1008,6 +1044,7 @@ class Episode extends DataClass implements Insertable<Episode> {
     completedAt: completedAt.present ? completedAt.value : this.completedAt,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
+    resumable: resumable.present ? resumable.value : this.resumable,
   );
   Episode copyWithCompanion(EpisodesCompanion data) {
     return Episode(
@@ -1033,6 +1070,7 @@ class Episode extends DataClass implements Insertable<Episode> {
           : this.completedAt,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      resumable: data.resumable.present ? data.resumable.value : this.resumable,
     );
   }
 
@@ -1052,7 +1090,8 @@ class Episode extends DataClass implements Insertable<Episode> {
           ..write('playedAt: $playedAt, ')
           ..write('completedAt: $completedAt, ')
           ..write('createdAt: $createdAt, ')
-          ..write('updatedAt: $updatedAt')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('resumable: $resumable')
           ..write(')'))
         .toString();
   }
@@ -1073,6 +1112,7 @@ class Episode extends DataClass implements Insertable<Episode> {
     completedAt,
     createdAt,
     updatedAt,
+    resumable,
   );
   @override
   bool operator ==(Object other) =>
@@ -1091,7 +1131,8 @@ class Episode extends DataClass implements Insertable<Episode> {
           other.playedAt == this.playedAt &&
           other.completedAt == this.completedAt &&
           other.createdAt == this.createdAt &&
-          other.updatedAt == this.updatedAt);
+          other.updatedAt == this.updatedAt &&
+          other.resumable == this.resumable);
 }
 
 class EpisodesCompanion extends UpdateCompanion<Episode> {
@@ -1109,6 +1150,7 @@ class EpisodesCompanion extends UpdateCompanion<Episode> {
   final Value<DateTime?> completedAt;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
+  final Value<bool?> resumable;
   final Value<int> rowid;
   const EpisodesCompanion({
     this.id = const Value.absent(),
@@ -1125,6 +1167,7 @@ class EpisodesCompanion extends UpdateCompanion<Episode> {
     this.completedAt = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
+    this.resumable = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   EpisodesCompanion.insert({
@@ -1142,6 +1185,7 @@ class EpisodesCompanion extends UpdateCompanion<Episode> {
     this.completedAt = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
+    this.resumable = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        podcastId = Value(podcastId),
@@ -1162,6 +1206,7 @@ class EpisodesCompanion extends UpdateCompanion<Episode> {
     Expression<DateTime>? completedAt,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
+    Expression<bool>? resumable,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -1179,6 +1224,7 @@ class EpisodesCompanion extends UpdateCompanion<Episode> {
       if (completedAt != null) 'completed_at': completedAt,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
+      if (resumable != null) 'resumable': resumable,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -1198,6 +1244,7 @@ class EpisodesCompanion extends UpdateCompanion<Episode> {
     Value<DateTime?>? completedAt,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
+    Value<bool?>? resumable,
     Value<int>? rowid,
   }) {
     return EpisodesCompanion(
@@ -1215,6 +1262,7 @@ class EpisodesCompanion extends UpdateCompanion<Episode> {
       completedAt: completedAt ?? this.completedAt,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      resumable: resumable ?? this.resumable,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1264,6 +1312,9 @@ class EpisodesCompanion extends UpdateCompanion<Episode> {
     if (updatedAt.present) {
       map['updated_at'] = Variable<DateTime>(updatedAt.value);
     }
+    if (resumable.present) {
+      map['resumable'] = Variable<bool>(resumable.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -1287,6 +1338,7 @@ class EpisodesCompanion extends UpdateCompanion<Episode> {
           ..write('completedAt: $completedAt, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
+          ..write('resumable: $resumable, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -1345,12 +1397,24 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, Setting> {
     type: DriftSqlType.int,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _keepLatestNMeta = const VerificationMeta(
+    'keepLatestN',
+  );
+  @override
+  late final GeneratedColumn<int> keepLatestN = GeneratedColumn<int>(
+    'keep_latest_n',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
     wifiOnly,
     maxParallel,
     deleteAfterHours,
+    keepLatestN,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1391,6 +1455,15 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, Setting> {
         ),
       );
     }
+    if (data.containsKey('keep_latest_n')) {
+      context.handle(
+        _keepLatestNMeta,
+        keepLatestN.isAcceptableOrUnknown(
+          data['keep_latest_n']!,
+          _keepLatestNMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -1416,6 +1489,10 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, Setting> {
         DriftSqlType.int,
         data['${effectivePrefix}delete_after_hours'],
       ),
+      keepLatestN: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}keep_latest_n'],
+      ),
     );
   }
 
@@ -1430,11 +1507,13 @@ class Setting extends DataClass implements Insertable<Setting> {
   final bool wifiOnly;
   final int maxParallel;
   final int? deleteAfterHours;
+  final int? keepLatestN;
   const Setting({
     required this.id,
     required this.wifiOnly,
     required this.maxParallel,
     this.deleteAfterHours,
+    this.keepLatestN,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1444,6 +1523,9 @@ class Setting extends DataClass implements Insertable<Setting> {
     map['max_parallel'] = Variable<int>(maxParallel);
     if (!nullToAbsent || deleteAfterHours != null) {
       map['delete_after_hours'] = Variable<int>(deleteAfterHours);
+    }
+    if (!nullToAbsent || keepLatestN != null) {
+      map['keep_latest_n'] = Variable<int>(keepLatestN);
     }
     return map;
   }
@@ -1456,6 +1538,9 @@ class Setting extends DataClass implements Insertable<Setting> {
       deleteAfterHours: deleteAfterHours == null && nullToAbsent
           ? const Value.absent()
           : Value(deleteAfterHours),
+      keepLatestN: keepLatestN == null && nullToAbsent
+          ? const Value.absent()
+          : Value(keepLatestN),
     );
   }
 
@@ -1469,6 +1554,7 @@ class Setting extends DataClass implements Insertable<Setting> {
       wifiOnly: serializer.fromJson<bool>(json['wifiOnly']),
       maxParallel: serializer.fromJson<int>(json['maxParallel']),
       deleteAfterHours: serializer.fromJson<int?>(json['deleteAfterHours']),
+      keepLatestN: serializer.fromJson<int?>(json['keepLatestN']),
     );
   }
   @override
@@ -1479,6 +1565,7 @@ class Setting extends DataClass implements Insertable<Setting> {
       'wifiOnly': serializer.toJson<bool>(wifiOnly),
       'maxParallel': serializer.toJson<int>(maxParallel),
       'deleteAfterHours': serializer.toJson<int?>(deleteAfterHours),
+      'keepLatestN': serializer.toJson<int?>(keepLatestN),
     };
   }
 
@@ -1487,6 +1574,7 @@ class Setting extends DataClass implements Insertable<Setting> {
     bool? wifiOnly,
     int? maxParallel,
     Value<int?> deleteAfterHours = const Value.absent(),
+    Value<int?> keepLatestN = const Value.absent(),
   }) => Setting(
     id: id ?? this.id,
     wifiOnly: wifiOnly ?? this.wifiOnly,
@@ -1494,6 +1582,7 @@ class Setting extends DataClass implements Insertable<Setting> {
     deleteAfterHours: deleteAfterHours.present
         ? deleteAfterHours.value
         : this.deleteAfterHours,
+    keepLatestN: keepLatestN.present ? keepLatestN.value : this.keepLatestN,
   );
   Setting copyWithCompanion(SettingsCompanion data) {
     return Setting(
@@ -1505,6 +1594,9 @@ class Setting extends DataClass implements Insertable<Setting> {
       deleteAfterHours: data.deleteAfterHours.present
           ? data.deleteAfterHours.value
           : this.deleteAfterHours,
+      keepLatestN: data.keepLatestN.present
+          ? data.keepLatestN.value
+          : this.keepLatestN,
     );
   }
 
@@ -1514,13 +1606,15 @@ class Setting extends DataClass implements Insertable<Setting> {
           ..write('id: $id, ')
           ..write('wifiOnly: $wifiOnly, ')
           ..write('maxParallel: $maxParallel, ')
-          ..write('deleteAfterHours: $deleteAfterHours')
+          ..write('deleteAfterHours: $deleteAfterHours, ')
+          ..write('keepLatestN: $keepLatestN')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, wifiOnly, maxParallel, deleteAfterHours);
+  int get hashCode =>
+      Object.hash(id, wifiOnly, maxParallel, deleteAfterHours, keepLatestN);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1528,7 +1622,8 @@ class Setting extends DataClass implements Insertable<Setting> {
           other.id == this.id &&
           other.wifiOnly == this.wifiOnly &&
           other.maxParallel == this.maxParallel &&
-          other.deleteAfterHours == this.deleteAfterHours);
+          other.deleteAfterHours == this.deleteAfterHours &&
+          other.keepLatestN == this.keepLatestN);
 }
 
 class SettingsCompanion extends UpdateCompanion<Setting> {
@@ -1536,29 +1631,34 @@ class SettingsCompanion extends UpdateCompanion<Setting> {
   final Value<bool> wifiOnly;
   final Value<int> maxParallel;
   final Value<int?> deleteAfterHours;
+  final Value<int?> keepLatestN;
   const SettingsCompanion({
     this.id = const Value.absent(),
     this.wifiOnly = const Value.absent(),
     this.maxParallel = const Value.absent(),
     this.deleteAfterHours = const Value.absent(),
+    this.keepLatestN = const Value.absent(),
   });
   SettingsCompanion.insert({
     this.id = const Value.absent(),
     this.wifiOnly = const Value.absent(),
     this.maxParallel = const Value.absent(),
     this.deleteAfterHours = const Value.absent(),
+    this.keepLatestN = const Value.absent(),
   });
   static Insertable<Setting> custom({
     Expression<int>? id,
     Expression<bool>? wifiOnly,
     Expression<int>? maxParallel,
     Expression<int>? deleteAfterHours,
+    Expression<int>? keepLatestN,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (wifiOnly != null) 'wifi_only': wifiOnly,
       if (maxParallel != null) 'max_parallel': maxParallel,
       if (deleteAfterHours != null) 'delete_after_hours': deleteAfterHours,
+      if (keepLatestN != null) 'keep_latest_n': keepLatestN,
     });
   }
 
@@ -1567,12 +1667,14 @@ class SettingsCompanion extends UpdateCompanion<Setting> {
     Value<bool>? wifiOnly,
     Value<int>? maxParallel,
     Value<int?>? deleteAfterHours,
+    Value<int?>? keepLatestN,
   }) {
     return SettingsCompanion(
       id: id ?? this.id,
       wifiOnly: wifiOnly ?? this.wifiOnly,
       maxParallel: maxParallel ?? this.maxParallel,
       deleteAfterHours: deleteAfterHours ?? this.deleteAfterHours,
+      keepLatestN: keepLatestN ?? this.keepLatestN,
     );
   }
 
@@ -1591,6 +1693,9 @@ class SettingsCompanion extends UpdateCompanion<Setting> {
     if (deleteAfterHours.present) {
       map['delete_after_hours'] = Variable<int>(deleteAfterHours.value);
     }
+    if (keepLatestN.present) {
+      map['keep_latest_n'] = Variable<int>(keepLatestN.value);
+    }
     return map;
   }
 
@@ -1600,7 +1705,8 @@ class SettingsCompanion extends UpdateCompanion<Setting> {
           ..write('id: $id, ')
           ..write('wifiOnly: $wifiOnly, ')
           ..write('maxParallel: $maxParallel, ')
-          ..write('deleteAfterHours: $deleteAfterHours')
+          ..write('deleteAfterHours: $deleteAfterHours, ')
+          ..write('keepLatestN: $keepLatestN')
           ..write(')'))
         .toString();
   }
@@ -1881,6 +1987,7 @@ typedef $$EpisodesTableCreateCompanionBuilder =
       Value<DateTime?> completedAt,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
+      Value<bool?> resumable,
       Value<int> rowid,
     });
 typedef $$EpisodesTableUpdateCompanionBuilder =
@@ -1899,6 +2006,7 @@ typedef $$EpisodesTableUpdateCompanionBuilder =
       Value<DateTime?> completedAt,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
+      Value<bool?> resumable,
       Value<int> rowid,
     });
 
@@ -1978,6 +2086,11 @@ class $$EpisodesTableFilterComposer
 
   ColumnFilters<DateTime> get updatedAt => $composableBuilder(
     column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get resumable => $composableBuilder(
+    column: $table.resumable,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -2060,6 +2173,11 @@ class $$EpisodesTableOrderingComposer
     column: $table.updatedAt,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<bool> get resumable => $composableBuilder(
+    column: $table.resumable,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$EpisodesTableAnnotationComposer
@@ -2120,6 +2238,9 @@ class $$EpisodesTableAnnotationComposer
 
   GeneratedColumn<DateTime> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<bool> get resumable =>
+      $composableBuilder(column: $table.resumable, builder: (column) => column);
 }
 
 class $$EpisodesTableTableManager
@@ -2164,6 +2285,7 @@ class $$EpisodesTableTableManager
                 Value<DateTime?> completedAt = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
+                Value<bool?> resumable = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => EpisodesCompanion(
                 id: id,
@@ -2180,6 +2302,7 @@ class $$EpisodesTableTableManager
                 completedAt: completedAt,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
+                resumable: resumable,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -2198,6 +2321,7 @@ class $$EpisodesTableTableManager
                 Value<DateTime?> completedAt = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
+                Value<bool?> resumable = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => EpisodesCompanion.insert(
                 id: id,
@@ -2214,6 +2338,7 @@ class $$EpisodesTableTableManager
                 completedAt: completedAt,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
+                resumable: resumable,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -2244,6 +2369,7 @@ typedef $$SettingsTableCreateCompanionBuilder =
       Value<bool> wifiOnly,
       Value<int> maxParallel,
       Value<int?> deleteAfterHours,
+      Value<int?> keepLatestN,
     });
 typedef $$SettingsTableUpdateCompanionBuilder =
     SettingsCompanion Function({
@@ -2251,6 +2377,7 @@ typedef $$SettingsTableUpdateCompanionBuilder =
       Value<bool> wifiOnly,
       Value<int> maxParallel,
       Value<int?> deleteAfterHours,
+      Value<int?> keepLatestN,
     });
 
 class $$SettingsTableFilterComposer
@@ -2279,6 +2406,11 @@ class $$SettingsTableFilterComposer
 
   ColumnFilters<int> get deleteAfterHours => $composableBuilder(
     column: $table.deleteAfterHours,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get keepLatestN => $composableBuilder(
+    column: $table.keepLatestN,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -2311,6 +2443,11 @@ class $$SettingsTableOrderingComposer
     column: $table.deleteAfterHours,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<int> get keepLatestN => $composableBuilder(
+    column: $table.keepLatestN,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$SettingsTableAnnotationComposer
@@ -2335,6 +2472,11 @@ class $$SettingsTableAnnotationComposer
 
   GeneratedColumn<int> get deleteAfterHours => $composableBuilder(
     column: $table.deleteAfterHours,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get keepLatestN => $composableBuilder(
+    column: $table.keepLatestN,
     builder: (column) => column,
   );
 }
@@ -2371,11 +2513,13 @@ class $$SettingsTableTableManager
                 Value<bool> wifiOnly = const Value.absent(),
                 Value<int> maxParallel = const Value.absent(),
                 Value<int?> deleteAfterHours = const Value.absent(),
+                Value<int?> keepLatestN = const Value.absent(),
               }) => SettingsCompanion(
                 id: id,
                 wifiOnly: wifiOnly,
                 maxParallel: maxParallel,
                 deleteAfterHours: deleteAfterHours,
+                keepLatestN: keepLatestN,
               ),
           createCompanionCallback:
               ({
@@ -2383,11 +2527,13 @@ class $$SettingsTableTableManager
                 Value<bool> wifiOnly = const Value.absent(),
                 Value<int> maxParallel = const Value.absent(),
                 Value<int?> deleteAfterHours = const Value.absent(),
+                Value<int?> keepLatestN = const Value.absent(),
               }) => SettingsCompanion.insert(
                 id: id,
                 wifiOnly: wifiOnly,
                 maxParallel: maxParallel,
                 deleteAfterHours: deleteAfterHours,
+                keepLatestN: keepLatestN,
               ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
