@@ -11,14 +11,17 @@ class EpisodeProvider extends ChangeNotifier {
   EpisodeProvider({
     required ApiService apiService,
     required AudioPlayerService audioPlayerService,
-  })  : _apiService = apiService,
-        _audioPlayerService = audioPlayerService {
-    _positionSubscription =
-        _audioPlayerService.positionStream.listen(_onPositionChanged);
-    _playerStateSubscription =
-        _audioPlayerService.playerStateStream.listen(_onPlayerStateChanged);
-    _bufferingSubscription =
-        _audioPlayerService.bufferingStream.listen(_onBufferingChanged);
+  }) : _apiService = apiService,
+       _audioPlayerService = audioPlayerService {
+    _positionSubscription = _audioPlayerService.positionStream.listen(
+      _onPositionChanged,
+    );
+    _playerStateSubscription = _audioPlayerService.playerStateStream.listen(
+      _onPlayerStateChanged,
+    );
+    _bufferingSubscription = _audioPlayerService.bufferingStream.listen(
+      _onBufferingChanged,
+    );
   }
 
   ApiService _apiService;
@@ -54,12 +57,15 @@ class EpisodeProvider extends ChangeNotifier {
       _playerStateSubscription?.cancel();
       _bufferingSubscription?.cancel();
       _audioPlayerService = audioPlayerService;
-      _positionSubscription =
-          _audioPlayerService.positionStream.listen(_onPositionChanged);
-      _playerStateSubscription =
-          _audioPlayerService.playerStateStream.listen(_onPlayerStateChanged);
-      _bufferingSubscription =
-          _audioPlayerService.bufferingStream.listen(_onBufferingChanged);
+      _positionSubscription = _audioPlayerService.positionStream.listen(
+        _onPositionChanged,
+      );
+      _playerStateSubscription = _audioPlayerService.playerStateStream.listen(
+        _onPlayerStateChanged,
+      );
+      _bufferingSubscription = _audioPlayerService.bufferingStream.listen(
+        _onBufferingChanged,
+      );
     }
   }
 
@@ -76,6 +82,35 @@ class EpisodeProvider extends ChangeNotifier {
     }
     await _audioPlayerService.loadEpisode(episode);
     notifyListeners();
+  }
+
+  /// Jumps the playback position relative to the current position.
+  /// Use a positive [duration] to seek forward, and a negative one to seek backward.
+  Future<void> seekRelative(Duration duration) async {
+    // Use the provider's own `_currentPosition` property
+    Duration newPosition = _currentPosition + duration;
+
+    // --- Boundary Checks ---
+    // Ensure the new position is not negative
+    if (newPosition.isNegative) {
+      newPosition = Duration.zero;
+    }
+
+    // Ensure the new position does not exceed the episode duration
+    // Use the provider's `totalDuration` getter
+    final episodeDuration = totalDuration ?? Duration.zero;
+    if (newPosition > episodeDuration) {
+      newPosition = episodeDuration;
+    }
+
+    // --- FIX: Optimistically update the local state ---
+    // Update the internal position immediately and notify listeners.
+    // This allows consecutive seek calls to work as expected.
+    _currentPosition = newPosition;
+    notifyListeners();
+
+    // Now, tell the audio player to perform the actual seek.
+    await _audioPlayerService.seek(newPosition);
   }
 
   Future<void> playNext() async {
@@ -96,8 +131,9 @@ class EpisodeProvider extends ChangeNotifier {
     if (_currentEpisode == null) {
       return null;
     }
-    final int index =
-        _queue.indexWhere((Episode episode) => episode.id == _currentEpisode!.id);
+    final int index = _queue.indexWhere(
+      (Episode episode) => episode.id == _currentEpisode!.id,
+    );
     if (index != -1 && index + 1 < _queue.length) {
       return _queue[index + 1];
     }
@@ -108,8 +144,9 @@ class EpisodeProvider extends ChangeNotifier {
     if (_currentEpisode == null) {
       return null;
     }
-    final int index =
-        _queue.indexWhere((Episode episode) => episode.id == _currentEpisode!.id);
+    final int index = _queue.indexWhere(
+      (Episode episode) => episode.id == _currentEpisode!.id,
+    );
     if (index > 0) {
       return _queue[index - 1];
     }

@@ -310,4 +310,16 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get podcastNotFoundError =>
       'Sorry, the selected show could not be found.';
+
+  @override
+  String get podcastListItem_subscribed => 'Subscribed';
+
+  @override
+  String get podcastListItem_subscribe => 'Subscribe';
+
+  @override
+  String get podcastListItem_subtitleFallback => 'Klubrádió show';
+
+  @override
+  String get podcastListItem_openDetails => 'Open podcast details';
 }

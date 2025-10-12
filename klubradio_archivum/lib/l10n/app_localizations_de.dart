@@ -318,4 +318,16 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get podcastNotFoundError =>
       'Die ausgewählte Sendung konnte leider nicht gefunden werden.';
+
+  @override
+  String get podcastListItem_subscribed => 'Abonniert';
+
+  @override
+  String get podcastListItem_subscribe => 'Abonnieren';
+
+  @override
+  String get podcastListItem_subtitleFallback => 'Klubrádió-Sendung';
+
+  @override
+  String get podcastListItem_openDetails => 'Podcastdetails öffnen';
 }

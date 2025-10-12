@@ -24,8 +24,10 @@ class NowPlayingBar extends StatelessWidget {
           return const SizedBox.shrink();
         }
 
+        final cs = Theme.of(context).colorScheme;
+
         return Material(
-          color: Theme.of(context).colorScheme.surface,
+          color: cs.surface,
           elevation: 4,
           child: InkWell(
             onTap: () {
@@ -50,9 +52,7 @@ class NowPlayingBar extends StatelessWidget {
                               : Icons.play_circle,
                           size: 32,
                         ),
-                        onPressed: () {
-                          provider.togglePlayPause();
-                        },
+                        onPressed: provider.togglePlayPause,
                       ),
                       const SizedBox(width: 12),
                       Expanded(
@@ -70,7 +70,9 @@ class NowPlayingBar extends StatelessWidget {
                               style: Theme.of(context).textTheme.bodySmall,
                             ),
                             Text(
-                              '${currentEpisode.description}',
+                              currentEpisode.description,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
                               style: Theme.of(context).textTheme.bodyMedium,
                             ),
                           ],
@@ -108,6 +110,8 @@ class _QueueSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
     return ListView.builder(
       padding: const EdgeInsets.all(16),
       itemCount: provider.queue.length,
@@ -120,24 +124,38 @@ class _QueueSheet extends StatelessWidget {
             .where((s) => s.isNotEmpty)
             .join(' ');
         return ListTile(
+          selected: isCurrent,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadiusGeometry.all(Radius.circular(8)),
+            borderRadius: BorderRadius.circular(12),
+            side: BorderSide(
+              color: isCurrent ? cs.outline : Colors.transparent,
+              width: 1,
+            ),
           ),
+
+          // Material 3-friendly colors
+          tileColor: cs.surfaceContainerLow, // unselected bg
+          selectedTileColor: cs.secondaryContainer, // selected bg
+          textColor: isCurrent ? cs.onSecondaryContainer : cs.onSurface,
+          iconColor: isCurrent ? cs.onSecondaryContainer : cs.onSurfaceVariant,
+
           leading: Icon(isCurrent ? Icons.play_arrow : Icons.queue_music),
-          trailing: CoverArt(imageUrl: episode.imageUrl ?? ""),
+          trailing: ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: ImageUrl(url: episode.imageUrl ?? "", width: 56, height: 56),
+          ),
           title: Text('${episode.title}, ${episode.showDate}'),
           subtitle: Text(
             '${formatDuration(context, episode.duration)} - $hosts',
           ),
+
+          // Nice pressed/hover overlay
+          hoverColor: cs.onSurface.withValues(alpha: 0.12),
+
           onTap: () async {
             Navigator.of(context).pop();
             await provider.playEpisode(episode, queue: provider.queue);
           },
-          // TODO fix colors
-          // tileColor: isCurrent
-          //     ? Theme.of(context).colorScheme.primaryContainer
-          //     : Theme.of(context).colorScheme.surface,
-          hoverColor: Theme.of(context).colorScheme.secondaryContainer,
         );
       },
     );

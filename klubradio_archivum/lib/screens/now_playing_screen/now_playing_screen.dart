@@ -1,9 +1,11 @@
+// lib/screens/now_playing/now_playing_screen.dart
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'package:klubradio_archivum/l10n/app_localizations.dart';
 import 'package:klubradio_archivum/providers/episode.provider.dart';
-import 'package:klubradio_archivum/screens/utils/helpers.dart';
+import 'package:klubradio_archivum/screens/widgets/stateless/image_url.dart';
 import 'audio_player_controls.dart';
 import 'progress_slider.dart';
 
@@ -24,39 +26,80 @@ class NowPlayingScreen extends StatelessWidget {
           );
         }
 
+        // Responsive cover size (max 240, ~40% of screen width)
+        final double screenW = MediaQuery.sizeOf(context).width;
+        final double coverSize = math.min(240, screenW * 0.4);
+
         return Scaffold(
           appBar: AppBar(title: Text(l10n.nowPlayingScreenTitle)),
-          body: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Text(
-                  '${episode.title} - ${episode.showDate}',
-                  style: Theme.of(context).textTheme.headlineSmall,
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  episode.hosts.join(', '),
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
+          body: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Scrollable top section prevents bottom overflow on small screens
+                  Expanded(
+                    child: SingleChildScrollView(
+                      padding: EdgeInsets.only(
+                        bottom: MediaQuery.viewPaddingOf(context).bottom,
+                      ),
+                      child: Wrap(
+                        alignment: WrapAlignment.center,
+                        crossAxisAlignment: WrapCrossAlignment.start,
+                        spacing: 24,
+                        runSpacing: 16,
+                        children: [
+                          // Left: cover art
+                          ImageUrl(
+                            url: episode.imageUrl ?? "",
+                            width: coverSize,
+                            height: coverSize,
+                          ),
 
-                const SizedBox(height: 24), // Added more space for readability
-                Expanded(
-                  child: SingleChildScrollView(
-                    // Makes description scrollable if too long
-                    child: Text(
-                      episode.description,
-                      style: Theme.of(context).textTheme.bodyMedium,
+                          // Right: info
+                          ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 600),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  '${episode.title} - ${episode.showDate}',
+                                  style: Theme.of(
+                                    context,
+                                  ).textTheme.headlineSmall,
+                                ),
+                                const SizedBox(height: 12),
+
+                                if (episode.hosts.isNotEmpty) ...[
+                                  Text(
+                                    episode.hosts.join('\n'),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyMedium
+                                        ?.copyWith(fontWeight: FontWeight.w600),
+                                  ),
+                                  const SizedBox(height: 12),
+                                ],
+                                Text(
+                                  episode.description,
+                                  style: Theme.of(context).textTheme.bodyMedium,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 24), // Added space before controls
-                ProgressSlider(provider: provider),
-                const SizedBox(height: 16), // Adjusted spacing
-                AudioPlayerControls(provider: provider),
-              ],
+
+                  const SizedBox(height: 16),
+                  // Progress + controls stay visible without overflow
+                  ProgressSlider(provider: provider),
+                  const SizedBox(height: 12),
+                  AudioPlayerControls(provider: provider),
+                ],
+              ),
             ),
           ),
         );

@@ -447,6 +447,11 @@
   "podcastNotFoundError": "Sorry, the selected show could not be found.",
   "@podcastNotFoundError": {
     "description": "Error message when a podcast selected from a list can't be fetched."
-  }
+  },
+
+  "podcastListItem_subscribed": "Subscribed",
+  "podcastListItem_subscribe": "Subscribe",
+  "podcastListItem_subtitleFallback": "Klubrádió show",
+  "podcastListItem_openDetails": "Open podcast details"
 
 }
