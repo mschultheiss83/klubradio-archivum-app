@@ -446,6 +446,12 @@
   "podcastNotFoundError": "Sajnos a kiválasztott műsor nem található.",
   "@podcastNotFoundError": {
     "description": "Hibaüzenet, ha egy listából kiválasztott műsort nem sikerül lekérni."
-  }
+  },
+
+
+  "podcastListItem_subscribed": "Feliratkozva",
+  "podcastListItem_subscribe": "Feliratkozás",
+  "podcastListItem_subtitleFallback": "Klubrádió műsor",
+  "podcastListItem_openDetails": "Műsor részleteinek megnyitása"
 
 }

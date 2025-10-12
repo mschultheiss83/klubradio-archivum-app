@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'package:klubradio_archivum/l10n/app_localizations.dart';
 import 'package:klubradio_archivum/models/podcast.dart';
 import 'package:klubradio_archivum/providers/podcast_provider.dart';
 import 'package:klubradio_archivum/screens/podcast_detail_screen/podcast_detail_screen.dart';
@@ -18,14 +19,17 @@ class PodcastListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    final PodcastProvider provider = context.watch<PodcastProvider>();
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final provider = context.watch<PodcastProvider>();
+
     final bool isSubscribed =
         provider.userProfile?.subscribedPodcastIds.contains(podcast.id) ??
         podcast.isSubscribed;
+
     final String subtitle = podcast.hosts.isNotEmpty
-        ? podcast.hosts.map((host) => host.name).join(', ')
-        : 'Klubrádió műsor';
+        ? podcast.hosts.map((h) => h.name).join(', ')
+        : l10n.podcastListItem_subtitleFallback;
 
     return Card(
       clipBehavior: Clip.antiAlias,
@@ -33,8 +37,7 @@ class PodcastListItem extends StatelessWidget {
         onTap: () {
           Navigator.of(context).push(
             MaterialPageRoute<void>(
-              builder: (BuildContext context) =>
-                  PodcastDetailScreen(podcast: podcast),
+              builder: (_) => PodcastDetailScreen(podcast: podcast),
             ),
           );
         },
@@ -71,7 +74,9 @@ class PodcastListItem extends StatelessWidget {
                                   : Icons.notifications_outlined,
                             ),
                             label: Text(
-                              isSubscribed ? 'Feliratkozva' : 'Feliratkozás',
+                              isSubscribed
+                                  ? l10n.podcastListItem_subscribed
+                                  : l10n.podcastListItem_subscribe,
                             ),
                             onPressed: () {
                               if (isSubscribed) {

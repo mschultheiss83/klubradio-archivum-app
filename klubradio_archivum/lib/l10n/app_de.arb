@@ -447,5 +447,10 @@
   "podcastNotFoundError": "Die ausgewählte Sendung konnte leider nicht gefunden werden.",
   "@podcastNotFoundError": {
     "description": "Fehlermeldung, wenn ein aus einer Liste ausgewählter Podcast nicht abgerufen werden kann."
-  }
+  },
+
+  "podcastListItem_subscribed": "Abonniert",
+  "podcastListItem_subscribe": "Abonnieren",
+  "podcastListItem_subtitleFallback": "Klubrádió-Sendung",
+  "podcastListItem_openDetails": "Podcastdetails öffnen"
 }

@@ -311,4 +311,16 @@ class AppLocalizationsHu extends AppLocalizations {
   @override
   String get podcastNotFoundError =>
       'Sajnos a kiválasztott műsor nem található.';
+
+  @override
+  String get podcastListItem_subscribed => 'Feliratkozva';
+
+  @override
+  String get podcastListItem_subscribe => 'Feliratkozás';
+
+  @override
+  String get podcastListItem_subtitleFallback => 'Klubrádió műsor';
+
+  @override
+  String get podcastListItem_openDetails => 'Műsor részleteinek megnyitása';
 }

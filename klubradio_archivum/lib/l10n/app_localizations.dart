@@ -621,6 +621,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Sorry, the selected show could not be found.'**
   String get podcastNotFoundError;
+
+  /// No description provided for @podcastListItem_subscribed.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscribed'**
+  String get podcastListItem_subscribed;
+
+  /// No description provided for @podcastListItem_subscribe.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscribe'**
+  String get podcastListItem_subscribe;
+
+  /// No description provided for @podcastListItem_subtitleFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'Klubrádió show'**
+  String get podcastListItem_subtitleFallback;
+
+  /// No description provided for @podcastListItem_openDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Open podcast details'**
+  String get podcastListItem_openDetails;
 }
 
 class _AppLocalizationsDelegate
