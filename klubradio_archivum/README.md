@@ -47,3 +47,36 @@ Wenn iOS-Builds genutzt werden:
    nutzt iOS-APIs automatisch.
 3. 
 
+### Was noch offen ist
+
+1. **Abonnieren (Subscriptions) – lokal in DB**
+
+   * UI: „Abonnieren“/„Deabonnieren“-Button im Podcast-Detail.
+   * DB/DAO:
+
+      * `subscriptions`-Tabelle (haben wir).
+      * DAO-Methoden: `toggleSubscribe(podcastId)`, `isSubscribed(podcastId)`, `watchAll()`.
+   * Auto-Download je Abo:
+
+      * Feld `autoDownloadN` je Abo.
+      * Bei neuem Abo → `enqueueLatestN(podcastId, n)`.
+      * Bei App-Start (oder Pull-to-refresh) → für alle Abos prüfen/enqueuen.
+   * Settings-Panel: Optional „Standard für neue Abos“ (z. B. 3 Folgen).
+
+2. **Downloader-Feinschliff**
+
+   * Guards testen: nach `complete` ignorieren wir spätere Events 
+   * Windows Pfad/Branding später: `com.example` → Company/Product in `windows/runner` anpassen.
+
+3. **Integrationstest**
+
+   * ✅ Läuft grün, misst Größe & Speed, dynamisches Timeout.
+   * kleinen Negativtest (ungültige URL ⇒ `failed`) ergänzen.
+   * kleinen Negativtest (404 URL ⇒ `failed`) ergänzen.
+
+4. **README/Onboarding**
+
+   * Setup iOS (Xcode Permissions, Background Modes) – TODO Abschnitt.
+   * Windows Build-Prereqs (VS Build Tools / Desktop C++).
+   * „How to run integration tests“ (drive vs. test, Dart-defines).
+   * Storage-Pfade & Retention-Regeln dokumentieren.
