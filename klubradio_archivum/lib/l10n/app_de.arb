@@ -452,5 +452,41 @@
   "podcastListItem_subscribed": "Abonniert",
   "podcastListItem_subscribe": "Abonnieren",
   "podcastListItem_subtitleFallback": "Klubrádió-Sendung",
-  "podcastListItem_openDetails": "Podcastdetails öffnen"
+  "podcastListItem_openDetails": "Podcastdetails öffnen",
+
+  "downloads_tab_active": "Aktiv",
+  "downloads_tab_done": "Fertig",
+  "downloads_empty_active": "Keine aktiven Downloads",
+  "downloads_empty_done": "Keine fertigen Downloads",
+  "downloads_status_waiting": "Wartet",
+  "downloads_status_running": "Lädt",
+  "downloads_status_done": "Fertig",
+  "downloads_status_failed": "Fehler",
+  "downloads_status_canceled": "Abgebrochen",
+  "downloads_status_unknown": "Unbekannt",
+  "downloads_action_pause": "Pause",
+  "downloads_action_resume": "Fortsetzen",
+  "downloads_action_cancel": "Abbrechen",
+  "downloads_action_delete": "Löschen",
+
+  "ep_action_resume": "Fortsetzen",
+  "ep_action_downloaded": "Heruntergeladen",
+  "ep_action_retry": "Erneut versuchen",
+  "ep_action_download": "Download",
+
+  "settings_title_downloads": "Downloads",
+  "settings_wifi_only": "Nur WLAN",
+  "settings_max_parallel": "Max. gleichzeitige Downloads",
+  "settings_keep_latest": "Letzte Episoden behalten",
+  "settings_delete_after_hours": "Löschen nach (Stunden)",
+  "settings_zero_off": "0 = aus",
+  "settings_wifi_only_mobile_default": "Standard auf mobilen Geräten: AN",
+  "settings_wifi_only_desktop_default": "Standard auf Desktop: AUS",
+  "settings_retention_section": "Aufbewahrung",
+  "settings_keep_all": "Alle behalten",
+  "settings_keep_latest_label": "Nur die letzten n",
+  "settings_keep_latest_hint": "Behalte die neuesten n Episoden.",
+  "settings_delete_after_heard_label": "Nach „gehört“ in x Stunden löschen",
+  "settings_delete_after_hint": "Wenn eine Episode gehört wurde, nach x Stunden automatisch entfernen."
+
 }

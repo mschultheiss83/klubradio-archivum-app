@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'package:klubradio_archivum/providers/episode.provider.dart';
+import 'package:klubradio_archivum/providers/episode_provider.dart';
 import 'package:klubradio_archivum/screens/now_playing_screen/now_playing_screen.dart';
 import 'package:klubradio_archivum/screens/utils/helpers.dart';
 import 'package:klubradio_archivum/screens/widgets/stateless/image_url.dart';

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../models/episode.dart';
-import '../../providers/episode.provider.dart';
+import '../../providers/episode_provider.dart';
 import '../../providers/podcast_provider.dart';
 import '../utils/helpers.dart';
 

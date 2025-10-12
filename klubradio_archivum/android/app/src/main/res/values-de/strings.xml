@@ -1,0 +1,4 @@
+<resources>
+    <string name="channel_name_downloads">Downloads</string>
+    <string name="channel_description_downloads">Fortschritt der Hintergrund-Downloads</string>
+</resources>

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../providers/episode.provider.dart';
+import '../../providers/episode_provider.dart';
 import '../utils/helpers.dart';
 
 class ProgressSlider extends StatelessWidget {

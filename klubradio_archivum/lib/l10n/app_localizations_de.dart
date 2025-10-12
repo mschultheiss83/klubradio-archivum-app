@@ -330,4 +330,103 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get podcastListItem_openDetails => 'Podcastdetails öffnen';
+
+  @override
+  String get downloads_tab_active => 'Aktiv';
+
+  @override
+  String get downloads_tab_done => 'Fertig';
+
+  @override
+  String get downloads_empty_active => 'Keine aktiven Downloads';
+
+  @override
+  String get downloads_empty_done => 'Keine fertigen Downloads';
+
+  @override
+  String get downloads_status_waiting => 'Wartet';
+
+  @override
+  String get downloads_status_running => 'Lädt';
+
+  @override
+  String get downloads_status_done => 'Fertig';
+
+  @override
+  String get downloads_status_failed => 'Fehler';
+
+  @override
+  String get downloads_status_canceled => 'Abgebrochen';
+
+  @override
+  String get downloads_status_unknown => 'Unbekannt';
+
+  @override
+  String get downloads_action_pause => 'Pause';
+
+  @override
+  String get downloads_action_resume => 'Fortsetzen';
+
+  @override
+  String get downloads_action_cancel => 'Abbrechen';
+
+  @override
+  String get downloads_action_delete => 'Löschen';
+
+  @override
+  String get ep_action_resume => 'Fortsetzen';
+
+  @override
+  String get ep_action_downloaded => 'Heruntergeladen';
+
+  @override
+  String get ep_action_retry => 'Erneut versuchen';
+
+  @override
+  String get ep_action_download => 'Download';
+
+  @override
+  String get settings_title_downloads => 'Downloads';
+
+  @override
+  String get settings_wifi_only => 'Nur WLAN';
+
+  @override
+  String get settings_max_parallel => 'Max. gleichzeitige Downloads';
+
+  @override
+  String get settings_keep_latest => 'Letzte Episoden behalten';
+
+  @override
+  String get settings_delete_after_hours => 'Löschen nach (Stunden)';
+
+  @override
+  String get settings_zero_off => '0 = aus';
+
+  @override
+  String get settings_wifi_only_mobile_default =>
+      'Standard auf mobilen Geräten: AN';
+
+  @override
+  String get settings_wifi_only_desktop_default => 'Standard auf Desktop: AUS';
+
+  @override
+  String get settings_retention_section => 'Aufbewahrung';
+
+  @override
+  String get settings_keep_all => 'Alle behalten';
+
+  @override
+  String get settings_keep_latest_label => 'Nur die letzten n';
+
+  @override
+  String get settings_keep_latest_hint => 'Behalte die neuesten n Episoden.';
+
+  @override
+  String get settings_delete_after_heard_label =>
+      'Nach „gehört“ in x Stunden löschen';
+
+  @override
+  String get settings_delete_after_hint =>
+      'Wenn eine Episode gehört wurde, nach x Stunden automatisch entfernen.';
 }

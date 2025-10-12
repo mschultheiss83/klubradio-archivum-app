@@ -1,0 +1,4 @@
+<resources>
+    <string name="channel_name_downloads">Letöltések</string>
+    <string name="channel_description_downloads">A háttérletöltések előrehaladása</string>
+</resources>

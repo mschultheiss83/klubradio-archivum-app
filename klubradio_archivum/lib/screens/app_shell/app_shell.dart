@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'package:klubradio_archivum/l10n/app_localizations.dart';
-import 'package:klubradio_archivum/providers/episode.provider.dart';
+import 'package:klubradio_archivum/providers/episode_provider.dart';
 
 // tabs
 import 'package:klubradio_archivum/screens/home_screen/home_screen.dart';
