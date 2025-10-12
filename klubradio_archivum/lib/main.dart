@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'l10n/app_localizations.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
 
+import 'l10n/app_localizations.dart';
 import 'providers/episode.provider.dart';
 import 'providers/podcast_provider.dart';
 import 'providers/theme_provider.dart';
-import 'screens/home_screen/home_screen.dart';
 import 'services/api_service.dart';
 import 'services/audio_player_service.dart';
 import 'services/download_service.dart';
+
+import 'screens/app_shell/app_shell.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -37,92 +38,69 @@ class KlubradioArchivumApp extends StatelessWidget {
           create: (_) => AudioPlayerService(),
           dispose: (_, AudioPlayerService service) => service.dispose(),
         ),
-        ChangeNotifierProvider<ThemeProvider>(
-          create: (_) => ThemeProvider(),
-          child: Consumer<ThemeProvider>(
-            builder: (_, theme, _) => MaterialApp(
-              theme: theme.lightTheme,
-              darkTheme: theme.darkTheme,
-              themeMode: theme.themeMode,
-              // ... TODO revisit
-            ),
-          ),
-        ),
+
+        // Theme provider (consumed by the single MaterialApp below)
+        ChangeNotifierProvider<ThemeProvider>(create: (_) => ThemeProvider()),
+
+        // PodcastProvider depends on ApiService + DownloadService
         ChangeNotifierProxyProvider2<
           ApiService,
           DownloadService,
           PodcastProvider
         >(
-          create: (BuildContext context) => PodcastProvider(
+          create: (context) => PodcastProvider(
             apiService: context.read<ApiService>(),
             downloadService: context.read<DownloadService>(),
           ),
-          update:
-              (
-                BuildContext context,
-                ApiService apiService,
-                DownloadService downloadService,
-                PodcastProvider? previous,
-              ) {
-                if (previous != null) {
-                  previous.updateDependencies(apiService, downloadService);
-                  return previous;
-                }
-                return PodcastProvider(
-                  apiService: apiService,
-                  downloadService: downloadService,
-                );
-              },
+          update: (context, api, dl, previous) {
+            if (previous != null) {
+              previous.updateDependencies(api, dl);
+              return previous;
+            }
+            return PodcastProvider(apiService: api, downloadService: dl);
+          },
         ),
+
+        // EpisodeProvider depends on ApiService + AudioPlayerService
         ChangeNotifierProxyProvider2<
           ApiService,
           AudioPlayerService,
           EpisodeProvider
         >(
-          create: (BuildContext context) => EpisodeProvider(
+          create: (context) => EpisodeProvider(
             apiService: context.read<ApiService>(),
             audioPlayerService: context.read<AudioPlayerService>(),
           ),
-          update:
-              (
-                BuildContext context,
-                ApiService apiService,
-                AudioPlayerService audioPlayerService,
-                EpisodeProvider? previous,
-              ) {
-                if (previous != null) {
-                  previous.updateDependencies(apiService, audioPlayerService);
-                  return previous;
-                }
-                return EpisodeProvider(
-                  apiService: apiService,
-                  audioPlayerService: audioPlayerService,
-                );
-              },
+          update: (context, api, audio, previous) {
+            if (previous != null) {
+              previous.updateDependencies(api, audio);
+              return previous;
+            }
+            return EpisodeProvider(apiService: api, audioPlayerService: audio);
+          },
         ),
       ],
+
+      // Single MaterialApp (removes the duplicate from before)
       child: Consumer<ThemeProvider>(
-        builder:
-            (BuildContext context, ThemeProvider themeProvider, Widget? child) {
-              return MaterialApp(
-                onGenerateTitle: (context) =>
-                    AppLocalizations.of(context)!.appName,
-                theme: themeProvider.lightTheme,
-                darkTheme: themeProvider.darkTheme,
-                themeMode: themeProvider.themeMode,
-                localizationsDelegates: const [
-                  AppLocalizations.delegate,
-                  GlobalMaterialLocalizations.delegate,
-                  GlobalWidgetsLocalizations.delegate,
-                  GlobalCupertinoLocalizations.delegate,
-                ],
-                supportedLocales: AppLocalizations.supportedLocales,
-                localeResolutionCallback: (locale, supportedLocales) {
-                  return locale;
-                },
-                home: const HomeScreen(),
-              );
-            },
+        builder: (context, theme, _) {
+          return MaterialApp(
+            debugShowCheckedModeBanner: false,
+            onGenerateTitle: (context) => AppLocalizations.of(context)!.appName,
+            theme: theme.lightTheme,
+            darkTheme: theme.darkTheme,
+            themeMode: theme.themeMode,
+            localizationsDelegates: const [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: AppLocalizations.supportedLocales,
+            // Keep the shell mounted so bottom nav + player persist across tabs/stacks
+            home: const AppShell(),
+          );
+        },
       ),
     );
   }

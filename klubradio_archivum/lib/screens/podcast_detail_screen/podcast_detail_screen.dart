@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:klubradio_archivum/l10n/app_localizations.dart'; // Import l10n
-import 'package:klubradio_archivum/services/api_service.dart'; // Import for ApiException
+import 'package:klubradio_archivum/l10n/app_localizations.dart';
+import 'package:klubradio_archivum/services/api_service.dart';
 
 import '../../models/episode.dart';
 import '../../models/podcast.dart';
@@ -19,13 +19,11 @@ class PodcastDetailScreen extends StatefulWidget {
 }
 
 class _PodcastDetailScreenState extends State<PodcastDetailScreen> {
-  // Use a single Future for fetching episodes
   late Future<List<Episode>> _episodesFuture;
 
   @override
   void initState() {
     super.initState();
-    // Fetch episodes once and store the future
     _episodesFuture = context.read<PodcastProvider>().fetchEpisodesForPodcast(
       widget.podcast.id,
     );
@@ -56,17 +54,17 @@ class _PodcastDetailScreenState extends State<PodcastDetailScreen> {
                   )
                 : null,
             onPressed: () {
-              final scaffoldMessenger = ScaffoldMessenger.of(context);
+              final snack = ScaffoldMessenger.of(context);
               if (isSubscribed) {
                 provider.unsubscribe(widget.podcast.id);
-                scaffoldMessenger.showSnackBar(
+                snack.showSnackBar(
                   SnackBar(
                     content: Text(l10n.podcastDetailScreenUnsubscribeSuccess),
                   ),
                 );
               } else {
                 provider.subscribe(widget.podcast.id);
-                scaffoldMessenger.showSnackBar(
+                snack.showSnackBar(
                   SnackBar(
                     content: Text(l10n.podcastDetailScreenSubscribeSuccess),
                   ),
@@ -80,7 +78,6 @@ class _PodcastDetailScreenState extends State<PodcastDetailScreen> {
             ),
           ),
           const SizedBox(height: 24),
-          // Use a single FutureBuilder to show episodes or loading/error states
           FutureBuilder<List<Episode>>(
             future: _episodesFuture,
             builder: (context, snapshot) {
