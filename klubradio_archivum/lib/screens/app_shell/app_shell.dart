@@ -3,8 +3,8 @@ import 'package:provider/provider.dart';
 
 import 'package:klubradio_archivum/l10n/app_localizations.dart';
 import 'package:klubradio_archivum/providers/episode_provider.dart';
+import 'package:klubradio_archivum/providers/podcast_provider.dart';
 
-// tabs
 import 'package:klubradio_archivum/screens/home_screen/home_screen.dart';
 import 'package:klubradio_archivum/screens/discover_screen/discover_screen.dart';
 import 'package:klubradio_archivum/screens/search_screen/search_screen.dart';
@@ -12,7 +12,6 @@ import 'package:klubradio_archivum/screens/download_manager_screen/download_mana
 import 'package:klubradio_archivum/screens/profile_screen/profile_screen.dart';
 import 'package:klubradio_archivum/screens/settings_screen/settings_screen.dart';
 
-// chrome
 import 'package:klubradio_archivum/screens/widgets/stateful/now_playing_bar.dart';
 import 'package:klubradio_archivum/screens/widgets/stateless/bottom_navigation_bar.dart';
 
@@ -76,7 +75,20 @@ class _AppShellState extends State<AppShell> {
               ),
               AppBottomNavigationBar(
                 currentIndex: _index,
-                onTap: (i) => setState(() => _index = i),
+                onTap: (i) async {
+                  if (i == _index) {
+                    // Re-tap auf denselben Tab
+                    if (i == 0) {
+                      final nav = _navKeys[0].currentState;
+                      nav?.popUntil((route) => route.isFirst);
+                      await context.read<PodcastProvider>().loadInitialData(
+                        forceRefresh: true,
+                      );
+                    }
+                    return;
+                  }
+                  setState(() => _index = i);
+                },
               ),
             ],
           ),

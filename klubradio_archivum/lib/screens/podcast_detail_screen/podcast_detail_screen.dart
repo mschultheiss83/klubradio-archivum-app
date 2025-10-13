@@ -46,50 +46,59 @@ class _PodcastDetailScreenState extends State<PodcastDetailScreen> {
           StreamBuilder<db.Subscription?>(
             stream: subsDao.watchOne(widget.podcast.id),
             builder: (context, snapshot) {
-              final bool isSubscribed =
+              final isSubscribed =
                   snapshot.data?.active ??
                   provider.isSubscribed(widget.podcast.id);
 
-              return IconButton(
-                tooltip: isSubscribed
-                    ? l10n.podcastDetailScreenUnsubscribeButton
-                    : l10n.podcastDetailScreenSubscribeButton,
-                onPressed: _subscribeBusy
-                    ? null
-                    : () async {
-                        setState(() => _subscribeBusy = true);
-                        final snack = ScaffoldMessenger.of(context);
-                        try {
-                          if (isSubscribed) {
-                            await provider.unsubscribe(widget.podcast.id);
-                            snack.showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  l10n.podcastDetailScreenUnsubscribeSuccess,
+              return Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: FilledButton.icon(
+                  onPressed: _subscribeBusy
+                      ? null
+                      : () async {
+                          setState(() => _subscribeBusy = true);
+                          final snack = ScaffoldMessenger.of(context);
+                          try {
+                            if (isSubscribed) {
+                              await provider.unsubscribe(widget.podcast.id);
+                              snack.showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    l10n.podcastDetailScreenUnsubscribeSuccess,
+                                  ),
                                 ),
-                              ),
-                            );
-                          } else {
-                            await provider.subscribe(widget.podcast.id);
-                            snack.showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  l10n.podcastDetailScreenSubscribeSuccess,
+                              );
+                            } else {
+                              await provider.subscribe(widget.podcast.id);
+                              snack.showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    l10n.podcastDetailScreenSubscribeSuccess,
+                                  ),
                                 ),
-                              ),
-                            );
+                              );
+                            }
+                          } finally {
+                            if (mounted) setState(() => _subscribeBusy = false);
                           }
-                        } finally {
-                          if (mounted) setState(() => _subscribeBusy = false);
-                        }
-                      },
-                icon: _subscribeBusy
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : Icon(isSubscribed ? Icons.check : Icons.add),
+                        },
+                  icon: _subscribeBusy
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : Icon(isSubscribed ? Icons.check : Icons.add),
+                  label: Text(
+                    isSubscribed
+                        ? l10n.podcastDetailScreenUnsubscribeButton
+                        : l10n.podcastDetailScreenSubscribeButton,
+                  ),
+                  style: FilledButton.styleFrom(
+                    visualDensity: VisualDensity.compact,
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                  ),
+                ),
               );
             },
           ),

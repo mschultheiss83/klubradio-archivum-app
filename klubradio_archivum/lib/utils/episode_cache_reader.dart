@@ -1,84 +1,112 @@
+// lib/utils/episode_cache_reader.dart
 import 'dart:convert';
 import 'dart:io';
-
 import 'package:path/path.dart' as p;
 import 'package:klubradio_archivum/models/episode.dart' as model;
 
-/// Liest eine Episode aus der Cache-JSON (…/<episodeId>.json).
-/// - Unterstützt `cachedImageFile` & `mp3File` (relativ), wandelt zu absoluten Pfaden.
-/// - Nutzt möglichst alle API-Felder aus der JSON.
-/// - Setzt cachedTitle / cachedImagePath / cachedMetaPath,
-///   damit die UI offline direkt mit FS > Web arbeiten kann.
-Future<model.Episode?> readEpisodeFromCacheJson(String cachedMetaPath) async {
+/// Liest eine Episode aus der Cache-JSON (reiches Format ab schemaVersion 1).
+/// Gibt null zurück, wenn Datei fehlt oder JSON unbrauchbar ist.
+Future<model.Episode?> readEpisodeFromCacheJson(String metaPath) async {
   try {
-    final file = File(cachedMetaPath);
+    final file = File(metaPath);
     if (!await file.exists()) return null;
 
-    final parent = p.dirname(cachedMetaPath);
-    final map = jsonDecode(await file.readAsString()) as Map<String, dynamic>;
+    final dir = file.parent.path;
+    final map = jsonDecode(await file.readAsString());
+    if (map is! Map<String, dynamic>) return null;
 
-    // JSON Felder
-    final id = _asString(map['id']) ?? '';
-    final podcastId = _asString(map['podcastId']) ?? '';
-    final title = _asString(map['title']) ?? '';
-    final description = _asString(map['description']) ?? '';
-    final audioUrl = _asString(map['audioUrl']) ?? '';
-    final showDate = _asString(map['showDate']) ?? '';
-    final durationSec = _asInt(map['duration']) ?? 0;
-    final publishedAtIso = _asString(map['publishedAt']);
-    final publishedAt = publishedAtIso != null
-        ? DateTime.tryParse(publishedAtIso) ?? DateTime.now()
-        : DateTime.now();
-    final imageUrl = _asString(map['imageUrl']);
-    final hosts = _asStringList(map['hosts']) ?? const <String>[];
+    // Schema prüfen (optional, tolerant)
+    final schemaVersion = (map['schemaVersion'] is int)
+        ? map['schemaVersion'] as int
+        : 0;
+    if (schemaVersion < 1) {
+      // very old/minimal JSON – versuchen wir es trotzdem best-effort
+    }
 
-    // lokale (relative) Verweise
-    final cachedImageFile = _asString(map['cachedImageFile']);
-    final mp3File = _asString(map['mp3File']);
+    String _str(String key, [String fallback = '']) {
+      final v = map[key];
+      return (v is String) ? v : fallback;
+    }
 
-    final cachedImagePath =
-        (cachedImageFile != null && cachedImageFile.isNotEmpty)
-        ? p.join(parent, cachedImageFile)
+    int _int(String key, [int fallback = 0]) {
+      final v = map[key];
+      if (v is int) return v;
+      if (v is num) return v.toInt();
+      return fallback;
+    }
+
+    List<String> _strList(String key) {
+      final v = map[key];
+      if (v is List) {
+        return v.whereType<String>().toList(growable: false);
+      }
+      return const <String>[];
+    }
+
+    DateTime? _dt(String key) {
+      final v = map[key];
+      if (v is String && v.isNotEmpty) {
+        try {
+          return DateTime.parse(v);
+        } catch (_) {}
+      }
+      return null;
+    }
+
+    final id = _str('id');
+    final podcastId = _str('podcastId');
+    if (id.isEmpty || podcastId.isEmpty) return null;
+
+    final title = _str('title');
+    final description = _str('description');
+    final audioUrl = _str('audioUrl');
+
+    // publishedAt (Fallback: createdAt)
+    final publishedAt =
+        _dt('publishedAt') ?? _dt('createdAt') ?? DateTime.now();
+
+    // Dauer in Sekunden
+    final durationSecs = _int('duration', 0);
+    final duration = Duration(seconds: durationSecs);
+
+    // bereits formatiert (von dir) – übernehmen wie ist
+    final showDate = _str('showDate');
+
+    final hosts = _strList('hosts');
+
+    // Bild & MP3 – relative Dateinamen zu absoluten Pfaden auflösen
+    final cachedImageFile = _str('cachedImageFile');
+    final imageUrl = _str('imageUrl'); // nur als Fallback/Info
+    final imageAbsPath = cachedImageFile.isNotEmpty
+        ? p.join(dir, cachedImageFile)
         : null;
-    final localFilePath = (mp3File != null && mp3File.isNotEmpty)
-        ? p.join(parent, mp3File)
-        : null;
 
+    final mp3Rel = _str('mp3File');
+    final mp3AbsPath = mp3Rel.isNotEmpty ? p.join(dir, mp3Rel) : null;
+
+    // Modell befüllen – Felder benutzen, die dein Player/Provider erwartet
     return model.Episode(
       id: id,
       podcastId: podcastId,
       title: title,
       description: description,
       audioUrl: audioUrl,
+      imageUrl: imageUrl.isNotEmpty ? imageUrl : null,
       publishedAt: publishedAt,
-      showDate: showDate,
-      duration: Duration(seconds: durationSec),
-      imageUrl: imageUrl, // Web-Fallback bleibt verfügbar
+      duration: duration,
       hosts: hosts,
-      // Download/UI Felder
-      localFilePath: localFilePath, // lokale MP3 falls vorhanden
-      cachedTitle: title, // fürs Offline-Listing
-      cachedImagePath: cachedImagePath, // FS > Web in Image-Widget
-      cachedMetaPath: cachedMetaPath, // woher es kam
+      showDate: showDate,
+      // Lokale Pfade zurück in dein Modell spiegeln:
+      localFilePath: (mp3AbsPath != null && File(mp3AbsPath).existsSync())
+          ? mp3AbsPath
+          : null,
+      cachedImagePath: (imageAbsPath != null && File(imageAbsPath).existsSync())
+          ? imageAbsPath
+          : null,
+      cachedMetaPath: metaPath,
+      // Falls du weitere optionale Felder im Model hast, hier setzbar.
     );
   } catch (_) {
     return null;
   }
-}
-
-String? _asString(dynamic v) {
-  if (v == null) return null;
-  return v.toString();
-}
-
-int? _asInt(dynamic v) {
-  if (v == null) return null;
-  if (v is int) return v;
-  return int.tryParse(v.toString());
-}
-
-List<String>? _asStringList(dynamic v) {
-  if (v == null) return null;
-  if (v is List) return v.map((e) => e.toString()).toList();
-  return null;
 }
