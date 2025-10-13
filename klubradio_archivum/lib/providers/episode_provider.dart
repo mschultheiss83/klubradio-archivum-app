@@ -8,6 +8,7 @@ import 'package:klubradio_archivum/db/app_database.dart' as db;
 import 'package:klubradio_archivum/models/episode.dart' as model;
 import 'package:klubradio_archivum/services/api_service.dart';
 import 'package:klubradio_archivum/services/audio_player_service.dart';
+import 'package:klubradio_archivum/utils/episode_cache_reader.dart';
 
 class EpisodeProvider extends ChangeNotifier {
   EpisodeProvider({
@@ -85,13 +86,24 @@ class EpisodeProvider extends ChangeNotifier {
     List<model.Episode>? queue,
     bool preferLocal = true,
   }) async {
-    _currentEpisode = episode;
     if (queue != null) {
       _queue = queue;
     } else if (!_queue.any((model.Episode item) => item.id == episode.id)) {
       _queue.insert(0, episode);
     }
-    await _audioPlayerService.loadEpisode(episode);
+
+    model.Episode epForPlay = episode;
+    if (preferLocal && (episode.cachedMetaPath?.isNotEmpty ?? false)) {
+      final fromCache = await readEpisodeFromCacheJson(episode.cachedMetaPath!);
+      if (fromCache != null) {
+        epForPlay = fromCache;
+      }
+    }
+
+    _currentEpisode = epForPlay;
+
+    await _audioPlayerService.loadEpisode(epForPlay);
+
     notifyListeners();
   }
 

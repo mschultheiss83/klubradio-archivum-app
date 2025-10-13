@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:klubradio_archivum/l10n/app_localizations.dart';
-import '../../models/episode.dart';
+import 'package:klubradio_archivum/models/episode.dart';
 
 String formatDate(DateTime dateTime, {String locale = 'hu'}) {
   final DateFormat formatter = DateFormat.yMMMMEEEEd(locale).add_Hm();
