@@ -6,6 +6,10 @@ The Klubrádió Archive App is a cross-platform mobile application built with Fl
 
 TODO
 
+```powershell
+Get-ChildItem -Path .\lib -Filter *.dart* -Recurse | ForEach-Object { $_.FullName | Resolve-Path -Relative }
+```
+
 ## Update
 
 ```

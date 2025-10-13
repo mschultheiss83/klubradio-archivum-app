@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:drift/drift.dart' as d show OrderingTerm;
@@ -9,6 +11,7 @@ import 'package:klubradio_archivum/models/episode.dart' as model;
 import 'package:klubradio_archivum/providers/episode_provider.dart';
 import 'package:klubradio_archivum/providers/podcast_provider.dart';
 import 'package:klubradio_archivum/screens/widgets/stateless/episode_list_item.dart';
+import 'package:klubradio_archivum/screens/widgets/stateless/image_url.dart';
 
 /// ---------------------------------------------------------------------------
 /// DownloadList (Tab-Ansicht für Download-Manager-Screen)
@@ -167,7 +170,7 @@ class _CompletedDownloads extends StatelessWidget {
             final ep = items[i];
 
             return ListTile(
-              leading: const Icon(Icons.audio_file_outlined),
+              leading: ImageUrl(path: ep.cachedImagePath),
               title: Text('${ep.podcastId} • ${ep.title}'),
               subtitle: Text(
                 '${l10n.downloads_status_done} • ${ep.id} - ${ep.localPath} - ${ep.publishedAt}',

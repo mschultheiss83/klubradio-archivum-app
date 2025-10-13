@@ -217,7 +217,6 @@ class DownloadService {
     if (_disposed) return;
 
     final task = u.task;
-    // Merkt die (optionale) Bild-URL pro Episode bis zum COMPLETE
 
     // episodeId aus metaData oder Dateiname herausziehen (null-sicher)
     String? episodeId;
@@ -272,31 +271,6 @@ class DownloadService {
 
               _metaHintByEpisodeId.remove(episodeId);
             }
-
-            // Episode aus DB besorgen, um podcastId/title/image ziehen zu können
-            final row = await episodesDao.getById(episodeId);
-
-            // Minimal-Infos für Cache (falls Model/Row Felder abweichen, passe hier an)
-            final podcastId = row?.podcastId ?? '';
-            final title = row?.title; // oder vom Domain-Model, falls vorhanden
-            final imageUrl = _imageUrlHintByEpisodeId[episodeId];
-
-            // JSON + Cover schreiben (optional)
-            final cache = await _cacheEpisodeAssets(
-              episodeId: episodeId,
-              podcastId: podcastId,
-              title: title,
-              imageUrl: imageUrl,
-              mp3Path: localPath,
-            );
-
-            // Pfade in DB merken (nur was vorhanden ist)
-            await episodesDao.setCachedMeta(
-              episodeId,
-              title: cache.title, // wenn null -> bleibt absent
-              imagePath: cache.imagePath,
-              metaPath: cache.jsonPath,
-            );
 
             // nach dem Caching aufräumen:
             _imageUrlHintByEpisodeId.remove(episodeId);
