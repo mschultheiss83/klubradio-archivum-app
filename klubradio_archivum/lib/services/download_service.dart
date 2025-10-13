@@ -137,6 +137,15 @@ class DownloadService {
 
   Future<void> enqueueEpisode(model.Episode ep) async {
     await _ready.future;
+    final existingSub = await subscriptionsDao.getById(ep.podcastId);
+    if (existingSub == null) {
+      await subscriptionsDao.upsert(
+        SubscriptionsCompanion.insert(
+          podcastId: ep.podcastId,
+          active: const Value(false),
+        ),
+      );
+    }
     if (_disposed) return;
     final isResumable = await _checkResumable(ep.audioUrl);
 

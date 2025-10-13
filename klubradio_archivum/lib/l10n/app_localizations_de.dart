@@ -98,6 +98,10 @@ class AppLocalizationsDe extends AppLocalizations {
   String get podcastDetailSubscribeButton => 'Abonnieren';
 
   @override
+  String get homeScreenSubscribedPodcastsEmptyHint =>
+      'Noch keine Abos – entdecke Podcasts und tippe auf „Abonnieren“.';
+
+  @override
   String get homeScreenSubscribedPodcastsTitle => 'Abonnierte Sendungen';
 
   @override
@@ -392,23 +396,13 @@ class AppLocalizationsDe extends AppLocalizations {
   String get settings_wifi_only => 'Nur WLAN';
 
   @override
-  String get settings_max_parallel => 'Max. gleichzeitige Downloads';
-
-  @override
-  String get settings_keep_latest => 'Letzte Episoden behalten';
-
-  @override
-  String get settings_delete_after_hours => 'Löschen nach (Stunden)';
-
-  @override
-  String get settings_zero_off => '0 = aus';
-
-  @override
-  String get settings_wifi_only_mobile_default =>
-      'Standard auf mobilen Geräten: AN';
+  String get settings_wifi_only_mobile_default => 'Standard auf Mobil: AN';
 
   @override
   String get settings_wifi_only_desktop_default => 'Standard auf Desktop: AUS';
+
+  @override
+  String get settings_max_parallel => 'Max. gleichzeitige Downloads';
 
   @override
   String get settings_retention_section => 'Aufbewahrung';
@@ -420,13 +414,23 @@ class AppLocalizationsDe extends AppLocalizations {
   String get settings_keep_latest_label => 'Nur die letzten n';
 
   @override
-  String get settings_keep_latest_hint => 'Behalte die neuesten n Episoden.';
+  String get settings_keep_latest => 'Letzte Episoden behalten';
+
+  @override
+  String get settings_keep_latest_hint =>
+      'Behält pro Podcast die neuesten n Episoden.';
 
   @override
   String get settings_delete_after_heard_label =>
-      'Nach „gehört“ in x Stunden löschen';
+      'Nach „gehört” in x Stunden löschen';
+
+  @override
+  String get settings_delete_after_hours => 'Löschen nach (Stunden)';
 
   @override
   String get settings_delete_after_hint =>
-      'Wenn eine Episode gehört wurde, nach x Stunden automatisch entfernen.';
+      'Nach dem Anhören automatisch nach x Stunden entfernen.';
+
+  @override
+  String get settings_zero_off => '0 = AUS';
 }

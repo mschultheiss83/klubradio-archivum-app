@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:klubradio_archivum/db/daos.dart';
+import 'package:klubradio_archivum/db/app_database.dart' as db;
 import 'package:klubradio_archivum/l10n/app_localizations.dart';
 import 'package:klubradio_archivum/services/api_service.dart';
 
-import '../../models/episode.dart';
-import '../../models/podcast.dart';
-import '../../providers/podcast_provider.dart';
-import '../widgets/stateful/episode_list.dart';
+import 'package:klubradio_archivum/models/episode.dart';
+import 'package:klubradio_archivum/models/podcast.dart';
+import 'package:klubradio_archivum/providers/podcast_provider.dart';
+import 'package:klubradio_archivum/screens/widgets/stateful/episode_list.dart';
 import 'podcast_info_card.dart';
 
 class PodcastDetailScreen extends StatefulWidget {
@@ -21,6 +23,8 @@ class PodcastDetailScreen extends StatefulWidget {
 class _PodcastDetailScreenState extends State<PodcastDetailScreen> {
   late Future<List<Episode>> _episodesFuture;
 
+  bool _subscribeBusy = false; // Loading-Guard für den AppBar-Button
+
   @override
   void initState() {
     super.initState();
@@ -33,51 +37,69 @@ class _PodcastDetailScreenState extends State<PodcastDetailScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final provider = context.watch<PodcastProvider>();
-    final bool isSubscribed = provider.isSubscribed(widget.podcast.id);
+    final subsDao = context.read<SubscriptionsDao>();
 
     return Scaffold(
-      appBar: AppBar(title: Text(widget.podcast.title)),
+      appBar: AppBar(
+        title: Text(widget.podcast.title),
+        actions: [
+          StreamBuilder<db.Subscription?>(
+            stream: subsDao.watchOne(widget.podcast.id),
+            builder: (context, snapshot) {
+              final bool isSubscribed =
+                  snapshot.data?.active ??
+                  provider.isSubscribed(widget.podcast.id);
+
+              return IconButton(
+                tooltip: isSubscribed
+                    ? l10n.podcastDetailScreenUnsubscribeButton
+                    : l10n.podcastDetailScreenSubscribeButton,
+                onPressed: _subscribeBusy
+                    ? null
+                    : () async {
+                        setState(() => _subscribeBusy = true);
+                        final snack = ScaffoldMessenger.of(context);
+                        try {
+                          if (isSubscribed) {
+                            await provider.unsubscribe(widget.podcast.id);
+                            snack.showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  l10n.podcastDetailScreenUnsubscribeSuccess,
+                                ),
+                              ),
+                            );
+                          } else {
+                            await provider.subscribe(widget.podcast.id);
+                            snack.showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  l10n.podcastDetailScreenSubscribeSuccess,
+                                ),
+                              ),
+                            );
+                          }
+                        } finally {
+                          if (mounted) setState(() => _subscribeBusy = false);
+                        }
+                      },
+                icon: _subscribeBusy
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : Icon(isSubscribed ? Icons.check : Icons.add),
+              );
+            },
+          ),
+        ],
+      ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: <Widget>[
           PodcastInfoCard(podcast: widget.podcast),
-          const SizedBox(height: 24),
-          FilledButton(
-            style: isSubscribed
-                ? FilledButton.styleFrom(
-                    backgroundColor: Theme.of(
-                      context,
-                    ).colorScheme.errorContainer,
-                    foregroundColor: Theme.of(
-                      context,
-                    ).colorScheme.onErrorContainer,
-                  )
-                : null,
-            onPressed: () {
-              final snack = ScaffoldMessenger.of(context);
-              if (isSubscribed) {
-                provider.unsubscribe(widget.podcast.id);
-                snack.showSnackBar(
-                  SnackBar(
-                    content: Text(l10n.podcastDetailScreenUnsubscribeSuccess),
-                  ),
-                );
-              } else {
-                provider.subscribe(widget.podcast.id);
-                snack.showSnackBar(
-                  SnackBar(
-                    content: Text(l10n.podcastDetailScreenSubscribeSuccess),
-                  ),
-                );
-              }
-            },
-            child: Text(
-              isSubscribed
-                  ? l10n.podcastDetailScreenUnsubscribeButton
-                  : l10n.podcastDetailScreenSubscribeButton,
-            ),
-          ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 12),
           FutureBuilder<List<Episode>>(
             future: _episodesFuture,
             builder: (context, snapshot) {

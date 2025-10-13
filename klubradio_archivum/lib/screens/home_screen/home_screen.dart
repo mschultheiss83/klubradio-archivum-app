@@ -11,6 +11,10 @@ import 'recently_played_list.dart';
 import 'subscribed_podcasts_list.dart';
 import 'package:klubradio_archivum/screens/widgets/stateful/episode_list.dart';
 
+// Für Subscriptions-Stream & Typ
+import 'package:klubradio_archivum/db/daos.dart';
+import 'package:klubradio_archivum/db/app_database.dart' as db;
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -22,14 +26,12 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    // Load data once this widget is mounted inside the AppShell.
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final podcastProvider = context.read<PodcastProvider>();
       final episodeProvider = context.read<EpisodeProvider>();
 
       await podcastProvider.loadInitialData();
 
-      // Optional: autoplay first recent episode if nothing is playing yet.
       if (episodeProvider.currentEpisode == null &&
           podcastProvider.recentEpisodes.isNotEmpty) {
         await episodeProvider.playEpisode(
@@ -66,7 +68,6 @@ class _HomeScreenState extends State<HomeScreen> {
           );
         }
 
-        final List<Podcast> subscribed = provider.subscribedPodcasts;
         final List<Episode> recentEpisodes = provider.recentEpisodes;
         final List<Episode> recentlyPlayed =
             provider.userProfile?.recentlyPlayed ?? const <Episode>[];
@@ -76,15 +77,66 @@ class _HomeScreenState extends State<HomeScreen> {
           child: ListView(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             children: [
-              if (subscribed.isNotEmpty) ...[
-                Text(
-                  l10n.homeScreenSubscribedPodcastsTitle,
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                const SizedBox(height: 12),
-                SubscribedPodcastsList(podcasts: subscribed),
-                const SizedBox(height: 24),
-              ],
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l10n.homeScreenSubscribedPodcastsTitle,
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  const SizedBox(height: 12),
+                  StreamBuilder<List<db.Subscription>>(
+                    stream: context.read<SubscriptionsDao>().watchAllActive(),
+                    builder: (context, subsSnap) {
+                      if (subsSnap.connectionState == ConnectionState.waiting) {
+                        return const SizedBox.shrink();
+                      }
+                      final subs = subsSnap.data ?? const <db.Subscription>[];
+                      if (subs.isEmpty) {
+                        // Leerer Zustand: lokalisierter Hinweis
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 24),
+                          child: Text(
+                            l10n.homeScreenSubscribedPodcastsEmptyHint,
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(
+                                  color: Theme.of(context).colorScheme.outline,
+                                ),
+                          ),
+                        );
+                      }
+
+                      final ids = subs.map((s) => s.podcastId).toList();
+                      return FutureBuilder<List<Podcast?>>(
+                        future: Future.wait(
+                          ids.map((id) => provider.fetchPodcastById(id)),
+                        ),
+                        builder: (context, podSnap) {
+                          if (podSnap.connectionState ==
+                              ConnectionState.waiting) {
+                            return const SizedBox.shrink();
+                          }
+                          final pods = (podSnap.data ?? const <Podcast?>[])
+                              .whereType<Podcast>()
+                              .toList();
+                          if (pods.isEmpty) {
+                            return const SizedBox.shrink();
+                          }
+
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              SubscribedPodcastsList(podcasts: pods),
+                              const SizedBox(height: 24),
+                            ],
+                          );
+                        },
+                      );
+                    },
+                  ),
+                ],
+              ),
+
               Text(
                 l10n.homeScreenRecentEpisodesTitle,
                 style: Theme.of(context).textTheme.titleLarge,
@@ -102,7 +154,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 RecentlyPlayedList(episodes: recentlyPlayed),
               ],
 
-              // Keep content above the persistent NowPlayingBar in AppShell.
               SizedBox(height: hasCurrentEpisode ? 96 : 24),
             ],
           ),

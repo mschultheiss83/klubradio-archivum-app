@@ -262,6 +262,12 @@ abstract class AppLocalizations {
   /// **'Subscribe'**
   String get podcastDetailSubscribeButton;
 
+  /// No description provided for @homeScreenSubscribedPodcastsEmptyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'No subscriptions yet — discover podcasts and tap “Subscribe”.'**
+  String get homeScreenSubscribedPodcastsEmptyHint;
+
   /// Section title for subscribed podcasts on the home screen.
   ///
   /// In en, this message translates to:
@@ -766,30 +772,6 @@ abstract class AppLocalizations {
   /// **'Wi-Fi only'**
   String get settings_wifi_only;
 
-  /// No description provided for @settings_max_parallel.
-  ///
-  /// In en, this message translates to:
-  /// **'Max parallel downloads'**
-  String get settings_max_parallel;
-
-  /// No description provided for @settings_keep_latest.
-  ///
-  /// In en, this message translates to:
-  /// **'Keep latest episodes'**
-  String get settings_keep_latest;
-
-  /// No description provided for @settings_delete_after_hours.
-  ///
-  /// In en, this message translates to:
-  /// **'Delete after (hours)'**
-  String get settings_delete_after_hours;
-
-  /// No description provided for @settings_zero_off.
-  ///
-  /// In en, this message translates to:
-  /// **'0 = off'**
-  String get settings_zero_off;
-
   /// No description provided for @settings_wifi_only_mobile_default.
   ///
   /// In en, this message translates to:
@@ -801,6 +783,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Default on desktop: OFF'**
   String get settings_wifi_only_desktop_default;
+
+  /// No description provided for @settings_max_parallel.
+  ///
+  /// In en, this message translates to:
+  /// **'Max concurrent downloads'**
+  String get settings_max_parallel;
 
   /// No description provided for @settings_retention_section.
   ///
@@ -817,26 +805,44 @@ abstract class AppLocalizations {
   /// No description provided for @settings_keep_latest_label.
   ///
   /// In en, this message translates to:
-  /// **'Keep latest n'**
+  /// **'Keep only the last n'**
   String get settings_keep_latest_label;
+
+  /// No description provided for @settings_keep_latest.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep latest episodes'**
+  String get settings_keep_latest;
 
   /// No description provided for @settings_keep_latest_hint.
   ///
   /// In en, this message translates to:
-  /// **'Keep the most recent n episodes.'**
+  /// **'Keeps the newest n episodes per podcast.'**
   String get settings_keep_latest_hint;
 
   /// No description provided for @settings_delete_after_heard_label.
   ///
   /// In en, this message translates to:
-  /// **'Delete after “played” in x hours'**
+  /// **'Delete x hours after listened'**
   String get settings_delete_after_heard_label;
+
+  /// No description provided for @settings_delete_after_hours.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete after (hours)'**
+  String get settings_delete_after_hours;
 
   /// No description provided for @settings_delete_after_hint.
   ///
   /// In en, this message translates to:
-  /// **'Once an episode was played, remove it automatically after x hours.'**
+  /// **'Automatically remove x hours after playback.'**
   String get settings_delete_after_hint;
+
+  /// No description provided for @settings_zero_off.
+  ///
+  /// In en, this message translates to:
+  /// **'0 = OFF'**
+  String get settings_zero_off;
 }
 
 class _AppLocalizationsDelegate

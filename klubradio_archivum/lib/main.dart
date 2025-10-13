@@ -4,7 +4,8 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
 
 import 'l10n/app_localizations.dart';
-import 'db/app_database.dart';
+import 'package:klubradio_archivum/db/app_database.dart';
+import 'package:klubradio_archivum/db/daos.dart';
 import 'providers/download_provider.dart';
 import 'providers/episode_provider.dart';
 import 'providers/podcast_provider.dart';
@@ -56,7 +57,9 @@ class _KlubradioArchivumAppState extends State<KlubradioArchivumApp> {
           create: (_) => AudioPlayerService(),
           dispose: (_, AudioPlayerService service) => service.dispose(),
         ),
-
+        Provider<SubscriptionsDao>(
+          create: (ctx) => SubscriptionsDao(ctx.read<AppDatabase>()),
+        ),
         // Theme provider (consumed by the single MaterialApp below)
         ChangeNotifierProvider<ThemeProvider>(create: (_) => ThemeProvider()),
 

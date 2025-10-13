@@ -98,6 +98,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get podcastDetailSubscribeButton => 'Subscribe';
 
   @override
+  String get homeScreenSubscribedPodcastsEmptyHint =>
+      'No subscriptions yet — discover podcasts and tap “Subscribe”.';
+
+  @override
   String get homeScreenSubscribedPodcastsTitle => 'Subscribed Shows';
 
   @override
@@ -384,22 +388,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settings_wifi_only => 'Wi-Fi only';
 
   @override
-  String get settings_max_parallel => 'Max parallel downloads';
-
-  @override
-  String get settings_keep_latest => 'Keep latest episodes';
-
-  @override
-  String get settings_delete_after_hours => 'Delete after (hours)';
-
-  @override
-  String get settings_zero_off => '0 = off';
-
-  @override
   String get settings_wifi_only_mobile_default => 'Default on mobile: ON';
 
   @override
   String get settings_wifi_only_desktop_default => 'Default on desktop: OFF';
+
+  @override
+  String get settings_max_parallel => 'Max concurrent downloads';
 
   @override
   String get settings_retention_section => 'Retention';
@@ -408,16 +403,26 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settings_keep_all => 'Keep all';
 
   @override
-  String get settings_keep_latest_label => 'Keep latest n';
+  String get settings_keep_latest_label => 'Keep only the last n';
 
   @override
-  String get settings_keep_latest_hint => 'Keep the most recent n episodes.';
+  String get settings_keep_latest => 'Keep latest episodes';
+
+  @override
+  String get settings_keep_latest_hint =>
+      'Keeps the newest n episodes per podcast.';
 
   @override
   String get settings_delete_after_heard_label =>
-      'Delete after “played” in x hours';
+      'Delete x hours after listened';
+
+  @override
+  String get settings_delete_after_hours => 'Delete after (hours)';
 
   @override
   String get settings_delete_after_hint =>
-      'Once an episode was played, remove it automatically after x hours.';
+      'Automatically remove x hours after playback.';
+
+  @override
+  String get settings_zero_off => '0 = OFF';
 }

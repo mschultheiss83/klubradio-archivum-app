@@ -98,6 +98,10 @@ class AppLocalizationsHu extends AppLocalizations {
   String get podcastDetailSubscribeButton => 'Feliratkozás';
 
   @override
+  String get homeScreenSubscribedPodcastsEmptyHint =>
+      'Még nincsenek feliratkozások – fedezd fel a podcasteket és koppints a „Feliratkozás” gombra.';
+
+  @override
   String get homeScreenSubscribedPodcastsTitle => 'Feliratkozott műsorok';
 
   @override
@@ -382,19 +386,7 @@ class AppLocalizationsHu extends AppLocalizations {
   String get settings_title_downloads => 'Letöltések';
 
   @override
-  String get settings_wifi_only => 'Csak Wi-Fi';
-
-  @override
-  String get settings_max_parallel => 'Párhuzamos letöltések (max.)';
-
-  @override
-  String get settings_keep_latest => 'Legutóbbi epizódok megtartása';
-
-  @override
-  String get settings_delete_after_hours => 'Törlés ennyi óra után';
-
-  @override
-  String get settings_zero_off => '0 = kikapcsolva';
+  String get settings_wifi_only => 'Csak Wi-Fi-n';
 
   @override
   String get settings_wifi_only_mobile_default => 'Alapértelmezett mobilon: BE';
@@ -404,22 +396,35 @@ class AppLocalizationsHu extends AppLocalizations {
       'Alapértelmezett asztali gépen: KI';
 
   @override
+  String get settings_max_parallel => 'Max. párhuzamos letöltés';
+
+  @override
   String get settings_retention_section => 'Megőrzés';
 
   @override
-  String get settings_keep_all => 'Mindet megtartani';
+  String get settings_keep_all => 'Mindet megtartja';
 
   @override
   String get settings_keep_latest_label => 'Csak az utolsó n';
 
   @override
-  String get settings_keep_latest_hint => 'Tartsd meg a legutóbbi n epizódot.';
+  String get settings_keep_latest => 'Legújabb epizódok megtartása';
+
+  @override
+  String get settings_keep_latest_hint =>
+      'Podcastonként a legújabb n epizód marad meg.';
 
   @override
   String get settings_delete_after_heard_label =>
-      'Lejátszás után törlés x órán belül';
+      'Törlés x órával lejátszás után';
+
+  @override
+  String get settings_delete_after_hours => 'Törlés ennyi óra után';
 
   @override
   String get settings_delete_after_hint =>
-      'Ha egy epizód le lett játszva, x óra múlva automatikusan törlődik.';
+      'Automatikus eltávolítás x óra után.';
+
+  @override
+  String get settings_zero_off => '0 = KI';
 }
