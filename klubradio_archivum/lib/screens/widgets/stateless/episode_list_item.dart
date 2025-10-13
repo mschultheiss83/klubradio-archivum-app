@@ -22,7 +22,10 @@ class EpisodeListItem extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 4),
       child: ListTile(
-        leading: ImageUrl(url: episode.imageUrl ?? ""),
+        leading: ImageUrl(
+          url: episode.imageUrl ?? "",
+          path: episode.cachedImagePath,
+        ),
         title: Text(
           '${episode.id} ${episode.title}',
           style: theme.textTheme.titleMedium,

@@ -20,60 +20,18 @@ class $SubscriptionsTable extends Subscriptions
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _titleMeta = const VerificationMeta('title');
+  static const VerificationMeta _activeMeta = const VerificationMeta('active');
   @override
-  late final GeneratedColumn<String> title = GeneratedColumn<String>(
-    'title',
+  late final GeneratedColumn<bool> active = GeneratedColumn<bool>(
+    'active',
     aliasedName,
     false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _imageUrlMeta = const VerificationMeta(
-    'imageUrl',
-  );
-  @override
-  late final GeneratedColumn<String> imageUrl = GeneratedColumn<String>(
-    'image_url',
-    aliasedName,
-    true,
-    type: DriftSqlType.string,
+    type: DriftSqlType.bool,
     requiredDuringInsert: false,
-  );
-  static const VerificationMeta _autoDownloadNMeta = const VerificationMeta(
-    'autoDownloadN',
-  );
-  @override
-  late final GeneratedColumn<int> autoDownloadN = GeneratedColumn<int>(
-    'auto_download_n',
-    aliasedName,
-    false,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-    defaultValue: const Constant(5),
-  );
-  static const VerificationMeta _keepLatestNMeta = const VerificationMeta(
-    'keepLatestN',
-  );
-  @override
-  late final GeneratedColumn<int> keepLatestN = GeneratedColumn<int>(
-    'keep_latest_n',
-    aliasedName,
-    true,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-  );
-  static const VerificationMeta _createdAtMeta = const VerificationMeta(
-    'createdAt',
-  );
-  @override
-  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
-    'created_at',
-    aliasedName,
-    false,
-    type: DriftSqlType.dateTime,
-    requiredDuringInsert: false,
-    defaultValue: currentDateAndTime,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("active" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
   );
   static const VerificationMeta _updatedAtMeta = const VerificationMeta(
     'updatedAt',
@@ -87,15 +45,60 @@ class $SubscriptionsTable extends Subscriptions
     requiredDuringInsert: false,
     defaultValue: currentDateAndTime,
   );
+  static const VerificationMeta _subscribedAtMeta = const VerificationMeta(
+    'subscribedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> subscribedAt = GeneratedColumn<DateTime>(
+    'subscribed_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _autoDownloadNMeta = const VerificationMeta(
+    'autoDownloadN',
+  );
+  @override
+  late final GeneratedColumn<int> autoDownloadN = GeneratedColumn<int>(
+    'auto_download_n',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _lastHeardEpisodeIdMeta =
+      const VerificationMeta('lastHeardEpisodeId');
+  @override
+  late final GeneratedColumn<String> lastHeardEpisodeId =
+      GeneratedColumn<String>(
+        'last_heard_episode_id',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _lastDownloadedEpisodeIdMeta =
+      const VerificationMeta('lastDownloadedEpisodeId');
+  @override
+  late final GeneratedColumn<String> lastDownloadedEpisodeId =
+      GeneratedColumn<String>(
+        'last_downloaded_episode_id',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
   @override
   List<GeneratedColumn> get $columns => [
     podcastId,
-    title,
-    imageUrl,
-    autoDownloadN,
-    keepLatestN,
-    createdAt,
+    active,
     updatedAt,
+    subscribedAt,
+    autoDownloadN,
+    lastHeardEpisodeId,
+    lastDownloadedEpisodeId,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -117,18 +120,25 @@ class $SubscriptionsTable extends Subscriptions
     } else if (isInserting) {
       context.missing(_podcastIdMeta);
     }
-    if (data.containsKey('title')) {
+    if (data.containsKey('active')) {
       context.handle(
-        _titleMeta,
-        title.isAcceptableOrUnknown(data['title']!, _titleMeta),
+        _activeMeta,
+        active.isAcceptableOrUnknown(data['active']!, _activeMeta),
       );
-    } else if (isInserting) {
-      context.missing(_titleMeta);
     }
-    if (data.containsKey('image_url')) {
+    if (data.containsKey('updated_at')) {
       context.handle(
-        _imageUrlMeta,
-        imageUrl.isAcceptableOrUnknown(data['image_url']!, _imageUrlMeta),
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    if (data.containsKey('subscribed_at')) {
+      context.handle(
+        _subscribedAtMeta,
+        subscribedAt.isAcceptableOrUnknown(
+          data['subscribed_at']!,
+          _subscribedAtMeta,
+        ),
       );
     }
     if (data.containsKey('auto_download_n')) {
@@ -140,25 +150,22 @@ class $SubscriptionsTable extends Subscriptions
         ),
       );
     }
-    if (data.containsKey('keep_latest_n')) {
+    if (data.containsKey('last_heard_episode_id')) {
       context.handle(
-        _keepLatestNMeta,
-        keepLatestN.isAcceptableOrUnknown(
-          data['keep_latest_n']!,
-          _keepLatestNMeta,
+        _lastHeardEpisodeIdMeta,
+        lastHeardEpisodeId.isAcceptableOrUnknown(
+          data['last_heard_episode_id']!,
+          _lastHeardEpisodeIdMeta,
         ),
       );
     }
-    if (data.containsKey('created_at')) {
+    if (data.containsKey('last_downloaded_episode_id')) {
       context.handle(
-        _createdAtMeta,
-        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
-      );
-    }
-    if (data.containsKey('updated_at')) {
-      context.handle(
-        _updatedAtMeta,
-        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+        _lastDownloadedEpisodeIdMeta,
+        lastDownloadedEpisodeId.isAcceptableOrUnknown(
+          data['last_downloaded_episode_id']!,
+          _lastDownloadedEpisodeIdMeta,
+        ),
       );
     }
     return context;
@@ -174,30 +181,30 @@ class $SubscriptionsTable extends Subscriptions
         DriftSqlType.string,
         data['${effectivePrefix}podcast_id'],
       )!,
-      title: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}title'],
-      )!,
-      imageUrl: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}image_url'],
-      ),
-      autoDownloadN: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}auto_download_n'],
-      )!,
-      keepLatestN: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}keep_latest_n'],
-      ),
-      createdAt: attachedDatabase.typeMapping.read(
-        DriftSqlType.dateTime,
-        data['${effectivePrefix}created_at'],
+      active: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}active'],
       )!,
       updatedAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}updated_at'],
       )!,
+      subscribedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}subscribed_at'],
+      )!,
+      autoDownloadN: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}auto_download_n'],
+      ),
+      lastHeardEpisodeId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}last_heard_episode_id'],
+      ),
+      lastDownloadedEpisodeId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}last_downloaded_episode_id'],
+      ),
     );
   }
 
@@ -209,51 +216,57 @@ class $SubscriptionsTable extends Subscriptions
 
 class Subscription extends DataClass implements Insertable<Subscription> {
   final String podcastId;
-  final String title;
-  final String? imageUrl;
-  final int autoDownloadN;
-  final int? keepLatestN;
-  final DateTime createdAt;
+  final bool active;
   final DateTime updatedAt;
+  final DateTime subscribedAt;
+  final int? autoDownloadN;
+  final String? lastHeardEpisodeId;
+  final String? lastDownloadedEpisodeId;
   const Subscription({
     required this.podcastId,
-    required this.title,
-    this.imageUrl,
-    required this.autoDownloadN,
-    this.keepLatestN,
-    required this.createdAt,
+    required this.active,
     required this.updatedAt,
+    required this.subscribedAt,
+    this.autoDownloadN,
+    this.lastHeardEpisodeId,
+    this.lastDownloadedEpisodeId,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['podcast_id'] = Variable<String>(podcastId);
-    map['title'] = Variable<String>(title);
-    if (!nullToAbsent || imageUrl != null) {
-      map['image_url'] = Variable<String>(imageUrl);
-    }
-    map['auto_download_n'] = Variable<int>(autoDownloadN);
-    if (!nullToAbsent || keepLatestN != null) {
-      map['keep_latest_n'] = Variable<int>(keepLatestN);
-    }
-    map['created_at'] = Variable<DateTime>(createdAt);
+    map['active'] = Variable<bool>(active);
     map['updated_at'] = Variable<DateTime>(updatedAt);
+    map['subscribed_at'] = Variable<DateTime>(subscribedAt);
+    if (!nullToAbsent || autoDownloadN != null) {
+      map['auto_download_n'] = Variable<int>(autoDownloadN);
+    }
+    if (!nullToAbsent || lastHeardEpisodeId != null) {
+      map['last_heard_episode_id'] = Variable<String>(lastHeardEpisodeId);
+    }
+    if (!nullToAbsent || lastDownloadedEpisodeId != null) {
+      map['last_downloaded_episode_id'] = Variable<String>(
+        lastDownloadedEpisodeId,
+      );
+    }
     return map;
   }
 
   SubscriptionsCompanion toCompanion(bool nullToAbsent) {
     return SubscriptionsCompanion(
       podcastId: Value(podcastId),
-      title: Value(title),
-      imageUrl: imageUrl == null && nullToAbsent
-          ? const Value.absent()
-          : Value(imageUrl),
-      autoDownloadN: Value(autoDownloadN),
-      keepLatestN: keepLatestN == null && nullToAbsent
-          ? const Value.absent()
-          : Value(keepLatestN),
-      createdAt: Value(createdAt),
+      active: Value(active),
       updatedAt: Value(updatedAt),
+      subscribedAt: Value(subscribedAt),
+      autoDownloadN: autoDownloadN == null && nullToAbsent
+          ? const Value.absent()
+          : Value(autoDownloadN),
+      lastHeardEpisodeId: lastHeardEpisodeId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastHeardEpisodeId),
+      lastDownloadedEpisodeId: lastDownloadedEpisodeId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastDownloadedEpisodeId),
     );
   }
 
@@ -264,12 +277,16 @@ class Subscription extends DataClass implements Insertable<Subscription> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return Subscription(
       podcastId: serializer.fromJson<String>(json['podcastId']),
-      title: serializer.fromJson<String>(json['title']),
-      imageUrl: serializer.fromJson<String?>(json['imageUrl']),
-      autoDownloadN: serializer.fromJson<int>(json['autoDownloadN']),
-      keepLatestN: serializer.fromJson<int?>(json['keepLatestN']),
-      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      active: serializer.fromJson<bool>(json['active']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      subscribedAt: serializer.fromJson<DateTime>(json['subscribedAt']),
+      autoDownloadN: serializer.fromJson<int?>(json['autoDownloadN']),
+      lastHeardEpisodeId: serializer.fromJson<String?>(
+        json['lastHeardEpisodeId'],
+      ),
+      lastDownloadedEpisodeId: serializer.fromJson<String?>(
+        json['lastDownloadedEpisodeId'],
+      ),
     );
   }
   @override
@@ -277,45 +294,57 @@ class Subscription extends DataClass implements Insertable<Subscription> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'podcastId': serializer.toJson<String>(podcastId),
-      'title': serializer.toJson<String>(title),
-      'imageUrl': serializer.toJson<String?>(imageUrl),
-      'autoDownloadN': serializer.toJson<int>(autoDownloadN),
-      'keepLatestN': serializer.toJson<int?>(keepLatestN),
-      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'active': serializer.toJson<bool>(active),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'subscribedAt': serializer.toJson<DateTime>(subscribedAt),
+      'autoDownloadN': serializer.toJson<int?>(autoDownloadN),
+      'lastHeardEpisodeId': serializer.toJson<String?>(lastHeardEpisodeId),
+      'lastDownloadedEpisodeId': serializer.toJson<String?>(
+        lastDownloadedEpisodeId,
+      ),
     };
   }
 
   Subscription copyWith({
     String? podcastId,
-    String? title,
-    Value<String?> imageUrl = const Value.absent(),
-    int? autoDownloadN,
-    Value<int?> keepLatestN = const Value.absent(),
-    DateTime? createdAt,
+    bool? active,
     DateTime? updatedAt,
+    DateTime? subscribedAt,
+    Value<int?> autoDownloadN = const Value.absent(),
+    Value<String?> lastHeardEpisodeId = const Value.absent(),
+    Value<String?> lastDownloadedEpisodeId = const Value.absent(),
   }) => Subscription(
     podcastId: podcastId ?? this.podcastId,
-    title: title ?? this.title,
-    imageUrl: imageUrl.present ? imageUrl.value : this.imageUrl,
-    autoDownloadN: autoDownloadN ?? this.autoDownloadN,
-    keepLatestN: keepLatestN.present ? keepLatestN.value : this.keepLatestN,
-    createdAt: createdAt ?? this.createdAt,
+    active: active ?? this.active,
     updatedAt: updatedAt ?? this.updatedAt,
+    subscribedAt: subscribedAt ?? this.subscribedAt,
+    autoDownloadN: autoDownloadN.present
+        ? autoDownloadN.value
+        : this.autoDownloadN,
+    lastHeardEpisodeId: lastHeardEpisodeId.present
+        ? lastHeardEpisodeId.value
+        : this.lastHeardEpisodeId,
+    lastDownloadedEpisodeId: lastDownloadedEpisodeId.present
+        ? lastDownloadedEpisodeId.value
+        : this.lastDownloadedEpisodeId,
   );
   Subscription copyWithCompanion(SubscriptionsCompanion data) {
     return Subscription(
       podcastId: data.podcastId.present ? data.podcastId.value : this.podcastId,
-      title: data.title.present ? data.title.value : this.title,
-      imageUrl: data.imageUrl.present ? data.imageUrl.value : this.imageUrl,
+      active: data.active.present ? data.active.value : this.active,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      subscribedAt: data.subscribedAt.present
+          ? data.subscribedAt.value
+          : this.subscribedAt,
       autoDownloadN: data.autoDownloadN.present
           ? data.autoDownloadN.value
           : this.autoDownloadN,
-      keepLatestN: data.keepLatestN.present
-          ? data.keepLatestN.value
-          : this.keepLatestN,
-      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
-      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      lastHeardEpisodeId: data.lastHeardEpisodeId.present
+          ? data.lastHeardEpisodeId.value
+          : this.lastHeardEpisodeId,
+      lastDownloadedEpisodeId: data.lastDownloadedEpisodeId.present
+          ? data.lastDownloadedEpisodeId.value
+          : this.lastDownloadedEpisodeId,
     );
   }
 
@@ -323,12 +352,12 @@ class Subscription extends DataClass implements Insertable<Subscription> {
   String toString() {
     return (StringBuffer('Subscription(')
           ..write('podcastId: $podcastId, ')
-          ..write('title: $title, ')
-          ..write('imageUrl: $imageUrl, ')
+          ..write('active: $active, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('subscribedAt: $subscribedAt, ')
           ..write('autoDownloadN: $autoDownloadN, ')
-          ..write('keepLatestN: $keepLatestN, ')
-          ..write('createdAt: $createdAt, ')
-          ..write('updatedAt: $updatedAt')
+          ..write('lastHeardEpisodeId: $lastHeardEpisodeId, ')
+          ..write('lastDownloadedEpisodeId: $lastDownloadedEpisodeId')
           ..write(')'))
         .toString();
   }
@@ -336,96 +365,98 @@ class Subscription extends DataClass implements Insertable<Subscription> {
   @override
   int get hashCode => Object.hash(
     podcastId,
-    title,
-    imageUrl,
-    autoDownloadN,
-    keepLatestN,
-    createdAt,
+    active,
     updatedAt,
+    subscribedAt,
+    autoDownloadN,
+    lastHeardEpisodeId,
+    lastDownloadedEpisodeId,
   );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is Subscription &&
           other.podcastId == this.podcastId &&
-          other.title == this.title &&
-          other.imageUrl == this.imageUrl &&
+          other.active == this.active &&
+          other.updatedAt == this.updatedAt &&
+          other.subscribedAt == this.subscribedAt &&
           other.autoDownloadN == this.autoDownloadN &&
-          other.keepLatestN == this.keepLatestN &&
-          other.createdAt == this.createdAt &&
-          other.updatedAt == this.updatedAt);
+          other.lastHeardEpisodeId == this.lastHeardEpisodeId &&
+          other.lastDownloadedEpisodeId == this.lastDownloadedEpisodeId);
 }
 
 class SubscriptionsCompanion extends UpdateCompanion<Subscription> {
   final Value<String> podcastId;
-  final Value<String> title;
-  final Value<String?> imageUrl;
-  final Value<int> autoDownloadN;
-  final Value<int?> keepLatestN;
-  final Value<DateTime> createdAt;
+  final Value<bool> active;
   final Value<DateTime> updatedAt;
+  final Value<DateTime> subscribedAt;
+  final Value<int?> autoDownloadN;
+  final Value<String?> lastHeardEpisodeId;
+  final Value<String?> lastDownloadedEpisodeId;
   final Value<int> rowid;
   const SubscriptionsCompanion({
     this.podcastId = const Value.absent(),
-    this.title = const Value.absent(),
-    this.imageUrl = const Value.absent(),
-    this.autoDownloadN = const Value.absent(),
-    this.keepLatestN = const Value.absent(),
-    this.createdAt = const Value.absent(),
+    this.active = const Value.absent(),
     this.updatedAt = const Value.absent(),
+    this.subscribedAt = const Value.absent(),
+    this.autoDownloadN = const Value.absent(),
+    this.lastHeardEpisodeId = const Value.absent(),
+    this.lastDownloadedEpisodeId = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   SubscriptionsCompanion.insert({
     required String podcastId,
-    required String title,
-    this.imageUrl = const Value.absent(),
-    this.autoDownloadN = const Value.absent(),
-    this.keepLatestN = const Value.absent(),
-    this.createdAt = const Value.absent(),
+    this.active = const Value.absent(),
     this.updatedAt = const Value.absent(),
+    this.subscribedAt = const Value.absent(),
+    this.autoDownloadN = const Value.absent(),
+    this.lastHeardEpisodeId = const Value.absent(),
+    this.lastDownloadedEpisodeId = const Value.absent(),
     this.rowid = const Value.absent(),
-  }) : podcastId = Value(podcastId),
-       title = Value(title);
+  }) : podcastId = Value(podcastId);
   static Insertable<Subscription> custom({
     Expression<String>? podcastId,
-    Expression<String>? title,
-    Expression<String>? imageUrl,
-    Expression<int>? autoDownloadN,
-    Expression<int>? keepLatestN,
-    Expression<DateTime>? createdAt,
+    Expression<bool>? active,
     Expression<DateTime>? updatedAt,
+    Expression<DateTime>? subscribedAt,
+    Expression<int>? autoDownloadN,
+    Expression<String>? lastHeardEpisodeId,
+    Expression<String>? lastDownloadedEpisodeId,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (podcastId != null) 'podcast_id': podcastId,
-      if (title != null) 'title': title,
-      if (imageUrl != null) 'image_url': imageUrl,
-      if (autoDownloadN != null) 'auto_download_n': autoDownloadN,
-      if (keepLatestN != null) 'keep_latest_n': keepLatestN,
-      if (createdAt != null) 'created_at': createdAt,
+      if (active != null) 'active': active,
       if (updatedAt != null) 'updated_at': updatedAt,
+      if (subscribedAt != null) 'subscribed_at': subscribedAt,
+      if (autoDownloadN != null) 'auto_download_n': autoDownloadN,
+      if (lastHeardEpisodeId != null)
+        'last_heard_episode_id': lastHeardEpisodeId,
+      if (lastDownloadedEpisodeId != null)
+        'last_downloaded_episode_id': lastDownloadedEpisodeId,
       if (rowid != null) 'rowid': rowid,
     });
   }
 
   SubscriptionsCompanion copyWith({
     Value<String>? podcastId,
-    Value<String>? title,
-    Value<String?>? imageUrl,
-    Value<int>? autoDownloadN,
-    Value<int?>? keepLatestN,
-    Value<DateTime>? createdAt,
+    Value<bool>? active,
     Value<DateTime>? updatedAt,
+    Value<DateTime>? subscribedAt,
+    Value<int?>? autoDownloadN,
+    Value<String?>? lastHeardEpisodeId,
+    Value<String?>? lastDownloadedEpisodeId,
     Value<int>? rowid,
   }) {
     return SubscriptionsCompanion(
       podcastId: podcastId ?? this.podcastId,
-      title: title ?? this.title,
-      imageUrl: imageUrl ?? this.imageUrl,
-      autoDownloadN: autoDownloadN ?? this.autoDownloadN,
-      keepLatestN: keepLatestN ?? this.keepLatestN,
-      createdAt: createdAt ?? this.createdAt,
+      active: active ?? this.active,
       updatedAt: updatedAt ?? this.updatedAt,
+      subscribedAt: subscribedAt ?? this.subscribedAt,
+      autoDownloadN: autoDownloadN ?? this.autoDownloadN,
+      lastHeardEpisodeId: lastHeardEpisodeId ?? this.lastHeardEpisodeId,
+      lastDownloadedEpisodeId:
+          lastDownloadedEpisodeId ?? this.lastDownloadedEpisodeId,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -436,23 +467,25 @@ class SubscriptionsCompanion extends UpdateCompanion<Subscription> {
     if (podcastId.present) {
       map['podcast_id'] = Variable<String>(podcastId.value);
     }
-    if (title.present) {
-      map['title'] = Variable<String>(title.value);
+    if (active.present) {
+      map['active'] = Variable<bool>(active.value);
     }
-    if (imageUrl.present) {
-      map['image_url'] = Variable<String>(imageUrl.value);
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (subscribedAt.present) {
+      map['subscribed_at'] = Variable<DateTime>(subscribedAt.value);
     }
     if (autoDownloadN.present) {
       map['auto_download_n'] = Variable<int>(autoDownloadN.value);
     }
-    if (keepLatestN.present) {
-      map['keep_latest_n'] = Variable<int>(keepLatestN.value);
+    if (lastHeardEpisodeId.present) {
+      map['last_heard_episode_id'] = Variable<String>(lastHeardEpisodeId.value);
     }
-    if (createdAt.present) {
-      map['created_at'] = Variable<DateTime>(createdAt.value);
-    }
-    if (updatedAt.present) {
-      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    if (lastDownloadedEpisodeId.present) {
+      map['last_downloaded_episode_id'] = Variable<String>(
+        lastDownloadedEpisodeId.value,
+      );
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -464,12 +497,12 @@ class SubscriptionsCompanion extends UpdateCompanion<Subscription> {
   String toString() {
     return (StringBuffer('SubscriptionsCompanion(')
           ..write('podcastId: $podcastId, ')
-          ..write('title: $title, ')
-          ..write('imageUrl: $imageUrl, ')
-          ..write('autoDownloadN: $autoDownloadN, ')
-          ..write('keepLatestN: $keepLatestN, ')
-          ..write('createdAt: $createdAt, ')
+          ..write('active: $active, ')
           ..write('updatedAt: $updatedAt, ')
+          ..write('subscribedAt: $subscribedAt, ')
+          ..write('autoDownloadN: $autoDownloadN, ')
+          ..write('lastHeardEpisodeId: $lastHeardEpisodeId, ')
+          ..write('lastDownloadedEpisodeId: $lastDownloadedEpisodeId, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -633,6 +666,39 @@ class $EpisodesTable extends Episodes with TableInfo<$EpisodesTable, Episode> {
     requiredDuringInsert: false,
     defaultValue: currentDateAndTime,
   );
+  static const VerificationMeta _cachedTitleMeta = const VerificationMeta(
+    'cachedTitle',
+  );
+  @override
+  late final GeneratedColumn<String> cachedTitle = GeneratedColumn<String>(
+    'cached_title',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _cachedImagePathMeta = const VerificationMeta(
+    'cachedImagePath',
+  );
+  @override
+  late final GeneratedColumn<String> cachedImagePath = GeneratedColumn<String>(
+    'cached_image_path',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _cachedMetaPathMeta = const VerificationMeta(
+    'cachedMetaPath',
+  );
+  @override
+  late final GeneratedColumn<String> cachedMetaPath = GeneratedColumn<String>(
+    'cached_meta_path',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _resumableMeta = const VerificationMeta(
     'resumable',
   );
@@ -663,6 +729,9 @@ class $EpisodesTable extends Episodes with TableInfo<$EpisodesTable, Episode> {
     completedAt,
     createdAt,
     updatedAt,
+    cachedTitle,
+    cachedImagePath,
+    cachedMetaPath,
     resumable,
   ];
   @override
@@ -775,6 +844,33 @@ class $EpisodesTable extends Episodes with TableInfo<$EpisodesTable, Episode> {
         updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
       );
     }
+    if (data.containsKey('cached_title')) {
+      context.handle(
+        _cachedTitleMeta,
+        cachedTitle.isAcceptableOrUnknown(
+          data['cached_title']!,
+          _cachedTitleMeta,
+        ),
+      );
+    }
+    if (data.containsKey('cached_image_path')) {
+      context.handle(
+        _cachedImagePathMeta,
+        cachedImagePath.isAcceptableOrUnknown(
+          data['cached_image_path']!,
+          _cachedImagePathMeta,
+        ),
+      );
+    }
+    if (data.containsKey('cached_meta_path')) {
+      context.handle(
+        _cachedMetaPathMeta,
+        cachedMetaPath.isAcceptableOrUnknown(
+          data['cached_meta_path']!,
+          _cachedMetaPathMeta,
+        ),
+      );
+    }
     if (data.containsKey('resumable')) {
       context.handle(
         _resumableMeta,
@@ -846,6 +942,18 @@ class $EpisodesTable extends Episodes with TableInfo<$EpisodesTable, Episode> {
         DriftSqlType.dateTime,
         data['${effectivePrefix}updated_at'],
       )!,
+      cachedTitle: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}cached_title'],
+      ),
+      cachedImagePath: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}cached_image_path'],
+      ),
+      cachedMetaPath: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}cached_meta_path'],
+      ),
       resumable: attachedDatabase.typeMapping.read(
         DriftSqlType.bool,
         data['${effectivePrefix}resumable'],
@@ -879,6 +987,9 @@ class Episode extends DataClass implements Insertable<Episode> {
   final DateTime? completedAt;
   final DateTime createdAt;
   final DateTime updatedAt;
+  final String? cachedTitle;
+  final String? cachedImagePath;
+  final String? cachedMetaPath;
   final bool? resumable;
   const Episode({
     required this.id,
@@ -895,6 +1006,9 @@ class Episode extends DataClass implements Insertable<Episode> {
     this.completedAt,
     required this.createdAt,
     required this.updatedAt,
+    this.cachedTitle,
+    this.cachedImagePath,
+    this.cachedMetaPath,
     this.resumable,
   });
   @override
@@ -926,6 +1040,15 @@ class Episode extends DataClass implements Insertable<Episode> {
     }
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || cachedTitle != null) {
+      map['cached_title'] = Variable<String>(cachedTitle);
+    }
+    if (!nullToAbsent || cachedImagePath != null) {
+      map['cached_image_path'] = Variable<String>(cachedImagePath);
+    }
+    if (!nullToAbsent || cachedMetaPath != null) {
+      map['cached_meta_path'] = Variable<String>(cachedMetaPath);
+    }
     if (!nullToAbsent || resumable != null) {
       map['resumable'] = Variable<bool>(resumable);
     }
@@ -960,6 +1083,15 @@ class Episode extends DataClass implements Insertable<Episode> {
           : Value(completedAt),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
+      cachedTitle: cachedTitle == null && nullToAbsent
+          ? const Value.absent()
+          : Value(cachedTitle),
+      cachedImagePath: cachedImagePath == null && nullToAbsent
+          ? const Value.absent()
+          : Value(cachedImagePath),
+      cachedMetaPath: cachedMetaPath == null && nullToAbsent
+          ? const Value.absent()
+          : Value(cachedMetaPath),
       resumable: resumable == null && nullToAbsent
           ? const Value.absent()
           : Value(resumable),
@@ -986,6 +1118,9 @@ class Episode extends DataClass implements Insertable<Episode> {
       completedAt: serializer.fromJson<DateTime?>(json['completedAt']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      cachedTitle: serializer.fromJson<String?>(json['cachedTitle']),
+      cachedImagePath: serializer.fromJson<String?>(json['cachedImagePath']),
+      cachedMetaPath: serializer.fromJson<String?>(json['cachedMetaPath']),
       resumable: serializer.fromJson<bool?>(json['resumable']),
     );
   }
@@ -1007,6 +1142,9 @@ class Episode extends DataClass implements Insertable<Episode> {
       'completedAt': serializer.toJson<DateTime?>(completedAt),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'cachedTitle': serializer.toJson<String?>(cachedTitle),
+      'cachedImagePath': serializer.toJson<String?>(cachedImagePath),
+      'cachedMetaPath': serializer.toJson<String?>(cachedMetaPath),
       'resumable': serializer.toJson<bool?>(resumable),
     };
   }
@@ -1026,6 +1164,9 @@ class Episode extends DataClass implements Insertable<Episode> {
     Value<DateTime?> completedAt = const Value.absent(),
     DateTime? createdAt,
     DateTime? updatedAt,
+    Value<String?> cachedTitle = const Value.absent(),
+    Value<String?> cachedImagePath = const Value.absent(),
+    Value<String?> cachedMetaPath = const Value.absent(),
     Value<bool?> resumable = const Value.absent(),
   }) => Episode(
     id: id ?? this.id,
@@ -1044,6 +1185,13 @@ class Episode extends DataClass implements Insertable<Episode> {
     completedAt: completedAt.present ? completedAt.value : this.completedAt,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
+    cachedTitle: cachedTitle.present ? cachedTitle.value : this.cachedTitle,
+    cachedImagePath: cachedImagePath.present
+        ? cachedImagePath.value
+        : this.cachedImagePath,
+    cachedMetaPath: cachedMetaPath.present
+        ? cachedMetaPath.value
+        : this.cachedMetaPath,
     resumable: resumable.present ? resumable.value : this.resumable,
   );
   Episode copyWithCompanion(EpisodesCompanion data) {
@@ -1070,6 +1218,15 @@ class Episode extends DataClass implements Insertable<Episode> {
           : this.completedAt,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      cachedTitle: data.cachedTitle.present
+          ? data.cachedTitle.value
+          : this.cachedTitle,
+      cachedImagePath: data.cachedImagePath.present
+          ? data.cachedImagePath.value
+          : this.cachedImagePath,
+      cachedMetaPath: data.cachedMetaPath.present
+          ? data.cachedMetaPath.value
+          : this.cachedMetaPath,
       resumable: data.resumable.present ? data.resumable.value : this.resumable,
     );
   }
@@ -1091,6 +1248,9 @@ class Episode extends DataClass implements Insertable<Episode> {
           ..write('completedAt: $completedAt, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
+          ..write('cachedTitle: $cachedTitle, ')
+          ..write('cachedImagePath: $cachedImagePath, ')
+          ..write('cachedMetaPath: $cachedMetaPath, ')
           ..write('resumable: $resumable')
           ..write(')'))
         .toString();
@@ -1112,9 +1272,11 @@ class Episode extends DataClass implements Insertable<Episode> {
     completedAt,
     createdAt,
     updatedAt,
+    cachedTitle,
+    cachedImagePath,
+    cachedMetaPath,
     resumable,
   );
-
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1133,6 +1295,9 @@ class Episode extends DataClass implements Insertable<Episode> {
           other.completedAt == this.completedAt &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
+          other.cachedTitle == this.cachedTitle &&
+          other.cachedImagePath == this.cachedImagePath &&
+          other.cachedMetaPath == this.cachedMetaPath &&
           other.resumable == this.resumable);
 }
 
@@ -1151,6 +1316,9 @@ class EpisodesCompanion extends UpdateCompanion<Episode> {
   final Value<DateTime?> completedAt;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
+  final Value<String?> cachedTitle;
+  final Value<String?> cachedImagePath;
+  final Value<String?> cachedMetaPath;
   final Value<bool?> resumable;
   final Value<int> rowid;
   const EpisodesCompanion({
@@ -1168,6 +1336,9 @@ class EpisodesCompanion extends UpdateCompanion<Episode> {
     this.completedAt = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
+    this.cachedTitle = const Value.absent(),
+    this.cachedImagePath = const Value.absent(),
+    this.cachedMetaPath = const Value.absent(),
     this.resumable = const Value.absent(),
     this.rowid = const Value.absent(),
   });
@@ -1186,6 +1357,9 @@ class EpisodesCompanion extends UpdateCompanion<Episode> {
     this.completedAt = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
+    this.cachedTitle = const Value.absent(),
+    this.cachedImagePath = const Value.absent(),
+    this.cachedMetaPath = const Value.absent(),
     this.resumable = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
@@ -1207,6 +1381,9 @@ class EpisodesCompanion extends UpdateCompanion<Episode> {
     Expression<DateTime>? completedAt,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
+    Expression<String>? cachedTitle,
+    Expression<String>? cachedImagePath,
+    Expression<String>? cachedMetaPath,
     Expression<bool>? resumable,
     Expression<int>? rowid,
   }) {
@@ -1225,6 +1402,9 @@ class EpisodesCompanion extends UpdateCompanion<Episode> {
       if (completedAt != null) 'completed_at': completedAt,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
+      if (cachedTitle != null) 'cached_title': cachedTitle,
+      if (cachedImagePath != null) 'cached_image_path': cachedImagePath,
+      if (cachedMetaPath != null) 'cached_meta_path': cachedMetaPath,
       if (resumable != null) 'resumable': resumable,
       if (rowid != null) 'rowid': rowid,
     });
@@ -1245,6 +1425,9 @@ class EpisodesCompanion extends UpdateCompanion<Episode> {
     Value<DateTime?>? completedAt,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
+    Value<String?>? cachedTitle,
+    Value<String?>? cachedImagePath,
+    Value<String?>? cachedMetaPath,
     Value<bool?>? resumable,
     Value<int>? rowid,
   }) {
@@ -1263,6 +1446,9 @@ class EpisodesCompanion extends UpdateCompanion<Episode> {
       completedAt: completedAt ?? this.completedAt,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      cachedTitle: cachedTitle ?? this.cachedTitle,
+      cachedImagePath: cachedImagePath ?? this.cachedImagePath,
+      cachedMetaPath: cachedMetaPath ?? this.cachedMetaPath,
       resumable: resumable ?? this.resumable,
       rowid: rowid ?? this.rowid,
     );
@@ -1313,6 +1499,15 @@ class EpisodesCompanion extends UpdateCompanion<Episode> {
     if (updatedAt.present) {
       map['updated_at'] = Variable<DateTime>(updatedAt.value);
     }
+    if (cachedTitle.present) {
+      map['cached_title'] = Variable<String>(cachedTitle.value);
+    }
+    if (cachedImagePath.present) {
+      map['cached_image_path'] = Variable<String>(cachedImagePath.value);
+    }
+    if (cachedMetaPath.present) {
+      map['cached_meta_path'] = Variable<String>(cachedMetaPath.value);
+    }
     if (resumable.present) {
       map['resumable'] = Variable<bool>(resumable.value);
     }
@@ -1339,6 +1534,9 @@ class EpisodesCompanion extends UpdateCompanion<Episode> {
           ..write('completedAt: $completedAt, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
+          ..write('cachedTitle: $cachedTitle, ')
+          ..write('cachedImagePath: $cachedImagePath, ')
+          ..write('cachedMetaPath: $cachedMetaPath, ')
           ..write('resumable: $resumable, ')
           ..write('rowid: $rowid')
           ..write(')'))
@@ -1733,23 +1931,23 @@ abstract class _$AppDatabase extends GeneratedDatabase {
 typedef $$SubscriptionsTableCreateCompanionBuilder =
     SubscriptionsCompanion Function({
       required String podcastId,
-      required String title,
-      Value<String?> imageUrl,
-      Value<int> autoDownloadN,
-      Value<int?> keepLatestN,
-      Value<DateTime> createdAt,
+      Value<bool> active,
       Value<DateTime> updatedAt,
+      Value<DateTime> subscribedAt,
+      Value<int?> autoDownloadN,
+      Value<String?> lastHeardEpisodeId,
+      Value<String?> lastDownloadedEpisodeId,
       Value<int> rowid,
     });
 typedef $$SubscriptionsTableUpdateCompanionBuilder =
     SubscriptionsCompanion Function({
       Value<String> podcastId,
-      Value<String> title,
-      Value<String?> imageUrl,
-      Value<int> autoDownloadN,
-      Value<int?> keepLatestN,
-      Value<DateTime> createdAt,
+      Value<bool> active,
       Value<DateTime> updatedAt,
+      Value<DateTime> subscribedAt,
+      Value<int?> autoDownloadN,
+      Value<String?> lastHeardEpisodeId,
+      Value<String?> lastDownloadedEpisodeId,
       Value<int> rowid,
     });
 
@@ -1767,13 +1965,18 @@ class $$SubscriptionsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get title => $composableBuilder(
-    column: $table.title,
+  ColumnFilters<bool> get active => $composableBuilder(
+    column: $table.active,
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get imageUrl => $composableBuilder(
-    column: $table.imageUrl,
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get subscribedAt => $composableBuilder(
+    column: $table.subscribedAt,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -1782,18 +1985,13 @@ class $$SubscriptionsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<int> get keepLatestN => $composableBuilder(
-    column: $table.keepLatestN,
+  ColumnFilters<String> get lastHeardEpisodeId => $composableBuilder(
+    column: $table.lastHeardEpisodeId,
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<DateTime> get createdAt => $composableBuilder(
-    column: $table.createdAt,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
-    column: $table.updatedAt,
+  ColumnFilters<String> get lastDownloadedEpisodeId => $composableBuilder(
+    column: $table.lastDownloadedEpisodeId,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -1812,13 +2010,18 @@ class $$SubscriptionsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get title => $composableBuilder(
-    column: $table.title,
+  ColumnOrderings<bool> get active => $composableBuilder(
+    column: $table.active,
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get imageUrl => $composableBuilder(
-    column: $table.imageUrl,
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get subscribedAt => $composableBuilder(
+    column: $table.subscribedAt,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -1827,18 +2030,13 @@ class $$SubscriptionsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<int> get keepLatestN => $composableBuilder(
-    column: $table.keepLatestN,
+  ColumnOrderings<String> get lastHeardEpisodeId => $composableBuilder(
+    column: $table.lastHeardEpisodeId,
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
-    column: $table.createdAt,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
-    column: $table.updatedAt,
+  ColumnOrderings<String> get lastDownloadedEpisodeId => $composableBuilder(
+    column: $table.lastDownloadedEpisodeId,
     builder: (column) => ColumnOrderings(column),
   );
 }
@@ -1855,27 +2053,31 @@ class $$SubscriptionsTableAnnotationComposer
   GeneratedColumn<String> get podcastId =>
       $composableBuilder(column: $table.podcastId, builder: (column) => column);
 
-  GeneratedColumn<String> get title =>
-      $composableBuilder(column: $table.title, builder: (column) => column);
+  GeneratedColumn<bool> get active =>
+      $composableBuilder(column: $table.active, builder: (column) => column);
 
-  GeneratedColumn<String> get imageUrl =>
-      $composableBuilder(column: $table.imageUrl, builder: (column) => column);
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get subscribedAt => $composableBuilder(
+    column: $table.subscribedAt,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<int> get autoDownloadN => $composableBuilder(
     column: $table.autoDownloadN,
     builder: (column) => column,
   );
 
-  GeneratedColumn<int> get keepLatestN => $composableBuilder(
-    column: $table.keepLatestN,
+  GeneratedColumn<String> get lastHeardEpisodeId => $composableBuilder(
+    column: $table.lastHeardEpisodeId,
     builder: (column) => column,
   );
 
-  GeneratedColumn<DateTime> get createdAt =>
-      $composableBuilder(column: $table.createdAt, builder: (column) => column);
-
-  GeneratedColumn<DateTime> get updatedAt =>
-      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+  GeneratedColumn<String> get lastDownloadedEpisodeId => $composableBuilder(
+    column: $table.lastDownloadedEpisodeId,
+    builder: (column) => column,
+  );
 }
 
 class $$SubscriptionsTableTableManager
@@ -1910,41 +2112,41 @@ class $$SubscriptionsTableTableManager
           updateCompanionCallback:
               ({
                 Value<String> podcastId = const Value.absent(),
-                Value<String> title = const Value.absent(),
-                Value<String?> imageUrl = const Value.absent(),
-                Value<int> autoDownloadN = const Value.absent(),
-                Value<int?> keepLatestN = const Value.absent(),
-                Value<DateTime> createdAt = const Value.absent(),
+                Value<bool> active = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
+                Value<DateTime> subscribedAt = const Value.absent(),
+                Value<int?> autoDownloadN = const Value.absent(),
+                Value<String?> lastHeardEpisodeId = const Value.absent(),
+                Value<String?> lastDownloadedEpisodeId = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => SubscriptionsCompanion(
                 podcastId: podcastId,
-                title: title,
-                imageUrl: imageUrl,
-                autoDownloadN: autoDownloadN,
-                keepLatestN: keepLatestN,
-                createdAt: createdAt,
+                active: active,
                 updatedAt: updatedAt,
+                subscribedAt: subscribedAt,
+                autoDownloadN: autoDownloadN,
+                lastHeardEpisodeId: lastHeardEpisodeId,
+                lastDownloadedEpisodeId: lastDownloadedEpisodeId,
                 rowid: rowid,
               ),
           createCompanionCallback:
               ({
                 required String podcastId,
-                required String title,
-                Value<String?> imageUrl = const Value.absent(),
-                Value<int> autoDownloadN = const Value.absent(),
-                Value<int?> keepLatestN = const Value.absent(),
-                Value<DateTime> createdAt = const Value.absent(),
+                Value<bool> active = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
+                Value<DateTime> subscribedAt = const Value.absent(),
+                Value<int?> autoDownloadN = const Value.absent(),
+                Value<String?> lastHeardEpisodeId = const Value.absent(),
+                Value<String?> lastDownloadedEpisodeId = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => SubscriptionsCompanion.insert(
                 podcastId: podcastId,
-                title: title,
-                imageUrl: imageUrl,
-                autoDownloadN: autoDownloadN,
-                keepLatestN: keepLatestN,
-                createdAt: createdAt,
+                active: active,
                 updatedAt: updatedAt,
+                subscribedAt: subscribedAt,
+                autoDownloadN: autoDownloadN,
+                lastHeardEpisodeId: lastHeardEpisodeId,
+                lastDownloadedEpisodeId: lastDownloadedEpisodeId,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -1988,6 +2190,9 @@ typedef $$EpisodesTableCreateCompanionBuilder =
       Value<DateTime?> completedAt,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
+      Value<String?> cachedTitle,
+      Value<String?> cachedImagePath,
+      Value<String?> cachedMetaPath,
       Value<bool?> resumable,
       Value<int> rowid,
     });
@@ -2007,6 +2212,9 @@ typedef $$EpisodesTableUpdateCompanionBuilder =
       Value<DateTime?> completedAt,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
+      Value<String?> cachedTitle,
+      Value<String?> cachedImagePath,
+      Value<String?> cachedMetaPath,
       Value<bool?> resumable,
       Value<int> rowid,
     });
@@ -2087,6 +2295,21 @@ class $$EpisodesTableFilterComposer
 
   ColumnFilters<DateTime> get updatedAt => $composableBuilder(
     column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get cachedTitle => $composableBuilder(
+    column: $table.cachedTitle,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get cachedImagePath => $composableBuilder(
+    column: $table.cachedImagePath,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get cachedMetaPath => $composableBuilder(
+    column: $table.cachedMetaPath,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -2175,6 +2398,21 @@ class $$EpisodesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get cachedTitle => $composableBuilder(
+    column: $table.cachedTitle,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get cachedImagePath => $composableBuilder(
+    column: $table.cachedImagePath,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get cachedMetaPath => $composableBuilder(
+    column: $table.cachedMetaPath,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<bool> get resumable => $composableBuilder(
     column: $table.resumable,
     builder: (column) => ColumnOrderings(column),
@@ -2240,6 +2478,21 @@ class $$EpisodesTableAnnotationComposer
   GeneratedColumn<DateTime> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
 
+  GeneratedColumn<String> get cachedTitle => $composableBuilder(
+    column: $table.cachedTitle,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get cachedImagePath => $composableBuilder(
+    column: $table.cachedImagePath,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get cachedMetaPath => $composableBuilder(
+    column: $table.cachedMetaPath,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<bool> get resumable =>
       $composableBuilder(column: $table.resumable, builder: (column) => column);
 }
@@ -2286,6 +2539,9 @@ class $$EpisodesTableTableManager
                 Value<DateTime?> completedAt = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
+                Value<String?> cachedTitle = const Value.absent(),
+                Value<String?> cachedImagePath = const Value.absent(),
+                Value<String?> cachedMetaPath = const Value.absent(),
                 Value<bool?> resumable = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => EpisodesCompanion(
@@ -2303,6 +2559,9 @@ class $$EpisodesTableTableManager
                 completedAt: completedAt,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
+                cachedTitle: cachedTitle,
+                cachedImagePath: cachedImagePath,
+                cachedMetaPath: cachedMetaPath,
                 resumable: resumable,
                 rowid: rowid,
               ),
@@ -2322,6 +2581,9 @@ class $$EpisodesTableTableManager
                 Value<DateTime?> completedAt = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
+                Value<String?> cachedTitle = const Value.absent(),
+                Value<String?> cachedImagePath = const Value.absent(),
+                Value<String?> cachedMetaPath = const Value.absent(),
                 Value<bool?> resumable = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => EpisodesCompanion.insert(
@@ -2339,6 +2601,9 @@ class $$EpisodesTableTableManager
                 completedAt: completedAt,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
+                cachedTitle: cachedTitle,
+                cachedImagePath: cachedImagePath,
+                cachedMetaPath: cachedMetaPath,
                 resumable: resumable,
                 rowid: rowid,
               ),

@@ -18,6 +18,9 @@ class Episode {
     this.downloadStatus = DownloadStatus.notDownloaded,
     this.downloadProgress = 0,
     this.localFilePath,
+    this.cachedTitle,
+    this.cachedImagePath,
+    this.cachedMetaPath,
   });
 
   factory Episode.fromJson(Map<String, dynamic> json) {
@@ -43,6 +46,9 @@ class Episode {
       downloadStatus: _downloadStatusFromJson(json['downloadStatus']),
       downloadProgress: (json['downloadProgress'] as num?)?.toDouble() ?? 0,
       localFilePath: json['localFilePath'] as String?,
+      cachedTitle: json['cachedTitle'] as String?,
+      cachedImagePath: json['cachedImagePath'] as String?,
+      cachedMetaPath: json['cachedMetaPath'] as String?,
     );
   }
 
@@ -61,6 +67,25 @@ class Episode {
   final double downloadProgress;
   final String? localFilePath;
 
+  final String? cachedTitle;
+  final String? cachedImagePath;
+  final String? cachedMetaPath;
+
+  /// Bevorzugter Titel für UI (offline → cachedTitle, sonst title)
+  String get displayTitle =>
+      (cachedTitle != null && cachedTitle!.isNotEmpty) ? cachedTitle! : title;
+
+  /// true, wenn ein lokal gecachtes Bild verfügbar ist
+  bool get hasCachedImage =>
+      (cachedImagePath != null && cachedImagePath!.isNotEmpty);
+
+  /// Bevorzugte Bild-Quelle (Pfad oder URL): zuerst lokal, dann remote
+  String? get displayImagePathOrUrl =>
+      hasCachedImage ? cachedImagePath : imageUrl;
+
+  /// Kennzeichnet, ob displayImagePathOrUrl eine lokale Datei ist
+  bool get isDisplayImageLocal => hasCachedImage;
+
   Episode copyWith({
     String? id,
     String? podcastId,
@@ -76,6 +101,9 @@ class Episode {
     DownloadStatus? downloadStatus,
     double? downloadProgress,
     String? localFilePath,
+    String? cachedTitle,
+    String? cachedImagePath,
+    String? cachedMetaPath,
   }) {
     return Episode(
       id: id ?? this.id,
@@ -92,6 +120,9 @@ class Episode {
       downloadStatus: downloadStatus ?? this.downloadStatus,
       downloadProgress: downloadProgress ?? this.downloadProgress,
       localFilePath: localFilePath ?? this.localFilePath,
+      cachedTitle: cachedTitle ?? this.cachedTitle,
+      cachedImagePath: cachedImagePath ?? this.cachedImagePath,
+      cachedMetaPath: cachedMetaPath ?? this.cachedMetaPath,
     );
   }
 
@@ -111,13 +142,14 @@ class Episode {
       'downloadStatus': downloadStatus.name,
       'downloadProgress': downloadProgress,
       'localFilePath': localFilePath,
+      'cachedTitle': cachedTitle,
+      'cachedImagePath': cachedImagePath,
+      'cachedMetaPath': cachedMetaPath,
     };
   }
 
   static Duration _durationFromString(String? value) {
-    if (value == null || value.isEmpty) {
-      return Duration.zero;
-    }
+    if (value == null || value.isEmpty) return Duration.zero;
     final parts = value.split(':');
     if (parts.length == 3) {
       final hours = int.tryParse(parts[0]) ?? 0;
@@ -134,9 +166,7 @@ class Episode {
   }
 
   static DownloadStatus _downloadStatusFromJson(dynamic value) {
-    if (value == null) {
-      return DownloadStatus.notDownloaded;
-    }
+    if (value == null) return DownloadStatus.notDownloaded;
     return DownloadStatus.values.firstWhere(
       (DownloadStatus status) => status.name == value.toString(),
       orElse: () => DownloadStatus.notDownloaded,

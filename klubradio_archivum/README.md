@@ -6,6 +6,15 @@ The Klubrádió Archive App is a cross-platform mobile application built with Fl
 
 TODO
 
+## Update
+
+```
+flutter pub add background_downloader cupertino_icons drift hive hive_flutter html http image intl just_audio just_audio_windows markdown_widget package_info_plus path path_provider permission_handler provider shared_preferences sqlite3_flutter_libs url_launcher xml
+flutter pub add --dev build_runner change_app_package_name drift_dev flutter_lints intl_translation
+
+flutter pub get
+```
+
 ### test api
 
 `flutter test --dart-define API_SERVICE_LIVE_TESTS=true .\test\services\api_service_live_test.dart`
@@ -80,3 +89,10 @@ Wenn iOS-Builds genutzt werden:
    * Windows Build-Prereqs (VS Build Tools / Desktop C++).
    * „How to run integration tests“ (drive vs. test, Dart-defines).
    * Storage-Pfade & Retention-Regeln dokumentieren.
+
+
+## Note
+ 
+ - https://www.klubradio.hu/musorok/{podcastId}
+
+

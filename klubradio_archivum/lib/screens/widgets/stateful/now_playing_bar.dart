@@ -142,7 +142,12 @@ class _QueueSheet extends StatelessWidget {
           leading: Icon(isCurrent ? Icons.play_arrow : Icons.queue_music),
           trailing: ClipRRect(
             borderRadius: BorderRadius.circular(8),
-            child: ImageUrl(url: episode.imageUrl ?? "", width: 56, height: 56),
+            child: ImageUrl(
+              url: episode.imageUrl ?? "",
+              path: episode.cachedImagePath ?? "",
+              width: 56,
+              height: 56,
+            ),
           ),
           title: Text('${episode.title}, ${episode.showDate}'),
           subtitle: Text(

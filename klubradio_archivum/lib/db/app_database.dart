@@ -10,14 +10,17 @@ part 'app_database.g.dart';
 /// ---------- Tabellen ----------
 
 class Subscriptions extends Table {
-  TextColumn get podcastId => text()(); // Primary Key
-  TextColumn get title => text()();
-  TextColumn get imageUrl => text().nullable()();
-  IntColumn get autoDownloadN =>
-      integer().withDefault(const Constant(5))(); // 1/3/5/20/100
-  IntColumn get keepLatestN => integer().nullable()(); // z.B. 5
-  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  TextColumn get podcastId => text()();
+  BoolColumn get active => boolean().withDefault(const Constant(true))();
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get subscribedAt =>
+      dateTime().withDefault(currentDateAndTime)();
+
+  // Auto-Download-Regel je Abo (optional): n > 0 ⇒ die letzten n automatisch laden
+  IntColumn get autoDownloadN => integer().nullable()();
+
+  TextColumn get lastHeardEpisodeId => text().nullable()();
+  TextColumn get lastDownloadedEpisodeId => text().nullable()();
 
   @override
   Set<Column> get primaryKey => {podcastId};
@@ -43,6 +46,11 @@ class Episodes extends Table {
   DateTimeColumn get completedAt => dateTime().nullable()(); // fertig geladen
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
+
+  // Offline-Cache (optional)
+  TextColumn get cachedTitle => text().nullable()(); // lokaler Anzeigename
+  TextColumn get cachedImagePath => text().nullable()(); // Pfad zu 500x500 JPG
+  TextColumn get cachedMetaPath => text().nullable()(); // Pfad zu JSON
 
   BoolColumn get resumable => boolean().nullable()(); // true/false/null
 
@@ -85,7 +93,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -96,6 +104,11 @@ class AppDatabase extends _$AppDatabase {
       }
       if (from < 3) {
         await m.addColumn(episodes, episodes.resumable);
+      }
+      if (from < 4) {
+        await m.addColumn(episodes, episodes.cachedTitle);
+        await m.addColumn(episodes, episodes.cachedImagePath);
+        await m.addColumn(episodes, episodes.cachedMetaPath);
       }
     },
   );

@@ -55,3 +55,7 @@ String formatProgress(double progress) {
   final int percentage = (progress * 100).clamp(0, 100).round();
   return '$percentage%';
 }
+
+// Hilfsfunktion (kannst du in einen Utils-Helper auslagern)
+String displayTitleFor(Episode e) =>
+    (e.cachedTitle?.isNotEmpty ?? false) ? e.cachedTitle! : e.title;

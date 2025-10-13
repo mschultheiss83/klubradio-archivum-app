@@ -17,33 +17,82 @@ class SubscriptionsDao extends DatabaseAccessor<AppDatabase>
   Future<void> upsert(SubscriptionsCompanion data) =>
       into(subscriptions).insertOnConflictUpdate(data);
 
-  Future<Subscription?> getById(String podcastId) => (select(
-    subscriptions,
-  )..where((s) => s.podcastId.equals(podcastId))).getSingleOrNull();
+  Future<Subscription?> getById(String podcastId) async {
+    return (select(
+      subscriptions,
+    )..where((s) => s.podcastId.equals(podcastId))).getSingleOrNull();
+  }
 
-  Future<int> setAutoDownloadN(String podcastId, int n) =>
-      (update(
+  // Live-State für einen Podcast (Button/UI)
+  Stream<Subscription?> watchOne(String podcastId) {
+    return (select(
+      subscriptions,
+    )..where((s) => s.podcastId.equals(podcastId))).watchSingleOrNull();
+  }
+
+  // alle aktiven Abos streamen (z. B. Auto-Download beim App-Start)
+  Stream<List<Subscription>> watchAllActive() {
+    return (select(subscriptions)..where((s) => s.active.equals(true))).watch();
+  }
+
+  // bool: abonniert?
+  Future<bool> isSubscribed(String podcastId) async {
+    final row = await getById(podcastId);
+    return row?.active == true;
+  }
+
+  // aktivieren/deaktivieren OHNE Titel/Bild – nur Status & Rules
+  Future<void> toggleSubscribe({
+    required String podcastId,
+    bool? active, // optional: explizit setzen
+    int? autoDownloadN, // optional: Regel mitgeben
+  }) async {
+    final existing = await getById(podcastId);
+    if (existing == null) {
+      await into(subscriptions).insert(
+        SubscriptionsCompanion.insert(
+          podcastId: podcastId,
+          active: const Value(true),
+          autoDownloadN: Value(autoDownloadN),
+        ),
+      );
+    } else {
+      final toActive = active ?? !existing.active;
+      await (update(
         subscriptions,
       )..where((s) => s.podcastId.equals(podcastId))).write(
         SubscriptionsCompanion(
-          autoDownloadN: Value(n),
-          updatedAt: Value(DateTime.now()),
+          active: Value(toActive),
+          // Regel übernehmen, wenn übergeben
+          autoDownloadN: autoDownloadN == null
+              ? const Value.absent()
+              : Value(autoDownloadN),
         ),
       );
+    }
+  }
 
-  Future<int> setKeepLatestN(String podcastId, int? n) =>
-      (update(
-        subscriptions,
-      )..where((s) => s.podcastId.equals(podcastId))).write(
-        SubscriptionsCompanion(
-          keepLatestN: Value(n),
-          updatedAt: Value(DateTime.now()),
-        ),
-      );
+  // Regel-Setter
+  Future<int> setAutoDownloadN(String podcastId, int? n) {
+    // 0 => null (aus)
+    final normalized = (n ?? 0) <= 0 ? null : n;
+    return (update(subscriptions)..where((s) => s.podcastId.equals(podcastId)))
+        .write(SubscriptionsCompanion(autoDownloadN: Value(normalized)));
+  }
 
-  Stream<List<Subscription>> watchAll() => (select(
-    subscriptions,
-  )..orderBy([(s) => OrderingTerm.asc(s.title)])).watch();
+  // Fortschritt updaten (optional)
+  Future<int> setLastHeard(String podcastId, String episodeId) {
+    return (update(subscriptions)..where((s) => s.podcastId.equals(podcastId)))
+        .write(SubscriptionsCompanion(lastHeardEpisodeId: Value(episodeId)));
+  }
+
+  Future<int> setLastDownloaded(String podcastId, String episodeId) {
+    return (update(
+      subscriptions,
+    )..where((s) => s.podcastId.equals(podcastId))).write(
+      SubscriptionsCompanion(lastDownloadedEpisodeId: Value(episodeId)),
+    );
+  }
 }
 
 /// ---------------- Episodes DAO ----------------
@@ -214,6 +263,26 @@ class EpisodesDao extends DatabaseAccessor<AppDatabase>
       }
     });
   }
+
+  Future<int> setCachedMeta(
+    String id, {
+    String? title,
+    String? imagePath,
+    String? metaPath,
+  }) {
+    return (update(episodes)..where((e) => e.id.equals(id))).write(
+      EpisodesCompanion(
+        cachedTitle: title == null ? const Value.absent() : Value(title),
+        cachedImagePath: imagePath == null
+            ? const Value.absent()
+            : Value(imagePath),
+        cachedMetaPath: metaPath == null
+            ? const Value.absent()
+            : Value(metaPath),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+  }
 }
 
 /// ---------------- Settings DAO ----------------
@@ -302,13 +371,14 @@ class RetentionDao {
     }
 
     // keepLatestN nur wenn > 0
-    final sub = await subscriptionsDao.getById(podcastId);
     final global = await settingsDao.getOne();
-    final keepN = sub?.keepLatestN ?? global?.keepLatestN;
+    final keepN = global?.keepLatestN;
+
     if (keepN != null && keepN > 0) {
       final done = await episodesDao.completedWithFileDesc(podcastId);
       if (done.length > keepN) {
-        planIds.addAll(done.sublist(keepN).map((e) => e.id));
+        final extra = done.sublist(keepN);
+        planIds.addAll(extra.map((e) => e.id));
       }
     }
 
