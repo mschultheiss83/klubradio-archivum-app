@@ -93,7 +93,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 6;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -109,6 +109,14 @@ class AppDatabase extends _$AppDatabase {
         await m.addColumn(episodes, episodes.cachedTitle);
         await m.addColumn(episodes, episodes.cachedImagePath);
         await m.addColumn(episodes, episodes.cachedMetaPath);
+      }
+      if (from < 5) {
+        await m.addColumn(subscriptions, subscriptions.lastHeardEpisodeId);
+        await m.addColumn(subscriptions, subscriptions.lastDownloadedEpisodeId);
+      }
+      if (from < 6) {
+        await m.deleteTable('subscriptions');
+        await m.createTable(subscriptions);
       }
     },
   );

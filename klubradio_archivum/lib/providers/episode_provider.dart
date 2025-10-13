@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:just_audio/just_audio.dart';
 
 import 'package:klubradio_archivum/db/app_database.dart' as db;
+import 'package:klubradio_archivum/db/daos.dart' as daos;
 import 'package:klubradio_archivum/models/episode.dart' as model;
 import 'package:klubradio_archivum/services/api_service.dart';
 import 'package:klubradio_archivum/services/audio_player_service.dart';
@@ -92,18 +93,30 @@ class EpisodeProvider extends ChangeNotifier {
       _queue.insert(0, episode);
     }
 
-    model.Episode epForPlay = episode;
+    model.Episode episodeForPlay = episode;
     if (preferLocal && (episode.cachedMetaPath?.isNotEmpty ?? false)) {
       final fromCache = await readEpisodeFromCacheJson(episode.cachedMetaPath!);
       if (fromCache != null) {
-        epForPlay = fromCache;
+        episodeForPlay = fromCache;
       }
     }
 
-    _currentEpisode = epForPlay;
+    _currentEpisode = episodeForPlay;
 
-    await _audioPlayerService.loadEpisode(epForPlay);
+    try {
+      final subsDao = daos.SubscriptionsDao(_db);
+      final sub = await subsDao.getById(episodeForPlay.podcastId);
+      if (sub == null || sub.active == false) {
+        await subsDao.toggleSubscribe(
+          podcastId: episodeForPlay.podcastId,
+          active: true,
+        );
+      }
+    } catch (_) {
+      // still: Abo ist „nice-to-have“, Playback darf nicht blockieren
+    }
 
+    await _audioPlayerService.loadEpisode(episodeForPlay);
     notifyListeners();
   }
 

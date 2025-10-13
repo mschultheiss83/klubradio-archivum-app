@@ -109,6 +109,7 @@ class PodcastProvider extends ChangeNotifier {
   }
 
   Future<void> subscribe(String podcastId) async {
+    print('[Provider] subscribe/unsubscribe ${podcastId}');
     final profile = _userProfile;
     if (profile == null) return;
 
@@ -124,6 +125,7 @@ class PodcastProvider extends ChangeNotifier {
   }
 
   Future<void> unsubscribe(String podcastId) async {
+    print('[Provider] subscribe/unsubscribe ${podcastId}');
     final profile = _userProfile;
     if (profile == null) return;
 
