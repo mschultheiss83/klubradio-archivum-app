@@ -16,9 +16,7 @@ class Subscriptions extends Table {
   DateTimeColumn get subscribedAt =>
       dateTime().withDefault(currentDateAndTime)();
 
-  // Auto-Download-Regel je Abo (optional): n > 0 ⇒ die letzten n automatisch laden
   IntColumn get autoDownloadN => integer().nullable()();
-
   TextColumn get lastHeardEpisodeId => text().nullable()();
   TextColumn get lastDownloadedEpisodeId => text().nullable()();
 
@@ -83,7 +81,6 @@ LazyDatabase _openConnection() {
         ? await getApplicationSupportDirectory()
         : await getApplicationDocumentsDirectory();
     final file = File(p.join(dir.path, 'klubradio.db'));
-    // Stabil + Threaded I/O
     return NativeDatabase.createInBackground(file);
   });
 }
@@ -93,33 +90,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 6;
-
-  @override
-  MigrationStrategy get migration => MigrationStrategy(
-    onCreate: (m) async => await m.createAll(),
-    onUpgrade: (m, from, to) async {
-      if (from < 2) {
-        await m.addColumn(settings, settings.keepLatestN);
-      }
-      if (from < 3) {
-        await m.addColumn(episodes, episodes.resumable);
-      }
-      if (from < 4) {
-        await m.addColumn(episodes, episodes.cachedTitle);
-        await m.addColumn(episodes, episodes.cachedImagePath);
-        await m.addColumn(episodes, episodes.cachedMetaPath);
-      }
-      if (from < 5) {
-        await m.addColumn(subscriptions, subscriptions.lastHeardEpisodeId);
-        await m.addColumn(subscriptions, subscriptions.lastDownloadedEpisodeId);
-      }
-      if (from < 6) {
-        await m.deleteTable('subscriptions');
-        await m.createTable(subscriptions);
-      }
-    },
-  );
+  int get schemaVersion => 1;
 
   /// Convenience: Timestamps aktualisieren
   Future<int> touchEpisode(String id) =>
