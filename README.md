@@ -1,6 +1,6 @@
 # Klubrádió Archivum App
 
-[![CI Status](https://github.com/mschultheiss83/klubradio-archivum-app/actions/workflows/ci.yml/badge.svg)](https://github.com/mschultheiss83/klubradio-archivum-app/actions)
+[![CI Status](https://github.com/mschultheiss83/klubradio-archivum-app/actions/workflows/scrape-and-upload.yml/badge.svg)](https://github.com/mschultheiss83/klubradio-archivum-app/actions)
 
 **Scraper → RSS → Supabase**  
 Backend for the Klubrádió Archivum App.  
