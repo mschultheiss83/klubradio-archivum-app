@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import 'package:klubradio_archivum/db/daos.dart';
 import 'package:klubradio_archivum/db/app_database.dart' as db;
 import 'package:klubradio_archivum/l10n/app_localizations.dart';
@@ -23,7 +24,7 @@ class PodcastDetailScreen extends StatefulWidget {
 class _PodcastDetailScreenState extends State<PodcastDetailScreen> {
   late Future<List<Episode>> _episodesFuture;
 
-  bool _subscribeBusy = false; // Loading-Guard für den AppBar-Button
+  bool _subscribeBusy = false; // Busy-Guard für AppBar-Button
 
   @override
   void initState() {
@@ -46,7 +47,7 @@ class _PodcastDetailScreenState extends State<PodcastDetailScreen> {
           StreamBuilder<db.Subscription?>(
             stream: subsDao.watchOne(widget.podcast.id),
             builder: (context, snapshot) {
-              final isSubscribed =
+              final bool isSubscribed =
                   snapshot.data?.active ??
                   provider.isSubscribed(widget.podcast.id);
 
@@ -59,25 +60,22 @@ class _PodcastDetailScreenState extends State<PodcastDetailScreen> {
                           setState(() => _subscribeBusy = true);
                           final snack = ScaffoldMessenger.of(context);
                           try {
-                            if (isSubscribed) {
-                              await provider.unsubscribe(widget.podcast.id);
-                              snack.showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    l10n.podcastDetailScreenUnsubscribeSuccess,
-                                  ),
+                            await subsDao.toggleSubscribe(
+                              podcastId: widget.podcast.id,
+                              active: !isSubscribed,
+                            );
+
+                            snack.showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  !isSubscribed
+                                      ? l10n.podcastDetailScreenSubscribeSuccess
+                                      : l10n.podcastDetailScreenUnsubscribeSuccess,
                                 ),
-                              );
-                            } else {
-                              await provider.subscribe(widget.podcast.id);
-                              snack.showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    l10n.podcastDetailScreenSubscribeSuccess,
-                                  ),
-                                ),
-                              );
-                            }
+                              ),
+                            );
+                          } catch (_) {
+                            // optional: Fehler-Toast
                           } finally {
                             if (mounted) setState(() => _subscribeBusy = false);
                           }

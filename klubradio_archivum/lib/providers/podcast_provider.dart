@@ -2,25 +2,23 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 
-import '../models/episode.dart';
-import '../models/podcast.dart';
-import '../models/show_data.dart';
-import '../models/user_profile.dart';
-import '../screens/utils/constants.dart' as constants;
-import '../services/api_service.dart';
-
-// ALT entfernt: import '../services/download_service.dart';
-import '../providers/download_provider.dart'; // NEU
+import 'package:klubradio_archivum/models/episode.dart';
+import 'package:klubradio_archivum/models/podcast.dart';
+import 'package:klubradio_archivum/models/show_data.dart';
+import 'package:klubradio_archivum/models/user_profile.dart';
+import 'package:klubradio_archivum/screens/utils/constants.dart' as constants;
+import 'package:klubradio_archivum/services/api_service.dart';
+import 'package:klubradio_archivum/providers/download_provider.dart';
 
 class PodcastProvider extends ChangeNotifier {
   PodcastProvider({
     required ApiService apiService,
-    required DownloadProvider downloadProvider, // NEU
+    required DownloadProvider downloadProvider,
   }) : _apiService = apiService,
        _downloadProvider = downloadProvider;
 
   ApiService _apiService;
-  DownloadProvider _downloadProvider; // NEU
+  DownloadProvider _downloadProvider;
 
   final Map<String, List<Episode>> _episodesByPodcast =
       <String, List<Episode>>{};
@@ -39,7 +37,6 @@ class PodcastProvider extends ChangeNotifier {
   UserProfile? _userProfile;
   bool _isLoading = false;
   String? _errorMessage;
-  bool _initialised = false;
 
   List<Podcast> get podcasts => _podcasts;
   List<Podcast> get trendingPodcasts => _trendingPodcasts;
@@ -59,7 +56,7 @@ class PodcastProvider extends ChangeNotifier {
 
   void updateDependencies(
     ApiService apiService,
-    DownloadProvider downloadProvider, // NEU
+    DownloadProvider downloadProvider,
   ) {
     if (!identical(_apiService, apiService)) {
       _apiService = apiService;
@@ -70,31 +67,54 @@ class PodcastProvider extends ChangeNotifier {
   }
 
   Future<void> loadInitialData({bool forceRefresh = false}) async {
-    if (_isLoading) return;
-    if (_initialised && !forceRefresh) return;
+    // ── Performance-Messpunkte ────────────────────────────────────────────────
+    final t0 = DateTime.now();
+    if (kDebugMode) debugPrint('LOAD ▶ start');
 
     _isLoading = true;
     _errorMessage = null;
+    if (forceRefresh && kDebugMode) debugPrint('LOAD ▷ forceRefresh=true');
     notifyListeners();
 
     try {
+      final t1 = DateTime.now();
+      if (kDebugMode) debugPrint('LOAD … fetching');
+
+      // final profileFuture = _apiService.fetchUserProfile(constants.demoUserId); // todo add later
+      // _userProfile = profileFuture;
+
       final fetchedPodcasts = await _apiService.fetchLatestPodcasts();
       final trending = await _apiService.fetchTrendingPodcasts();
       final recommended = await _apiService.fetchRecommendedPodcasts();
       final latestEpisodes = await _apiService.fetchRecentEpisodes();
 
+      final t2 = DateTime.now();
+      if (kDebugMode) {
+        debugPrint('LOAD ✓ fetched   Δ=${t2.difference(t1).inMilliseconds}ms');
+      }
+
       await loadTopShows(forceRefresh: forceRefresh);
 
-      _podcasts = fetchedPodcasts;
-      _trendingPodcasts = trending;
-      _recommendedPodcasts = recommended;
+      final t3 = DateTime.now();
       _recentEpisodes = latestEpisodes;
-      _initialised = true;
-    } catch (error) {
-      _errorMessage = error.toString();
+      _recommendedPodcasts = recommended;
+      _trendingPodcasts = trending;
+      _podcasts = fetchedPodcasts;
+
+      if (kDebugMode) {
+        debugPrint('LOAD ✓ mapped    Δ=${t3.difference(t2).inMilliseconds}ms');
+      }
+    } catch (e) {
+      _errorMessage = e.toString();
     } finally {
       _isLoading = false;
       notifyListeners();
+      final t4 = DateTime.now();
+      if (kDebugMode) {
+        debugPrint(
+          'LOAD ■ done      total=${t4.difference(t0).inMilliseconds}ms',
+        );
+      }
     }
   }
 
@@ -109,7 +129,7 @@ class PodcastProvider extends ChangeNotifier {
   }
 
   Future<void> subscribe(String podcastId) async {
-    print('[Provider] subscribe/unsubscribe ${podcastId}');
+    debugPrint('[Provider] subscribe/unsubscribe $podcastId');
     final profile = _userProfile;
     if (profile == null) return;
 
@@ -125,7 +145,7 @@ class PodcastProvider extends ChangeNotifier {
   }
 
   Future<void> unsubscribe(String podcastId) async {
-    print('[Provider] subscribe/unsubscribe ${podcastId}');
+    debugPrint('[Provider] subscribe/unsubscribe $podcastId');
     final profile = _userProfile;
     if (profile == null) return;
 
@@ -140,14 +160,14 @@ class PodcastProvider extends ChangeNotifier {
 
   Future<void> downloadEpisode(Episode episode) async {
     try {
-      await _downloadProvider.enqueue(episode); // NEU: DownloadProvider nutzen
+      await _downloadProvider.enqueue(episode);
     } catch (_) {
       // Fehler werden über UI/DB sichtbar; hier keine Exception werfen
     }
   }
 
   Future<void> removeDownload(String episodeId) async {
-    await _downloadProvider.removeLocalFile(episodeId); // NEU
+    await _downloadProvider.removeLocalFile(episodeId);
     notifyListeners();
   }
 
@@ -161,8 +181,6 @@ class PodcastProvider extends ChangeNotifier {
     _episodesByPodcast[podcastId] = episodes;
 
     for (final episode in episodes.take(maxDownloads)) {
-      // Start nur, wenn nicht bereits lokal vorhanden – das prüft DownloadService/DB ohnehin,
-      // hier vereinfachen wir und starten immer; Retention regelt den Rest.
       unawaited(_downloadProvider.enqueue(episode));
     }
     notifyListeners();
