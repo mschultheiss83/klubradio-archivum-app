@@ -634,11 +634,23 @@ abstract class AppLocalizations {
   /// **'Subscribed'**
   String get podcastListItem_subscribed;
 
+  /// No description provided for @podcastListItem_unsubscribe.
+  ///
+  /// In en, this message translates to:
+  /// **'Unsubscribe'**
+  String get podcastListItem_unsubscribe;
+
   /// No description provided for @podcastListItem_subscribe.
   ///
   /// In en, this message translates to:
   /// **'Subscribe'**
   String get podcastListItem_subscribe;
+
+  /// No description provided for @podcastListItem_unsubscribed.
+  ///
+  /// In en, this message translates to:
+  /// **'Unsubscribed'**
+  String get podcastListItem_unsubscribed;
 
   /// No description provided for @podcastListItem_subtitleFallback.
   ///
@@ -843,6 +855,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'0 = OFF'**
   String get settings_zero_off;
+
+  /// No description provided for @profileScreenNoRecentlyPlayed.
+  ///
+  /// In en, this message translates to:
+  /// **'No recently played episodes yet.'**
+  String get profileScreenNoRecentlyPlayed;
+
+  /// No description provided for @profileScreenSubscriptionsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscribed shows'**
+  String get profileScreenSubscriptionsTitle;
+
+  /// No description provided for @profileScreenAppIdTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'App ID'**
+  String get profileScreenAppIdTitle;
+
+  /// No description provided for @profileScreenIdCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'ID copied'**
+  String get profileScreenIdCopied;
+
+  /// No description provided for @profileScreenPlaybackSpeedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Playback speed'**
+  String get profileScreenPlaybackSpeedTitle;
+
+  /// No description provided for @profileScreenPlaybackSpeedValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{value}×'**
+  String profileScreenPlaybackSpeedValue(Object value);
+
+  /// No description provided for @commonOk.
+  ///
+  /// In en, this message translates to:
+  /// **'OK'**
+  String get commonOk;
+
+  /// No description provided for @commonCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get commonCancel;
+
+  /// No description provided for @commonCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Count'**
+  String get commonCount;
+
+  /// No description provided for @commonDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Fertig'**
+  String get commonDone;
 }
 
 class _AppLocalizationsDelegate

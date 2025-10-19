@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -5,6 +7,8 @@ import 'package:klubradio_archivum/l10n/app_localizations.dart';
 import 'package:klubradio_archivum/models/podcast.dart';
 import 'package:klubradio_archivum/models/show_data.dart';
 import 'package:klubradio_archivum/providers/podcast_provider.dart';
+import 'package:klubradio_archivum/providers/latest_provider.dart';
+import 'package:klubradio_archivum/providers/recommended_provider.dart';
 
 import 'recommended_podcasts_list.dart';
 import 'top_shows_list.dart';
@@ -21,12 +25,46 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
   bool _bootstrapped = false;
 
   @override
+  void initState() {
+    super.initState();
+    Future.microtask(() async {
+      final latest = context.read<LatestProvider>();
+      final rec = context.read<RecommendedProvider>();
+
+      // Cache-first sofort anzeigen
+      await Future.wait([
+        latest.load(useCacheFirst: true),
+        rec.load(useCacheFirst: true),
+      ], eagerError: false);
+
+      // im Hintergrund frische Daten (UI bleibt sichtbar)
+      unawaited(latest.load(useCacheFirst: false));
+      unawaited(rec.load(useCacheFirst: false));
+    });
+  }
+
+  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (!_bootstrapped) {
       _bootstrapped = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         context.read<PodcastProvider>().loadInitialData();
+      });
+
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        final latest = context.read<LatestProvider>();
+        final rec = context.read<RecommendedProvider>();
+
+        // Cache-first schnell, danach still fresh
+        await Future.wait([
+          latest.load(useCacheFirst: true),
+          rec.load(useCacheFirst: true),
+        ], eagerError: false);
+
+        // Silent refresh (UI bleibt sichtbar)
+        latest.load(useCacheFirst: false);
+        rec.load(useCacheFirst: false);
       });
     }
   }
@@ -35,62 +73,44 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    return Consumer<PodcastProvider>(
-      builder: (BuildContext context, PodcastProvider provider, Widget? child) {
-        final List<ShowData> topShowsData = provider.topShows;
-        // todo use in future TrendingTitle with discoverScreenTrendingTitle
-        // final List<Podcast> trending = provider.trendingPodcasts;
-        final List<Podcast> recommended = provider.recommendedPodcasts;
+    final latest = context.watch<LatestProvider>();
+    final rec = context.watch<RecommendedProvider>();
+    final topShowsData = context
+        .watch<PodcastProvider>()
+        .topShows; // bleibt wie gehabt
 
-        return RefreshIndicator(
-          onRefresh: () => provider.loadInitialData(forceRefresh: true),
-          child: ListView(
-            padding: const EdgeInsets.all(16),
-            children: <Widget>[
-              Text(
-                l10n.discoverScreenFeaturedCategoriesTitle,
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-              const SizedBox(height: 8),
-              if (provider.isLoadingTopShows && topShowsData.isEmpty)
-                const Center(
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(vertical: 20.0),
-                    child: CircularProgressIndicator(),
-                  ),
-                )
-              else if (!provider.isLoadingTopShows && topShowsData.isEmpty)
-                Center(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 20.0),
-                    child: Text(
-                      l10n.discoverScreenNoTopShows,
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                  ),
-                )
-              else
-                TopShowsList(topShows: topShowsData),
-
-              const SizedBox(height: 24),
-              Text(
-                l10n.discoverScreenRecommendedShowsTitle,
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-              const SizedBox(height: 12),
-              RecommendedPodcastsList(podcasts: recommended),
-              // TODO to use in future TrendingTitle with discoverScreenTrendingTitle and TrendingPodcastsList
-              // const SizedBox(height: 24),
-              // Text(
-              //   l10n.discoverScreenTrendingTitle,
-              //   style: Theme.of(context).textTheme.titleLarge,
-              // ),
-              // const SizedBox(height: 12),
-              // TrendingPodcastsList(podcasts: trending),
-            ],
-          ),
-        );
+    return RefreshIndicator(
+      onRefresh: () async {
+        await Future.wait([
+          latest.load(useCacheFirst: false),
+          rec.load(useCacheFirst: false),
+          context.read<PodcastProvider>().loadTopShows(forceRefresh: true),
+        ], eagerError: false);
       },
+      child: ListView(
+        padding: const EdgeInsets.all(16),
+        children: <Widget>[
+          Text(
+            l10n.discoverScreenFeaturedCategoriesTitle,
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
+          const SizedBox(height: 8),
+          if (latest.loading && latest.items.isEmpty)
+            const Center(child: CircularProgressIndicator())
+          else
+            TopShowsList(topShows: topShowsData),
+          const SizedBox(height: 24),
+          Text(
+            l10n.discoverScreenRecommendedShowsTitle,
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
+          const SizedBox(height: 12),
+          if (rec.loading && rec.items.isEmpty)
+            const Center(child: CircularProgressIndicator())
+          else
+            RecommendedPodcastsList(podcasts: rec.items),
+        ],
+      ),
     );
   }
 }

@@ -1,6 +1,6 @@
 #!/bin/bash
 # Bash-Skript zum Auflisten und Anzeigen des Inhalts von *.dart-Dateien in Markdown
-# Speichert Ausgabe in docs/project/flutter-app-fs.md
+# Speichert Ausgabe in docs/project/flutter-app-fs.md und normalisiert Zeilenumbrüche
 
 # Alle .dart-Dateien rekursiv finden (relativ)
 dart_files=$(find . -type f -name "*.dart" | sort)
@@ -9,6 +9,11 @@ if [ -z "$dart_files" ]; then
   echo "Keine *.dart-Dateien gefunden."
   exit 0
 fi
+
+# Normalisiere Zeilenumbrüche in .dart-Dateien
+for file in $dart_files; do
+  sed -i 's/\r$//' "$file"  # Entfernt CRLF und lässt LF
+done
 
 # Markdown-Datei erstellen
 mkdir -p docs/project

@@ -320,7 +320,13 @@ class AppLocalizationsHu extends AppLocalizations {
   String get podcastListItem_subscribed => 'Feliratkozva';
 
   @override
+  String get podcastListItem_unsubscribe => 'Leiratkozás';
+
+  @override
   String get podcastListItem_subscribe => 'Feliratkozás';
+
+  @override
+  String get podcastListItem_unsubscribed => 'Leiratkozva';
 
   @override
   String get podcastListItem_subtitleFallback => 'Klubrádió műsor';
@@ -427,4 +433,37 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get settings_zero_off => '0 = KI';
+
+  @override
+  String get profileScreenNoRecentlyPlayed =>
+      'Még nincs nemrég hallgatott epizód.';
+
+  @override
+  String get profileScreenSubscriptionsTitle => 'Feliratkozott műsorok';
+
+  @override
+  String get profileScreenAppIdTitle => 'Alkalmazás-azonosító';
+
+  @override
+  String get profileScreenIdCopied => 'Azonosító kimásolva';
+
+  @override
+  String get profileScreenPlaybackSpeedTitle => 'Lejátszási sebesség';
+
+  @override
+  String profileScreenPlaybackSpeedValue(Object value) {
+    return '$value×';
+  }
+
+  @override
+  String get commonOk => 'OK';
+
+  @override
+  String get commonCancel => 'Mégse';
+
+  @override
+  String get commonCount => 'Darab';
+
+  @override
+  String get commonDone => 'Kész';
 }

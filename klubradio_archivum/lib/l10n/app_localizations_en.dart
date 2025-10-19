@@ -319,7 +319,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get podcastListItem_subscribed => 'Subscribed';
 
   @override
+  String get podcastListItem_unsubscribe => 'Unsubscribe';
+
+  @override
   String get podcastListItem_subscribe => 'Subscribe';
+
+  @override
+  String get podcastListItem_unsubscribed => 'Unsubscribed';
 
   @override
   String get podcastListItem_subtitleFallback => 'Klubrádió show';
@@ -425,4 +431,37 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settings_zero_off => '0 = OFF';
+
+  @override
+  String get profileScreenNoRecentlyPlayed =>
+      'No recently played episodes yet.';
+
+  @override
+  String get profileScreenSubscriptionsTitle => 'Subscribed shows';
+
+  @override
+  String get profileScreenAppIdTitle => 'App ID';
+
+  @override
+  String get profileScreenIdCopied => 'ID copied';
+
+  @override
+  String get profileScreenPlaybackSpeedTitle => 'Playback speed';
+
+  @override
+  String profileScreenPlaybackSpeedValue(Object value) {
+    return '$value×';
+  }
+
+  @override
+  String get commonOk => 'OK';
+
+  @override
+  String get commonCancel => 'Cancel';
+
+  @override
+  String get commonCount => 'Count';
+
+  @override
+  String get commonDone => 'Fertig';
 }
