@@ -2,13 +2,13 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 
-import 'package:klubradio_archivum/models/episode.dart';
-import 'package:klubradio_archivum/models/podcast.dart';
-import 'package:klubradio_archivum/models/show_data.dart';
-import 'package:klubradio_archivum/models/user_profile.dart';
-import 'package:klubradio_archivum/screens/utils/constants.dart' as constants;
-import 'package:klubradio_archivum/services/api_service.dart';
-import 'package:klubradio_archivum/providers/download_provider.dart';
+import '../models/episode.dart';
+import '../models/podcast.dart';
+import '../models/show_data.dart';
+import '../models/user_profile.dart';
+import '../screens/utils/constants.dart' as constants;
+import '../services/api_service.dart';
+import '../providers/download_provider.dart';
 
 class PodcastProvider extends ChangeNotifier {
   PodcastProvider({
@@ -66,54 +66,96 @@ class PodcastProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> loadInitialData({bool forceRefresh = false}) async {
-    // ── Performance-Messpunkte ────────────────────────────────────────────────
+  /// Kleiner Mess-Helper: protokolliert Dauer + Fehler je Call.
+  Future<T?> _measure<T>(String label, Future<T> Function() call) async {
     final t0 = DateTime.now();
-    if (kDebugMode) debugPrint('LOAD ▶ start');
+    if (kDebugMode) debugPrint('LOAD → $label start');
+    try {
+      final res = await call();
+      final t1 = DateTime.now();
+      if (kDebugMode) {
+        debugPrint('LOAD ← $label ok  Δ=${t1.difference(t0).inMilliseconds}ms');
+      }
+      return res;
+    } catch (e) {
+      final t1 = DateTime.now();
+      if (kDebugMode) {
+        debugPrint(
+          'LOAD ← $label ERR Δ=${t1.difference(t0).inMilliseconds}ms  $e',
+        );
+      }
+      return null; // andere Calls sollen weiterlaufen
+    }
+  }
 
+  Future<void> loadInitialData({bool forceRefresh = false}) async {
+    if (_isLoading && !forceRefresh) {
+      if (kDebugMode) debugPrint('LOAD ✋ already running – skip');
+      return;
+    }
+    final T0 = DateTime.now();
+    if (kDebugMode) debugPrint('LOAD ▶ start');
     _isLoading = true;
     _errorMessage = null;
     if (forceRefresh && kDebugMode) debugPrint('LOAD ▷ forceRefresh=true');
     notifyListeners();
 
     try {
-      final t1 = DateTime.now();
-      if (kDebugMode) debugPrint('LOAD … fetching');
+      // Alle Fetches PARALLEL starten – jede mit eigener Messung/Fehlerlogik
+      final fLatest = _measure<List<Podcast>>(
+        'latestPodcasts',
+        () => _apiService.fetchLatestPodcasts(),
+      );
 
-      // final profileFuture = _apiService.fetchUserProfile(constants.demoUserId); // todo add later
-      // _userProfile = profileFuture;
+      final fRecommended = _measure<List<Podcast>>(
+        'recommended',
+        () => _apiService.fetchRecommendedPodcasts(),
+      );
 
-      final fetchedPodcasts = await _apiService.fetchLatestPodcasts();
-      final trending = await _apiService.fetchTrendingPodcasts();
-      final recommended = await _apiService.fetchRecommendedPodcasts();
-      final latestEpisodes = await _apiService.fetchRecentEpisodes();
+      final fTrending = _measure<List<Podcast>>(
+        'trending',
+        () => _apiService.fetchTrendingPodcasts(),
+      );
 
-      final t2 = DateTime.now();
+      final fRecent = _measure<List<Episode>>(
+        'recentEpisodes',
+        () => _apiService.fetchRecentEpisodes(),
+      );
+
+      // TopShows separat (mit interner Messung)
+      final fTopShows = loadTopShows(forceRefresh: forceRefresh);
+
+      // Warten bis alles fertig (Fehler sind bereits im Helper geloggt)
+      final results = await Future.wait([
+        fLatest,
+        fTrending,
+        fRecommended,
+        fRecent,
+        fTopShows,
+      ]);
+
+      // Zuordnen, was da ist
+      final latestPodcasts = results[0] as List<Podcast>?;
+      final trending = results[1] as List<Podcast>?;
+      final recommended = results[2] as List<Podcast>?;
+      final recent = results[3] as List<Episode>?;
+
+      if (latestPodcasts != null) _podcasts = latestPodcasts;
+      if (trending != null) _trendingPodcasts = trending;
+      if (recommended != null) _recommendedPodcasts = recommended;
+      if (recent != null) _recentEpisodes = recent;
+
       if (kDebugMode) {
-        debugPrint('LOAD ✓ fetched   Δ=${t2.difference(t1).inMilliseconds}ms');
-      }
-
-      await loadTopShows(forceRefresh: forceRefresh);
-
-      final t3 = DateTime.now();
-      _recentEpisodes = latestEpisodes;
-      _recommendedPodcasts = recommended;
-      _trendingPodcasts = trending;
-      _podcasts = fetchedPodcasts;
-
-      if (kDebugMode) {
-        debugPrint('LOAD ✓ mapped    Δ=${t3.difference(t2).inMilliseconds}ms');
+        debugPrint('LOAD ✓ mapped');
       }
     } catch (e) {
       _errorMessage = e.toString();
     } finally {
       _isLoading = false;
       notifyListeners();
-      final t4 = DateTime.now();
+      final T1 = DateTime.now();
       if (kDebugMode) {
-        debugPrint(
-          'LOAD ■ done      total=${t4.difference(t0).inMilliseconds}ms',
-        );
+        debugPrint('LOAD ■ done total=${T1.difference(T0).inMilliseconds}ms');
       }
     }
   }
@@ -257,7 +299,7 @@ class PodcastProvider extends ChangeNotifier {
       final podcast = await _apiService.fetchPodcastById(podcastId);
       return podcast;
     } catch (e) {
-      debugPrint('Error fetching podcast by ID: $e');
+      debugPrint('Error fetching podcast $podcastId by ID: $e');
       return null;
     }
   }
@@ -269,9 +311,19 @@ class PodcastProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
+      final s0 = DateTime.now();
       _topShows = await _apiService.fetchTopShowsThisYear();
+      final s1 = DateTime.now();
+      if (kDebugMode) {
+        debugPrint(
+          'LOAD ← topShows ok  Δ=${s1.difference(s0).inMilliseconds}ms',
+        );
+      }
     } catch (e) {
-      debugPrint('Error loading top shows: $e');
+      final s1 = DateTime.now();
+      debugPrint(
+        'LOAD ← topShows ERR Δ=${s1.difference(s1).inMilliseconds}ms  $e',
+      );
     } finally {
       _isLoadingTopShows = false;
       notifyListeners();

@@ -23,10 +23,15 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  bool _kickoffDone = false;
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (_kickoffDone) return;
+      _kickoffDone = true;
+
       final podcastProvider = context.read<PodcastProvider>();
       final episodeProvider = context.read<EpisodeProvider>();
 
