@@ -8,6 +8,16 @@
 * DI/Provider: `AppDatabase`, `SubscriptionsDao`, Provider in `main.dart` registriert.
 * Settings/Retention: UI im Download-Panel; `DownloadService` nutzt `RetentionDao` nach `complete`.
 
+# Persistenzrichtlinie
+
+| Kategorie                                                                                          | Empfohlene Persistenz                | Begründung                                                              |
+| -------------------------------------------------------------------------------------------------- | ------------------------------------ | ----------------------------------------------------------------------- |
+| **App-Einstellungen**<br>(Sprache, Theme, Wiedergabegeschwindigkeit, Auto-Downloads, App-ID u. ä.) | `SharedPreferences`                  | leichtgewichtig, sofort verfügbar, kein Overhead, keine Migration nötig |
+| **Temporäre Caches**<br>(Podcast-Listen, letzte Suchergebnisse)                                    | `SharedPreferences` oder Datei-Cache | wenige KB, kein Querying erforderlich                                   |
+| **Strukturierte Daten**<br>(Downloads, Episoden, Queues, Hosts, etc.)                              | lokale DB (Drift / Isar / SQLite)    | komplexe Abfragen, Joins, Indizes, große Mengen                         |
+| **Netzwerk-Synchronisation**<br>(nur optional)                                                     | Supabase / API                       | nur, wenn Remote-Sync oder Telemetrie gewünscht                         |
+
+
 # Arbeitsprinzipien
 
 * **Minimal ändern, Original bewahren.**
@@ -29,6 +39,7 @@
 * **Sprechende Namen** (z. B. `episodeForPlay`).
 * **Debug-freundlich & reversibel:** defensive Reads, keine harten Crashes.
 * **Performance erst messen**, keine premature Optimierung.
+* **Entscheidungsregel:** So weit wie möglich `SharedPreferences` verwenden (App-State, Settings, einfache Caches). Nur wenn Datenstruktur, Größe oder Abfragekomplexität es verlangen → lokale DB (Drift / Isar / SQLite).
 
 # Was ich explizit von dir brauchte / noch brauchen werde
 
