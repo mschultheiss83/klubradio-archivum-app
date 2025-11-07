@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'package:klubradio_archivum/db/daos.dart';
 import 'package:klubradio_archivum/db/app_database.dart' as db;
 import 'package:klubradio_archivum/l10n/app_localizations.dart';
 import 'package:klubradio_archivum/services/api_service.dart';
-
+import 'package:klubradio_archivum/providers/podcast_provider.dart';
 import 'package:klubradio_archivum/models/episode.dart';
 import 'package:klubradio_archivum/models/podcast.dart';
-import 'package:klubradio_archivum/providers/podcast_provider.dart';
 import 'package:klubradio_archivum/screens/widgets/stateful/episode_list.dart';
 import 'podcast_info_card.dart';
+import 'package:klubradio_archivum/providers/subscription_provider.dart';
 
 class PodcastDetailScreen extends StatefulWidget {
   const PodcastDetailScreen({super.key, required this.podcast});
@@ -24,8 +23,6 @@ class PodcastDetailScreen extends StatefulWidget {
 class _PodcastDetailScreenState extends State<PodcastDetailScreen> {
   late Future<List<Episode>> _episodesFuture;
 
-  bool _subscribeBusy = false; // Busy-Guard für AppBar-Button
-
   @override
   void initState() {
     super.initState();
@@ -37,50 +34,59 @@ class _PodcastDetailScreenState extends State<PodcastDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final provider = context.watch<PodcastProvider>();
-    final subsDao = context.read<SubscriptionsDao>();
+    final subscriptionProvider = context.watch<SubscriptionProvider>();
 
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.podcast.title),
         actions: [
           StreamBuilder<db.Subscription?>(
-            stream: subsDao.watchOne(widget.podcast.id),
+            stream: subscriptionProvider.watchSubscription(widget.podcast.id),
             builder: (context, snapshot) {
-              final bool isSubscribed =
-                  snapshot.data?.active ??
-                  provider.isSubscribed(widget.podcast.id);
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Padding(
+                  padding: EdgeInsets.only(right: 8.0),
+                  child: SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                );
+              }
+              final bool isSubscribed = snapshot.data?.active ?? false;
 
               return Padding(
                 padding: const EdgeInsets.only(right: 8),
                 child: FilledButton.icon(
-                  onPressed: _subscribeBusy
+                  onPressed: subscriptionProvider.busy
                       ? null
                       : () async {
-                          setState(() => _subscribeBusy = true);
                           final snack = ScaffoldMessenger.of(context);
                           try {
-                            await subsDao.toggleSubscribe(
-                              podcastId: widget.podcast.id,
-                              active: !isSubscribed,
-                            );
+                            await subscriptionProvider.toggleSubscription(
+                                widget.podcast.id, isSubscribed);
 
                             snack.showSnackBar(
                               SnackBar(
                                 content: Text(
                                   !isSubscribed
                                       ? l10n.podcastDetailScreenSubscribeSuccess
-                                      : l10n.podcastDetailScreenUnsubscribeSuccess,
+                                      : l10n
+                                          .podcastDetailScreenUnsubscribeSuccess,
                                 ),
                               ),
                             );
-                          } catch (_) {
-                            // optional: Fehler-Toast
-                          } finally {
-                            if (mounted) setState(() => _subscribeBusy = false);
+                          } catch (e) {
+                            snack.showSnackBar(
+                              SnackBar(
+                                content: Text(l10n.podcastDetailScreenSubscribeError),
+                                backgroundColor:
+                                    Theme.of(context).colorScheme.error,
+                              ),
+                            );
                           }
                         },
-                  icon: _subscribeBusy
+                  icon: subscriptionProvider.busy
                       ? const SizedBox(
                           width: 18,
                           height: 18,

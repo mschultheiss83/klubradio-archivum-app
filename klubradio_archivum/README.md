@@ -15,6 +15,7 @@ Get-ChildItem -Path .\lib -Filter *.dart* -Recurse | ForEach-Object { $_.FullNam
 ```
 flutter pub add background_downloader cupertino_icons drift hive hive_flutter html http image intl just_audio just_audio_windows markdown_widget package_info_plus path path_provider permission_handler provider shared_preferences sqlite3_flutter_libs url_launcher xml
 flutter pub add --dev build_runner change_app_package_name drift_dev flutter_lints intl_translation
+flutter pub add uuid device_info_plus
 
 flutter pub get
 ```

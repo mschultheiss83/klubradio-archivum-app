@@ -13,6 +13,7 @@
 		- podcast_provider.dart
 		- episode.provider.dart
 		- theme_provider.dart
+		- subscription_provider.dart
 	- screens/
 		- discover_screen/
 			- discover_screen.dart

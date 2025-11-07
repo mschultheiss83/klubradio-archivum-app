@@ -450,8 +450,10 @@
     "description": "Fehlermeldung, wenn ein aus einer Liste ausgewählter Podcast nicht abgerufen werden kann."
   },
 
+  "podcastListItem_unsubscribe": "Abo beenden",
   "podcastListItem_subscribed": "Abonniert",
   "podcastListItem_subscribe": "Abonnieren",
+  "podcastListItem_unsubscribed": "Abo beendet",
   "podcastListItem_subtitleFallback": "Klubrádió-Sendung",
   "podcastListItem_openDetails": "Podcastdetails öffnen",
 
@@ -488,5 +490,17 @@
   "settings_delete_after_heard_label": "Nach „gehört” in x Stunden löschen",
   "settings_delete_after_hours": "Löschen nach (Stunden)",
   "settings_delete_after_hint": "Nach dem Anhören automatisch nach x Stunden entfernen.",
-  "settings_zero_off": "0 = AUS"
+  "settings_zero_off": "0 = AUS",
+
+  "profileScreenNoRecentlyPlayed": "Noch nichts kürzlich gehört.",
+  "profileScreenSubscriptionsTitle": "Abonnierte Sendungen",
+  "profileScreenAppIdTitle": "App-ID",
+  "profileScreenIdCopied": "ID kopiert",
+  "profileScreenPlaybackSpeedTitle": "Wiedergabegeschwindigkeit",
+  "profileScreenPlaybackSpeedValue": "{value}×",
+  "commonOk": "OK",
+  "commonCancel": "Abbrechen",
+  "commonCount": "Anzahl",
+  "commonDone": "Fertig"
+
 }

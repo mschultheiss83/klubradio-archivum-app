@@ -10,7 +10,8 @@ environment:
 dependencies:
   background_downloader: ^9.2.6
   cupertino_icons: ^1.0.8
-  drift: ^2.28.2
+  device_info_plus: ^12.1.0
+  drift: ^2.29.0
   flutter:
     sdk: flutter
   flutter_localizations:
@@ -32,12 +33,13 @@ dependencies:
   shared_preferences: ^2.5.3
   sqlite3_flutter_libs: ^0.5.40
   url_launcher: ^6.3.2
+  uuid: ^4.5.1
   xml: ^6.6.1
 
 dev_dependencies:
   build_runner: ^2.9.0
   change_app_package_name: ^1.5.0
-  drift_dev: ^2.28.3
+  drift_dev: ^2.29.0
   flutter_lints: ^6.0.0
   flutter_test:
     sdk: flutter

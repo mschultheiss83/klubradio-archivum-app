@@ -188,6 +188,12 @@ class _CompletedDownloads extends StatelessWidget {
                     ? readEpisodeFromCacheJson(ep.cachedMetaPath!)
                     : Future.value(null),
                 builder: (context, snap) {
+                  if (snap.connectionState == ConnectionState.waiting) {
+                    return const CircularProgressIndicator(); // Or any other loading indicator
+                  }
+                  if (snap.hasError) {
+                    return Text('Error: ${snap.error}'); // Show error message
+                  }
                   final l10n = AppLocalizations.of(context)!;
                   final showDate =
                       snap.data?.showDate ?? ''; // bereits formatiert
@@ -390,6 +396,13 @@ class _DownloadButton extends StatelessWidget {
     return StreamBuilder<Episode?>(
       stream: stream,
       builder: (context, snap) {
+        if (snap.connectionState == ConnectionState.waiting) {
+          return const SizedBox(
+            width: 24,
+            height: 24,
+            child: CircularProgressIndicator(strokeWidth: 2),
+          );
+        }
         final row = snap.data;
         final status =
             row?.status ??

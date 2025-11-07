@@ -8,61 +8,34 @@ import 'package:klubradio_archivum/l10n/app_localizations.dart';
 import 'package:klubradio_archivum/screens/podcast_detail_screen/podcast_detail_screen.dart';
 
 class SubscriptionsPanel extends StatelessWidget {
-  const SubscriptionsPanel({super.key});
+  const SubscriptionsPanel({super.key, required this.podcasts});
+
+  final List<Podcast> podcasts;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    return StreamBuilder<List<db.Subscription>>(
-      stream: context.read<SubscriptionsDao>().watchAllActive(),
-      builder: (context, subsSnap) {
-        if (!subsSnap.hasData) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        final subs = subsSnap.data!;
-        if (subs.isEmpty) {
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: Text(
-              l10n.homeScreenSubscribedPodcastsEmptyHint,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.outline,
-              ),
-            ),
-          );
-        }
-
-        final ids = subs.map((s) => s.podcastId).toList();
-        return FutureBuilder<List<Podcast?>>(
-          future: Future.wait(
-            ids.map(
-              (id) => context.read<PodcastProvider>().fetchPodcastById(id),
-            ),
+    if (podcasts.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 8),
+        child: Text(
+          l10n.homeScreenSubscribedPodcastsEmptyHint,
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            color: Theme.of(context).colorScheme.outline,
           ),
-          builder: (context, podSnap) {
-            if (podSnap.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            final pods = (podSnap.data ?? const <Podcast?>[])
-                .whereType<Podcast>()
-                .toList();
-            if (pods.isEmpty) {
-              return Text(l10n.errorParsingData);
-            }
+        ),
+      );
+    }
 
-            return ListView.separated(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: pods.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 8),
-              itemBuilder: (context, i) {
-                final p = pods[i];
-                return _PodcastTile(podcast: p);
-              },
-            );
-          },
-        );
+    return ListView.separated(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: podcasts.length,
+      separatorBuilder: (_, __) => const SizedBox(height: 8),
+      itemBuilder: (context, i) {
+        final p = podcasts[i];
+        return _PodcastTile(podcast: p);
       },
     );
   }

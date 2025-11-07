@@ -451,7 +451,9 @@
   },
 
   "podcastListItem_subscribed": "Subscribed",
+  "podcastListItem_unsubscribe": "Unsubscribe",
   "podcastListItem_subscribe": "Subscribe",
+  "podcastListItem_unsubscribed": "Unsubscribed",
   "podcastListItem_subtitleFallback": "Klubrádió show",
   "podcastListItem_openDetails": "Open podcast details",
 
@@ -488,6 +490,17 @@
   "settings_delete_after_heard_label": "Delete x hours after listened",
   "settings_delete_after_hours": "Delete after (hours)",
   "settings_delete_after_hint": "Automatically remove x hours after playback.",
-  "settings_zero_off": "0 = OFF"
+  "settings_zero_off": "0 = OFF",
+
+  "profileScreenNoRecentlyPlayed": "No recently played episodes yet.",
+  "profileScreenSubscriptionsTitle": "Subscribed shows",
+  "profileScreenAppIdTitle": "App ID",
+  "profileScreenIdCopied": "ID copied",
+  "profileScreenPlaybackSpeedTitle": "Playback speed",
+  "profileScreenPlaybackSpeedValue": "{value}×",
+  "commonOk": "OK",
+  "commonCancel": "Cancel",
+  "commonCount": "Count",
+  "commonDone": "Fertig"
 
 }

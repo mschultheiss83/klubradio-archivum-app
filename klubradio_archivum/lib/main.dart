@@ -19,6 +19,7 @@ import 'services/api_service.dart';
 import 'services/audio_player_service.dart';
 import 'screens/app_shell/app_shell.dart';
 import 'providers/profile_provider.dart';
+import 'package:klubradio_archivum/providers/subscription_provider.dart';
 import 'repositories/profile_repository.dart';
 
 Future<void> main() async {
@@ -66,6 +67,10 @@ class _KlubradioArchivumAppState extends State<KlubradioArchivumApp> {
         ),
         Provider<SubscriptionsDao>(
           create: (ctx) => SubscriptionsDao(ctx.read<AppDatabase>()),
+        ),
+        ChangeNotifierProvider<SubscriptionProvider>(
+          create: (ctx) =>
+              SubscriptionProvider(subscriptionsDao: ctx.read<SubscriptionsDao>()),
         ),
         // Repository layer for podcasts
         Provider<PodcastRepository>(

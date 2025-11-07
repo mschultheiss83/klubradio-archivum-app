@@ -86,6 +86,9 @@ class ProfileScreen extends StatelessWidget {
         StreamBuilder<List<db.Subscription>>(
           stream: context.read<SubscriptionsDao>().watchAllActive(),
           builder: (context, subsSnap) {
+            if (subsSnap.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
             final subs = subsSnap.data ?? const <db.Subscription>[];
             if (subs.isEmpty) {
               return Padding(
@@ -107,7 +110,21 @@ class ProfileScreen extends StatelessWidget {
                   (id) => context.read<PodcastProvider>().fetchPodcastById(id),
                 ),
               ),
-              builder: (context, _) => const SubscriptionsPanel(),
+              builder: (context, podSnap) {
+                if (podSnap.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (podSnap.hasError) {
+                  return Center(child: Text('Error: ${podSnap.error}'));
+                }
+                final pods = (podSnap.data ?? const <Podcast?>[])
+                    .whereType<Podcast>()
+                    .toList();
+                if (pods.isEmpty) {
+                  return const SizedBox.shrink();
+                }
+                return SubscriptionsPanel(podcasts: pods);
+              },
             );
           },
         ),

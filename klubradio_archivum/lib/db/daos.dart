@@ -52,7 +52,7 @@ class SubscriptionsDao extends DatabaseAccessor<AppDatabase>
       await into(subscriptions).insert(
         SubscriptionsCompanion.insert(
           podcastId: podcastId,
-          active: const Value(true),
+          active: Value(active ?? true),
           autoDownloadN: Value(autoDownloadN),
         ),
       );
