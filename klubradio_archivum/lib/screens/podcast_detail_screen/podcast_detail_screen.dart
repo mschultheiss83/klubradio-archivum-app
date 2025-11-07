@@ -64,24 +64,30 @@ class _PodcastDetailScreenState extends State<PodcastDetailScreen> {
                           final snack = ScaffoldMessenger.of(context);
                           try {
                             await subscriptionProvider.toggleSubscription(
-                                widget.podcast.id, isSubscribed);
+                              widget.podcast.id,
+                              isSubscribed,
+                            );
 
                             snack.showSnackBar(
                               SnackBar(
                                 content: Text(
                                   !isSubscribed
                                       ? l10n.podcastDetailScreenSubscribeSuccess
-                                      : l10n
-                                          .podcastDetailScreenUnsubscribeSuccess,
+                                      : l10n.podcastDetailScreenUnsubscribeSuccess,
                                 ),
                               ),
                             );
                           } catch (e) {
                             snack.showSnackBar(
                               SnackBar(
-                                content: Text(l10n.podcastDetailScreenSubscribeError),
-                                backgroundColor:
-                                    Theme.of(context).colorScheme.error,
+                                content: Text(
+                                  l10n.podcastDetailScreenErrorMessage(
+                                    e.toString(),
+                                  ),
+                                ),
+                                backgroundColor: Theme.of(
+                                  context,
+                                ).colorScheme.error,
                               ),
                             );
                           }

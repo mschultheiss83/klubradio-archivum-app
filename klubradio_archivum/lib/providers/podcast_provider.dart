@@ -10,15 +10,20 @@ import '../screens/utils/constants.dart' as constants;
 import '../services/api_service.dart';
 import '../providers/download_provider.dart';
 
+import '../providers/profile_provider.dart';
+
 class PodcastProvider extends ChangeNotifier {
   PodcastProvider({
     required ApiService apiService,
     required DownloadProvider downloadProvider,
+    required ProfileProvider profileProvider,
   }) : _apiService = apiService,
-       _downloadProvider = downloadProvider;
+       _downloadProvider = downloadProvider,
+       _profileProvider = profileProvider;
 
   ApiService _apiService;
   DownloadProvider _downloadProvider;
+  ProfileProvider _profileProvider;
 
   final Map<String, List<Episode>> _episodesByPodcast =
       <String, List<Episode>>{};
@@ -57,12 +62,16 @@ class PodcastProvider extends ChangeNotifier {
   void updateDependencies(
     ApiService apiService,
     DownloadProvider downloadProvider,
+    ProfileProvider profileProvider,
   ) {
     if (!identical(_apiService, apiService)) {
       _apiService = apiService;
     }
     if (!identical(_downloadProvider, downloadProvider)) {
       _downloadProvider = downloadProvider;
+    }
+    if (!identical(_profileProvider, profileProvider)) {
+      _profileProvider = profileProvider;
     }
   }
 
@@ -259,18 +268,9 @@ class PodcastProvider extends ChangeNotifier {
     }
   }
 
-  void addRecentlyPlayed(Episode episode) {
-    final profile = _userProfile;
-    if (profile == null) return;
-
-    final updated = List<Episode>.from(profile.recentlyPlayed);
-    updated.removeWhere((e) => e.id == episode.id);
-    updated.insert(0, episode);
-    if (updated.length > constants.maxRecentlyPlayed) {
-      updated.removeLast();
-    }
-    _userProfile = profile.copyWith(recentlyPlayed: updated);
-    notifyListeners();
+  Future<void> addRecentlyPlayed(Episode episode) async {
+    await _profileProvider.addRecentlyPlayed(episode);
+    notifyListeners(); // Notify listeners in PodcastProvider as well, if needed for UI updates
   }
 
   void toggleFavourite(Episode episode) {

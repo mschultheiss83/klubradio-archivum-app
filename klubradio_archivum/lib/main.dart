@@ -103,27 +103,30 @@ class _KlubradioArchivumAppState extends State<KlubradioArchivumApp> {
         ChangeNotifierProvider<ThemeProvider>(create: (_) => ThemeProvider()),
 
         // PodcastProvider depends on ApiService + DownloadService
-        ChangeNotifierProxyProvider2<
+        ChangeNotifierProxyProvider3<
           ApiService,
           DownloadProvider,
+          ProfileProvider,
           PodcastProvider
         >(
           create: (context) => PodcastProvider(
             apiService: context.read<ApiService>(),
-            downloadProvider: context
-                .read<DownloadProvider>(), // NEU: Param-Name anpassen
+            downloadProvider: context.read<DownloadProvider>(),
+            profileProvider: context.read<ProfileProvider>(),
           ),
-          update: (context, api, dlProv, previous) {
+          update: (context, api, dlProv, profileProv, previous) {
             if (previous != null) {
               previous.updateDependencies(
                 api,
-                dlProv, // NEU
+                dlProv,
+                profileProv,
               );
               return previous;
             }
             return PodcastProvider(
               apiService: api,
-              downloadProvider: dlProv, // NEU
+              downloadProvider: dlProv,
+              profileProvider: profileProv,
             );
           },
         ),

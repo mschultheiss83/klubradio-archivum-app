@@ -1,6 +1,7 @@
 // lib/providers/profile_provider.dart
 import 'package:flutter/foundation.dart';
 import '../models/user_profile.dart';
+import '../models/episode.dart';
 import '../repositories/profile_repository.dart';
 
 class ProfileProvider extends ChangeNotifier {
@@ -59,7 +60,15 @@ class ProfileProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> addRecentlyPlayed(List<String> newestEpisodeIds) async {
-    // TODO: implementieren, wenn ihr die Episode-Objekte hier managen wollt
+  Future<void> addRecentlyPlayed(Episode episode) async {
+    final updated = List<Episode>.from(profile.recentlyPlayed);
+    updated.removeWhere((e) => e.id == episode.id);
+    updated.insert(0, episode);
+    if (updated.length > 10) { // Assuming a max of 10 recently played episodes
+      updated.removeLast();
+    }
+    _profile = profile.copyWith(recentlyPlayed: updated);
+    await _repo.save(profile);
+    notifyListeners();
   }
 }
