@@ -59,7 +59,10 @@ class _KlubradioArchivumAppState extends State<KlubradioArchivumApp> {
           dispose: (_, ApiService service) => service.dispose(),
         ),
         ChangeNotifierProvider<DownloadProvider>(
-          create: (_) => DownloadProvider(db: db),
+          create: (ctx) => DownloadProvider(
+            db: ctx.read<AppDatabase>(),
+            episodeProvider: ctx.read<EpisodeProvider>(),
+          ),
         ),
         Provider<AudioPlayerService>(
           create: (_) => AudioPlayerService(),

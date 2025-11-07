@@ -12,18 +12,23 @@ import '../providers/download_provider.dart';
 
 import '../providers/profile_provider.dart';
 
+import '../services/api_cache_service.dart';
+
 class PodcastProvider extends ChangeNotifier {
   PodcastProvider({
     required ApiService apiService,
     required DownloadProvider downloadProvider,
     required ProfileProvider profileProvider,
+    required ApiCacheService apiCacheService,
   }) : _apiService = apiService,
        _downloadProvider = downloadProvider,
-       _profileProvider = profileProvider;
+       _profileProvider = profileProvider,
+       _apiCacheService = apiCacheService;
 
   ApiService _apiService;
   DownloadProvider _downloadProvider;
   ProfileProvider _profileProvider;
+  ApiCacheService _apiCacheService;
 
   final Map<String, List<Episode>> _episodesByPodcast =
       <String, List<Episode>>{};
@@ -63,6 +68,7 @@ class PodcastProvider extends ChangeNotifier {
     ApiService apiService,
     DownloadProvider downloadProvider,
     ProfileProvider profileProvider,
+    ApiCacheService apiCacheService,
   ) {
     if (!identical(_apiService, apiService)) {
       _apiService = apiService;
@@ -72,6 +78,9 @@ class PodcastProvider extends ChangeNotifier {
     }
     if (!identical(_profileProvider, profileProvider)) {
       _profileProvider = profileProvider;
+    }
+    if (!identical(_apiCacheService, apiCacheService)) {
+      _apiCacheService = apiCacheService;
     }
   }
 

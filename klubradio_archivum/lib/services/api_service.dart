@@ -9,9 +9,12 @@ import '../models/show_host.dart';
 import '../models/user_profile.dart';
 import '../screens/utils/constants.dart' as constants;
 
+import 'package:klubradio_archivum/services/api_cache_service.dart';
+
 class ApiService {
-  ApiService({http.Client? httpClient})
-    : _httpClient = httpClient ?? http.Client();
+  ApiService({http.Client? httpClient, ApiCacheService? cacheService})
+    : _httpClient = httpClient ?? http.Client(),
+      _cacheService = cacheService ?? ApiCacheService();
 
   // === Supabase ===
   static const String _supabaseUrl = 'https://arakbotxgwpyyqyxjhhl.supabase.co';
@@ -26,6 +29,7 @@ class ApiService {
   static const Duration _longTimeout = Duration(minutes: 1);
 
   final http.Client _httpClient;
+  final ApiCacheService _cacheService;
 
   bool get hasValidCredentials =>
       !_supabaseUrl.contains('TODO') && !_supabaseKey.contains('TODO');
@@ -40,6 +44,15 @@ class ApiService {
   // =================== PODCAST LISTS ===================
 
   Future<List<Podcast>> fetchLatestPodcasts({int limit = 10}) async {
+    const String cacheKey = 'latest_podcasts';
+    final cachedData = await _cacheService.get(cacheKey);
+    if (cachedData != null) {
+      return (cachedData as List)
+          .whereType<Map<String, dynamic>>()
+          .map(Podcast.fromJson)
+          .toList();
+    }
+
     if (!hasValidCredentials) return _mockPodcasts();
 
     final uri = Uri.parse('$_supabaseUrl/rest/v1/${constants.podcastsTable}')
@@ -56,6 +69,7 @@ class ApiService {
 
     if (res.statusCode >= 200 && res.statusCode < 300) {
       final data = jsonDecode(res.body) as List<dynamic>;
+      await _cacheService.save(cacheKey, data, expiry: const Duration(hours: 3));
       return data
           .whereType<Map<String, dynamic>>()
           .map(Podcast.fromJson)
@@ -68,6 +82,16 @@ class ApiService {
   }
 
   Future<List<Podcast>> fetchTrendingPodcasts({int limit = 10}) async {
+    const String cacheKey = 'trending_podcasts';
+    final cachedData = await _cacheService.get(cacheKey);
+    if (cachedData != null) {
+      return (cachedData as List)
+          .whereType<Map<String, dynamic>>()
+          .map(Podcast.fromJson)
+          .map((p) => p.copyWith(isTrending: true))
+          .toList();
+    }
+
     if (!hasValidCredentials) {
       return _mockPodcasts()
           .take(limit)
@@ -87,6 +111,7 @@ class ApiService {
 
     if (res.statusCode >= 200 && res.statusCode < 300) {
       final data = jsonDecode(res.body) as List<dynamic>;
+      await _cacheService.save(cacheKey, data, expiry: const Duration(hours: 3));
       return data
           .whereType<Map<String, dynamic>>()
           .map(Podcast.fromJson)
@@ -98,6 +123,16 @@ class ApiService {
   }
 
   Future<List<Podcast>> fetchRecommendedPodcasts({int limit = 10}) async {
+    const String cacheKey = 'recommended_podcasts';
+    final cachedData = await _cacheService.get(cacheKey);
+    if (cachedData != null) {
+      return (cachedData as List)
+          .whereType<Map<String, dynamic>>()
+          .map(Podcast.fromJson)
+          .map((p) => p.copyWith(isRecommended: true))
+          .toList();
+    }
+
     if (!hasValidCredentials) {
       return _mockPodcasts()
           .take(limit)
@@ -120,6 +155,7 @@ class ApiService {
 
     if (res.statusCode >= 200 && res.statusCode < 300) {
       final data = jsonDecode(res.body) as List<dynamic>;
+      await _cacheService.save(cacheKey, data, expiry: const Duration(hours: 3));
       return data
           .whereType<Map<String, dynamic>>()
           .map(Podcast.fromJson)
@@ -136,6 +172,16 @@ class ApiService {
     String podcastId, {
     int limit = 500,
   }) async {
+    final String cacheKey = 'episodes_for_podcast_$podcastId';
+    // Try to get from cache first
+    final cachedData = await _cacheService.get(cacheKey);
+    if (cachedData != null) {
+      return (cachedData as List)
+          .whereType<Map<String, dynamic>>()
+          .map(Episode.fromJson)
+          .toList();
+    }
+
     if (!hasValidCredentials)
       return _mockEpisodes(podcastId).take(limit).toList();
 
@@ -151,6 +197,8 @@ class ApiService {
 
     if (res.statusCode >= 200 && res.statusCode < 300) {
       final data = jsonDecode(res.body) as List<dynamic>;
+      // Save to cache with a 2-4 hour expiry (e.g., 3 hours)
+      await _cacheService.save(cacheKey, data, expiry: const Duration(hours: 3));
       return data
           .whereType<Map<String, dynamic>>()
           .map(Episode.fromJson)
@@ -162,6 +210,15 @@ class ApiService {
   }
 
   Future<List<Episode>> fetchRecentEpisodes({int limit = 8}) async {
+    const String cacheKey = 'recent_episodes';
+    final cachedData = await _cacheService.get(cacheKey);
+    if (cachedData != null) {
+      return (cachedData as List)
+          .whereType<Map<String, dynamic>>()
+          .map(Episode.fromJson)
+          .toList();
+    }
+
     if (!hasValidCredentials) {
       final mocked = _mockPodcasts().expand((p) => _mockEpisodes(p.id)).toList()
         ..sort((a, b) => b.publishedAt.compareTo(a.publishedAt));
@@ -180,6 +237,7 @@ class ApiService {
 
     if (res.statusCode >= 200 && res.statusCode < 300) {
       final data = jsonDecode(res.body) as List<dynamic>;
+      await _cacheService.save(cacheKey, data, expiry: const Duration(hours: 3));
       return data
           .whereType<Map<String, dynamic>>()
           .map(Episode.fromJson)
@@ -219,6 +277,16 @@ class ApiService {
   }
 
   Future<List<ShowData>> fetchTopShowsThisYear() async {
+    const String cacheKey = 'top_shows_this_year';
+    // Try to get from cache first
+    final cachedData = await _cacheService.get(cacheKey);
+    if (cachedData != null) {
+      return (cachedData as List)
+          .whereType<Map<String, dynamic>>()
+          .map(ShowData.fromJson)
+          .toList();
+    }
+
     if (!hasValidCredentials) {
       final queryResults = [
         {"id": "3", "title": "A lényeg", "count": 8563},
@@ -248,6 +316,8 @@ class ApiService {
 
     if (res.statusCode >= 200 && res.statusCode < 300) {
       final data = jsonDecode(res.body) as List<dynamic>;
+      // Save to cache with a daily expiry
+      await _cacheService.save(cacheKey, data, expiry: const Duration(days: 1));
       return data
           .whereType<Map<String, dynamic>>()
           .map(ShowData.fromJson)
@@ -257,6 +327,12 @@ class ApiService {
   }
 
   Future<Podcast?> fetchPodcastById(String podcastId) async {
+    final String cacheKey = 'podcast_by_id_$podcastId';
+    final cachedData = await _cacheService.get(cacheKey);
+    if (cachedData != null) {
+      return Podcast.fromJson(cachedData as Map<String, dynamic>);
+    }
+
     final uri = Uri.parse('$_supabaseUrl/rest/v1/${constants.podcastsTable}')
         .replace(
           queryParameters: {'select': '*', 'id': 'eq.$podcastId', 'limit': '1'},
@@ -268,6 +344,7 @@ class ApiService {
     if (res.statusCode >= 200 && res.statusCode < 300) {
       final data = jsonDecode(res.body) as List<dynamic>;
       if (data.isNotEmpty) {
+        await _cacheService.save(cacheKey, data.first, expiry: const Duration(hours: 3));
         return Podcast.fromJson(data.first as Map<String, dynamic>);
       }
     }
@@ -277,6 +354,12 @@ class ApiService {
   // =================== USER / TELEMETRY ===================
 
   Future<UserProfile> fetchUserProfile(String userId) async {
+    final String cacheKey = 'user_profile_$userId';
+    final cachedData = await _cacheService.get(cacheKey);
+    if (cachedData != null) {
+      return UserProfile.fromJson(cachedData as Map<String, dynamic>);
+    }
+
     if (!hasValidCredentials) {
       final podcasts = _mockPodcasts();
       final episodes = podcasts.expand((p) => _mockEpisodes(p.id)).toList();
@@ -302,6 +385,7 @@ class ApiService {
     if (res.statusCode >= 200 && res.statusCode < 300) {
       final data = jsonDecode(res.body) as List<dynamic>;
       if (data.isEmpty) throw ApiException('Profile not found for $userId');
+      await _cacheService.save(cacheKey, data.first, expiry: const Duration(hours: 3));
       return UserProfile.fromJson(data.first as Map<String, dynamic>);
     }
     throw ApiException('Unable to fetch user profile ($userId)');

@@ -16,6 +16,7 @@ class SubscriptionProvider extends ChangeNotifier {
   }
 
   Future<void> toggleSubscription(String podcastId, bool isSubscribed) async {
+    debugPrint('toggleSubscription: podcastId=$podcastId, isSubscribed=$isSubscribed, busy=true');
     _busy = true;
     notifyListeners();
     try {
@@ -23,9 +24,14 @@ class SubscriptionProvider extends ChangeNotifier {
         podcastId: podcastId,
         active: !isSubscribed,
       );
+      debugPrint('toggleSubscription: subscriptionsDao.toggleSubscribe completed');
+    } catch (e) {
+      debugPrint('toggleSubscription: Error: $e');
+      rethrow; // Re-throw the error so it can be caught by the UI
     } finally {
       _busy = false;
       notifyListeners();
+      debugPrint('toggleSubscription: busy=false, notifyListeners called');
     }
   }
 }

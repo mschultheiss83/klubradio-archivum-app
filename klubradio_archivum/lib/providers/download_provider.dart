@@ -8,9 +8,11 @@ import 'package:klubradio_archivum/db/app_database.dart';
 import 'package:klubradio_archivum/db/daos.dart';
 import 'package:klubradio_archivum/services/download_service.dart';
 
+import '../providers/episode_provider.dart';
+
 /// Einfacher ChangeNotifier-Provider rund um den DownloadService.
 class DownloadProvider extends ChangeNotifier {
-  DownloadProvider({required AppDatabase db})
+  DownloadProvider({required AppDatabase db, required EpisodeProvider episodeProvider})
     : episodesDao = EpisodesDao(db),
       subscriptionsDao = SubscriptionsDao(db),
       settingsDao = SettingsDao(db),
@@ -26,6 +28,7 @@ class DownloadProvider extends ChangeNotifier {
       subscriptionsDao: subscriptionsDao,
       settingsDao: settingsDao,
       retentionDao: retentionDao,
+      episodeProvider: episodeProvider,
     );
     // init bewusst nicht awaiten – der Service wartet intern auf _ready
     unawaited(service.init());

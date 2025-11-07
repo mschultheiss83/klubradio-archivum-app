@@ -103,21 +103,29 @@ class EpisodeProvider extends ChangeNotifier {
 
     _currentEpisode = episodeForPlay;
 
-    try {
-      final subsDao = daos.SubscriptionsDao(_db);
-      final sub = await subsDao.getById(episodeForPlay.podcastId);
-      if (sub == null || sub.active == false) {
-        await subsDao.toggleSubscribe(
-          podcastId: episodeForPlay.podcastId,
-          active: true,
-        );
-      }
-    } catch (_) {
-      // still: Abo ist „nice-to-have“, Playback darf nicht blockieren
-    }
+
 
     await _audioPlayerService.loadEpisode(episodeForPlay);
     notifyListeners();
+  }
+
+  Future<void> onEpisodeDownloaded(String episodeId, String localPath) async {
+    if (_currentEpisode?.id == episodeId) {
+      // If the downloaded episode is currently playing
+      final currentPosition = _audioPlayerService.currentPosition;
+      await _audioPlayerService.stop(); // Stop playback
+
+      // Update _currentEpisode to point to the local path
+      _currentEpisode = _currentEpisode!.copyWith(localFilePath: localPath);
+
+      // Reload episode and resume playback from local
+      await _audioPlayerService.loadEpisode(_currentEpisode!);
+      if (currentPosition != null) {
+        await _audioPlayerService.seek(currentPosition);
+      }
+      await _audioPlayerService.play();
+      notifyListeners();
+    }
   }
 
   /// Jumps the playback position relative to the current position.

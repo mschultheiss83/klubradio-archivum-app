@@ -83,6 +83,8 @@ class EpisodeStatusDB {
   static const canceled = 5;
 }
 
+import 'package:klubradio_archivum/providers/episode_provider.dart';
+
 class DownloadService {
   DownloadService({
     required this.db,
@@ -90,6 +92,7 @@ class DownloadService {
     required this.subscriptionsDao,
     required this.settingsDao,
     required this.retentionDao,
+    required this.episodeProvider,
   });
 
   final AppDatabase db;
@@ -97,6 +100,7 @@ class DownloadService {
   final SubscriptionsDao subscriptionsDao;
   final SettingsDao settingsDao;
   final RetentionDao retentionDao;
+  final EpisodeProvider episodeProvider;
 
   late FileDownloader _downloader;
   StreamSubscription<TaskUpdate>? _sub;
@@ -294,6 +298,8 @@ class DownloadService {
                 await removeLocalFile(id);
               }
             }
+            // Notify EpisodeProvider that the episode has been downloaded
+            episodeProvider.onEpisodeDownloaded(episodeId, localPath);
             break;
           }
         default:
