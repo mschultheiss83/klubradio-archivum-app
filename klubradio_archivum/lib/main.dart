@@ -15,6 +15,7 @@ import 'providers/podcast_provider.dart';
 import 'providers/latest_provider.dart';
 import 'providers/theme_provider.dart';
 import 'providers/recommended_provider.dart';
+import 'services/api_cache_service.dart';
 import 'services/api_service.dart';
 import 'services/audio_player_service.dart';
 import 'screens/app_shell/app_shell.dart';
@@ -58,22 +59,48 @@ class _KlubradioArchivumAppState extends State<KlubradioArchivumApp> {
           create: (_) => ApiService(),
           dispose: (_, ApiService service) => service.dispose(),
         ),
+        Provider<ApiCacheService>(create: (_) => ApiCacheService()),
+        Provider<AudioPlayerService>(
+          create: (_) => AudioPlayerService(),
+          dispose: (_, AudioPlayerService service) => service.dispose(),
+        ),
+        // EpisodeProvider depends on ApiService + AudioPlayerService
+        ChangeNotifierProxyProvider3<
+          ApiService,
+          AudioPlayerService,
+          AppDatabase,
+          EpisodeProvider
+        >(
+          create: (context) => EpisodeProvider(
+            apiService: context.read<ApiService>(),
+            audioPlayerService: context.read<AudioPlayerService>(),
+            db: context.read<AppDatabase>(),
+          ),
+          update: (context, api, audio, db, previous) {
+            if (previous != null) {
+              previous.updateDependencies(api, audio, db);
+              return previous;
+            }
+            return EpisodeProvider(
+              apiService: api,
+              audioPlayerService: audio,
+              db: db,
+            );
+          },
+        ),
         ChangeNotifierProvider<DownloadProvider>(
           create: (ctx) => DownloadProvider(
             db: ctx.read<AppDatabase>(),
             episodeProvider: ctx.read<EpisodeProvider>(),
           ),
         ),
-        Provider<AudioPlayerService>(
-          create: (_) => AudioPlayerService(),
-          dispose: (_, AudioPlayerService service) => service.dispose(),
-        ),
         Provider<SubscriptionsDao>(
           create: (ctx) => SubscriptionsDao(ctx.read<AppDatabase>()),
         ),
         ChangeNotifierProvider<SubscriptionProvider>(
-          create: (ctx) =>
-              SubscriptionProvider(subscriptionsDao: ctx.read<SubscriptionsDao>()),
+          create: (ctx) => SubscriptionProvider(
+            subscriptionsDao: ctx.read<SubscriptionsDao>(),
+          ),
         ),
         // Repository layer for podcasts
         Provider<PodcastRepository>(
@@ -106,55 +133,29 @@ class _KlubradioArchivumAppState extends State<KlubradioArchivumApp> {
         ChangeNotifierProvider<ThemeProvider>(create: (_) => ThemeProvider()),
 
         // PodcastProvider depends on ApiService + DownloadService
-        ChangeNotifierProxyProvider3<
+        ChangeNotifierProxyProvider4<
           ApiService,
           DownloadProvider,
           ProfileProvider,
+          ApiCacheService,
           PodcastProvider
         >(
           create: (context) => PodcastProvider(
             apiService: context.read<ApiService>(),
             downloadProvider: context.read<DownloadProvider>(),
             profileProvider: context.read<ProfileProvider>(),
+            apiCacheService: context.read<ApiCacheService>(),
           ),
-          update: (context, api, dlProv, profileProv, previous) {
+          update: (context, api, dlProv, profileProv, apiCache, previous) {
             if (previous != null) {
-              previous.updateDependencies(
-                api,
-                dlProv,
-                profileProv,
-              );
+              previous.updateDependencies(api, dlProv, profileProv, apiCache);
               return previous;
             }
             return PodcastProvider(
               apiService: api,
               downloadProvider: dlProv,
               profileProvider: profileProv,
-            );
-          },
-        ),
-
-        // EpisodeProvider depends on ApiService + AudioPlayerService
-        ChangeNotifierProxyProvider3<
-          ApiService,
-          AudioPlayerService,
-          AppDatabase,
-          EpisodeProvider
-        >(
-          create: (context) => EpisodeProvider(
-            apiService: context.read<ApiService>(),
-            audioPlayerService: context.read<AudioPlayerService>(),
-            db: context.read<AppDatabase>(),
-          ),
-          update: (context, api, audio, db, previous) {
-            if (previous != null) {
-              previous.updateDependencies(api, audio, db);
-              return previous;
-            }
-            return EpisodeProvider(
-              apiService: api,
-              audioPlayerService: audio,
-              db: db,
+              apiCacheService: apiCache,
             );
           },
         ),

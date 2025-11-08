@@ -103,8 +103,6 @@ class EpisodeProvider extends ChangeNotifier {
 
     _currentEpisode = episodeForPlay;
 
-
-
     await _audioPlayerService.loadEpisode(episodeForPlay);
     notifyListeners();
   }
@@ -112,7 +110,7 @@ class EpisodeProvider extends ChangeNotifier {
   Future<void> onEpisodeDownloaded(String episodeId, String localPath) async {
     if (_currentEpisode?.id == episodeId) {
       // If the downloaded episode is currently playing
-      final currentPosition = _audioPlayerService.currentPosition;
+      final currentPosition = _currentPosition;
       await _audioPlayerService.stop(); // Stop playback
 
       // Update _currentEpisode to point to the local path
@@ -120,10 +118,8 @@ class EpisodeProvider extends ChangeNotifier {
 
       // Reload episode and resume playback from local
       await _audioPlayerService.loadEpisode(_currentEpisode!);
-      if (currentPosition != null) {
-        await _audioPlayerService.seek(currentPosition);
-      }
-      await _audioPlayerService.play();
+      await _audioPlayerService.seek(currentPosition);
+      await _audioPlayerService.togglePlayPause();
       notifyListeners();
     }
   }

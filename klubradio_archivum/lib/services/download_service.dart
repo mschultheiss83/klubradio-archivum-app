@@ -8,10 +8,10 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:drift/drift.dart' show Value;
 import 'package:background_downloader/background_downloader.dart';
-
 import 'package:klubradio_archivum/db/app_database.dart';
 import 'package:klubradio_archivum/db/daos.dart';
 import 'package:klubradio_archivum/models/episode.dart' as model;
+import 'package:klubradio_archivum/providers/episode_provider.dart';
 
 class _EpisodeMetaLite {
   _EpisodeMetaLite({
@@ -82,8 +82,6 @@ class EpisodeStatusDB {
   static const failed = 4;
   static const canceled = 5;
 }
-
-import 'package:klubradio_archivum/providers/episode_provider.dart';
 
 class DownloadService {
   DownloadService({

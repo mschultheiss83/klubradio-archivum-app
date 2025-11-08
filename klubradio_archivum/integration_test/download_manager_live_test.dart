@@ -10,6 +10,8 @@ import 'package:klubradio_archivum/db/app_database.dart';
 import 'package:klubradio_archivum/db/daos.dart';
 import 'package:klubradio_archivum/services/download_service.dart';
 import 'package:klubradio_archivum/services/api_service.dart';
+import 'package:klubradio_archivum/services/audio_player_service.dart';
+import 'package:klubradio_archivum/providers/episode_provider.dart';
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -62,6 +64,11 @@ void main() {
         subscriptionsDao: subscriptionsDao,
         settingsDao: settingsDao,
         retentionDao: retentionDao,
+        episodeProvider: EpisodeProvider(
+          apiService: api,
+          audioPlayerService: AudioPlayerService(),
+          db: db,
+        ),
       );
       await service.init();
       await settingsDao.ensureDefaults();
