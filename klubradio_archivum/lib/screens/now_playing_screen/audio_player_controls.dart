@@ -78,12 +78,12 @@ class AudioPlayerControls extends StatelessWidget {
 class _SeekOption {
   final String label;
   final Duration delta;
+
   const _SeekOption({required this.label, required this.delta});
 }
 
 class _SeekCluster extends StatelessWidget {
   const _SeekCluster({
-    super.key,
     required this.options,
     required this.canSeek,
     required this.onTap,
@@ -113,7 +113,6 @@ class _SeekCluster extends StatelessWidget {
 
 class _TransportCluster extends StatelessWidget {
   const _TransportCluster({
-    super.key,
     required this.hasPrevious,
     required this.hasNext,
     required this.isPlaying,
@@ -159,11 +158,7 @@ class _TransportCluster extends StatelessWidget {
 }
 
 class _SpeedCluster extends StatelessWidget {
-  const _SpeedCluster({
-    super.key,
-    required this.speed,
-    required this.onChanged,
-  });
+  const _SpeedCluster({required this.speed, required this.onChanged});
 
   final double speed;
   final void Function(double) onChanged;
@@ -193,7 +188,8 @@ class _SpeedCluster extends StatelessWidget {
 }
 
 class _SeekButton extends StatelessWidget {
-  const _SeekButton({required this.label, required this.onPressed, super.key});
+  const _SeekButton({required this.label, required this.onPressed});
+
   final String label;
   final VoidCallback? onPressed;
 
