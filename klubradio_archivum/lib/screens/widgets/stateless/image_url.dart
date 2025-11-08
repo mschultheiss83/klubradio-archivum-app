@@ -85,7 +85,7 @@ class ImageUrl extends StatelessWidget {
           width: w,
           height: h,
           fit: fit,
-          errorBuilder: (ctx, _, __) => fallback(),
+          errorBuilder: (ctx, _, _) => fallback(),
         ),
       );
     }
@@ -117,7 +117,7 @@ class ImageUrl extends StatelessWidget {
           width: w,
           height: h,
           fit: fit,
-          errorBuilder: (ctx, _, __) => fallback(),
+          errorBuilder: (ctx, _, _) => fallback(),
         ),
       );
     }

@@ -1,11 +1,9 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:just_audio/just_audio.dart';
 
 import 'package:klubradio_archivum/db/app_database.dart' as db;
-import 'package:klubradio_archivum/db/daos.dart' as daos;
 import 'package:klubradio_archivum/models/episode.dart' as model;
 import 'package:klubradio_archivum/services/api_service.dart';
 import 'package:klubradio_archivum/services/audio_player_service.dart';
@@ -38,14 +36,17 @@ class EpisodeProvider extends ChangeNotifier {
   StreamSubscription<PlayerState>? _playerStateSubscription;
   StreamSubscription<bool>? _bufferingSubscription;
 
+  final ValueNotifier<Duration> _positionNotifier =
+      ValueNotifier<Duration>(Duration.zero);
+
   model.Episode? _currentEpisode;
   List<model.Episode> _queue = <model.Episode>[];
-  Duration _currentPosition = Duration.zero;
   bool _isBuffering = false;
   double _playbackSpeed = 1.0;
 
   model.Episode? get currentEpisode => _currentEpisode;
-  Duration get currentPosition => _currentPosition;
+  ValueNotifier<Duration> get positionNotifier => _positionNotifier;
+
   bool get isPlaying => _audioPlayerService.isPlaying;
   bool get isBuffering => _isBuffering;
   Duration? get totalDuration => _audioPlayerService.totalDuration;
@@ -110,7 +111,7 @@ class EpisodeProvider extends ChangeNotifier {
   Future<void> onEpisodeDownloaded(String episodeId, String localPath) async {
     if (_currentEpisode?.id == episodeId) {
       // If the downloaded episode is currently playing
-      final currentPosition = _currentPosition;
+      final currentPosition = _positionNotifier.value;
       await _audioPlayerService.stop(); // Stop playback
 
       // Update _currentEpisode to point to the local path
@@ -128,7 +129,7 @@ class EpisodeProvider extends ChangeNotifier {
   /// Use a positive [duration] to seek forward, and a negative one to seek backward.
   Future<void> seekRelative(Duration duration) async {
     // Use the provider's own `_currentPosition` property
-    Duration newPosition = _currentPosition + duration;
+    Duration newPosition = _positionNotifier.value + duration;
 
     // --- Boundary Checks ---
     // Ensure the new position is not negative
@@ -146,8 +147,7 @@ class EpisodeProvider extends ChangeNotifier {
     // --- FIX: Optimistically update the local state ---
     // Update the internal position immediately and notify listeners.
     // This allows consecutive seek calls to work as expected.
-    _currentPosition = newPosition;
-    notifyListeners();
+    _positionNotifier.value = newPosition;
 
     // Now, tell the audio player to perform the actual seek.
     await _audioPlayerService.seek(newPosition);
@@ -217,8 +217,7 @@ class EpisodeProvider extends ChangeNotifier {
   }
 
   void _onPositionChanged(Duration position) {
-    _currentPosition = position;
-    notifyListeners();
+    _positionNotifier.value = position;
   }
 
   void _onPlayerStateChanged(PlayerState state) {
@@ -235,6 +234,7 @@ class EpisodeProvider extends ChangeNotifier {
     await _positionSubscription?.cancel();
     await _playerStateSubscription?.cancel();
     await _bufferingSubscription?.cancel();
+    _positionNotifier.dispose();
     super.dispose();
   }
 }

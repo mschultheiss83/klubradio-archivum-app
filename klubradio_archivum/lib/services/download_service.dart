@@ -12,6 +12,7 @@ import 'package:klubradio_archivum/db/app_database.dart';
 import 'package:klubradio_archivum/db/daos.dart';
 import 'package:klubradio_archivum/models/episode.dart' as model;
 import 'package:klubradio_archivum/providers/episode_provider.dart';
+import 'package:klubradio_archivum/services/api_service.dart';
 
 class _EpisodeMetaLite {
   _EpisodeMetaLite({
@@ -91,6 +92,7 @@ class DownloadService {
     required this.settingsDao,
     required this.retentionDao,
     required this.episodeProvider,
+    required this.apiService,
   });
 
   final AppDatabase db;
@@ -99,9 +101,11 @@ class DownloadService {
   final SettingsDao settingsDao;
   final RetentionDao retentionDao;
   final EpisodeProvider episodeProvider;
+  final ApiService apiService;
 
   late FileDownloader _downloader;
   StreamSubscription<TaskUpdate>? _sub;
+  Timer? _autodownloadTimer;
 
   final Map<String, DownloadTask> _tasksByEpisodeId = {};
   final Map<String, String?> _imageUrlHintByEpisodeId = {};
@@ -112,8 +116,6 @@ class DownloadService {
   static const _relDir = 'Klubradio';
   String _podcastSubdir(String podcastId) => p.join(_relDir, podcastId);
   String _episodeMp3Name(String episodeId) => '$episodeId.mp3';
-  String _episodeJsonName(String episodeId) => '$episodeId.json';
-  String _episodeJpgName(String episodeId) => '$episodeId.jpg';
 
   /// Muss genau einmal aufgerufen werden. Lädt Konfig & startet Eventstream.
   Future<void> init() async {
@@ -129,12 +131,18 @@ class DownloadService {
     _sub = _downloader.updates.listen(_onUpdate, onError: (_) {});
     await _downloader.start();
 
+    _autodownloadTimer = Timer.periodic(
+      const Duration(minutes: 1),
+      (_) => _checkAutodownloads(),
+    );
+
     if (!_ready.isCompleted) _ready.complete();
   }
 
   Future<void> dispose() async {
     _disposed = true;
     await _sub?.cancel();
+    _autodownloadTimer?.cancel();
   }
 
   Future<void> enqueueEpisode(model.Episode ep) async {
@@ -308,20 +316,6 @@ class DownloadService {
     }
   }
 
-  Future<String> _resolveSaveDir() async {
-    if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
-      final dir = await getApplicationSupportDirectory();
-      final path = '${dir.path}/Klubradio';
-      await Directory(path).create(recursive: true);
-      return path;
-    } else {
-      final dir = await getApplicationDocumentsDirectory();
-      final path = '${dir.path}/Klubradio';
-      await Directory(path).create(recursive: true);
-      return path;
-    }
-  }
-
   Future<String> _finalPathForTask(DownloadTask task) async {
     // 1) map BaseDirectory -> echtes Basis-Verzeichnis vom OS
     Directory base;
@@ -360,6 +354,29 @@ class DownloadService {
       }
     }
     await episodesDao.clearLocalFile(episodeId);
+  }
+
+  Future<void> _checkAutodownloads() async {
+    if (_disposed) return;
+    final settings = await settingsDao.getOne();
+    if (settings?.autodownloadSubscribed ?? false) {
+      final activeSubscriptions = await subscriptionsDao.watchAllActive().first;
+      for (final sub in activeSubscriptions) {
+        // Fetch latest episodes for this podcast from the API
+        final latestEpisodes = await apiService.fetchEpisodesForPodcast(sub.podcastId);
+
+        // Get already downloaded episodes for this podcast
+        final downloadedEpisodes = await episodesDao.getEpisodesByPodcastId(sub.podcastId);
+        final downloadedEpisodeIds = downloadedEpisodes.map((e) => e.id).toSet();
+
+        for (final episode in latestEpisodes) {
+          if (!downloadedEpisodeIds.contains(episode.id)) {
+            // This is a new episode, enqueue it for download
+            await enqueueEpisode(episode);
+          }
+        }
+      }
+    }
   }
 
   Future<bool> _checkResumable(String url) async {
@@ -416,63 +433,5 @@ class DownloadService {
     await File(jsonPath).writeAsString(jsonEncode(jsonMap), flush: true);
 
     return (imagePath: imagePath, jsonPath: jsonPath);
-  }
-}
-
-/// Speichert Metadaten (JSON) + skaliertes Cover (max 500x500) neben der MP3.
-/// Gibt (title, imagePath, jsonPath) zurück – nur die tatsächlich geschriebenen Pfade.
-Future<({String? title, String? imagePath, String? jsonPath})>
-_cacheEpisodeAssets({
-  required String episodeId,
-  required String podcastId,
-  required String? title,
-  required String? imageUrl,
-  required String mp3Path, // absoluter Pfad zur MP3
-}) async {
-  try {
-    // Basisverzeichnis = Ordner der MP3
-    final dir = p.dirname(mp3Path);
-
-    // 1) JSON schreiben
-    final jsonPath = p.join(dir, '$episodeId.json');
-    final meta = <String, dynamic>{
-      'id': episodeId,
-      'podcastId': podcastId,
-      'title': title ?? '',
-      'imageUrl': imageUrl ?? '',
-      'createdAt': DateTime.now().toIso8601String(),
-    };
-    await File(jsonPath).writeAsString(jsonEncode(meta), flush: true);
-
-    // 2) Bild laden & auf 500x500 begrenzen
-    String? imagePath;
-    if (imageUrl != null && imageUrl.isNotEmpty) {
-      try {
-        final resp = await http.get(Uri.parse(imageUrl));
-        if (resp.statusCode >= 200 &&
-            resp.statusCode < 300 &&
-            resp.bodyBytes.isNotEmpty) {
-          final decoded = img.decodeImage(resp.bodyBytes);
-          if (decoded != null) {
-            final resized = img.copyResize(
-              decoded,
-              width: 500,
-              height: 500,
-              maintainAspect: true,
-            );
-            final jpg = img.encodeJpg(resized, quality: 85);
-            imagePath = p.join(dir, '$episodeId.jpg');
-            await File(imagePath).writeAsBytes(jpg, flush: true);
-          }
-        }
-      } catch (_) {
-        // Bild ist optional – Fehler hier ignorieren
-      }
-    }
-
-    return (title: title, imagePath: imagePath, jsonPath: jsonPath);
-  } catch (_) {
-    // JSON/Bild sind optional – im Fehlerfall nichts zurückgeben
-    return (title: null, imagePath: null, jsonPath: null);
   }
 }

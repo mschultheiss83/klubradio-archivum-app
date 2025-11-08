@@ -433,6 +433,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settings_zero_off => '0 = OFF';
 
   @override
+  String get settings_autodownload_subscriptions =>
+      'Autodownload subscribed episodes';
+
+  @override
+  String get settings_autodownload_subscriptions_hint =>
+      'Automatically download new episodes from subscribed podcasts.';
+
+  @override
   String get profileScreenNoRecentlyPlayed =>
       'No recently played episodes yet.';
 

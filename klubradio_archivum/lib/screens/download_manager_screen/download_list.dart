@@ -70,6 +70,7 @@ class DownloadList extends StatelessWidget {
 
 class _ActiveDownloads extends StatelessWidget {
   const _ActiveDownloads({required this.stream});
+
   final Stream<List<Episode>> stream;
 
   @override
@@ -89,12 +90,11 @@ class _ActiveDownloads extends StatelessWidget {
         }
         return ListView.separated(
           itemCount: items.length,
-          separatorBuilder: (_, __) => const Divider(height: 1),
+          separatorBuilder: (_, _) => const Divider(height: 1),
           itemBuilder: (context, i) {
             final ep = items[i];
-            final canPause = (ep.resumable ?? false);
             final status = _statusLabel(context, ep.status);
-            final percentLabel = formatProgress(ep.progress ?? 0);
+            final percentLabel = formatProgress(ep.progress);
 
             final bytesMB = (ep.bytesDownloaded != null)
                 ? (ep.bytesDownloaded! / (1024 * 1024)).toStringAsFixed(1)
@@ -119,21 +119,23 @@ class _ActiveDownloads extends StatelessWidget {
                       width: 24,
                       height: 24,
                       child: CircularProgressIndicator(
-                        value: (ep.progress ?? 0),
+                        value: (ep.progress),
                         strokeWidth: 3,
                       ),
                     ),
                   if (ep.status == 2) const SizedBox(width: 8),
                   if (ep.status == 2) Text(percentLabel),
 
-                  if (ep.status == 2 && canPause) // downloading & resumable
+                  if (ep.status == 2 &&
+                      (ep.resumable ?? false)) // downloading & resumable
                     IconButton(
                       tooltip: l10n.downloads_action_pause,
                       icon: const Icon(Icons.pause),
                       onPressed: () => provider.pause(ep.id),
                     ),
 
-                  if (ep.status == 1 && canPause) // queued & resumable
+                  if (ep.status == 1 &&
+                      (ep.resumable ?? false)) // queued & resumable
                     IconButton(
                       tooltip: l10n.downloads_action_resume,
                       icon: const Icon(Icons.play_arrow),
@@ -156,12 +158,12 @@ class _ActiveDownloads extends StatelessWidget {
 
 class _CompletedDownloads extends StatelessWidget {
   const _CompletedDownloads({required this.stream});
+
   final Stream<List<Episode>> stream;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final provider = context.read<DownloadProvider>();
 
     return StreamBuilder<List<Episode>>(
       stream: stream,
@@ -175,7 +177,7 @@ class _CompletedDownloads extends StatelessWidget {
         }
         return ListView.separated(
           itemCount: items.length,
-          separatorBuilder: (_, __) => const Divider(height: 1),
+          separatorBuilder: (_, _) => const Divider(height: 1),
           itemBuilder: (context, i) {
             final ep = items[i];
 
@@ -184,7 +186,8 @@ class _CompletedDownloads extends StatelessWidget {
               title: Text('${ep.podcastId} • ${ep.title}'),
               subtitle: FutureBuilder<model.Episode?>(
                 future:
-                    (ep.cachedMetaPath != null && ep.cachedMetaPath!.isNotEmpty)
+                    // (ep.cachedMetaPath != null && ep.cachedMetaPath!.isNotEmpty)
+                    (ep.cachedMetaPath?.isNotEmpty ?? false)
                     ? readEpisodeFromCacheJson(ep.cachedMetaPath!)
                     : Future.value(null),
                 builder: (context, snap) {
@@ -381,6 +384,7 @@ class _EpisodeListState extends State<EpisodeList> {
 
 class _DownloadButton extends StatelessWidget {
   const _DownloadButton({required this.episode});
+
   final model.Episode episode;
 
   @override

@@ -23,19 +23,19 @@ Future<model.Episode?> readEpisodeFromCacheJson(String metaPath) async {
       // very old/minimal JSON – versuchen wir es trotzdem best-effort
     }
 
-    String _str(String key, [String fallback = '']) {
+    String toStr(String key, [String fallback = '']) {
       final v = map[key];
       return (v is String) ? v : fallback;
     }
 
-    int _int(String key, [int fallback = 0]) {
+    int toInt(String key, [int fallback = 0]) {
       final v = map[key];
       if (v is int) return v;
       if (v is num) return v.toInt();
       return fallback;
     }
 
-    List<String> _strList(String key) {
+    List<String> strList(String key) {
       final v = map[key];
       if (v is List) {
         return v.whereType<String>().toList(growable: false);
@@ -43,7 +43,7 @@ Future<model.Episode?> readEpisodeFromCacheJson(String metaPath) async {
       return const <String>[];
     }
 
-    DateTime? _dt(String key) {
+    DateTime? toDatetime(String key) {
       final v = map[key];
       if (v is String && v.isNotEmpty) {
         try {
@@ -53,35 +53,35 @@ Future<model.Episode?> readEpisodeFromCacheJson(String metaPath) async {
       return null;
     }
 
-    final id = _str('id');
-    final podcastId = _str('podcastId');
+    final id = toStr('id');
+    final podcastId = toStr('podcastId');
     if (id.isEmpty || podcastId.isEmpty) return null;
 
-    final title = _str('title');
-    final description = _str('description');
-    final audioUrl = _str('audioUrl');
+    final title = toStr('title');
+    final description = toStr('description');
+    final audioUrl = toStr('audioUrl');
 
     // publishedAt (Fallback: createdAt)
     final publishedAt =
-        _dt('publishedAt') ?? _dt('createdAt') ?? DateTime.now();
+        toDatetime('publishedAt') ?? toDatetime('createdAt') ?? DateTime.now();
 
     // Dauer in Sekunden
-    final durationSecs = _int('duration', 0);
+    final durationSecs = toInt('duration', 0);
     final duration = Duration(seconds: durationSecs);
 
     // bereits formatiert (von dir) – übernehmen wie ist
-    final showDate = _str('showDate');
+    final showDate = toStr('showDate');
 
-    final hosts = _strList('hosts');
+    final hosts = strList('hosts');
 
     // Bild & MP3 – relative Dateinamen zu absoluten Pfaden auflösen
-    final cachedImageFile = _str('cachedImageFile');
-    final imageUrl = _str('imageUrl'); // nur als Fallback/Info
+    final cachedImageFile = toStr('cachedImageFile');
+    final imageUrl = toStr('imageUrl'); // nur als Fallback/Info
     final imageAbsPath = cachedImageFile.isNotEmpty
         ? p.join(dir, cachedImageFile)
         : null;
 
-    final mp3Rel = _str('mp3File');
+    final mp3Rel = toStr('mp3File');
     final mp3AbsPath = mp3Rel.isNotEmpty ? p.join(dir, mp3Rel) : null;
 
     // Modell befüllen – Felder benutzen, die dein Player/Provider erwartet

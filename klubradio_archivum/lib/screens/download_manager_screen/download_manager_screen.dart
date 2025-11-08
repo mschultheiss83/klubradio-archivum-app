@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import 'package:klubradio_archivum/l10n/app_localizations.dart';
 import 'package:klubradio_archivum/db/app_database.dart';
 import 'package:klubradio_archivum/providers/download_provider.dart';
-import 'package:klubradio_archivum/providers/podcast_provider.dart';
 
 import 'download_list.dart';
 

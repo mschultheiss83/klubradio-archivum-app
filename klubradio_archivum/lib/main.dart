@@ -92,6 +92,7 @@ class _KlubradioArchivumAppState extends State<KlubradioArchivumApp> {
           create: (ctx) => DownloadProvider(
             db: ctx.read<AppDatabase>(),
             episodeProvider: ctx.read<EpisodeProvider>(),
+            apiService: ctx.read<ApiService>(),
           ),
         ),
         Provider<SubscriptionsDao>(

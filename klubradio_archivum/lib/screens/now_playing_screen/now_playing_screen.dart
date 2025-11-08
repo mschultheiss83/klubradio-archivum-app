@@ -96,7 +96,11 @@ class NowPlayingScreen extends StatelessWidget {
 
                   const SizedBox(height: 16),
                   // Progress + controls stay visible without overflow
-                  ProgressSlider(provider: provider),
+                  ProgressSlider(
+                    positionNotifier: provider.positionNotifier,
+                    totalDuration: provider.totalDuration ?? Duration.zero,
+                    onSeek: provider.seek,
+                  ),
                   const SizedBox(height: 12),
                   AudioPlayerControls(provider: provider),
                 ],

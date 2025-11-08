@@ -1607,6 +1607,21 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, Setting> {
     type: DriftSqlType.int,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _autodownloadSubscribedMeta =
+      const VerificationMeta('autodownloadSubscribed');
+  @override
+  late final GeneratedColumn<bool> autodownloadSubscribed =
+      GeneratedColumn<bool>(
+        'autodownload_subscribed',
+        aliasedName,
+        false,
+        type: DriftSqlType.bool,
+        requiredDuringInsert: false,
+        defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'CHECK ("autodownload_subscribed" IN (0, 1))',
+        ),
+        defaultValue: const Constant(false),
+      );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -1614,6 +1629,7 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, Setting> {
     maxParallel,
     deleteAfterHours,
     keepLatestN,
+    autodownloadSubscribed,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1663,6 +1679,15 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, Setting> {
         ),
       );
     }
+    if (data.containsKey('autodownload_subscribed')) {
+      context.handle(
+        _autodownloadSubscribedMeta,
+        autodownloadSubscribed.isAcceptableOrUnknown(
+          data['autodownload_subscribed']!,
+          _autodownloadSubscribedMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -1692,6 +1717,10 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, Setting> {
         DriftSqlType.int,
         data['${effectivePrefix}keep_latest_n'],
       ),
+      autodownloadSubscribed: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}autodownload_subscribed'],
+      )!,
     );
   }
 
@@ -1707,12 +1736,14 @@ class Setting extends DataClass implements Insertable<Setting> {
   final int maxParallel;
   final int? deleteAfterHours;
   final int? keepLatestN;
+  final bool autodownloadSubscribed;
   const Setting({
     required this.id,
     required this.wifiOnly,
     required this.maxParallel,
     this.deleteAfterHours,
     this.keepLatestN,
+    required this.autodownloadSubscribed,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1726,6 +1757,7 @@ class Setting extends DataClass implements Insertable<Setting> {
     if (!nullToAbsent || keepLatestN != null) {
       map['keep_latest_n'] = Variable<int>(keepLatestN);
     }
+    map['autodownload_subscribed'] = Variable<bool>(autodownloadSubscribed);
     return map;
   }
 
@@ -1740,6 +1772,7 @@ class Setting extends DataClass implements Insertable<Setting> {
       keepLatestN: keepLatestN == null && nullToAbsent
           ? const Value.absent()
           : Value(keepLatestN),
+      autodownloadSubscribed: Value(autodownloadSubscribed),
     );
   }
 
@@ -1754,6 +1787,9 @@ class Setting extends DataClass implements Insertable<Setting> {
       maxParallel: serializer.fromJson<int>(json['maxParallel']),
       deleteAfterHours: serializer.fromJson<int?>(json['deleteAfterHours']),
       keepLatestN: serializer.fromJson<int?>(json['keepLatestN']),
+      autodownloadSubscribed: serializer.fromJson<bool>(
+        json['autodownloadSubscribed'],
+      ),
     );
   }
   @override
@@ -1765,6 +1801,7 @@ class Setting extends DataClass implements Insertable<Setting> {
       'maxParallel': serializer.toJson<int>(maxParallel),
       'deleteAfterHours': serializer.toJson<int?>(deleteAfterHours),
       'keepLatestN': serializer.toJson<int?>(keepLatestN),
+      'autodownloadSubscribed': serializer.toJson<bool>(autodownloadSubscribed),
     };
   }
 
@@ -1774,6 +1811,7 @@ class Setting extends DataClass implements Insertable<Setting> {
     int? maxParallel,
     Value<int?> deleteAfterHours = const Value.absent(),
     Value<int?> keepLatestN = const Value.absent(),
+    bool? autodownloadSubscribed,
   }) => Setting(
     id: id ?? this.id,
     wifiOnly: wifiOnly ?? this.wifiOnly,
@@ -1782,6 +1820,8 @@ class Setting extends DataClass implements Insertable<Setting> {
         ? deleteAfterHours.value
         : this.deleteAfterHours,
     keepLatestN: keepLatestN.present ? keepLatestN.value : this.keepLatestN,
+    autodownloadSubscribed:
+        autodownloadSubscribed ?? this.autodownloadSubscribed,
   );
   Setting copyWithCompanion(SettingsCompanion data) {
     return Setting(
@@ -1796,6 +1836,9 @@ class Setting extends DataClass implements Insertable<Setting> {
       keepLatestN: data.keepLatestN.present
           ? data.keepLatestN.value
           : this.keepLatestN,
+      autodownloadSubscribed: data.autodownloadSubscribed.present
+          ? data.autodownloadSubscribed.value
+          : this.autodownloadSubscribed,
     );
   }
 
@@ -1806,14 +1849,21 @@ class Setting extends DataClass implements Insertable<Setting> {
           ..write('wifiOnly: $wifiOnly, ')
           ..write('maxParallel: $maxParallel, ')
           ..write('deleteAfterHours: $deleteAfterHours, ')
-          ..write('keepLatestN: $keepLatestN')
+          ..write('keepLatestN: $keepLatestN, ')
+          ..write('autodownloadSubscribed: $autodownloadSubscribed')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, wifiOnly, maxParallel, deleteAfterHours, keepLatestN);
+  int get hashCode => Object.hash(
+    id,
+    wifiOnly,
+    maxParallel,
+    deleteAfterHours,
+    keepLatestN,
+    autodownloadSubscribed,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1822,7 +1872,8 @@ class Setting extends DataClass implements Insertable<Setting> {
           other.wifiOnly == this.wifiOnly &&
           other.maxParallel == this.maxParallel &&
           other.deleteAfterHours == this.deleteAfterHours &&
-          other.keepLatestN == this.keepLatestN);
+          other.keepLatestN == this.keepLatestN &&
+          other.autodownloadSubscribed == this.autodownloadSubscribed);
 }
 
 class SettingsCompanion extends UpdateCompanion<Setting> {
@@ -1831,12 +1882,14 @@ class SettingsCompanion extends UpdateCompanion<Setting> {
   final Value<int> maxParallel;
   final Value<int?> deleteAfterHours;
   final Value<int?> keepLatestN;
+  final Value<bool> autodownloadSubscribed;
   const SettingsCompanion({
     this.id = const Value.absent(),
     this.wifiOnly = const Value.absent(),
     this.maxParallel = const Value.absent(),
     this.deleteAfterHours = const Value.absent(),
     this.keepLatestN = const Value.absent(),
+    this.autodownloadSubscribed = const Value.absent(),
   });
   SettingsCompanion.insert({
     this.id = const Value.absent(),
@@ -1844,6 +1897,7 @@ class SettingsCompanion extends UpdateCompanion<Setting> {
     this.maxParallel = const Value.absent(),
     this.deleteAfterHours = const Value.absent(),
     this.keepLatestN = const Value.absent(),
+    this.autodownloadSubscribed = const Value.absent(),
   });
   static Insertable<Setting> custom({
     Expression<int>? id,
@@ -1851,6 +1905,7 @@ class SettingsCompanion extends UpdateCompanion<Setting> {
     Expression<int>? maxParallel,
     Expression<int>? deleteAfterHours,
     Expression<int>? keepLatestN,
+    Expression<bool>? autodownloadSubscribed,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -1858,6 +1913,8 @@ class SettingsCompanion extends UpdateCompanion<Setting> {
       if (maxParallel != null) 'max_parallel': maxParallel,
       if (deleteAfterHours != null) 'delete_after_hours': deleteAfterHours,
       if (keepLatestN != null) 'keep_latest_n': keepLatestN,
+      if (autodownloadSubscribed != null)
+        'autodownload_subscribed': autodownloadSubscribed,
     });
   }
 
@@ -1867,6 +1924,7 @@ class SettingsCompanion extends UpdateCompanion<Setting> {
     Value<int>? maxParallel,
     Value<int?>? deleteAfterHours,
     Value<int?>? keepLatestN,
+    Value<bool>? autodownloadSubscribed,
   }) {
     return SettingsCompanion(
       id: id ?? this.id,
@@ -1874,6 +1932,8 @@ class SettingsCompanion extends UpdateCompanion<Setting> {
       maxParallel: maxParallel ?? this.maxParallel,
       deleteAfterHours: deleteAfterHours ?? this.deleteAfterHours,
       keepLatestN: keepLatestN ?? this.keepLatestN,
+      autodownloadSubscribed:
+          autodownloadSubscribed ?? this.autodownloadSubscribed,
     );
   }
 
@@ -1895,6 +1955,11 @@ class SettingsCompanion extends UpdateCompanion<Setting> {
     if (keepLatestN.present) {
       map['keep_latest_n'] = Variable<int>(keepLatestN.value);
     }
+    if (autodownloadSubscribed.present) {
+      map['autodownload_subscribed'] = Variable<bool>(
+        autodownloadSubscribed.value,
+      );
+    }
     return map;
   }
 
@@ -1905,7 +1970,8 @@ class SettingsCompanion extends UpdateCompanion<Setting> {
           ..write('wifiOnly: $wifiOnly, ')
           ..write('maxParallel: $maxParallel, ')
           ..write('deleteAfterHours: $deleteAfterHours, ')
-          ..write('keepLatestN: $keepLatestN')
+          ..write('keepLatestN: $keepLatestN, ')
+          ..write('autodownloadSubscribed: $autodownloadSubscribed')
           ..write(')'))
         .toString();
   }
@@ -2636,6 +2702,7 @@ typedef $$SettingsTableCreateCompanionBuilder =
       Value<int> maxParallel,
       Value<int?> deleteAfterHours,
       Value<int?> keepLatestN,
+      Value<bool> autodownloadSubscribed,
     });
 typedef $$SettingsTableUpdateCompanionBuilder =
     SettingsCompanion Function({
@@ -2644,6 +2711,7 @@ typedef $$SettingsTableUpdateCompanionBuilder =
       Value<int> maxParallel,
       Value<int?> deleteAfterHours,
       Value<int?> keepLatestN,
+      Value<bool> autodownloadSubscribed,
     });
 
 class $$SettingsTableFilterComposer
@@ -2677,6 +2745,11 @@ class $$SettingsTableFilterComposer
 
   ColumnFilters<int> get keepLatestN => $composableBuilder(
     column: $table.keepLatestN,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get autodownloadSubscribed => $composableBuilder(
+    column: $table.autodownloadSubscribed,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -2714,6 +2787,11 @@ class $$SettingsTableOrderingComposer
     column: $table.keepLatestN,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<bool> get autodownloadSubscribed => $composableBuilder(
+    column: $table.autodownloadSubscribed,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$SettingsTableAnnotationComposer
@@ -2743,6 +2821,11 @@ class $$SettingsTableAnnotationComposer
 
   GeneratedColumn<int> get keepLatestN => $composableBuilder(
     column: $table.keepLatestN,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get autodownloadSubscribed => $composableBuilder(
+    column: $table.autodownloadSubscribed,
     builder: (column) => column,
   );
 }
@@ -2780,12 +2863,14 @@ class $$SettingsTableTableManager
                 Value<int> maxParallel = const Value.absent(),
                 Value<int?> deleteAfterHours = const Value.absent(),
                 Value<int?> keepLatestN = const Value.absent(),
+                Value<bool> autodownloadSubscribed = const Value.absent(),
               }) => SettingsCompanion(
                 id: id,
                 wifiOnly: wifiOnly,
                 maxParallel: maxParallel,
                 deleteAfterHours: deleteAfterHours,
                 keepLatestN: keepLatestN,
+                autodownloadSubscribed: autodownloadSubscribed,
               ),
           createCompanionCallback:
               ({
@@ -2794,12 +2879,14 @@ class $$SettingsTableTableManager
                 Value<int> maxParallel = const Value.absent(),
                 Value<int?> deleteAfterHours = const Value.absent(),
                 Value<int?> keepLatestN = const Value.absent(),
+                Value<bool> autodownloadSubscribed = const Value.absent(),
               }) => SettingsCompanion.insert(
                 id: id,
                 wifiOnly: wifiOnly,
                 maxParallel: maxParallel,
                 deleteAfterHours: deleteAfterHours,
                 keepLatestN: keepLatestN,
+                autodownloadSubscribed: autodownloadSubscribed,
               ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))

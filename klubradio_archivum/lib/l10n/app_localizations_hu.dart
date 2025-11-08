@@ -435,6 +435,14 @@ class AppLocalizationsHu extends AppLocalizations {
   String get settings_zero_off => '0 = KI';
 
   @override
+  String get settings_autodownload_subscriptions =>
+      'Feliratkozott epizódok automatikus letöltése';
+
+  @override
+  String get settings_autodownload_subscriptions_hint =>
+      'Automatikusan letölti az új epizódokat a feliratkozott podcastokból.';
+
+  @override
   String get profileScreenNoRecentlyPlayed =>
       'Még nincs nemrég hallgatott epizód.';
 

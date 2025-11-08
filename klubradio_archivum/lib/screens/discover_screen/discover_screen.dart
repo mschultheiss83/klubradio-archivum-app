@@ -4,15 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'package:klubradio_archivum/l10n/app_localizations.dart';
-import 'package:klubradio_archivum/models/podcast.dart';
-import 'package:klubradio_archivum/models/show_data.dart';
 import 'package:klubradio_archivum/providers/podcast_provider.dart';
 import 'package:klubradio_archivum/providers/latest_provider.dart';
 import 'package:klubradio_archivum/providers/recommended_provider.dart';
 
 import 'recommended_podcasts_list.dart';
 import 'top_shows_list.dart';
-import 'trending_podcasts_list.dart';
 
 class DiscoverScreen extends StatefulWidget {
   const DiscoverScreen({super.key});

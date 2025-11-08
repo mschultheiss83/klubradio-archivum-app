@@ -489,10 +489,11 @@
   "settings_delete_after_heard_label": "Törlés x órával lejátszás után",
   "settings_delete_after_hours": "Törlés ennyi óra után",
   "settings_delete_after_hint": "Automatikus eltávolítás x óra után.",
-  "settings_zero_off": "0 = KI",
-
-
-  "profileScreenNoRecentlyPlayed": "Még nincs nemrég hallgatott epizód.",
+    "settings_zero_off": "0 = KI",
+    "settings_autodownload_subscriptions": "Feliratkozott epizódok automatikus letöltése",
+    "settings_autodownload_subscriptions_hint": "Automatikusan letölti az új epizódokat a feliratkozott podcastokból.",
+  
+    "profileScreenNoRecentlyPlayed": "Még nincs nemrég hallgatott epizód.",
   "profileScreenSubscriptionsTitle": "Feliratkozott műsorok",
   "profileScreenAppIdTitle": "Alkalmazás-azonosító",
   "profileScreenIdCopied": "Azonosító kimásolva",

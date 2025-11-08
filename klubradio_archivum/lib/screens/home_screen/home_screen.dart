@@ -3,17 +3,11 @@ import 'package:provider/provider.dart';
 
 import 'package:klubradio_archivum/l10n/app_localizations.dart';
 import 'package:klubradio_archivum/models/episode.dart';
-import 'package:klubradio_archivum/models/podcast.dart';
 import 'package:klubradio_archivum/providers/episode_provider.dart';
 import 'package:klubradio_archivum/providers/podcast_provider.dart';
 
 import 'recently_played_list.dart';
-import 'subscribed_podcasts_list.dart';
 import 'package:klubradio_archivum/screens/widgets/stateful/episode_list.dart';
-
-// Für Subscriptions-Stream & Typ
-import 'package:klubradio_archivum/db/daos.dart';
-import 'package:klubradio_archivum/db/app_database.dart' as db;
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});

@@ -123,6 +123,10 @@ class EpisodesDao extends DatabaseAccessor<AppDatabase>
     return q.get();
   }
 
+  Future<List<Episode>> getEpisodesByPodcastId(String podcastId) {
+    return (select(episodes)..where((e) => e.podcastId.equals(podcastId))).get();
+  }
+
   // Status-/Progress-Updates (Download-Lifecycle)
   Future<int> setQueued(String id) =>
       (update(episodes)..where((e) => e.id.equals(id))).write(
@@ -304,6 +308,7 @@ class SettingsDao extends DatabaseAccessor<AppDatabase>
         maxParallel: const Value(2),
         deleteAfterHours: const Value(null), // AUS
         keepLatestN: const Value(null), // AUS
+        autodownloadSubscribed: const Value(false),
       ),
     );
   }
@@ -325,6 +330,11 @@ class SettingsDao extends DatabaseAccessor<AppDatabase>
   Future<int> setKeepLatestN(int? n) =>
       (update(settings)..where((s) => s.id.equals(1))).write(
         SettingsCompanion(keepLatestN: Value((n ?? 0) <= 0 ? null : n)),
+      );
+
+  Future<int> setAutodownloadSubscribed(bool v) =>
+      (update(settings)..where((s) => s.id.equals(1))).write(
+        SettingsCompanion(autodownloadSubscribed: Value(v)),
       );
 }
 

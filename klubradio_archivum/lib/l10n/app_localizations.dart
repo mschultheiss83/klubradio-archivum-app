@@ -856,6 +856,18 @@ abstract class AppLocalizations {
   /// **'0 = OFF'**
   String get settings_zero_off;
 
+  /// No description provided for @settings_autodownload_subscriptions.
+  ///
+  /// In en, this message translates to:
+  /// **'Autodownload subscribed episodes'**
+  String get settings_autodownload_subscriptions;
+
+  /// No description provided for @settings_autodownload_subscriptions_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatically download new episodes from subscribed podcasts.'**
+  String get settings_autodownload_subscriptions_hint;
+
   /// No description provided for @profileScreenNoRecentlyPlayed.
   ///
   /// In en, this message translates to:

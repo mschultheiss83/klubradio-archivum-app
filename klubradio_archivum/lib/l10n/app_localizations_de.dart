@@ -441,6 +441,14 @@ class AppLocalizationsDe extends AppLocalizations {
   String get settings_zero_off => '0 = AUS';
 
   @override
+  String get settings_autodownload_subscriptions =>
+      'Autodownload subscribed episodes';
+
+  @override
+  String get settings_autodownload_subscriptions_hint =>
+      'Automatically download new episodes from subscribed podcasts.';
+
+  @override
   String get profileScreenNoRecentlyPlayed => 'Noch nichts kürzlich gehört.';
 
   @override

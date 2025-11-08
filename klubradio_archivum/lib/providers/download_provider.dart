@@ -7,21 +7,25 @@ import 'package:klubradio_archivum/models/episode.dart' as model;
 import 'package:klubradio_archivum/db/app_database.dart';
 import 'package:klubradio_archivum/db/daos.dart';
 import 'package:klubradio_archivum/services/download_service.dart';
+import 'package:klubradio_archivum/services/api_service.dart'; // Import ApiService
 
 import '../providers/episode_provider.dart';
 
 /// Einfacher ChangeNotifier-Provider rund um den DownloadService.
 class DownloadProvider extends ChangeNotifier {
-  DownloadProvider({required AppDatabase db, required EpisodeProvider episodeProvider})
-    : episodesDao = EpisodesDao(db),
-      subscriptionsDao = SubscriptionsDao(db),
-      settingsDao = SettingsDao(db),
-      retentionDao = RetentionDao(
-        db,
-        EpisodesDao(db),
-        SubscriptionsDao(db),
-        SettingsDao(db),
-      ) {
+  DownloadProvider({
+    required AppDatabase db,
+    required EpisodeProvider episodeProvider,
+    required this.apiService,
+  })  : episodesDao = EpisodesDao(db),
+        subscriptionsDao = SubscriptionsDao(db),
+        settingsDao = SettingsDao(db),
+        retentionDao = RetentionDao(
+          db,
+          EpisodesDao(db),
+          SubscriptionsDao(db),
+          SettingsDao(db),
+        ) {
     service = DownloadService(
       db: db,
       episodesDao: episodesDao,
@@ -29,6 +33,7 @@ class DownloadProvider extends ChangeNotifier {
       settingsDao: settingsDao,
       retentionDao: retentionDao,
       episodeProvider: episodeProvider,
+      apiService: apiService,
     );
     // init bewusst nicht awaiten – der Service wartet intern auf _ready
     unawaited(service.init());
@@ -40,6 +45,7 @@ class DownloadProvider extends ChangeNotifier {
   final SubscriptionsDao subscriptionsDao;
   final SettingsDao settingsDao;
   final RetentionDao retentionDao;
+  final ApiService apiService; // Add apiService field
 
   /// API, die Screens aufrufen:
   Future<void> enqueue(model.Episode ep) async {

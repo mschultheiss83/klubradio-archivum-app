@@ -77,6 +77,16 @@ class _DownloadSettingsPanelState extends State<DownloadSettingsPanel> {
                 ),
                 const SizedBox(height: 8),
 
+                // Autodownload subscribed episodes
+                SwitchListTile.adaptive(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(l10n.settings_autodownload_subscriptions),
+                  subtitle: Text(l10n.settings_autodownload_subscriptions_hint),
+                  value: s.autodownloadSubscribed,
+                  onChanged: (v) => _dao.setAutodownloadSubscribed(v),
+                ),
+                const SizedBox(height: 8),
+
                 // Max parallel
                 _StepperRow(
                   label: l10n.settings_max_parallel,

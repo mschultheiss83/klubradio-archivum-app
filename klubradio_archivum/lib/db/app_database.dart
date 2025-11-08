@@ -68,6 +68,7 @@ class Settings extends Table {
   IntColumn get deleteAfterHours =>
       integer().nullable()(); // z.B. 24 (am nächsten Tag)
   IntColumn get keepLatestN => integer().nullable()();
+  BoolColumn get autodownloadSubscribed => boolean().withDefault(const Constant(false))();
 
   @override
   Set<Column> get primaryKey => {id};

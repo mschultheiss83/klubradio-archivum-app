@@ -69,6 +69,7 @@ void main() {
           audioPlayerService: AudioPlayerService(),
           db: db,
         ),
+        apiService: api,
       );
       await service.init();
       await settingsDao.ensureDefaults();

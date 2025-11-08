@@ -491,6 +491,8 @@
   "settings_delete_after_hours": "Delete after (hours)",
   "settings_delete_after_hint": "Automatically remove x hours after playback.",
   "settings_zero_off": "0 = OFF",
+  "settings_autodownload_subscriptions": "Autodownload subscribed episodes",
+  "settings_autodownload_subscriptions_hint": "Automatically download new episodes from subscribed podcasts.",
 
   "profileScreenNoRecentlyPlayed": "No recently played episodes yet.",
   "profileScreenSubscriptionsTitle": "Subscribed shows",

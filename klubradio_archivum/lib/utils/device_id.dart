@@ -29,11 +29,11 @@ class AppIdentity {
     try {
       if (Platform.isAndroid) {
         final a = await info.androidInfo;
-        return 'android-${a.version.release ?? '0'}';
+        return 'android-${a.version.release}';
       }
       if (Platform.isIOS) {
         final i = await info.iosInfo;
-        return 'ios-${i.systemVersion ?? '0'}';
+        return 'ios-${i.systemVersion}';
       }
       if (Platform.isWindows) {
         final w = await info.windowsInfo;
@@ -41,19 +41,17 @@ class AppIdentity {
       }
       if (Platform.isMacOS) {
         final m = await info.macOsInfo;
-        return 'macos-${m.osRelease ?? '0'}';
+        return 'macos-${m.osRelease}';
       }
       if (Platform.isLinux) {
         final l = await info.linuxInfo;
-        final ver = (l.version ?? l.prettyName ?? '0').split(' ').first;
+        final ver = (l.version ?? l.prettyName).split(' ').first;
         return 'linux-$ver';
       }
     } catch (_) {
       /* fallthrough */
     }
     // Fallback
-    return Platform.operatingSystem.isEmpty
-        ? 'unknown-0'
-        : '${Platform.operatingSystem}-0';
+    return 'unknown-0';
   }
 }

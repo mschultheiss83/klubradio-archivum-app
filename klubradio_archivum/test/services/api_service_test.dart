@@ -315,7 +315,7 @@ class _ClosingClient extends http.BaseClient {
 }
 
 class _OfflineApiService extends ApiService {
-  _OfflineApiService({http.Client? httpClient}) : super(httpClient: httpClient);
+  _OfflineApiService({super.httpClient});
 
   @override
   bool get hasValidCredentials => false;

@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:klubradio_archivum/db/app_database.dart' as db;
 import 'package:klubradio_archivum/db/daos.dart';
 import 'package:klubradio_archivum/models/podcast.dart';
-import 'package:klubradio_archivum/providers/podcast_provider.dart';
 import 'package:klubradio_archivum/l10n/app_localizations.dart';
 import 'package:klubradio_archivum/screens/podcast_detail_screen/podcast_detail_screen.dart';
 
@@ -32,7 +30,7 @@ class SubscriptionsPanel extends StatelessWidget {
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       itemCount: podcasts.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 8),
+      separatorBuilder: (_, _) => const SizedBox(height: 8),
       itemBuilder: (context, i) {
         final p = podcasts[i];
         return _PodcastTile(podcast: p);
@@ -59,7 +57,7 @@ class _PodcastTile extends StatelessWidget {
           width: 56,
           height: 56,
           fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) =>
+          errorBuilder: (_, _, _) =>
               Container(width: 56, height: 56, color: cs.surfaceVariant),
         ),
       ),
