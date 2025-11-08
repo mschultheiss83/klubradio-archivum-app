@@ -442,11 +442,11 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get settings_autodownload_subscriptions =>
-      'Autodownload subscribed episodes';
+      'Automatisch abonnierte Episoden herunterladen';
 
   @override
   String get settings_autodownload_subscriptions_hint =>
-      'Automatically download new episodes from subscribed podcasts.';
+      'Neue Episoden von abonnierten Podcasts automatisch herunterladen.';
 
   @override
   String get profileScreenNoRecentlyPlayed => 'Noch nichts kürzlich gehört.';

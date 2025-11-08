@@ -202,13 +202,13 @@ class _ModeChip extends StatelessWidget {
       label: Text(label),
       selected: selected,
       onSelected: (_) => onSelected(),
-      selectedColor: cs.primary.withOpacity(0.16),
+      selectedColor: cs.primary.withAlpha((255 * 0.16).round()),
       labelStyle: TextStyle(
         color: selected ? cs.onPrimaryContainer : cs.onSurface,
         fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
       ),
       side: BorderSide(
-        color: selected ? cs.primary : cs.outlineVariant.withOpacity(0.7),
+        color: selected ? cs.primary : cs.outlineVariant.withAlpha((255 * 0.7).round()),
       ),
     );
   }

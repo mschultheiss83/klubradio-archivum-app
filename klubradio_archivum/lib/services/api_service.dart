@@ -182,8 +182,9 @@ class ApiService {
           .toList();
     }
 
-    if (!hasValidCredentials)
+    if (!hasValidCredentials) {
       return _mockEpisodes(podcastId).take(limit).toList();
+    }
 
     final uri = Uri.parse('$_supabaseUrl/rest/v1/${constants.episodesTable}')
         .replace(

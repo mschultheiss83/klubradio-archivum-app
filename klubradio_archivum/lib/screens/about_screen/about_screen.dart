@@ -21,6 +21,7 @@ class _AboutScreenState extends State<AboutScreen> {
 
   Future<void> _loadVersion() async {
     final info = await PackageInfo.fromPlatform();
+    if (!mounted) return;
     final l10n = AppLocalizations.of(context)!;
     setState(() {
       versionText = l10n.aboutScreenVersionFormat(

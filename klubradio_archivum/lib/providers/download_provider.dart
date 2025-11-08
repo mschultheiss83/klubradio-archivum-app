@@ -73,6 +73,12 @@ class DownloadProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<int> autodownloadPodcast(String podcastId) async {
+    final count = await service.autodownloadPodcast(podcastId);
+    notifyListeners();
+    return count;
+  }
+
   Future<void> autoEnqueueLatestN(
     String podcastId,
     int n,

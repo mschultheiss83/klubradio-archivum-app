@@ -57,7 +57,7 @@ class PlaybackSettings extends StatelessWidget {
                       speed,
                     ); // Live-Player
                   },
-                  selectedColor: cs.primary.withOpacity(0.16),
+                  selectedColor: cs.primary.withAlpha((255 * 0.16).round()),
                   labelStyle: TextStyle(
                     color: selected ? cs.onPrimaryContainer : cs.onSurface,
                     fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
@@ -65,7 +65,7 @@ class PlaybackSettings extends StatelessWidget {
                   side: BorderSide(
                     color: selected
                         ? cs.primary
-                        : cs.outlineVariant.withOpacity(0.7),
+                        : cs.outlineVariant.withAlpha((255 * 0.7).round()),
                   ),
                 );
               }).toList(),
@@ -89,7 +89,7 @@ class PlaybackSettings extends StatelessWidget {
                   selected: selected,
                   onSelected: (_) =>
                       context.read<ProfileProvider>().setMaxAutoDownload(count),
-                  selectedColor: cs.primary.withOpacity(0.16),
+                  selectedColor: cs.primary.withAlpha((255 * 0.16).round()),
                   labelStyle: TextStyle(
                     color: selected ? cs.onPrimaryContainer : cs.onSurface,
                     fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
@@ -97,7 +97,7 @@ class PlaybackSettings extends StatelessWidget {
                   side: BorderSide(
                     color: selected
                         ? cs.primary
-                        : cs.outlineVariant.withOpacity(0.7),
+                        : cs.outlineVariant.withAlpha((255 * 0.7).round()),
                   ),
                 );
               }).toList(),

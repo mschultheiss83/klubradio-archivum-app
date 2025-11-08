@@ -133,7 +133,7 @@ class DownloadService {
 
     _autodownloadTimer = Timer.periodic(
       const Duration(minutes: 1),
-      (_) => _checkAutodownloads(),
+      (_) => checkAutodownloads(),
     );
 
     if (!_ready.isCompleted) _ready.complete();
@@ -356,27 +356,35 @@ class DownloadService {
     await episodesDao.clearLocalFile(episodeId);
   }
 
-  Future<void> _checkAutodownloads() async {
+  Future<void> checkAutodownloads() async {
     if (_disposed) return;
     final settings = await settingsDao.getOne();
     if (settings?.autodownloadSubscribed ?? false) {
       final activeSubscriptions = await subscriptionsDao.watchAllActive().first;
       for (final sub in activeSubscriptions) {
-        // Fetch latest episodes for this podcast from the API
-        final latestEpisodes = await apiService.fetchEpisodesForPodcast(sub.podcastId);
-
-        // Get already downloaded episodes for this podcast
-        final downloadedEpisodes = await episodesDao.getEpisodesByPodcastId(sub.podcastId);
-        final downloadedEpisodeIds = downloadedEpisodes.map((e) => e.id).toSet();
-
-        for (final episode in latestEpisodes) {
-          if (!downloadedEpisodeIds.contains(episode.id)) {
-            // This is a new episode, enqueue it for download
-            await enqueueEpisode(episode);
-          }
-        }
+        await autodownloadPodcast(sub.podcastId);
       }
     }
+  }
+
+  Future<int> autodownloadPodcast(String podcastId) async {
+    // Fetch latest episodes for this podcast from the API
+    final latestEpisodes = await apiService.fetchEpisodesForPodcast(podcastId);
+
+    // Get already downloaded episodes for this podcast
+    final downloadedEpisodes =
+        await episodesDao.getEpisodesByPodcastId(podcastId);
+    final downloadedEpisodeIds = downloadedEpisodes.map((e) => e.id).toSet();
+
+    int downloadCount = 0;
+    for (final episode in latestEpisodes) {
+      if (!downloadedEpisodeIds.contains(episode.id)) {
+        // This is a new episode, enqueue it for download
+        await enqueueEpisode(episode);
+        downloadCount++;
+      }
+    }
+    return downloadCount;
   }
 
   Future<bool> _checkResumable(String url) async {

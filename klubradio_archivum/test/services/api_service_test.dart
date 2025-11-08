@@ -10,6 +10,7 @@ import 'package:klubradio_archivum/models/user_profile.dart';
 import 'package:klubradio_archivum/services/api_service.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
   group('ApiService network behaviour', () {
     test('fetchLatestPodcasts returns parsed podcasts on success', () async {
       late http.Request capturedRequest;

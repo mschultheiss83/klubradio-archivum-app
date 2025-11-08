@@ -491,6 +491,8 @@
   "settings_delete_after_hours": "Löschen nach (Stunden)",
   "settings_delete_after_hint": "Nach dem Anhören automatisch nach x Stunden entfernen.",
   "settings_zero_off": "0 = AUS",
+  "settings_autodownload_subscriptions": "Automatisch abonnierte Episoden herunterladen",
+  "settings_autodownload_subscriptions_hint": "Neue Episoden von abonnierten Podcasts automatisch herunterladen.",
 
   "profileScreenNoRecentlyPlayed": "Noch nichts kürzlich gehört.",
   "profileScreenSubscriptionsTitle": "Abonnierte Sendungen",

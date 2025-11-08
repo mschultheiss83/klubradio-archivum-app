@@ -45,10 +45,11 @@ class ProfileProvider extends ChangeNotifier {
 
   Future<void> toggleFavouriteEpisode(String episodeId) async {
     final fav = Set<String>.from(profile.favouriteEpisodeIds);
-    if (fav.contains(episodeId))
+    if (fav.contains(episodeId)) {
       fav.remove(episodeId);
-    else
+    } else {
       fav.add(episodeId);
+    }
     _profile = profile.copyWith(favouriteEpisodeIds: fav);
     await _repo.save(profile);
     notifyListeners();

@@ -1,6 +1,7 @@
 // lib/db/daos.dart
 import 'dart:async';
 import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart'; // Import for debugPrint
 
 import 'package:drift/drift.dart';
 import 'app_database.dart';
@@ -12,7 +13,7 @@ part 'daos.g.dart';
 @DriftAccessor(tables: [Subscriptions])
 class SubscriptionsDao extends DatabaseAccessor<AppDatabase>
     with _$SubscriptionsDaoMixin {
-  SubscriptionsDao(AppDatabase db) : super(db);
+  SubscriptionsDao(super.db);
 
   Future<void> upsert(SubscriptionsCompanion data) =>
       into(subscriptions).insertOnConflictUpdate(data);
@@ -171,7 +172,7 @@ class EpisodesDao extends DatabaseAccessor<AppDatabase>
     int? bytes,
     int? total,
   }) async {
-    print('DAO.setCompleted id=$id path=$localPath');
+    debugPrint('DAO.setCompleted id=$id path=$localPath');
     return (update(episodes)..where((e) => e.id.equals(id))).write(
       EpisodesCompanion(
         status: const Value(3),
@@ -294,7 +295,7 @@ class EpisodesDao extends DatabaseAccessor<AppDatabase>
 @DriftAccessor(tables: [Settings])
 class SettingsDao extends DatabaseAccessor<AppDatabase>
     with _$SettingsDaoMixin {
-  SettingsDao(AppDatabase db) : super(db);
+  SettingsDao(super.db);
 
   Future<Setting?> getOne() =>
       (select(settings)..where((s) => s.id.equals(1))).getSingleOrNull();

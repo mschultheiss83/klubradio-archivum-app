@@ -111,7 +111,7 @@ class PodcastProvider extends ChangeNotifier {
       if (kDebugMode) debugPrint('LOAD ✋ already running – skip');
       return;
     }
-    final T0 = DateTime.now();
+    final t0 = DateTime.now();
     if (kDebugMode) debugPrint('LOAD ▶ start');
     _isLoading = true;
     _errorMessage = null;
@@ -171,9 +171,9 @@ class PodcastProvider extends ChangeNotifier {
     } finally {
       _isLoading = false;
       notifyListeners();
-      final T1 = DateTime.now();
+      final t1 = DateTime.now();
       if (kDebugMode) {
-        debugPrint('LOAD ■ done total=${T1.difference(T0).inMilliseconds}ms');
+        debugPrint('LOAD ■ done total=${t1.difference(t0).inMilliseconds}ms');
       }
     }
   }

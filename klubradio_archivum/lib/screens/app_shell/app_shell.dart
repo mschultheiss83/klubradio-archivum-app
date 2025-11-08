@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import 'package:klubradio_archivum/l10n/app_localizations.dart';
@@ -30,13 +31,14 @@ class _AppShellState extends State<AppShell> {
     (_) => GlobalKey<NavigatorState>(),
   );
 
-  Future<bool> _onWillPop() async {
+  void onPopInvokedWithResult(bool didPop, result) {
+    if (didPop) return; // If system already popped, do nothing
     final nav = _navKeys[_index].currentState!;
     if (nav.canPop()) {
       nav.pop();
-      return false; // handled here
+    } else {
+      SystemNavigator.pop();
     }
-    return true; // allow system back to leave app
   }
 
   @override
@@ -44,8 +46,9 @@ class _AppShellState extends State<AppShell> {
     final l10n = AppLocalizations.of(context)!;
     final hasCurrent = context.watch<EpisodeProvider>().currentEpisode != null;
 
-    return WillPopScope(
-      onWillPop: _onWillPop,
+    return PopScope(
+      canPop: false, // We handle popping manually
+      onPopInvokedWithResult: onPopInvokedWithResult,
       child: Scaffold(
         appBar: AppBar(title: Text(l10n.appName)),
         body: IndexedStack(

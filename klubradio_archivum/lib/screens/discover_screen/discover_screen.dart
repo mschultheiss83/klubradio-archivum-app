@@ -25,6 +25,7 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
   void initState() {
     super.initState();
     Future.microtask(() async {
+      if (!mounted) return;
       final latest = context.read<LatestProvider>();
       final rec = context.read<RecommendedProvider>();
 
@@ -46,10 +47,12 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
     if (!_bootstrapped) {
       _bootstrapped = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
         context.read<PodcastProvider>().loadInitialData();
       });
 
       WidgetsBinding.instance.addPostFrameCallback((_) async {
+        if (!mounted) return;
         final latest = context.read<LatestProvider>();
         final rec = context.read<RecommendedProvider>();
 

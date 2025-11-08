@@ -58,7 +58,7 @@ class _PodcastTile extends StatelessWidget {
           height: 56,
           fit: BoxFit.cover,
           errorBuilder: (_, _, _) =>
-              Container(width: 56, height: 56, color: cs.surfaceVariant),
+              Container(width: 56, height: 56, color: cs.surfaceContainerHighest),
         ),
       ),
       title: Text(podcast.title, maxLines: 1, overflow: TextOverflow.ellipsis),

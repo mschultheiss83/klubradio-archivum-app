@@ -67,6 +67,7 @@ class _PodcastDetailScreenState extends State<PodcastDetailScreen> {
                               widget.podcast.id,
                               isSubscribed,
                             );
+                            if (!context.mounted) return;
 
                             snack.showSnackBar(
                               SnackBar(
