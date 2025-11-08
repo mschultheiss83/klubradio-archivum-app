@@ -25,7 +25,7 @@ class SearchResultsList extends StatelessWidget {
 
     return ListView.separated(
       itemCount: results.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 12),
+      separatorBuilder: (_, _) => const SizedBox(height: 12),
       itemBuilder: (BuildContext context, int index) {
         final Podcast podcast = results[index];
         return PodcastListItem(podcast: podcast);

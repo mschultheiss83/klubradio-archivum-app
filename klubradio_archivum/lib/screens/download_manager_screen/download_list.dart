@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:drift/drift.dart' as d show OrderingTerm;
@@ -9,6 +10,9 @@ import 'package:klubradio_archivum/models/episode.dart' as model;
 import 'package:klubradio_archivum/providers/episode_provider.dart';
 import 'package:klubradio_archivum/providers/podcast_provider.dart';
 import 'package:klubradio_archivum/screens/widgets/stateless/episode_list_item.dart';
+import 'package:klubradio_archivum/screens/widgets/stateless/image_url.dart';
+import 'package:klubradio_archivum/screens/utils/helpers.dart';
+import 'package:klubradio_archivum/utils/episode_cache_reader.dart';
 
 /// ---------------------------------------------------------------------------
 /// DownloadList (Tab-Ansicht für Download-Manager-Screen)
@@ -66,6 +70,7 @@ class DownloadList extends StatelessWidget {
 
 class _ActiveDownloads extends StatelessWidget {
   const _ActiveDownloads({required this.stream});
+
   final Stream<List<Episode>> stream;
 
   @override
@@ -85,19 +90,27 @@ class _ActiveDownloads extends StatelessWidget {
         }
         return ListView.separated(
           itemCount: items.length,
-          separatorBuilder: (_, __) => const Divider(height: 1),
+          separatorBuilder: (_, _) => const Divider(height: 1),
           itemBuilder: (context, i) {
             final ep = items[i];
             final status = _statusLabel(context, ep.status);
-            final percent = ((ep.progress ?? 0) * 100)
-                .clamp(0, 100)
-                .toStringAsFixed(0);
-            final canPause = (ep.resumable ?? false);
+            final percentLabel = formatProgress(ep.progress);
 
+            final bytesMB = (ep.bytesDownloaded != null)
+                ? (ep.bytesDownloaded! / (1024 * 1024)).toStringAsFixed(1)
+                : null;
+            final totalMB = (ep.totalBytes != null)
+                ? (ep.totalBytes! / (1024 * 1024)).toStringAsFixed(1)
+                : null;
+            final detail = (bytesMB != null && totalMB != null)
+                ? ' ($bytesMB / $totalMB MB)'
+                : '';
+
+            final activeSubtitle = '$status · $percentLabel$detail';
             return ListTile(
               leading: _statusIcon(ep.status),
               title: Text(ep.title),
-              subtitle: Text('$status • ${ep.podcastId}'),
+              subtitle: Text(activeSubtitle),
               trailing: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -106,21 +119,23 @@ class _ActiveDownloads extends StatelessWidget {
                       width: 24,
                       height: 24,
                       child: CircularProgressIndicator(
-                        value: (ep.progress ?? 0),
+                        value: (ep.progress),
                         strokeWidth: 3,
                       ),
                     ),
                   if (ep.status == 2) const SizedBox(width: 8),
-                  if (ep.status == 2) Text('$percent%'),
+                  if (ep.status == 2) Text(percentLabel),
 
-                  if (ep.status == 2 && canPause) // downloading & resumable
+                  if (ep.status == 2 &&
+                      (ep.resumable ?? false)) // downloading & resumable
                     IconButton(
                       tooltip: l10n.downloads_action_pause,
                       icon: const Icon(Icons.pause),
                       onPressed: () => provider.pause(ep.id),
                     ),
 
-                  if (ep.status == 1 && canPause) // queued & resumable
+                  if (ep.status == 1 &&
+                      (ep.resumable ?? false)) // queued & resumable
                     IconButton(
                       tooltip: l10n.downloads_action_resume,
                       icon: const Icon(Icons.play_arrow),
@@ -143,12 +158,12 @@ class _ActiveDownloads extends StatelessWidget {
 
 class _CompletedDownloads extends StatelessWidget {
   const _CompletedDownloads({required this.stream});
+
   final Stream<List<Episode>> stream;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final provider = context.read<DownloadProvider>();
 
     return StreamBuilder<List<Episode>>(
       stream: stream,
@@ -162,20 +177,102 @@ class _CompletedDownloads extends StatelessWidget {
         }
         return ListView.separated(
           itemCount: items.length,
-          separatorBuilder: (_, __) => const Divider(height: 1),
+          separatorBuilder: (_, _) => const Divider(height: 1),
           itemBuilder: (context, i) {
             final ep = items[i];
 
             return ListTile(
-              leading: const Icon(Icons.audio_file_outlined),
+              leading: ImageUrl(path: ep.cachedImagePath),
               title: Text('${ep.podcastId} • ${ep.title}'),
-              subtitle: Text(
-                '${l10n.downloads_status_done} • ${ep.id} - ${ep.localPath} - ${ep.publishedAt}',
+              subtitle: FutureBuilder<model.Episode?>(
+                future:
+                    // (ep.cachedMetaPath != null && ep.cachedMetaPath!.isNotEmpty)
+                    (ep.cachedMetaPath?.isNotEmpty ?? false)
+                    ? readEpisodeFromCacheJson(ep.cachedMetaPath!)
+                    : Future.value(null),
+                builder: (context, snap) {
+                  if (snap.connectionState == ConnectionState.waiting) {
+                    return const CircularProgressIndicator(); // Or any other loading indicator
+                  }
+                  if (snap.hasError) {
+                    return Text('Error: ${snap.error}'); // Show error message
+                  }
+                  final l10n = AppLocalizations.of(context)!;
+                  final showDate =
+                      snap.data?.showDate ?? ''; // bereits formatiert
+                  final base =
+                      '${l10n.downloads_status_done} • ${ep.id} - ${ep.localPath}';
+                  final text = showDate.isNotEmpty ? '$base · $showDate' : base;
+                  return Text(text);
+                },
               ),
-              trailing: IconButton(
-                tooltip: l10n.downloads_action_delete,
-                icon: const Icon(Icons.delete_outline),
-                onPressed: () => provider.removeLocalFile(ep.id),
+              trailing: PopupMenuButton<String>(
+                onSelected: (value) async {
+                  switch (value) {
+                    case 'play':
+                      final m = model.Episode(
+                        id: ep.id,
+                        podcastId: ep.podcastId,
+                        title: ep.title,
+                        description: '',
+                        audioUrl: ep.audioUrl,
+                        publishedAt: ep.publishedAt ?? DateTime.now(),
+                        duration: Duration.zero,
+                        hosts: const [],
+                        showDate: '',
+                      );
+                      // bevorzugt lokal (Provider liest cachedMetaPath bei Step 1)
+                      // ignore: use_build_context_synchronously
+                      context.read<EpisodeProvider>().playEpisode(
+                        m,
+                        queue: [m],
+                        preferLocal: true,
+                      );
+                      break;
+                    case 'open':
+                      if (ep.localPath != null && ep.localPath!.isNotEmpty) {
+                        _openInFolder(ep.localPath!);
+                      }
+                      break;
+                    case 'delete':
+                      // ignore: use_build_context_synchronously
+                      context.read<DownloadProvider>().removeLocalFile(ep.id);
+                      break;
+                  }
+                },
+                itemBuilder: (ctx) => [
+                  PopupMenuItem(
+                    value: 'play',
+                    child: Row(
+                      children: const [
+                        Icon(Icons.play_arrow, size: 18),
+                        SizedBox(width: 8),
+                        Text('Abspielen'),
+                      ],
+                    ),
+                  ),
+                  PopupMenuItem(
+                    value: 'open',
+                    child: Row(
+                      children: const [
+                        Icon(Icons.folder_open, size: 18),
+                        SizedBox(width: 8),
+                        Text('Im Ordner öffnen'),
+                      ],
+                    ),
+                  ),
+                  const PopupMenuDivider(),
+                  PopupMenuItem(
+                    value: 'delete',
+                    child: Row(
+                      children: const [
+                        Icon(Icons.delete_outline, size: 18),
+                        SizedBox(width: 8),
+                        Text('Löschen'),
+                      ],
+                    ),
+                  ),
+                ],
               ),
               onTap: () {
                 final m = model.Episode(
@@ -287,6 +384,7 @@ class _EpisodeListState extends State<EpisodeList> {
 
 class _DownloadButton extends StatelessWidget {
   const _DownloadButton({required this.episode});
+
   final model.Episode episode;
 
   @override
@@ -302,6 +400,13 @@ class _DownloadButton extends StatelessWidget {
     return StreamBuilder<Episode?>(
       stream: stream,
       builder: (context, snap) {
+        if (snap.connectionState == ConnectionState.waiting) {
+          return const SizedBox(
+            width: 24,
+            height: 24,
+            child: CircularProgressIndicator(strokeWidth: 2),
+          );
+        }
         final row = snap.data;
         final status =
             row?.status ??
@@ -347,5 +452,23 @@ class _DownloadButton extends StatelessWidget {
         }
       },
     );
+  }
+}
+
+void _openInFolder(String filePath) {
+  try {
+    if (Platform.isWindows) {
+      // zeigt die Datei im Explorer
+      Process.run('explorer', ['/select,', filePath]);
+    } else if (Platform.isMacOS) {
+      // zeigt die Datei im Finder
+      Process.run('open', ['-R', filePath]);
+    } else if (Platform.isLinux) {
+      // öffnet den Ordner (Datei wird ggf. nicht ausgewählt)
+      final dir = File(filePath).parent.path;
+      Process.run('xdg-open', [dir]);
+    }
+  } catch (_) {
+    // still – Debug-Only
   }
 }

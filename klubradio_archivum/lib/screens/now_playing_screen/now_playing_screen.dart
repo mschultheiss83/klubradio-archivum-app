@@ -53,6 +53,7 @@ class NowPlayingScreen extends StatelessWidget {
                           // Left: cover art
                           ImageUrl(
                             url: episode.imageUrl ?? "",
+                            path: episode.cachedImagePath ?? "",
                             width: coverSize,
                             height: coverSize,
                           ),
@@ -64,7 +65,7 @@ class NowPlayingScreen extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  '${episode.title} - ${episode.showDate}',
+                                  '${episode.displayTitle} - ${episode.showDate}',
                                   style: Theme.of(
                                     context,
                                   ).textTheme.headlineSmall,
@@ -95,7 +96,11 @@ class NowPlayingScreen extends StatelessWidget {
 
                   const SizedBox(height: 16),
                   // Progress + controls stay visible without overflow
-                  ProgressSlider(provider: provider),
+                  ProgressSlider(
+                    positionNotifier: provider.positionNotifier,
+                    totalDuration: provider.totalDuration ?? Duration.zero,
+                    onSeek: provider.seek,
+                  ),
                   const SizedBox(height: 12),
                   AudioPlayerControls(provider: provider),
                 ],

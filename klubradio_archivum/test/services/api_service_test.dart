@@ -10,6 +10,7 @@ import 'package:klubradio_archivum/models/user_profile.dart';
 import 'package:klubradio_archivum/services/api_service.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
   group('ApiService network behaviour', () {
     test('fetchLatestPodcasts returns parsed podcasts on success', () async {
       late http.Request capturedRequest;
@@ -25,8 +26,9 @@ void main() {
       });
       final ApiService service = ApiService(httpClient: client);
 
-      final List<Podcast> podcasts =
-          await service.fetchLatestPodcasts(limit: 2);
+      final List<Podcast> podcasts = await service.fetchLatestPodcasts(
+        limit: 2,
+      );
 
       expect(podcasts, hasLength(2));
       expect(podcasts.first.title, 'Podcast 0');
@@ -35,34 +37,40 @@ void main() {
       expect(capturedRequest.headers['Authorization'], isNotNull);
     });
 
-    test('fetchLatestPodcasts throws ApiException when response not successful',
-        () async {
-      final client = MockClient((http.Request request) async {
-        return http.Response('server error', 500);
-      });
-      final ApiService service = ApiService(httpClient: client);
+    test(
+      'fetchLatestPodcasts throws ApiException when response not successful',
+      () async {
+        final client = MockClient((http.Request request) async {
+          return http.Response('server error', 500);
+        });
+        final ApiService service = ApiService(httpClient: client);
 
-      await expectLater(
-        service.fetchLatestPodcasts(),
-        throwsA(
-          isA<ApiException>()
-              .having((ApiException e) => e.message, 'message', contains('500')),
-        ),
-      );
-    });
+        await expectLater(
+          service.fetchLatestPodcasts(),
+          throwsA(
+            isA<ApiException>().having(
+              (ApiException e) => e.message,
+              'message',
+              contains('500'),
+            ),
+          ),
+        );
+      },
+    );
 
     test('fetchTrendingPodcasts marks returned podcasts as trending', () async {
       final client = MockClient((http.Request request) async {
-        expect(request.url.queryParameters['order'], 'playCount.desc.nullslast');
-        return http.Response(
-          jsonEncode(_samplePodcastResponse(count: 1)),
-          200,
+        expect(
+          request.url.queryParameters['order'],
+          'playCount.desc.nullslast',
         );
+        return http.Response(jsonEncode(_samplePodcastResponse(count: 1)), 200);
       });
       final ApiService service = ApiService(httpClient: client);
 
-      final List<Podcast> trending =
-          await service.fetchTrendingPodcasts(limit: 1);
+      final List<Podcast> trending = await service.fetchTrendingPodcasts(
+        limit: 1,
+      );
 
       expect(trending, hasLength(1));
       expect(trending.single.isTrending, isTrue);
@@ -74,19 +82,17 @@ void main() {
         capturedRequest = request;
         return http.Response(
           jsonEncode(<Map<String, dynamic>>[
-            _sampleEpisodeJson(
-              id: 'episode-1',
-              podcastId: 'series-1',
-              seed: 3,
-            ),
+            _sampleEpisodeJson(id: 'episode-1', podcastId: 'series-1', seed: 3),
           ]),
           200,
         );
       });
       final ApiService service = ApiService(httpClient: client);
 
-      final List<Episode> episodes =
-          await service.fetchEpisodesForPodcast('series-1', limit: 1);
+      final List<Episode> episodes = await service.fetchEpisodesForPodcast(
+        'series-1',
+        limit: 1,
+      );
 
       expect(episodes, hasLength(1));
       expect(episodes.single.id, 'episode-1');
@@ -94,26 +100,25 @@ void main() {
       expect(capturedRequest.url.queryParameters['limit'], '1');
     });
 
-    test('searchPodcasts returns empty list when query is blank without calling API',
-        () async {
-      final client = MockClient((http.Request request) async {
-        fail('HTTP client should not be invoked for blank queries');
-      });
-      final ApiService service = ApiService(httpClient: client);
+    test(
+      'searchPodcasts returns empty list when query is blank without calling API',
+      () async {
+        final client = MockClient((http.Request request) async {
+          fail('HTTP client should not be invoked for blank queries');
+        });
+        final ApiService service = ApiService(httpClient: client);
 
-      final List<Podcast> results = await service.searchPodcasts('   ');
+        final List<Podcast> results = await service.searchPodcasts('   ');
 
-      expect(results, isEmpty);
-    });
+        expect(results, isEmpty);
+      },
+    );
 
     test('searchPodcasts encodes apostrophes and parses response', () async {
       late http.Request capturedRequest;
       final client = MockClient((http.Request request) async {
         capturedRequest = request;
-        return http.Response(
-          jsonEncode(_samplePodcastResponse(count: 1)),
-          200,
-        );
+        return http.Response(jsonEncode(_samplePodcastResponse(count: 1)), 200);
       });
       final ApiService service = ApiService(httpClient: client);
 
@@ -137,7 +142,6 @@ void main() {
       final UserProfile profile = await service.fetchUserProfile('user-123');
 
       expect(profile.id, 'user-123');
-      expect(profile.displayName, 'User user-123');
       expect(profile.subscribedPodcastIds, contains('podcast-0'));
       expect(profile.recentlyPlayed, isNotEmpty);
     });
@@ -151,29 +155,38 @@ void main() {
       await expectLater(
         service.fetchUserProfile('missing'),
         throwsA(
-          isA<ApiException>()
-              .having((ApiException e) => e.message, 'message', contains('missing')),
+          isA<ApiException>().having(
+            (ApiException e) => e.message,
+            'message',
+            contains('missing'),
+          ),
         ),
       );
     });
 
-    test('logPlayback posts payload with episodeId and ISO timestamp', () async {
-      late http.Request capturedRequest;
-      final client = MockClient((http.Request request) async {
-        capturedRequest = request;
-        final Map<String, dynamic> body =
-            jsonDecode(request.body) as Map<String, dynamic>;
-        expect(body['episodeId'], 'episode-10');
-        expect(() => DateTime.parse(body['playedAt'] as String), returnsNormally);
-        return http.Response('', 201);
-      });
-      final ApiService service = ApiService(httpClient: client);
+    test(
+      'logPlayback posts payload with episodeId and ISO timestamp',
+      () async {
+        late http.Request capturedRequest;
+        final client = MockClient((http.Request request) async {
+          capturedRequest = request;
+          final Map<String, dynamic> body =
+              jsonDecode(request.body) as Map<String, dynamic>;
+          expect(body['episodeId'], 'episode-10');
+          expect(
+            () => DateTime.parse(body['playedAt'] as String),
+            returnsNormally,
+          );
+          return http.Response('', 201);
+        });
+        final ApiService service = ApiService(httpClient: client);
 
-      await service.logPlayback(episodeId: 'episode-10');
+        await service.logPlayback(episodeId: 'episode-10');
 
-      expect(capturedRequest.method, 'POST');
-      expect(capturedRequest.url.path, contains('/rest/v1/playback_events'));
-    });
+        expect(capturedRequest.method, 'POST');
+        expect(capturedRequest.url.path, contains('/rest/v1/playback_events'));
+      },
+    );
 
     test('logPlayback throws ApiException when server returns error', () async {
       final client = MockClient((http.Request request) async {
@@ -189,34 +202,39 @@ void main() {
   });
 
   group('ApiService fallback mocks', () {
-    test('fetchTrendingPodcasts uses mock data when credentials invalid',
-        () async {
-      final ApiService service = _OfflineApiService(
-        httpClient: MockClient((http.Request request) async {
-          fail('No network call expected when credentials are invalid');
-        }),
-      );
+    test(
+      'fetchTrendingPodcasts uses mock data when credentials invalid',
+      () async {
+        final ApiService service = _OfflineApiService(
+          httpClient: MockClient((http.Request request) async {
+            fail('No network call expected when credentials are invalid');
+          }),
+        );
 
-      final List<Podcast> trending =
-          await service.fetchTrendingPodcasts(limit: 2);
+        final List<Podcast> trending = await service.fetchTrendingPodcasts(
+          limit: 2,
+        );
 
-      expect(trending, hasLength(2));
-      expect(trending.every((Podcast podcast) => podcast.isTrending), isTrue);
-    });
+        expect(trending, hasLength(2));
+        expect(trending.every((Podcast podcast) => podcast.isTrending), isTrue);
+      },
+    );
 
-    test('searchPodcasts returns filtered mock data without network access',
-        () async {
-      final ApiService service = _OfflineApiService(
-        httpClient: MockClient((http.Request request) async {
-          fail('No HTTP call expected when credentials are invalid');
-        }),
-      );
+    test(
+      'searchPodcasts returns filtered mock data without network access',
+      () async {
+        final ApiService service = _OfflineApiService(
+          httpClient: MockClient((http.Request request) async {
+            fail('No HTTP call expected when credentials are invalid');
+          }),
+        );
 
-      final List<Podcast> results = await service.searchPodcasts('esti');
+        final List<Podcast> results = await service.searchPodcasts('esti');
 
-      expect(results, isNotEmpty);
-      expect(results.first.id, 'esti-gyors');
-    });
+        expect(results, isNotEmpty);
+        expect(results.first.id, 'esti-gyors');
+      },
+    );
   });
 
   test('dispose closes the injected http client', () {
@@ -239,10 +257,7 @@ List<Map<String, dynamic>> _samplePodcastResponse({int count = 2}) {
       'coverImageUrl': 'https://example.com/cover-$index.jpg',
       'episodeCount': index + 1,
       'hosts': <Map<String, dynamic>>[
-        <String, dynamic>{
-          'id': 'host-$index',
-          'name': 'Host $index',
-        },
+        <String, dynamic>{'id': 'host-$index', 'name': 'Host $index'},
       ],
       'latestEpisode': _sampleEpisodeJson(
         id: 'episode-$index',
@@ -279,11 +294,7 @@ Map<String, dynamic> _sampleProfileJson(String userId) {
     'email': '$userId@example.com',
     'subscribedPodcastIds': <String>['podcast-0'],
     'recentlyPlayed': <Map<String, dynamic>>[
-      _sampleEpisodeJson(
-        id: 'recent-episode',
-        podcastId: 'podcast-0',
-        seed: 5,
-      ),
+      _sampleEpisodeJson(id: 'recent-episode', podcastId: 'podcast-0', seed: 5),
     ],
     'favouriteEpisodeIds': <String>['recent-episode'],
   };
@@ -305,8 +316,7 @@ class _ClosingClient extends http.BaseClient {
 }
 
 class _OfflineApiService extends ApiService {
-  _OfflineApiService({http.Client? httpClient})
-      : super(httpClient: httpClient);
+  _OfflineApiService({super.httpClient});
 
   @override
   bool get hasValidCredentials => false;

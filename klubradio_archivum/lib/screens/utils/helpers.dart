@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:klubradio_archivum/l10n/app_localizations.dart';
-import '../../models/episode.dart';
+import 'package:klubradio_archivum/models/episode.dart';
 
 String formatDate(DateTime dateTime, {String locale = 'hu'}) {
   final DateFormat formatter = DateFormat.yMMMMEEEEd(locale).add_Hm();
@@ -55,3 +55,7 @@ String formatProgress(double progress) {
   final int percentage = (progress * 100).clamp(0, 100).round();
   return '$percentage%';
 }
+
+// Hilfsfunktion (kannst du in einen Utils-Helper auslagern)
+String displayTitleFor(Episode e) =>
+    (e.cachedTitle?.isNotEmpty ?? false) ? e.cachedTitle! : e.title;

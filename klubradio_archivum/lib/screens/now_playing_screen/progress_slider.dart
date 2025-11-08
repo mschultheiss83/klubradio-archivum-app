@@ -1,42 +1,52 @@
 import 'package:flutter/material.dart';
 
-import '../../providers/episode_provider.dart';
 import '../utils/helpers.dart';
 
 class ProgressSlider extends StatelessWidget {
-  const ProgressSlider({super.key, required this.provider});
+  const ProgressSlider({
+    super.key,
+    required this.positionNotifier,
+    required this.totalDuration,
+    required this.onSeek,
+  });
 
-  final EpisodeProvider provider;
+  final ValueNotifier<Duration> positionNotifier;
+  final Duration totalDuration;
+  final Function(Duration) onSeek;
 
   @override
   Widget build(BuildContext context) {
-    final Duration position = provider.currentPosition;
-    final Duration total = provider.totalDuration ?? Duration.zero;
-    final double maxSeconds = total.inSeconds > 0
-        ? total.inSeconds.toDouble()
-        : 1;
-    final double value = position.inSeconds
-        .clamp(0, total.inSeconds)
-        .toDouble();
+    return ValueListenableBuilder<Duration>(
+      valueListenable: positionNotifier,
+      builder: (context, position, child) {
+        final double maxSeconds = totalDuration.inSeconds > 0
+            ? totalDuration.inSeconds.toDouble()
+            : 1.0;
+        final double value = position.inSeconds
+            .clamp(0, totalDuration.inSeconds)
+            .toDouble();
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Slider(
-          value: value,
-          max: maxSeconds,
-          onChanged: (double newValue) {
-            provider.seek(Duration(seconds: newValue.toInt()));
-          },
-        ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Text(formatDurationPrecise(position)),
-            Text(formatDurationPrecise(total)),
+            Slider(
+              value: value,
+              max: maxSeconds,
+              onChanged: (double newValue) {
+                onSeek(Duration(seconds: newValue.toInt()));
+              },
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Text(formatDurationPrecise(position)),
+                Text(formatDurationPrecise(totalDuration)),
+              ],
+            ),
           ],
-        ),
-      ],
+        );
+      },
     );
   }
 }
+

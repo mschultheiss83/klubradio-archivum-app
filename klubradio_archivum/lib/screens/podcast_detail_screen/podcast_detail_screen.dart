@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
+import 'package:klubradio_archivum/db/app_database.dart' as db;
 import 'package:klubradio_archivum/l10n/app_localizations.dart';
 import 'package:klubradio_archivum/services/api_service.dart';
-
-import '../../models/episode.dart';
-import '../../models/podcast.dart';
-import '../../providers/podcast_provider.dart';
-import '../widgets/stateful/episode_list.dart';
+import 'package:klubradio_archivum/providers/podcast_provider.dart';
+import 'package:klubradio_archivum/models/episode.dart';
+import 'package:klubradio_archivum/models/podcast.dart';
+import 'package:klubradio_archivum/screens/widgets/stateful/episode_list.dart';
 import 'podcast_info_card.dart';
+import 'package:klubradio_archivum/providers/subscription_provider.dart';
 
 class PodcastDetailScreen extends StatefulWidget {
   const PodcastDetailScreen({super.key, required this.podcast});
@@ -32,52 +34,92 @@ class _PodcastDetailScreenState extends State<PodcastDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final provider = context.watch<PodcastProvider>();
-    final bool isSubscribed = provider.isSubscribed(widget.podcast.id);
+    final subscriptionProvider = context.watch<SubscriptionProvider>();
 
     return Scaffold(
-      appBar: AppBar(title: Text(widget.podcast.title)),
+      appBar: AppBar(
+        title: Text(widget.podcast.title),
+        actions: [
+          StreamBuilder<db.Subscription?>(
+            stream: subscriptionProvider.watchSubscription(widget.podcast.id),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Padding(
+                  padding: EdgeInsets.only(right: 8.0),
+                  child: SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                );
+              }
+              final bool isSubscribed = snapshot.data?.active ?? false;
+
+              return Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: FilledButton.icon(
+                  onPressed: subscriptionProvider.busy
+                      ? null
+                      : () async {
+                          final snack = ScaffoldMessenger.of(context);
+                          try {
+                            await subscriptionProvider.toggleSubscription(
+                              widget.podcast.id,
+                              isSubscribed,
+                            );
+                            if (!context.mounted) return;
+
+                            snack.showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  !isSubscribed
+                                      ? l10n.podcastDetailScreenSubscribeSuccess
+                                      : l10n.podcastDetailScreenUnsubscribeSuccess,
+                                ),
+                              ),
+                            );
+                          } catch (e) {
+                            snack.showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  l10n.podcastDetailScreenErrorMessage(
+                                    e.toString(),
+                                  ),
+                                ),
+                                backgroundColor: Theme.of(
+                                  context,
+                                ).colorScheme.error,
+                              ),
+                            );
+                          }
+                        },
+                  icon: subscriptionProvider.busy
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : Icon(isSubscribed ? Icons.check : Icons.add),
+                  label: Text(
+                    isSubscribed
+                        ? l10n.podcastDetailScreenUnsubscribeButton
+                        : l10n.podcastDetailScreenSubscribeButton,
+                  ),
+                  style: FilledButton.styleFrom(
+                    visualDensity: VisualDensity.compact,
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: <Widget>[
           PodcastInfoCard(podcast: widget.podcast),
-          const SizedBox(height: 24),
-          FilledButton(
-            style: isSubscribed
-                ? FilledButton.styleFrom(
-                    backgroundColor: Theme.of(
-                      context,
-                    ).colorScheme.errorContainer,
-                    foregroundColor: Theme.of(
-                      context,
-                    ).colorScheme.onErrorContainer,
-                  )
-                : null,
-            onPressed: () {
-              final snack = ScaffoldMessenger.of(context);
-              if (isSubscribed) {
-                provider.unsubscribe(widget.podcast.id);
-                snack.showSnackBar(
-                  SnackBar(
-                    content: Text(l10n.podcastDetailScreenUnsubscribeSuccess),
-                  ),
-                );
-              } else {
-                provider.subscribe(widget.podcast.id);
-                snack.showSnackBar(
-                  SnackBar(
-                    content: Text(l10n.podcastDetailScreenSubscribeSuccess),
-                  ),
-                );
-              }
-            },
-            child: Text(
-              isSubscribed
-                  ? l10n.podcastDetailScreenUnsubscribeButton
-                  : l10n.podcastDetailScreenSubscribeButton,
-            ),
-          ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 12),
           FutureBuilder<List<Episode>>(
             future: _episodesFuture,
             builder: (context, snapshot) {

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:just_audio/just_audio.dart';
 
@@ -29,7 +30,13 @@ class AudioPlayerService {
   Future<void> loadEpisode(Episode episode, {bool autoplay = true}) async {
     _currentEpisode = episode;
     try {
-      await _player.setUrl(episode.audioUrl);
+      final local = episode.localFilePath;
+      if (local != null && local.isNotEmpty && await File(local).exists()) {
+        await _player.setFilePath(local);
+      } else {
+        await _player.setUrl(episode.audioUrl);
+      }
+
       if (autoplay) {
         await _player.play();
       }

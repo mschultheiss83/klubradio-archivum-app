@@ -262,6 +262,12 @@ abstract class AppLocalizations {
   /// **'Subscribe'**
   String get podcastDetailSubscribeButton;
 
+  /// No description provided for @homeScreenSubscribedPodcastsEmptyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'No subscriptions yet — discover podcasts and tap “Subscribe”.'**
+  String get homeScreenSubscribedPodcastsEmptyHint;
+
   /// Section title for subscribed podcasts on the home screen.
   ///
   /// In en, this message translates to:
@@ -628,11 +634,23 @@ abstract class AppLocalizations {
   /// **'Subscribed'**
   String get podcastListItem_subscribed;
 
+  /// No description provided for @podcastListItem_unsubscribe.
+  ///
+  /// In en, this message translates to:
+  /// **'Unsubscribe'**
+  String get podcastListItem_unsubscribe;
+
   /// No description provided for @podcastListItem_subscribe.
   ///
   /// In en, this message translates to:
   /// **'Subscribe'**
   String get podcastListItem_subscribe;
+
+  /// No description provided for @podcastListItem_unsubscribed.
+  ///
+  /// In en, this message translates to:
+  /// **'Unsubscribed'**
+  String get podcastListItem_unsubscribed;
 
   /// No description provided for @podcastListItem_subtitleFallback.
   ///
@@ -766,30 +784,6 @@ abstract class AppLocalizations {
   /// **'Wi-Fi only'**
   String get settings_wifi_only;
 
-  /// No description provided for @settings_max_parallel.
-  ///
-  /// In en, this message translates to:
-  /// **'Max parallel downloads'**
-  String get settings_max_parallel;
-
-  /// No description provided for @settings_keep_latest.
-  ///
-  /// In en, this message translates to:
-  /// **'Keep latest episodes'**
-  String get settings_keep_latest;
-
-  /// No description provided for @settings_delete_after_hours.
-  ///
-  /// In en, this message translates to:
-  /// **'Delete after (hours)'**
-  String get settings_delete_after_hours;
-
-  /// No description provided for @settings_zero_off.
-  ///
-  /// In en, this message translates to:
-  /// **'0 = off'**
-  String get settings_zero_off;
-
   /// No description provided for @settings_wifi_only_mobile_default.
   ///
   /// In en, this message translates to:
@@ -801,6 +795,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Default on desktop: OFF'**
   String get settings_wifi_only_desktop_default;
+
+  /// No description provided for @settings_max_parallel.
+  ///
+  /// In en, this message translates to:
+  /// **'Max concurrent downloads'**
+  String get settings_max_parallel;
 
   /// No description provided for @settings_retention_section.
   ///
@@ -817,26 +817,116 @@ abstract class AppLocalizations {
   /// No description provided for @settings_keep_latest_label.
   ///
   /// In en, this message translates to:
-  /// **'Keep latest n'**
+  /// **'Keep only the last n'**
   String get settings_keep_latest_label;
+
+  /// No description provided for @settings_keep_latest.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep latest episodes'**
+  String get settings_keep_latest;
 
   /// No description provided for @settings_keep_latest_hint.
   ///
   /// In en, this message translates to:
-  /// **'Keep the most recent n episodes.'**
+  /// **'Keeps the newest n episodes per podcast.'**
   String get settings_keep_latest_hint;
 
   /// No description provided for @settings_delete_after_heard_label.
   ///
   /// In en, this message translates to:
-  /// **'Delete after “played” in x hours'**
+  /// **'Delete x hours after listened'**
   String get settings_delete_after_heard_label;
+
+  /// No description provided for @settings_delete_after_hours.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete after (hours)'**
+  String get settings_delete_after_hours;
 
   /// No description provided for @settings_delete_after_hint.
   ///
   /// In en, this message translates to:
-  /// **'Once an episode was played, remove it automatically after x hours.'**
+  /// **'Automatically remove x hours after playback.'**
   String get settings_delete_after_hint;
+
+  /// No description provided for @settings_zero_off.
+  ///
+  /// In en, this message translates to:
+  /// **'0 = OFF'**
+  String get settings_zero_off;
+
+  /// No description provided for @settings_autodownload_subscriptions.
+  ///
+  /// In en, this message translates to:
+  /// **'Autodownload subscribed episodes'**
+  String get settings_autodownload_subscriptions;
+
+  /// No description provided for @settings_autodownload_subscriptions_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatically download new episodes from subscribed podcasts.'**
+  String get settings_autodownload_subscriptions_hint;
+
+  /// No description provided for @profileScreenNoRecentlyPlayed.
+  ///
+  /// In en, this message translates to:
+  /// **'No recently played episodes yet.'**
+  String get profileScreenNoRecentlyPlayed;
+
+  /// No description provided for @profileScreenSubscriptionsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscribed shows'**
+  String get profileScreenSubscriptionsTitle;
+
+  /// No description provided for @profileScreenAppIdTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'App ID'**
+  String get profileScreenAppIdTitle;
+
+  /// No description provided for @profileScreenIdCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'ID copied'**
+  String get profileScreenIdCopied;
+
+  /// No description provided for @profileScreenPlaybackSpeedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Playback speed'**
+  String get profileScreenPlaybackSpeedTitle;
+
+  /// No description provided for @profileScreenPlaybackSpeedValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{value}×'**
+  String profileScreenPlaybackSpeedValue(Object value);
+
+  /// No description provided for @commonOk.
+  ///
+  /// In en, this message translates to:
+  /// **'OK'**
+  String get commonOk;
+
+  /// No description provided for @commonCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get commonCancel;
+
+  /// No description provided for @commonCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Count'**
+  String get commonCount;
+
+  /// No description provided for @commonDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Fertig'**
+  String get commonDone;
 }
 
 class _AppLocalizationsDelegate

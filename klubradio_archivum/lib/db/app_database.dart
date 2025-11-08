@@ -10,14 +10,15 @@ part 'app_database.g.dart';
 /// ---------- Tabellen ----------
 
 class Subscriptions extends Table {
-  TextColumn get podcastId => text()(); // Primary Key
-  TextColumn get title => text()();
-  TextColumn get imageUrl => text().nullable()();
-  IntColumn get autoDownloadN =>
-      integer().withDefault(const Constant(5))(); // 1/3/5/20/100
-  IntColumn get keepLatestN => integer().nullable()(); // z.B. 5
-  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  TextColumn get podcastId => text()();
+  BoolColumn get active => boolean().withDefault(const Constant(true))();
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get subscribedAt =>
+      dateTime().withDefault(currentDateAndTime)();
+
+  IntColumn get autoDownloadN => integer().nullable()();
+  TextColumn get lastHeardEpisodeId => text().nullable()();
+  TextColumn get lastDownloadedEpisodeId => text().nullable()();
 
   @override
   Set<Column> get primaryKey => {podcastId};
@@ -44,6 +45,11 @@ class Episodes extends Table {
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
 
+  // Offline-Cache (optional)
+  TextColumn get cachedTitle => text().nullable()(); // lokaler Anzeigename
+  TextColumn get cachedImagePath => text().nullable()(); // Pfad zu 500x500 JPG
+  TextColumn get cachedMetaPath => text().nullable()(); // Pfad zu JSON
+
   BoolColumn get resumable => boolean().nullable()(); // true/false/null
 
   @override
@@ -62,6 +68,7 @@ class Settings extends Table {
   IntColumn get deleteAfterHours =>
       integer().nullable()(); // z.B. 24 (am nächsten Tag)
   IntColumn get keepLatestN => integer().nullable()();
+  BoolColumn get autodownloadSubscribed => boolean().withDefault(const Constant(false))();
 
   @override
   Set<Column> get primaryKey => {id};
@@ -75,7 +82,6 @@ LazyDatabase _openConnection() {
         ? await getApplicationSupportDirectory()
         : await getApplicationDocumentsDirectory();
     final file = File(p.join(dir.path, 'klubradio.db'));
-    // Stabil + Threaded I/O
     return NativeDatabase.createInBackground(file);
   });
 }
@@ -85,20 +91,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 3;
-
-  @override
-  MigrationStrategy get migration => MigrationStrategy(
-    onCreate: (m) async => await m.createAll(),
-    onUpgrade: (m, from, to) async {
-      if (from < 2) {
-        await m.addColumn(settings, settings.keepLatestN);
-      }
-      if (from < 3) {
-        await m.addColumn(episodes, episodes.resumable);
-      }
-    },
-  );
+  int get schemaVersion => 1;
 
   /// Convenience: Timestamps aktualisieren
   Future<int> touchEpisode(String id) =>

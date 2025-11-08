@@ -34,7 +34,7 @@ class AppBottomNavigationBar extends StatelessWidget {
         color: cs.surface,
         border: Border(
           top: BorderSide(
-            color: cs.outlineVariant.withOpacity(0.5),
+            color: cs.outlineVariant.withAlpha((255 * 0.5).round()),
             width: 0.6,
           ),
         ),
@@ -81,7 +81,7 @@ class AppBottomNavigationBar extends StatelessWidget {
                 onDestinationSelected: onTap,
                 height: isSmall ? 60 : 68,
                 backgroundColor: cs.surface,
-                indicatorColor: cs.primary.withOpacity(0.12),
+                indicatorColor: cs.primary.withAlpha((255 * 0.12).round()),
                 labelBehavior: NavigationDestinationLabelBehavior
                     .alwaysHide, // we show label above
                 destinations: <NavigationDestination>[

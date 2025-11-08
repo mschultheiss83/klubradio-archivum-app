@@ -126,6 +126,7 @@
     "description": "Gomb felirat a podcastre való feliratkozáshoz."
   },
 
+  "homeScreenSubscribedPodcastsEmptyHint": "Még nincsenek feliratkozások – fedezd fel a podcasteket és koppints a „Feliratkozás” gombra.",
   "homeScreenSubscribedPodcastsTitle": "Feliratkozott műsorok",
   "@homeScreenSubscribedPodcastsTitle": {
     "description": "Címsor a feliratkozott műsorok szekcióhoz a főképernyőn."
@@ -449,7 +450,9 @@
   },
 
   "podcastListItem_subscribed": "Feliratkozva",
+  "podcastListItem_unsubscribe": "Leiratkozás",
   "podcastListItem_subscribe": "Feliratkozás",
+  "podcastListItem_unsubscribed": "Leiratkozva",
   "podcastListItem_subtitleFallback": "Klubrádió műsor",
   "podcastListItem_openDetails": "Műsor részleteinek megnyitása",
 
@@ -474,20 +477,30 @@
   "ep_action_download": "Letöltés",
 
   "settings_title_downloads": "Letöltések",
-  "settings_wifi_only": "Csak Wi-Fi",
-  "settings_max_parallel": "Párhuzamos letöltések (max.)",
-  "settings_keep_latest": "Legutóbbi epizódok megtartása",
-  "settings_delete_after_hours": "Törlés ennyi óra után",
-  "settings_zero_off": "0 = kikapcsolva",
+  "settings_wifi_only": "Csak Wi-Fi-n",
   "settings_wifi_only_mobile_default": "Alapértelmezett mobilon: BE",
   "settings_wifi_only_desktop_default": "Alapértelmezett asztali gépen: KI",
+  "settings_max_parallel": "Max. párhuzamos letöltés",
   "settings_retention_section": "Megőrzés",
-  "settings_keep_all": "Mindet megtartani",
+  "settings_keep_all": "Mindet megtartja",
   "settings_keep_latest_label": "Csak az utolsó n",
-  "settings_keep_latest_hint": "Tartsd meg a legutóbbi n epizódot.",
-  "settings_delete_after_heard_label": "Lejátszás után törlés x órán belül",
-  "settings_delete_after_hint": "Ha egy epizód le lett játszva, x óra múlva automatikusan törlődik."
-
-
-
+  "settings_keep_latest": "Legújabb epizódok megtartása",
+  "settings_keep_latest_hint": "Podcastonként a legújabb n epizód marad meg.",
+  "settings_delete_after_heard_label": "Törlés x órával lejátszás után",
+  "settings_delete_after_hours": "Törlés ennyi óra után",
+  "settings_delete_after_hint": "Automatikus eltávolítás x óra után.",
+    "settings_zero_off": "0 = KI",
+    "settings_autodownload_subscriptions": "Feliratkozott epizódok automatikus letöltése",
+    "settings_autodownload_subscriptions_hint": "Automatikusan letölti az új epizódokat a feliratkozott podcastokból.",
+  
+    "profileScreenNoRecentlyPlayed": "Még nincs nemrég hallgatott epizód.",
+  "profileScreenSubscriptionsTitle": "Feliratkozott műsorok",
+  "profileScreenAppIdTitle": "Alkalmazás-azonosító",
+  "profileScreenIdCopied": "Azonosító kimásolva",
+  "profileScreenPlaybackSpeedTitle": "Lejátszási sebesség",
+  "profileScreenPlaybackSpeedValue": "{value}×",
+  "commonOk": "OK",
+  "commonCancel": "Mégse",
+  "commonCount": "Darab",
+  "commonDone": "Kész"
 }

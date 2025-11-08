@@ -1,0 +1,37 @@
+{
+  "advanced": {
+    "autoConfigureMemory": true
+  },
+  "mcpServers": {
+    "memory": {
+      "trust": true,
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-memory"
+      ]
+    },
+    "sequential-thinking": {
+      "trust": true,
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-sequential-thinking"
+      ]
+    }
+  },
+  "tools": {
+    "autoAccept": false,
+    "shell": {
+      "showColor": true
+    }
+  },
+  "ui": {
+    "showMemoryUsage": true,
+    "showLineNumbers": true,
+    "footer": {
+      "hideContextPercentage": false
+    },
+    "showStatusInTitle": true
+  }
+}

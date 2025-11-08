@@ -1,16 +1,78 @@
 // lib/services/download_service.dart
 import 'dart:async';
 import 'dart:io';
-
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:image/image.dart' as img;
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:drift/drift.dart' show Value;
 import 'package:background_downloader/background_downloader.dart';
-import 'package:http/http.dart' as http;
-
 import 'package:klubradio_archivum/db/app_database.dart';
 import 'package:klubradio_archivum/db/daos.dart';
 import 'package:klubradio_archivum/models/episode.dart' as model;
+import 'package:klubradio_archivum/providers/episode_provider.dart';
+import 'package:klubradio_archivum/services/api_service.dart';
+
+class _EpisodeMetaLite {
+  _EpisodeMetaLite({
+    required this.id,
+    required this.podcastId,
+    required this.title,
+    required this.description,
+    required this.audioUrl,
+    required this.publishedAt,
+    required this.showDate,
+    required this.durationSeconds,
+    required this.hosts,
+    this.imageUrl,
+  });
+
+  final String id;
+  final String podcastId;
+  final String title;
+  final String description;
+  final String audioUrl;
+  final DateTime publishedAt;
+  final String showDate;
+  final int durationSeconds;
+  final List<String> hosts;
+  final String? imageUrl;
+
+  factory _EpisodeMetaLite.fromModel(model.Episode e) => _EpisodeMetaLite(
+    id: e.id,
+    podcastId: e.podcastId,
+    title: e.displayTitle, // cachedTitle bevorzugt
+    description: e.description,
+    audioUrl: e.audioUrl,
+    publishedAt: e.publishedAt,
+    showDate: e.showDate,
+    durationSeconds: e.duration.inSeconds,
+    hosts: e.hosts,
+    imageUrl: e.imageUrl,
+  );
+
+  Map<String, dynamic> toJson({
+    String? cachedImageFile,
+    String? mp3File,
+    int schemaVersion = 1,
+  }) => {
+    'schemaVersion': schemaVersion,
+    'id': id,
+    'podcastId': podcastId,
+    'title': title,
+    'description': description,
+    'audioUrl': audioUrl,
+    'publishedAt': publishedAt.toIso8601String(),
+    'showDate': showDate,
+    'duration': durationSeconds,
+    'hosts': hosts,
+    'imageUrl': imageUrl ?? '',
+    'cachedImageFile': cachedImageFile ?? '',
+    'mp3File': mp3File ?? '',
+    'createdAt': DateTime.now().toIso8601String(),
+  };
+}
 
 /// Integer-Status in der DB
 class EpisodeStatusDB {
@@ -29,6 +91,8 @@ class DownloadService {
     required this.subscriptionsDao,
     required this.settingsDao,
     required this.retentionDao,
+    required this.episodeProvider,
+    required this.apiService,
   });
 
   final AppDatabase db;
@@ -36,13 +100,22 @@ class DownloadService {
   final SubscriptionsDao subscriptionsDao;
   final SettingsDao settingsDao;
   final RetentionDao retentionDao;
+  final EpisodeProvider episodeProvider;
+  final ApiService apiService;
 
   late FileDownloader _downloader;
   StreamSubscription<TaskUpdate>? _sub;
+  Timer? _autodownloadTimer;
 
   final Map<String, DownloadTask> _tasksByEpisodeId = {};
+  final Map<String, String?> _imageUrlHintByEpisodeId = {};
+  final Map<String, _EpisodeMetaLite> _metaHintByEpisodeId = {};
+
   final Completer<void> _ready = Completer<void>();
   bool _disposed = false;
+  static const _relDir = 'Klubradio';
+  String _podcastSubdir(String podcastId) => p.join(_relDir, podcastId);
+  String _episodeMp3Name(String episodeId) => '$episodeId.mp3';
 
   /// Muss genau einmal aufgerufen werden. Lädt Konfig & startet Eventstream.
   Future<void> init() async {
@@ -58,25 +131,31 @@ class DownloadService {
     _sub = _downloader.updates.listen(_onUpdate, onError: (_) {});
     await _downloader.start();
 
+    _autodownloadTimer = Timer.periodic(
+      const Duration(minutes: 1),
+      (_) => checkAutodownloads(),
+    );
+
     if (!_ready.isCompleted) _ready.complete();
   }
 
   Future<void> dispose() async {
     _disposed = true;
     await _sub?.cancel();
-  }
-
-  static const _relDir = 'Klubradio';
-
-  Future<String> _composeLocalPath(String filename) async {
-    final base =
-        await getApplicationSupportDirectory(); // Win/macOS/Linux/iOS/Android
-    final path = '${base.path}/$_relDir/$filename';
-    return path;
+    _autodownloadTimer?.cancel();
   }
 
   Future<void> enqueueEpisode(model.Episode ep) async {
     await _ready.future;
+    final existingSub = await subscriptionsDao.getById(ep.podcastId);
+    if (existingSub == null) {
+      await subscriptionsDao.upsert(
+        SubscriptionsCompanion.insert(
+          podcastId: ep.podcastId,
+          active: const Value(false),
+        ),
+      );
+    }
     if (_disposed) return;
     final isResumable = await _checkResumable(ep.audioUrl);
 
@@ -95,13 +174,14 @@ class DownloadService {
 
     final settings = await settingsDao.getOne();
     final wifiOnly = settings?.wifiOnly ?? true;
-    final filename = '${ep.id}.mp3';
+    final subdir = _podcastSubdir(ep.podcastId);
+    final filename = _episodeMp3Name(ep.id);
 
     final task = DownloadTask(
       url: ep.audioUrl,
       filename: filename,
       baseDirectory: BaseDirectory.applicationSupport,
-      directory: _relDir,
+      directory: subdir,
       updates: Updates.statusAndProgress,
       retries: 3,
       allowPause: isResumable,
@@ -109,10 +189,12 @@ class DownloadService {
       metaData: 'episodeId=${ep.id}',
     );
 
+    _imageUrlHintByEpisodeId[ep.id] = ep.imageUrl;
+    _metaHintByEpisodeId[ep.id] = _EpisodeMetaLite.fromModel(ep);
     _tasksByEpisodeId[ep.id] = task;
     if (task.baseDirectory == BaseDirectory.applicationSupport) {
       final base = await getApplicationSupportDirectory();
-      final absDir = p.join(base.path, task.directory!);
+      final absDir = p.join(base.path, task.directory);
       await Directory(absDir).create(recursive: true);
     }
 
@@ -187,40 +269,50 @@ class DownloadService {
           await episodesDao.setFailed(episodeId);
           break;
         case TaskStatus.complete:
-          final localPath = await _finalPathForTask(task as DownloadTask);
-          final exists = await File(localPath).exists();
-          await episodesDao.setCompleted(episodeId, localPath);
-          final epRow = await episodesDao.getById(episodeId);
-          if (epRow != null) {
-            final plan = await retentionDao.computePlanForPodcast(
-              epRow.podcastId,
-            );
-            for (final id in plan.toDeleteIds) {
-              await removeLocalFile(id);
-            }
-          }
-          print('COMPLETE id=$episodeId path: $localPath exists=$exists');
+          {
+            final localPath = await _finalPathForTask(task as DownloadTask);
+            await episodesDao.setCompleted(episodeId, localPath);
+            final dirPath = p.dirname(localPath);
+            final meta = _metaHintByEpisodeId[episodeId];
+            if (meta != null) {
+              // JPG + JSON (mit relativen Verweisen) schreiben
+              final cache = await _writeEpisodeCache(
+                dirPath: dirPath, // <-- exakt der Ordner der MP3
+                meta: meta, // enthält podcastId, title, showDate, hosts, ...
+              );
 
-          break;
+              await episodesDao.setCachedMeta(
+                episodeId,
+                title: meta.title, // cachedTitle
+                imagePath: cache.imagePath, // ABSOLUT
+                metaPath: cache.jsonPath, // ABSOLUT
+              );
+
+              _metaHintByEpisodeId.remove(episodeId);
+            }
+
+            // nach dem Caching aufräumen:
+            _imageUrlHintByEpisodeId.remove(episodeId);
+
+            // (Deine Retention-Logik anschließend wie gehabt)
+            final epRow = await episodesDao.getById(episodeId);
+            if (epRow != null) {
+              final plan = await retentionDao.computePlanForPodcast(
+                epRow.podcastId,
+              );
+              for (final id in plan.toDeleteIds) {
+                await removeLocalFile(id);
+              }
+            }
+            // Notify EpisodeProvider that the episode has been downloaded
+            episodeProvider.onEpisodeDownloaded(episodeId, localPath);
+            break;
+          }
         default:
           break;
       }
     } else if (u is TaskProgressUpdate) {
       await episodesDao.setProgress(episodeId, u.progress);
-    }
-  }
-
-  Future<String> _resolveSaveDir() async {
-    if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
-      final dir = await getApplicationSupportDirectory();
-      final path = '${dir.path}/Klubradio';
-      await Directory(path).create(recursive: true);
-      return path;
-    } else {
-      final dir = await getApplicationDocumentsDirectory();
-      final path = '${dir.path}/Klubradio';
-      await Directory(path).create(recursive: true);
-      return path;
     }
   }
 
@@ -242,7 +334,7 @@ class DownloadService {
     }
 
     // 2) zusammensetzen: base + (relatives) directory + filename
-    final relDir = task.directory ?? '';
+    final relDir = task.directory;
     return p.join(base.path, relDir, task.filename);
   }
 
@@ -264,6 +356,37 @@ class DownloadService {
     await episodesDao.clearLocalFile(episodeId);
   }
 
+  Future<void> checkAutodownloads() async {
+    if (_disposed) return;
+    final settings = await settingsDao.getOne();
+    if (settings?.autodownloadSubscribed ?? false) {
+      final activeSubscriptions = await subscriptionsDao.watchAllActive().first;
+      for (final sub in activeSubscriptions) {
+        await autodownloadPodcast(sub.podcastId);
+      }
+    }
+  }
+
+  Future<int> autodownloadPodcast(String podcastId) async {
+    // Fetch latest episodes for this podcast from the API
+    final latestEpisodes = await apiService.fetchEpisodesForPodcast(podcastId);
+
+    // Get already downloaded episodes for this podcast
+    final downloadedEpisodes =
+        await episodesDao.getEpisodesByPodcastId(podcastId);
+    final downloadedEpisodeIds = downloadedEpisodes.map((e) => e.id).toSet();
+
+    int downloadCount = 0;
+    for (final episode in latestEpisodes) {
+      if (!downloadedEpisodeIds.contains(episode.id)) {
+        // This is a new episode, enqueue it for download
+        await enqueueEpisode(episode);
+        downloadCount++;
+      }
+    }
+    return downloadCount;
+  }
+
   Future<bool> _checkResumable(String url) async {
     try {
       final resp = await http.head(Uri.parse(url));
@@ -272,5 +395,51 @@ class DownloadService {
     } catch (_) {
       return false;
     }
+  }
+
+  Future<({String? imagePath, String jsonPath})> _writeEpisodeCache({
+    required String dirPath,
+    required _EpisodeMetaLite meta,
+  }) async {
+    String? imagePath;
+    String? imageFile;
+    // 1) Cover (optional)
+    if ((meta.imageUrl ?? '').isNotEmpty) {
+      try {
+        final resp = await http.get(Uri.parse(meta.imageUrl!));
+        if (resp.statusCode >= 200 &&
+            resp.statusCode < 300 &&
+            resp.bodyBytes.isNotEmpty) {
+          final decoded = img.decodeImage(resp.bodyBytes);
+          if (decoded != null) {
+            final resized = img.copyResize(
+              decoded,
+              width: 500,
+              height: 500,
+              maintainAspect: true,
+            );
+            final jpg = img.encodeJpg(resized, quality: 85);
+            imageFile = '${meta.id}.jpg';
+            imagePath = p.join(dirPath, imageFile);
+            await File(imagePath).writeAsBytes(jpg, flush: true);
+          }
+        }
+      } catch (_) {
+        /* optional log */
+      }
+    }
+
+    // 2) JSON
+    final jsonFileName = '${meta.id}.json';
+    final jsonPath = p.join(dirPath, jsonFileName);
+    final mp3File = '${meta.id}.mp3'; // wir nutzen ja diese Namenskonvention
+    final jsonMap = meta.toJson(
+      cachedImageFile: imageFile,
+      mp3File: mp3File,
+      schemaVersion: 1,
+    );
+    await File(jsonPath).writeAsString(jsonEncode(jsonMap), flush: true);
+
+    return (imagePath: imagePath, jsonPath: jsonPath);
   }
 }

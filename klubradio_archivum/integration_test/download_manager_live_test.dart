@@ -2,6 +2,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:http/http.dart' as http;
@@ -10,6 +11,8 @@ import 'package:klubradio_archivum/db/app_database.dart';
 import 'package:klubradio_archivum/db/daos.dart';
 import 'package:klubradio_archivum/services/download_service.dart';
 import 'package:klubradio_archivum/services/api_service.dart';
+import 'package:klubradio_archivum/services/audio_player_service.dart';
+import 'package:klubradio_archivum/providers/episode_provider.dart';
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -62,6 +65,12 @@ void main() {
         subscriptionsDao: subscriptionsDao,
         settingsDao: settingsDao,
         retentionDao: retentionDao,
+        episodeProvider: EpisodeProvider(
+          apiService: api,
+          audioPlayerService: AudioPlayerService(),
+          db: db,
+        ),
+        apiService: api,
       );
       await service.init();
       await settingsDao.ensureDefaults();
@@ -90,7 +99,9 @@ void main() {
         warmup: const Duration(seconds: 10),
       );
 
-      print('SIZE: ${_fmtBytes(sizeBytes)}   SPEED(10s): ${_fmtBps(speedBps)}');
+      debugPrint(
+        'SIZE: ${_fmtBytes(sizeBytes)}   SPEED(10s): ${_fmtBps(speedBps)}',
+      );
 
       // 3) ETA/Timeout bestimmen – großzügig puffern (x1.8 + 30s)
       //    Fallbacks, wenn Größe unbekannt: pauschaler Timeout
@@ -108,7 +119,7 @@ void main() {
                 ? const Duration(minutes: 5)
                 : computed);
 
-      print(
+      debugPrint(
         'ETA: ${_fmtDuration(Duration(seconds: estSeconds.ceil()))}  '
         '→ timeout used: ${_fmtDuration(dlTimeout)}',
       );
@@ -126,7 +137,9 @@ void main() {
           if (st != null) {
             // alle 5s ein kleines Lebenszeichen
             if (DateTime.now().second % 5 == 0) {
-              print('status=$st progress=${(row?.progress ?? 0) * 100 ~/ 1}%');
+              debugPrint(
+                'status=$st progress=${(row?.progress ?? 0) * 100 ~/ 1}%',
+              );
             }
           }
           return st == 1 || st == 2 || st == 3 || st == 4 || st == 5;
@@ -141,7 +154,7 @@ void main() {
           final row = await episodesDao.getById(ep.id);
           final st = row?.status;
           if (st != null && DateTime.now().second % 5 == 0) {
-            print(
+            debugPrint(
               'waiting… status=$st progress=${(row?.progress ?? 0) * 100 ~/ 1}%',
             );
           }

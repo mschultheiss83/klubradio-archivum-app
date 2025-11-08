@@ -127,6 +127,7 @@
     "description": "Button-Beschriftung zum Abonnieren des Podcasts."
   },
 
+  "homeScreenSubscribedPodcastsEmptyHint": "Noch keine Abos – entdecke Podcasts und tippe auf „Abonnieren“.",
   "homeScreenSubscribedPodcastsTitle": "Abonnierte Sendungen",
   "@homeScreenSubscribedPodcastsTitle": {
     "description": "Überschrift für den Bereich der abonnierten Sendungen auf dem Startbildschirm."
@@ -449,8 +450,10 @@
     "description": "Fehlermeldung, wenn ein aus einer Liste ausgewählter Podcast nicht abgerufen werden kann."
   },
 
+  "podcastListItem_unsubscribe": "Abo beenden",
   "podcastListItem_subscribed": "Abonniert",
   "podcastListItem_subscribe": "Abonnieren",
+  "podcastListItem_unsubscribed": "Abo beendet",
   "podcastListItem_subtitleFallback": "Klubrádió-Sendung",
   "podcastListItem_openDetails": "Podcastdetails öffnen",
 
@@ -476,17 +479,30 @@
 
   "settings_title_downloads": "Downloads",
   "settings_wifi_only": "Nur WLAN",
-  "settings_max_parallel": "Max. gleichzeitige Downloads",
-  "settings_keep_latest": "Letzte Episoden behalten",
-  "settings_delete_after_hours": "Löschen nach (Stunden)",
-  "settings_zero_off": "0 = aus",
-  "settings_wifi_only_mobile_default": "Standard auf mobilen Geräten: AN",
+  "settings_wifi_only_mobile_default": "Standard auf Mobil: AN",
   "settings_wifi_only_desktop_default": "Standard auf Desktop: AUS",
+  "settings_max_parallel": "Max. gleichzeitige Downloads",
   "settings_retention_section": "Aufbewahrung",
   "settings_keep_all": "Alle behalten",
   "settings_keep_latest_label": "Nur die letzten n",
-  "settings_keep_latest_hint": "Behalte die neuesten n Episoden.",
-  "settings_delete_after_heard_label": "Nach „gehört“ in x Stunden löschen",
-  "settings_delete_after_hint": "Wenn eine Episode gehört wurde, nach x Stunden automatisch entfernen."
+  "settings_keep_latest": "Letzte Episoden behalten",
+  "settings_keep_latest_hint": "Behält pro Podcast die neuesten n Episoden.",
+  "settings_delete_after_heard_label": "Nach „gehört” in x Stunden löschen",
+  "settings_delete_after_hours": "Löschen nach (Stunden)",
+  "settings_delete_after_hint": "Nach dem Anhören automatisch nach x Stunden entfernen.",
+  "settings_zero_off": "0 = AUS",
+  "settings_autodownload_subscriptions": "Automatisch abonnierte Episoden herunterladen",
+  "settings_autodownload_subscriptions_hint": "Neue Episoden von abonnierten Podcasts automatisch herunterladen.",
+
+  "profileScreenNoRecentlyPlayed": "Noch nichts kürzlich gehört.",
+  "profileScreenSubscriptionsTitle": "Abonnierte Sendungen",
+  "profileScreenAppIdTitle": "App-ID",
+  "profileScreenIdCopied": "ID kopiert",
+  "profileScreenPlaybackSpeedTitle": "Wiedergabegeschwindigkeit",
+  "profileScreenPlaybackSpeedValue": "{value}×",
+  "commonOk": "OK",
+  "commonCancel": "Abbrechen",
+  "commonCount": "Anzahl",
+  "commonDone": "Fertig"
 
 }
