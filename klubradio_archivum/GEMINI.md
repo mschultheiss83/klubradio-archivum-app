@@ -77,7 +77,7 @@ dart run flutter_launcher_icons
 -   **Main Entry Point**: The `lib/main.dart` file is the application's entry point, responsible for initializing Hive, setting up dependency injection via `MultiProvider`, and configuring the root `MaterialApp` with themes, localizations, and the `AppShell` widget.
 -   **App Icons**: Managed via `flutter_launcher_icons` with configuration in `pubspec.yaml`.
 -   **Persistence Strategy**: `SharedPreferences` for app settings, language, theme, playback speed, auto-downloads, and app ID. Local DB (Drift) for structured data like downloads, episodes, queues, and hosts.
--   **Workflow Principles**: Minimal changes, preserve original code, provide complete files for patches, follow a standard loop for features, and a bugfix loop for issues. `l10n` is mandatory for new/adapted keys. No assumptions are made; explicit requests for missing information. Emphasis on debug-friendly and reversible changes. Performance optimization is done after measurement.
+-   **Workflow Principles**: Minimal changes, preserve original code, provide complete files for patches, follow a standard loop for features, and a bugfix loop for issues. `l10n` is mandatory for new/adapted keys. No assumptions are made; explicit requests for missing information. Emphasis on debug-friendly and reversible changes. Performance optimization is done after measurement. When committing changes, use `git commit --quiet` to reduce output verbosity.
 
 ## File Structure Overview (from `docs/project/flutter-app-fs.md` and exploration)
 
