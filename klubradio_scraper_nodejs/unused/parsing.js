@@ -1,6 +1,6 @@
 // Dieses Modul ist für das Parsen von HTML-Inhalten zuständig.
 const cheerio = require("cheerio");
-const logger = require("./loggingSetup");
+const logger = require("../loggingSetup");
 
 function parseArchivePage(htmlContent) {
   logger.info("Starte das Parsen der Archivseite...");

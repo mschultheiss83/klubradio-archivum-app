@@ -1,0 +1,1 @@
+enum RetentionMode { keepAll, keepLatestN, deleteAfterHeard }

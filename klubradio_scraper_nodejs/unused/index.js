@@ -4,7 +4,7 @@
 import { flow } from "./flow.js";
 import { rssBuild } from "./rssBuild.js";
 import { supabase } from "./supabase.js";
-import logging from "./loggingSetup.js";
+import logging from "../loggingSetup.js";
 
 const logger = logging.getLogger("main");
 

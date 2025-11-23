@@ -1,5 +1,5 @@
 const RSS = require('rss');
-const logger = require('./loggingSetup');
+const logger = require('../loggingSetup');
 
 function buildRssFeed(shows, title, description, link, klubradio_link) {
   logger.info('Starte die RSS-Feed-Erstellung...');

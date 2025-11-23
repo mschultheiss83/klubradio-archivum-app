@@ -1,8 +1,8 @@
 // Dieses Modul verwaltet Netzwerk-Anfragen.
 const axios = require("axios");
 const path = require("path");
-const logger = require("./loggingSetup");
-const { RATE_LIMIT_MS } = require("./config");
+const logger = require("../loggingSetup");
+const { RATE_LIMIT_MS } = require("../config");
 
 let lastRequestTime = 0;
 

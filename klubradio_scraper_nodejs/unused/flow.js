@@ -1,6 +1,6 @@
 // Dieses Skript orchestriert den gesamten Scraping- und Datenspeicherungs-Workflow.
-const logger = require("./loggingSetup");
-const { validateConfig, KLUBRADIO_ARCHIVE_URL } = require("./config");
+const logger = require("../loggingSetup");
+const { validateConfig, KLUBRADIO_ARCHIVE_URL } = require("../config");
 const { fetchPage } = require("./net");
 const { parseArchivePage, parseDetailsPage } = require("./parsing");
 const { getMp3Duration } = require("./mp3meta");

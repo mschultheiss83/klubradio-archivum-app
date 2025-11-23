@@ -1,6 +1,6 @@
 // Dieses Modul bestimmt die Länge einer MP3-Datei durch das Parsen des Headers.
 const axios = require("axios");
-const logger = require("./loggingSetup");
+const logger = require("../loggingSetup");
 
 // Bitraten-Lookup-Tabelle (MPEG 1, Layer III)
 const BITRATES = {

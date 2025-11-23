@@ -1,7 +1,7 @@
 // Dieses Modul verwaltet den lokalen Cache.
 const fs = require("fs");
-const { CACHE_PATH } = require("./config");
-const logger = require("./loggingSetup");
+const { CACHE_PATH } = require("../config");
+const logger = require("../loggingSetup");
 
 function loadCache() {
   if (fs.existsSync(CACHE_PATH)) {

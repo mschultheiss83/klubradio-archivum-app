@@ -111,6 +111,9 @@ class DownloadService {
   final Map<String, String?> _imageUrlHintByEpisodeId = {};
   final Map<String, _EpisodeMetaLite> _metaHintByEpisodeId = {};
 
+  final List<model.Episode> _pendingDownloadQueue = [];
+  int _activeDownloadCount = 0;
+
   final Completer<void> _ready = Completer<void>();
   bool _disposed = false;
   static const _relDir = 'Klubradio';
@@ -157,6 +160,25 @@ class DownloadService {
       );
     }
     if (_disposed) return;
+
+    _pendingDownloadQueue.add(ep);
+    _processQueue();
+  }
+
+  Future<void> _processQueue() async {
+    if (_disposed) return;
+    final settings = await settingsDao.getOne();
+    final maxParallel = settings?.maxParallel ?? 1; // Default to 1 if not set
+
+    while (_activeDownloadCount < maxParallel &&
+        _pendingDownloadQueue.isNotEmpty) {
+      final ep = _pendingDownloadQueue.removeAt(0);
+      _activeDownloadCount++;
+      _startDownload(ep);
+    }
+  }
+
+  Future<void> _startDownload(model.Episode ep) async {
     final isResumable = await _checkResumable(ep.audioUrl);
 
     await episodesDao.upsert(
@@ -261,12 +283,18 @@ class DownloadService {
           break;
         case TaskStatus.paused:
           await episodesDao.setQueued(episodeId);
+          _activeDownloadCount--;
+          _processQueue();
           break;
         case TaskStatus.canceled:
           await episodesDao.setCanceled(episodeId);
+          _activeDownloadCount--;
+          _processQueue();
           break;
         case TaskStatus.failed:
           await episodesDao.setFailed(episodeId);
+          _activeDownloadCount--;
+          _processQueue();
           break;
         case TaskStatus.complete:
           {
@@ -306,6 +334,8 @@ class DownloadService {
             }
             // Notify EpisodeProvider that the episode has been downloaded
             episodeProvider.onEpisodeDownloaded(episodeId, localPath);
+            _activeDownloadCount--;
+            _processQueue();
             break;
           }
         default:
@@ -368,20 +398,43 @@ class DownloadService {
   }
 
   Future<int> autodownloadPodcast(String podcastId) async {
+    final settings = await settingsDao.getOne();
+    final keepN = settings?.keepLatestN ?? 0;
+
     // Fetch latest episodes for this podcast from the API
     final latestEpisodes = await apiService.fetchEpisodesForPodcast(podcastId);
 
     // Get already downloaded episodes for this podcast
-    final downloadedEpisodes =
-        await episodesDao.getEpisodesByPodcastId(podcastId);
+    final downloadedEpisodes = await episodesDao.getEpisodesByPodcastId(
+      podcastId,
+    );
     final downloadedEpisodeIds = downloadedEpisodes.map((e) => e.id).toSet();
 
     int downloadCount = 0;
+    int currentlyDownloaded = downloadedEpisodes.length;
+
+    // If keepN is 0, it means keep all, so no limit
+    if (keepN > 0 && currentlyDownloaded >= keepN) {
+      // Already have enough or more than enough, so don't download new ones
+      return 0;
+    }
+
+    // Determine how many more episodes we can download
+    int slotsAvailable = keepN > 0
+        ? keepN - currentlyDownloaded
+        : latestEpisodes.length;
+    if (slotsAvailable <= 0) return 0;
+
     for (final episode in latestEpisodes) {
       if (!downloadedEpisodeIds.contains(episode.id)) {
-        // This is a new episode, enqueue it for download
-        await enqueueEpisode(episode);
-        downloadCount++;
+        if (downloadCount < slotsAvailable) {
+          // This is a new episode, enqueue it for download
+          await enqueueEpisode(episode);
+          downloadCount++;
+        } else {
+          // Reached the keepN limit for new downloads
+          break;
+        }
       }
     }
     return downloadCount;

@@ -54,6 +54,9 @@
 ### Inhalt von `klubradio_archivum/lib/models/podcast.dart`
 
 
+### Inhalt von `klubradio_archivum/lib/models/retention_mode.dart`
+
+
 ### Inhalt von `klubradio_archivum/lib/models/show_data.dart`
 
 

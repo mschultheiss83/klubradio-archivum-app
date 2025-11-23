@@ -1,7 +1,7 @@
 // Dieses Modul verwaltet die Verbindung zu Supabase.
 const { createClient } = require("@supabase/supabase-js");
-const logger = require("./loggingSetup");
-const { SUPABASE_URL, SUPABASE_KEY, SUPABASE_TABLE } = require("./config");
+const logger = require("../loggingSetup");
+const { SUPABASE_URL, SUPABASE_KEY, SUPABASE_TABLE } = require("../config");
 
 let supabase;
 
