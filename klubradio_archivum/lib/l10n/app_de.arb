@@ -407,13 +407,19 @@
   "@podcastDetailScreenSubscribeSuccess": {
     "description": "Snackbar-Nachricht, die nach erfolgreichem Abonnieren eines Podcasts angezeigt wird."
   },
-  "podcastDetailScreenUnsubscribeSuccess": "Abonnement erfolgreich beendet!",
+  "podcastDetailScreenUnsubscribeSuccess": "Erfolgreich abbestellt!",
   "@podcastDetailScreenUnsubscribeSuccess": {
-    "description": "Snackbar-Nachricht, die nach erfolgreichem Beenden eines Abonnements angezeigt wird."
+    "description": "Snackbar-Nachricht nach erfolgreichem Abbestellen eines Podcasts."
   },
 
+  "unsubscribeDialogTitle": "Abbestellen",
+  "unsubscribeDialogContent": "Möchten Sie die heruntergeladenen Episoden für diesen Podcast löschen?",
+  "unsubscribeDialogDeleteButton": "Episoden löschen",
+  "unsubscribeDialogKeepButton": "Episoden behalten",
+
   "nowPlayingScreenTitle": "Aktuelle Wiedergabe",
-  "@nowPlayingScreenTitle": {"description": "Titel für den Bildschirm 'Aktuelle Wiedergabe'."
+  "@nowPlayingScreenTitle": {
+    "description": "Titel für den 'Aktuelle Wiedergabe'-Bildschirm."
   },
   "nowPlayingScreenNoEpisode": "Aktuell wird keine Episode abgespielt.",
   "@nowPlayingScreenNoEpisode": {

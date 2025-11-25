@@ -1,0 +1,12 @@
+======== Exception caught by image resource service ================================================
+The following NetworkImageLoadException was thrown resolving an image codec:
+HTTP request failed, statusCode: 404, https://www.klubradio.hu/data/sound-speaker-radio-microphone_focuspoint_340x340.jpg
+
+When the exception was thrown, this was the stack:
+#0      NetworkImage._loadAsync (package:flutter/src/painting/_network_image_io.dart:130:9)
+<asynchronous suspension>
+#1      MultiFrameImageStreamCompleter._handleCodecReady (package:flutter/src/painting/image_stream.dart:1021:3)
+<asynchronous suspension>
+Image provider: NetworkImage("https://www.klubradio.hu/data/sound-speaker-radio-microphone_focuspoint_340x340.jpg", scale: 1.0)
+Image key: NetworkImage("https://www.klubradio.hu/data/sound-speaker-radio-microphone_focuspoint_340x340.jpg", scale: 1.0)
+====================================================================================================

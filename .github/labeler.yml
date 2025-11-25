@@ -1,0 +1,41 @@
+# .github/labeler.yml
+
+# Add 'documentation' label to PRs that modify documentation files
+documentation:
+  - 'docs/**'
+  - '*.md' # Includes README.md, CONTRIBUTING.md etc.
+
+# Add 'flutter-app' label to PRs that modify the Flutter application code
+flutter-app:
+  - 'klubradio_archivum/lib/**'
+  - 'klubradio_archivum/pubspec.yaml'
+  - 'klubradio_archivum/analysis_options.yaml'
+  - 'klubradio_archivum/assets/**'
+  - 'klubradio_archivum/android/**'
+  - 'klubradio_archivum/ios/**'
+  - 'klubradio_archivum/linux/**'
+  - 'klubradio_archivum/macos/**'
+  - 'klubradio_archivum/web/**'
+  - 'klubradio_archivum/windows/**'
+
+# Add 'scraper' label to PRs that modify the Node.js scraper
+scraper:
+  - 'klubradio_scraper_nodejs/**'
+  - 'klubradio_scraper_nodejs/package.json'
+  - 'klubradio_scraper_nodejs/package-lock.json'
+
+# Add 'database' label to PRs that modify database schema or data
+database:
+  - 'database/**'
+
+# Add 'github-actions' label to PRs that modify workflow files
+github-actions:
+  - '.github/workflows/**'
+
+# Add 'configuration' label to PRs that modify general configuration files
+configuration:
+  - '.github/**' # Catch-all for other GitHub config files
+  - '.gemini/**'
+  - '.idea/**'
+  - '*.gitignore'
+  - '*.editorconfig'
