@@ -8,6 +8,7 @@ import 'package:klubradio_archivum/db/app_database.dart';
 import 'package:klubradio_archivum/db/daos.dart';
 import 'package:klubradio_archivum/services/download_service.dart';
 import 'package:klubradio_archivum/services/api_service.dart'; // Import ApiService
+import 'package:klubradio_archivum/screens/widgets/stateless/platform_utils.dart'; // Import PlatformUtils
 
 import '../providers/episode_provider.dart';
 
@@ -26,20 +27,41 @@ class DownloadProvider extends ChangeNotifier {
           SubscriptionsDao(db),
           SettingsDao(db),
         ) {
-    service = DownloadService(
-      db: db,
-      episodesDao: episodesDao,
-      subscriptionsDao: subscriptionsDao,
-      settingsDao: settingsDao,
-      retentionDao: retentionDao,
-      episodeProvider: episodeProvider,
-      apiService: apiService,
-    );
-    // init bewusst nicht awaiten – der Service wartet intern auf _ready
-    unawaited(service.init());
+    _isDownloadsSupported = PlatformUtils.supportsDownloads;
+
+    if (_isDownloadsSupported) {
+      service = DownloadService(
+        db: db,
+        episodesDao: episodesDao,
+        subscriptionsDao: subscriptionsDao,
+        settingsDao: settingsDao,
+        retentionDao: retentionDao,
+        episodeProvider: episodeProvider,
+        apiService: apiService,
+      );
+      // init bewusst nicht awaiten – der Service wartet intern auf _ready
+      unawaited(service.init());
+    } else {
+      // For web, create a dummy DownloadService or ensure `service` is not used.
+      // For this approach, we'll rely on the method checks.
+      // We still need a non-null `service` for type safety, but it won't be initialized.
+      // Let's make `service` nullable and check it in methods.
+      // OR, provide a Null DownloadService implementation if we want to avoid null checks everywhere.
+      // For now, let's make it simple: `service` is not initialized, and methods will guard against it.
+    }
   }
 
-  late final DownloadService service;
+  // late final DownloadService service; // Will be initialized conditionally
+  DownloadService? _service; // Make it nullable
+  bool _isDownloadsSupported = false;
+
+  set service(DownloadService svc) => _service = svc; // Setter for conditional init
+  DownloadService get service {
+    if (_service == null) {
+      throw StateError('DownloadService accessed when not supported/initialized');
+    }
+    return _service!;
+  }
 
   final EpisodesDao episodesDao;
   final SubscriptionsDao subscriptionsDao;
@@ -49,37 +71,44 @@ class DownloadProvider extends ChangeNotifier {
 
   /// API, die Screens aufrufen:
   Future<void> enqueue(model.Episode ep) async {
-    await service.enqueueEpisode(ep);
+    if (!_isDownloadsSupported) return;
+    await _service!.enqueueEpisode(ep);
     notifyListeners();
   }
 
   Future<void> pause(String episodeId) async {
-    await service.pause(episodeId);
+    if (!_isDownloadsSupported) return;
+    await _service!.pause(episodeId);
     notifyListeners();
   }
 
   Future<void> resume(String episodeId) async {
-    await service.resume(episodeId);
+    if (!_isDownloadsSupported) return;
+    await _service!.resume(episodeId);
     notifyListeners();
   }
 
   Future<void> cancel(String episodeId) async {
-    await service.cancel(episodeId);
+    if (!_isDownloadsSupported) return;
+    await _service!.cancel(episodeId);
     notifyListeners();
   }
 
   Future<void> removeLocalFile(String episodeId) async {
-    await service.removeLocalFile(episodeId);
+    if (!_isDownloadsSupported) return;
+    await _service!.removeLocalFile(episodeId);
     notifyListeners();
   }
 
   Future<void> deleteEpisodesForPodcast(String podcastId) async {
-    await service.deleteEpisodesForPodcast(podcastId);
+    if (!_isDownloadsSupported) return;
+    await _service!.deleteEpisodesForPodcast(podcastId);
     notifyListeners();
   }
 
   Future<int> autodownloadPodcast(String podcastId) async {
-    final count = await service.autodownloadPodcast(podcastId);
+    if (!_isDownloadsSupported) return 0;
+    final count = await _service!.autodownloadPodcast(podcastId);
     notifyListeners();
     return count;
   }
@@ -89,6 +118,7 @@ class DownloadProvider extends ChangeNotifier {
     int n,
     List<model.Episode> candidates,
   ) async {
+    if (!_isDownloadsSupported) return;
     final latest = candidates.take(n).toList();
 
     for (final ep in latest) {
@@ -114,7 +144,7 @@ class DownloadProvider extends ChangeNotifier {
         );
       }
 
-      await service.enqueueEpisode(ep);
+      await _service!.enqueueEpisode(ep);
     }
 
     notifyListeners();
@@ -122,8 +152,10 @@ class DownloadProvider extends ChangeNotifier {
 
   @override
   void dispose() {
-    // Stream sauber abmelden, damit nach Widget-Dispose keine Events mehr ankommen
-    unawaited(service.dispose());
+    if (_isDownloadsSupported) {
+      // Stream sauber abmelden, damit nach Widget-Dispose keine Events mehr ankommen
+      unawaited(_service!.dispose());
+    }
     super.dispose();
   }
 }

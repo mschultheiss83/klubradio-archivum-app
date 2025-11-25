@@ -1,11 +1,12 @@
-import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter/foundation.dart'; // Import for kIsWeb
 
 import 'package:klubradio_archivum/l10n/app_localizations.dart';
 import 'package:klubradio_archivum/db/app_database.dart';
 import 'package:klubradio_archivum/db/daos.dart';
 import 'package:klubradio_archivum/models/retention_mode.dart';
+import 'package:klubradio_archivum/screens/widgets/stateless/platform_utils.dart'; // Import PlatformUtils
 
 class DownloadSettingsPanel extends StatefulWidget {
   const DownloadSettingsPanel({super.key});
@@ -21,7 +22,10 @@ class _DownloadSettingsPanelState extends State<DownloadSettingsPanel> {
     super.initState();
     final db = context.read<AppDatabase>();
     _dao = SettingsDao(db);
-    _dao.ensureDefaults(); // setzt plattformabhängige WLAN-Defaults, siehe DAO unten
+    // Only ensure defaults if downloads are supported
+    if (PlatformUtils.supportsDownloads) {
+      _dao.ensureDefaults();
+    }
   }
 
   RetentionMode _modeFrom(Setting s) {
@@ -32,6 +36,10 @@ class _DownloadSettingsPanelState extends State<DownloadSettingsPanel> {
 
   @override
   Widget build(BuildContext context) {
+    if (!PlatformUtils.supportsDownloads) {
+      return const SizedBox.shrink();
+    }
+
     final l10n = AppLocalizations.of(context)!;
     final db = context.watch<AppDatabase>();
     final textTheme = Theme.of(context).textTheme;
@@ -67,7 +75,7 @@ class _DownloadSettingsPanelState extends State<DownloadSettingsPanel> {
                   contentPadding: EdgeInsets.zero,
                   title: Text(l10n.settings_wifi_only),
                   subtitle: Text(
-                    Platform.isAndroid || Platform.isIOS
+                    !kIsWeb
                         ? l10n.settings_wifi_only_mobile_default
                         : l10n.settings_wifi_only_desktop_default,
                   ),
