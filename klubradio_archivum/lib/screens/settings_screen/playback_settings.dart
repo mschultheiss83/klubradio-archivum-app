@@ -25,7 +25,6 @@ class PlaybackSettings extends StatelessWidget {
       );
     }
     final currentSpeed = profile.playbackSpeed;
-    final currentAuto = profile.maxAutoDownload;
 
     return Card(
       clipBehavior: Clip.antiAlias,
@@ -57,38 +56,6 @@ class PlaybackSettings extends StatelessWidget {
                       speed,
                     ); // Live-Player
                   },
-                  selectedColor: cs.primary.withAlpha((255 * 0.16).round()),
-                  labelStyle: TextStyle(
-                    color: selected ? cs.onPrimaryContainer : cs.onSurface,
-                    fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
-                  ),
-                  side: BorderSide(
-                    color: selected
-                        ? cs.primary
-                        : cs.outlineVariant.withAlpha((255 * 0.7).round()),
-                  ),
-                );
-              }).toList(),
-            ),
-
-            const SizedBox(height: 16),
-
-            // --- Automatic Downloads (Chips) ---
-            Text(
-              l10n.playbackSettingsAutoDownloadLabel,
-              style: textTheme.titleSmall,
-            ),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: constants.autoDownloadOptions.map((count) {
-                final selected = currentAuto == count;
-                return ChoiceChip(
-                  label: Text(l10n.playbackSettingsAutoDownloadValue(count)),
-                  selected: selected,
-                  onSelected: (_) =>
-                      context.read<ProfileProvider>().setMaxAutoDownload(count),
                   selectedColor: cs.primary.withAlpha((255 * 0.16).round()),
                   labelStyle: TextStyle(
                     color: selected ? cs.onPrimaryContainer : cs.onSurface,

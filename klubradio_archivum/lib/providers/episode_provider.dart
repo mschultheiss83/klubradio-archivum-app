@@ -216,6 +216,15 @@ class EpisodeProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void reorderQueue(int oldIndex, int newIndex) {
+    if (oldIndex < newIndex) {
+      newIndex -= 1;
+    }
+    final model.Episode item = _queue.removeAt(oldIndex);
+    _queue.insert(newIndex, item);
+    notifyListeners();
+  }
+
   void _onPositionChanged(Duration position) {
     _positionNotifier.value = position;
   }

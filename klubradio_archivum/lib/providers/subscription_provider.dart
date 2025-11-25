@@ -11,10 +11,26 @@ class SubscriptionProvider extends ChangeNotifier {
   });
 
   final SubscriptionsDao subscriptionsDao;
-  final DownloadProvider downloadProvider;
+  DownloadProvider downloadProvider; // Make it non-final to allow updating
+
+  Subscription? _currentSubscription;
+  Subscription? get currentSubscription => _currentSubscription;
 
   bool _busy = false;
   bool get busy => _busy;
+
+  void updateDependencies({
+    required DownloadProvider downloadProvider,
+  }) {
+    if (this.downloadProvider != downloadProvider) {
+      this.downloadProvider = downloadProvider;
+    }
+  }
+
+  Future<void> loadSubscription(String podcastId) async {
+    _currentSubscription = await subscriptionsDao.getById(podcastId);
+    notifyListeners();
+  }
 
   Stream<Subscription?> watchSubscription(String podcastId) {
     return subscriptionsDao.watchOne(podcastId);
@@ -31,6 +47,7 @@ class SubscriptionProvider extends ChangeNotifier {
         podcastId: podcastId,
         active: !isSubscribed,
       );
+      _currentSubscription = await subscriptionsDao.getById(podcastId);
       debugPrint(
         'toggleSubscription: subscriptionsDao.toggleSubscribe completed',
       );

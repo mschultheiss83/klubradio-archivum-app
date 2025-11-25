@@ -48,6 +48,8 @@ String formatDownloadStatus(BuildContext context, DownloadStatus status) {
       return l10n.downloadStatusNotDownloaded;
     case DownloadStatus.queued:
       return l10n.downloadStatusQueued;
+    case DownloadStatus.canceled:
+      return 'Canceled'; // Placeholder until localization is added
   }
 }
 

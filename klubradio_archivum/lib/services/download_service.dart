@@ -386,6 +386,18 @@ class DownloadService {
     await episodesDao.clearLocalFile(episodeId);
   }
 
+  Future<void> deleteEpisodesForPodcast(String podcastId) async {
+    await _ready.future;
+    if (_disposed) return;
+
+    final episodes = await episodesDao.getEpisodesByPodcastId(podcastId);
+    for (final episode in episodes) {
+      if (episode.localPath != null && episode.localPath!.isNotEmpty) {
+        await removeLocalFile(episode.id);
+      }
+    }
+  }
+
   Future<void> checkAutodownloads() async {
     if (_disposed) return;
     final settings = await settingsDao.getOne();
@@ -401,40 +413,29 @@ class DownloadService {
     final settings = await settingsDao.getOne();
     final keepN = settings?.keepLatestN ?? 0;
 
-    // Fetch latest episodes for this podcast from the API
-    final latestEpisodes = await apiService.fetchEpisodesForPodcast(podcastId);
+    if (keepN <= 0) {
+      return 0; // If keepN is 0 or less, do nothing.
+    }
 
-    // Get already downloaded episodes for this podcast
+    // Fetch latest episodes for this podcast from the API and sort them.
+    final latestEpisodes = await apiService.fetchEpisodesForPodcast(podcastId);
+    latestEpisodes.sort((a, b) => b.publishedAt.compareTo(a.publishedAt));
+
+    // These are the episodes we want to have locally.
+    final targetEpisodes = latestEpisodes.take(keepN);
+
+    // Get what we already have.
     final downloadedEpisodes = await episodesDao.getEpisodesByPodcastId(
       podcastId,
     );
     final downloadedEpisodeIds = downloadedEpisodes.map((e) => e.id).toSet();
 
     int downloadCount = 0;
-    int currentlyDownloaded = downloadedEpisodes.length;
-
-    // If keepN is 0, it means keep all, so no limit
-    if (keepN > 0 && currentlyDownloaded >= keepN) {
-      // Already have enough or more than enough, so don't download new ones
-      return 0;
-    }
-
-    // Determine how many more episodes we can download
-    int slotsAvailable = keepN > 0
-        ? keepN - currentlyDownloaded
-        : latestEpisodes.length;
-    if (slotsAvailable <= 0) return 0;
-
-    for (final episode in latestEpisodes) {
-      if (!downloadedEpisodeIds.contains(episode.id)) {
-        if (downloadCount < slotsAvailable) {
-          // This is a new episode, enqueue it for download
-          await enqueueEpisode(episode);
-          downloadCount++;
-        } else {
-          // Reached the keepN limit for new downloads
-          break;
-        }
+    for (final episodeToDownload in targetEpisodes) {
+      if (!downloadedEpisodeIds.contains(episodeToDownload.id)) {
+        // This is a new episode that we don't have, enqueue it.
+        await enqueueEpisode(episodeToDownload);
+        downloadCount++;
       }
     }
     return downloadCount;

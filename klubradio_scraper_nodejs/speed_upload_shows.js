@@ -163,6 +163,18 @@ async function main() {
 
   const totalSecs = Math.round((Date.now() - t0) / 1000);
   console.log(`✨ Fertig. Datensätze: ${allRows.length}, upserts/inserts: ${inserted}, Zeit: ${totalSecs}s`);
+
+  // --- ADDED LINES TO REFRESH MATERIALIZED VIEWS ---
+  console.log('🔄 Refreshing materialized views...');
+  // Call the Supabase RPC function
+  const { error: refreshError } = await supabase.rpc('refresh_all_materialized_views');
+
+  if (refreshError) {
+    console.error('❌ Fehler beim Aktualisieren der Materialized Views:', refreshError);
+  } else {
+    console.log('✅ Materialized Views erfolgreich aktualisiert.');
+  }
+  // --- END OF ADDED LINES ---
 }
 
 (async () => {

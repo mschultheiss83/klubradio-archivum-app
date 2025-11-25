@@ -77,6 +77,19 @@ class ImageUrl extends StatelessWidget {
       child: child,
     );
 
+    // Handle asset images first
+    if (url != null && url!.startsWith('assets/')) {
+      return clip(
+        Image.asset(
+          url!,
+          width: w,
+          height: h,
+          fit: fit,
+          errorBuilder: (ctx, _, _) => fallback(),
+        ),
+      );
+    }
+
     // Priorität: lokal (wenn preferLocal & vorhanden) → URL → Fallback
     if (preferLocal && _hasUsablePath) {
       return clip(
