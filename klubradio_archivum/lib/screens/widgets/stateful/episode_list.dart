@@ -64,7 +64,7 @@ class _EpisodeListState extends State<EpisodeList> {
 }
 
 class _DownloadButton extends StatelessWidget {
-  const _DownloadButton({required this.episode, this.queue, super.key});
+  const _DownloadButton({required this.episode, this.queue});
   final model.Episode episode;
   final List<model.Episode>? queue;
 

@@ -1,24 +1,9 @@
 {
+  "model": {
+    "name": "gemini-2.5-flash"
+  },
   "advanced": {
     "autoConfigureMemory": true
-  },
-  "mcpServers": {
-    "memory": {
-      "trust": true,
-      "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-memory"
-      ]
-    },
-    "sequential-thinking": {
-      "trust": true,
-      "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-sequential-thinking"
-      ]
-    }
   },
   "tools": {
     "autoAccept": false,

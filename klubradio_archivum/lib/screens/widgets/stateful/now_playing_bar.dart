@@ -120,9 +120,13 @@ class _QueueSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
 
-    return ListView.builder(
+    return ReorderableListView.builder(
+      buildDefaultDragHandles: false,
       padding: const EdgeInsets.all(16),
       itemCount: provider.queue.length,
+      onReorder: (int oldIndex, int newIndex) {
+        provider.reorderQueue(oldIndex, newIndex);
+      },
       itemBuilder: (BuildContext context, int index) {
         final episode = provider.queue[index];
         final bool isCurrent = provider.currentEpisode?.id == episode.id;
@@ -132,6 +136,7 @@ class _QueueSheet extends StatelessWidget {
             .where((s) => s.isNotEmpty)
             .join(' ');
         return ListTile(
+          key: ValueKey(episode.id),
           selected: isCurrent,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
@@ -147,14 +152,27 @@ class _QueueSheet extends StatelessWidget {
           textColor: isCurrent ? cs.onSecondaryContainer : cs.onSurface,
           iconColor: isCurrent ? cs.onSecondaryContainer : cs.onSurfaceVariant,
 
-          leading: Icon(isCurrent ? Icons.play_arrow : Icons.queue_music),
-          trailing: ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: ImageUrl(
-              url: episode.imageUrl ?? "",
-              path: episode.cachedImagePath ?? "",
-              width: 56,
-              height: 56,
+          leading: ReorderableDragStartListener(
+            index: index,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.drag_indicator),
+                SizedBox(width: 8),
+                Icon(isCurrent ? Icons.play_arrow : Icons.queue_music),
+              ],
+            ),
+          ),
+          trailing: Padding(
+            padding: const EdgeInsets.only(right: 8.0),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: ImageUrl(
+                url: episode.imageUrl ?? "",
+                path: episode.cachedImagePath ?? "",
+                width: 56,
+                height: 56,
+              ),
             ),
           ),
           title: Text('${episode.title}, ${episode.showDate}'),

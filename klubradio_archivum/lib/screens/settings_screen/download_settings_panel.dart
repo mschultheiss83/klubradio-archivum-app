@@ -5,8 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:klubradio_archivum/l10n/app_localizations.dart';
 import 'package:klubradio_archivum/db/app_database.dart';
 import 'package:klubradio_archivum/db/daos.dart';
-
-enum RetentionMode { keepAll, keepLatestN, deleteAfterHeard }
+import 'package:klubradio_archivum/models/retention_mode.dart';
 
 class DownloadSettingsPanel extends StatefulWidget {
   const DownloadSettingsPanel({super.key});

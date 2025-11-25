@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'package:klubradio_archivum/db/app_database.dart';
 import 'package:klubradio_archivum/l10n/app_localizations.dart';
 import 'package:klubradio_archivum/models/podcast.dart';
-import 'package:klubradio_archivum/providers/podcast_provider.dart';
+
+import 'package:klubradio_archivum/providers/subscription_provider.dart';
 import 'package:klubradio_archivum/screens/podcast_detail_screen/podcast_detail_screen.dart';
 import 'package:klubradio_archivum/screens/widgets/stateless/image_url.dart';
 
@@ -21,11 +23,9 @@ class PodcastListItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
-    final provider = context.watch<PodcastProvider>();
+    final subscriptionProvider = context.watch<SubscriptionProvider>();
 
-    final bool isSubscribed =
-        provider.userProfile?.subscribedPodcastIds.contains(podcast.id) ??
-        podcast.isSubscribed;
+
 
     final String subtitle = podcast.hosts.isNotEmpty
         ? podcast.hosts.map((h) => h.name).join(', ')
@@ -67,23 +67,25 @@ class PodcastListItem extends StatelessWidget {
                         alignment: Alignment.centerLeft,
                         child: Padding(
                           padding: const EdgeInsets.only(top: 12),
-                          child: OutlinedButton.icon(
-                            icon: Icon(
-                              isSubscribed
-                                  ? Icons.notifications_active
-                                  : Icons.notifications_outlined,
-                            ),
-                            label: Text(
-                              isSubscribed
-                                  ? l10n.podcastListItem_subscribed
-                                  : l10n.podcastListItem_subscribe,
-                            ),
-                            onPressed: () {
-                              if (isSubscribed) {
-                                provider.unsubscribe(podcast.id);
-                              } else {
-                                provider.subscribe(podcast.id);
-                              }
+                          child: StreamBuilder<Subscription?>(
+                            stream: subscriptionProvider.watchSubscription(podcast.id),
+                            builder: (context, snapshot) {
+                              final bool currentIsSubscribed = snapshot.data?.active ?? false;
+                              return OutlinedButton.icon(
+                                icon: Icon(
+                                  currentIsSubscribed
+                                      ? Icons.notifications_active
+                                      : Icons.notifications_outlined,
+                                ),
+                                label: Text(
+                                  currentIsSubscribed
+                                      ? l10n.podcastListItem_subscribed
+                                      : l10n.podcastListItem_subscribe,
+                                ),
+                                onPressed: () {
+                                  context.read<SubscriptionProvider>().toggleSubscription(podcast.id, currentIsSubscribed);
+                                },
+                              );
                             },
                           ),
                         ),

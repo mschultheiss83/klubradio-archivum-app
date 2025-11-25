@@ -111,6 +111,9 @@ class DownloadService {
   final Map<String, String?> _imageUrlHintByEpisodeId = {};
   final Map<String, _EpisodeMetaLite> _metaHintByEpisodeId = {};
 
+  final List<model.Episode> _pendingDownloadQueue = [];
+  int _activeDownloadCount = 0;
+
   final Completer<void> _ready = Completer<void>();
   bool _disposed = false;
   static const _relDir = 'Klubradio';
@@ -157,6 +160,25 @@ class DownloadService {
       );
     }
     if (_disposed) return;
+
+    _pendingDownloadQueue.add(ep);
+    _processQueue();
+  }
+
+  Future<void> _processQueue() async {
+    if (_disposed) return;
+    final settings = await settingsDao.getOne();
+    final maxParallel = settings?.maxParallel ?? 1; // Default to 1 if not set
+
+    while (_activeDownloadCount < maxParallel &&
+        _pendingDownloadQueue.isNotEmpty) {
+      final ep = _pendingDownloadQueue.removeAt(0);
+      _activeDownloadCount++;
+      _startDownload(ep);
+    }
+  }
+
+  Future<void> _startDownload(model.Episode ep) async {
     final isResumable = await _checkResumable(ep.audioUrl);
 
     await episodesDao.upsert(
@@ -261,12 +283,18 @@ class DownloadService {
           break;
         case TaskStatus.paused:
           await episodesDao.setQueued(episodeId);
+          _activeDownloadCount--;
+          _processQueue();
           break;
         case TaskStatus.canceled:
           await episodesDao.setCanceled(episodeId);
+          _activeDownloadCount--;
+          _processQueue();
           break;
         case TaskStatus.failed:
           await episodesDao.setFailed(episodeId);
+          _activeDownloadCount--;
+          _processQueue();
           break;
         case TaskStatus.complete:
           {
@@ -306,6 +334,8 @@ class DownloadService {
             }
             // Notify EpisodeProvider that the episode has been downloaded
             episodeProvider.onEpisodeDownloaded(episodeId, localPath);
+            _activeDownloadCount--;
+            _processQueue();
             break;
           }
         default:
@@ -356,6 +386,18 @@ class DownloadService {
     await episodesDao.clearLocalFile(episodeId);
   }
 
+  Future<void> deleteEpisodesForPodcast(String podcastId) async {
+    await _ready.future;
+    if (_disposed) return;
+
+    final episodes = await episodesDao.getEpisodesByPodcastId(podcastId);
+    for (final episode in episodes) {
+      if (episode.localPath != null && episode.localPath!.isNotEmpty) {
+        await removeLocalFile(episode.id);
+      }
+    }
+  }
+
   Future<void> checkAutodownloads() async {
     if (_disposed) return;
     final settings = await settingsDao.getOne();
@@ -368,19 +410,31 @@ class DownloadService {
   }
 
   Future<int> autodownloadPodcast(String podcastId) async {
-    // Fetch latest episodes for this podcast from the API
-    final latestEpisodes = await apiService.fetchEpisodesForPodcast(podcastId);
+    final settings = await settingsDao.getOne();
+    final keepN = settings?.keepLatestN ?? 0;
 
-    // Get already downloaded episodes for this podcast
-    final downloadedEpisodes =
-        await episodesDao.getEpisodesByPodcastId(podcastId);
+    if (keepN <= 0) {
+      return 0; // If keepN is 0 or less, do nothing.
+    }
+
+    // Fetch latest episodes for this podcast from the API and sort them.
+    final latestEpisodes = await apiService.fetchEpisodesForPodcast(podcastId);
+    latestEpisodes.sort((a, b) => b.publishedAt.compareTo(a.publishedAt));
+
+    // These are the episodes we want to have locally.
+    final targetEpisodes = latestEpisodes.take(keepN);
+
+    // Get what we already have.
+    final downloadedEpisodes = await episodesDao.getEpisodesByPodcastId(
+      podcastId,
+    );
     final downloadedEpisodeIds = downloadedEpisodes.map((e) => e.id).toSet();
 
     int downloadCount = 0;
-    for (final episode in latestEpisodes) {
-      if (!downloadedEpisodeIds.contains(episode.id)) {
-        // This is a new episode, enqueue it for download
-        await enqueueEpisode(episode);
+    for (final episodeToDownload in targetEpisodes) {
+      if (!downloadedEpisodeIds.contains(episodeToDownload.id)) {
+        // This is a new episode that we don't have, enqueue it.
+        await enqueueEpisode(episodeToDownload);
         downloadCount++;
       }
     }

@@ -31,10 +31,31 @@ class PodcastRepository {
   Future<List<Podcast>> trending() async =>
       (await api.trending()).map(Podcast.fromJson).toList();
 
-  Future<List<Episode>> recentEpisodes() async =>
-      (await api.recentEpisodes()).map(Episode.fromJson).toList();
+  Future<List<Episode>> recentEpisodes() async {
+    final allP = await allPodcasts();
+    final podcastCoverImageUrls = {
+      for (var p in allP) p.id: p.coverImageUrl
+    };
+
+    return (await api.recentEpisodes())
+        .map((e) => Episode.fromJson(
+              e,
+              podcastCoverImageUrl:
+                  podcastCoverImageUrls[e['podcastId'].toString()],
+            ))
+        .toList();
+  }
 
   // ---- helpers ----
+  Future<List<Podcast>> allPodcasts() async {
+    return _cachedList(
+      cacheName: 'all_podcasts.json',
+      fetch: () async =>
+          (await api.latest(limit: 999999)).map((e) => Podcast.fromJson(e)).toList(),
+      useCacheFirst: true,
+    );
+  }
+
   Future<List<T>> _cachedList<T>({
     required String cacheName,
     required Future<List<T>> Function() fetch,

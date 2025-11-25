@@ -73,6 +73,11 @@ class DownloadProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> deleteEpisodesForPodcast(String podcastId) async {
+    await service.deleteEpisodesForPodcast(podcastId);
+    notifyListeners();
+  }
+
   Future<int> autodownloadPodcast(String podcastId) async {
     final count = await service.autodownloadPodcast(podcastId);
     notifyListeners();

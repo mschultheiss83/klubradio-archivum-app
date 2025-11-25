@@ -410,6 +410,11 @@
     "description": "Snackbar üzenet sikeres leiratkozás után."
   },
 
+  "unsubscribeDialogTitle": "Leiratkozás",
+  "unsubscribeDialogContent": "Törölni szeretné a letöltött epizódokat ehhez a podcasthoz?",
+  "unsubscribeDialogDeleteButton": "Epizódok törlése",
+  "unsubscribeDialogKeepButton": "Epizódok megtartása",
+
   "nowPlayingScreenTitle": "Most szól",
   "@nowPlayingScreenTitle": {
     "description": "A 'Most szól' képernyő címe."

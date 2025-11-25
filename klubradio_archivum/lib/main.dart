@@ -98,6 +98,9 @@ class _KlubradioArchivumAppState extends State<KlubradioArchivumApp> {
         Provider<SubscriptionsDao>(
           create: (ctx) => SubscriptionsDao(ctx.read<AppDatabase>()),
         ),
+        Provider<EpisodesDao>(
+          create: (ctx) => EpisodesDao(ctx.read<AppDatabase>()),
+        ),
         ChangeNotifierProxyProvider<DownloadProvider, SubscriptionProvider>(
           create: (ctx) => SubscriptionProvider(
             subscriptionsDao: ctx.read<SubscriptionsDao>(),
@@ -105,10 +108,8 @@ class _KlubradioArchivumAppState extends State<KlubradioArchivumApp> {
           ),
           update: (context, downloadProvider, previous) {
             if (previous != null) {
-              return SubscriptionProvider(
-                subscriptionsDao: previous.subscriptionsDao,
-                downloadProvider: downloadProvider,
-              );
+              previous.updateDependencies(downloadProvider: downloadProvider);
+              return previous;
             }
             return SubscriptionProvider(
               subscriptionsDao: context.read<SubscriptionsDao>(),

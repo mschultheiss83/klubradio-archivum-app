@@ -188,35 +188,9 @@ class PodcastProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> subscribe(String podcastId) async {
-    debugPrint('[Provider] subscribe/unsubscribe $podcastId');
-    final profile = _userProfile;
-    if (profile == null) return;
 
-    if (!profile.subscribedPodcastIds.contains(podcastId)) {
-      _userProfile = profile.copyWith(
-        subscribedPodcastIds: Set<String>.from(profile.subscribedPodcastIds)
-          ..add(podcastId),
-      );
-      _updatePodcastSubscription(podcastId, isSubscribed: true);
-      notifyListeners();
-      await _scheduleAutoDownloadForPodcast(podcastId);
-    }
-  }
 
-  Future<void> unsubscribe(String podcastId) async {
-    debugPrint('[Provider] subscribe/unsubscribe $podcastId');
-    final profile = _userProfile;
-    if (profile == null) return;
 
-    if (profile.subscribedPodcastIds.contains(podcastId)) {
-      final updated = Set<String>.from(profile.subscribedPodcastIds)
-        ..remove(podcastId);
-      _userProfile = profile.copyWith(subscribedPodcastIds: updated);
-      _updatePodcastSubscription(podcastId, isSubscribed: false);
-      notifyListeners();
-    }
-  }
 
   Future<void> downloadEpisode(Episode episode) async {
     try {
@@ -231,20 +205,7 @@ class PodcastProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> _scheduleAutoDownloadForPodcast(String podcastId) async {
-    final maxDownloads =
-        _userProfile?.maxAutoDownload ?? constants.defaultAutoDownloadCount;
-    final episodes = await _apiService.fetchEpisodesForPodcast(
-      podcastId,
-      limit: maxDownloads,
-    );
-    _episodesByPodcast[podcastId] = episodes;
 
-    for (final episode in episodes.take(maxDownloads)) {
-      unawaited(_downloadProvider.enqueue(episode));
-    }
-    notifyListeners();
-  }
 
   Future<List<Episode>> fetchEpisodesForPodcast(String podcastId) async {
     var episodes = _episodesByPodcast[podcastId];
@@ -339,20 +300,7 @@ class PodcastProvider extends ChangeNotifier {
     }
   }
 
-  void _updatePodcastSubscription(
-    String podcastId, {
-    required bool isSubscribed,
-  }) {
-    _podcasts = _podcasts
-        .map(
-          (p) => p.id == podcastId ? p.copyWith(isSubscribed: isSubscribed) : p,
-        )
-        .toList();
-  }
 
-  bool isSubscribed(String podcastId) {
-    final profile = _userProfile;
-    if (profile == null) return false;
-    return profile.subscribedPodcastIds.contains(podcastId);
-  }
+
+
 }

@@ -411,6 +411,11 @@
     "description": "Snackbar message shown after successfully unsubscribing from a podcast."
   },
 
+  "unsubscribeDialogTitle": "Unsubscribe",
+  "unsubscribeDialogContent": "Do you want to delete the downloaded episodes for this podcast?",
+  "unsubscribeDialogDeleteButton": "Delete Episodes",
+  "unsubscribeDialogKeepButton": "Keep Episodes",
+
   "nowPlayingScreenTitle": "Now Playing",
   "@nowPlayingScreenTitle": {
     "description": "Title for the 'Now Playing' screen."
