@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:just_audio/just_audio.dart';
 
 import '../models/episode.dart';
@@ -31,7 +32,7 @@ class AudioPlayerService {
     _currentEpisode = episode;
     try {
       final local = episode.localFilePath;
-      if (local != null && local.isNotEmpty && await File(local).exists()) {
+      if (!kIsWeb && local != null && local.isNotEmpty && await File(local).exists()) {
         await _player.setFilePath(local);
       } else {
         await _player.setUrl(episode.audioUrl);

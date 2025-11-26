@@ -18,7 +18,25 @@
 ### Inhalt von `klubradio_archivum/integration_test/download_manager_live_test.dart`
 
 
+### Inhalt von `klubradio_archivum/lib/api/api_client.dart`
+
+
+### Inhalt von `klubradio_archivum/lib/api/episode_api.dart`
+
+
 ### Inhalt von `klubradio_archivum/lib/api/podcast_api.dart`
+
+
+### Inhalt von `klubradio_archivum/lib/api/search_api.dart`
+
+
+### Inhalt von `klubradio_archivum/lib/api/telemetry_api.dart`
+
+
+### Inhalt von `klubradio_archivum/lib/api/top_shows_api.dart`
+
+
+### Inhalt von `klubradio_archivum/lib/api/user_api.dart`
 
 
 ### Inhalt von `klubradio_archivum/lib/db/app_database.dart`
@@ -216,6 +234,9 @@
 ### Inhalt von `klubradio_archivum/lib/services/http_requester.dart`
 
 
+### Inhalt von `klubradio_archivum/lib/services/static_data_service.dart`
+
+
 ### Inhalt von `klubradio_archivum/lib/utils/device_id.dart`
 
 
@@ -232,4 +253,7 @@
 
 
 ### Inhalt von `klubradio_archivum/test_driver/integration_test.dart`
+
+
+### Inhalt von `scripts/fetch_static_data.dart`
 
