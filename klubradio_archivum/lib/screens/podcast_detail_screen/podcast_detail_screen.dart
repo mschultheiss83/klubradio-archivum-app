@@ -12,6 +12,7 @@ import 'podcast_info_card.dart';
 import 'package:klubradio_archivum/providers/subscription_provider.dart';
 import 'package:klubradio_archivum/db/daos.dart';
 import 'package:klubradio_archivum/db/app_database.dart' as db; // Alias for db.Episode
+import 'package:klubradio_archivum/screens/widgets/stateless/platform_utils.dart'; // Import PlatformUtils
 
 class PodcastDetailScreen extends StatefulWidget {
   const PodcastDetailScreen({super.key, required this.podcast});
@@ -72,20 +73,21 @@ class _PodcastDetailScreenState extends State<PodcastDetailScreen> {
       appBar: AppBar(
         title: Text(widget.podcast.title),
         actions: [
-          Consumer<SubscriptionProvider>(
-            builder: (context, subscriptionProvider, child) {
-              if (subscriptionProvider.currentSubscription == null && !subscriptionProvider.busy) {
-                // Initial loading state or no subscription found yet
-                return const Padding(
-                  padding: EdgeInsets.only(right: 8.0),
-                  child: SizedBox(
-                    width: 24,
-                    height: 24,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  ),
-                );
-              }
-              final bool isSubscribed = subscriptionProvider.currentSubscription?.active ?? false;
+          if (PlatformUtils.supportsSubscriptions)
+            Consumer<SubscriptionProvider>(
+              builder: (context, subscriptionProvider, child) {
+                if (subscriptionProvider.currentSubscription == null && !subscriptionProvider.busy) {
+                  // Initial loading state or no subscription found yet
+                  return const Padding(
+                    padding: EdgeInsets.only(right: 8.0),
+                    child: SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                  );
+                }
+                final bool isSubscribed = subscriptionProvider.currentSubscription?.active ?? false;
 
               return Padding(
                 padding: const EdgeInsets.only(right: 8),

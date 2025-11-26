@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:klubradio_archivum/models/episode.dart';
+import 'package:klubradio_archivum/models/episode.dart' as model; // Use alias for Episode
 import 'package:klubradio_archivum/screens/utils/helpers.dart';
 import 'package:klubradio_archivum/screens/widgets/stateless/image_url.dart';
 
@@ -12,7 +12,7 @@ class EpisodeListItem extends StatelessWidget {
     this.trailing,
   });
 
-  final Episode episode;
+  final model.Episode episode; // Use aliased type
   final VoidCallback? onTap;
   final Widget? trailing;
 

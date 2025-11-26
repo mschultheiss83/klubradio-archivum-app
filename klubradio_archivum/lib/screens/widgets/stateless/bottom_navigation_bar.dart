@@ -1,30 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:klubradio_archivum/l10n/app_localizations.dart';
+// import 'package:klubradio_archivum/l10n/app_localizations.dart'; // Removed
 
 class AppBottomNavigationBar extends StatelessWidget {
   const AppBottomNavigationBar({
     super.key,
     required this.currentIndex,
     required this.onTap,
+    required this.destinations,
   });
 
   final int currentIndex;
   final ValueChanged<int> onTap;
+  final List<NavigationDestination> destinations;
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    // final l10n = AppLocalizations.of(context)!; // Removed
     final cs = Theme.of(context).colorScheme;
-
-    // Localized labels in index order
-    final labels = <String>[
-      l10n.bottomNavHome,
-      l10n.bottomNavDiscover,
-      l10n.bottomNavSearch,
-      l10n.bottomNavDownloads,
-      l10n.bottomNavProfile,
-      l10n.bottomNavSettings,
-    ];
 
     final double w = MediaQuery.of(context).size.width;
     final bool isSmall = w < 600;
@@ -68,7 +60,7 @@ class AppBottomNavigationBar extends StatelessWidget {
                   ),
                   child: _TitleLabel(
                     key: ValueKey<int>(currentIndex),
-                    text: labels[currentIndex],
+                    text: destinations[currentIndex].tooltip ?? '', // Use tooltip for label
                     color: cs.onSurface,
                     isSmall: isSmall,
                   ),
@@ -84,50 +76,7 @@ class AppBottomNavigationBar extends StatelessWidget {
                 indicatorColor: cs.primary.withAlpha((255 * 0.12).round()),
                 labelBehavior: NavigationDestinationLabelBehavior
                     .alwaysHide, // we show label above
-                destinations: <NavigationDestination>[
-                  _dest(
-                    Icons.home_outlined,
-                    Icons.home,
-                    labels[0],
-                    selected: currentIndex == 0,
-                    cs: cs,
-                  ),
-                  _dest(
-                    Icons.explore_outlined,
-                    Icons.explore,
-                    labels[1],
-                    selected: currentIndex == 1,
-                    cs: cs,
-                  ),
-                  _dest(
-                    Icons.search_outlined,
-                    Icons.search,
-                    labels[2],
-                    selected: currentIndex == 2,
-                    cs: cs,
-                  ),
-                  _dest(
-                    Icons.download_outlined,
-                    Icons.download,
-                    labels[3],
-                    selected: currentIndex == 3,
-                    cs: cs,
-                  ),
-                  _dest(
-                    Icons.person_outline,
-                    Icons.person,
-                    labels[4],
-                    selected: currentIndex == 4,
-                    cs: cs,
-                  ),
-                  _dest(
-                    Icons.settings_outlined,
-                    Icons.settings,
-                    labels[5],
-                    selected: currentIndex == 5,
-                    cs: cs,
-                  ),
-                ],
+                destinations: destinations, // Use passed destinations
               ),
             ],
           ),
@@ -136,24 +85,21 @@ class AppBottomNavigationBar extends StatelessWidget {
     );
   }
 
-  static NavigationDestination _dest(
+  static NavigationDestination buildDestination(
     IconData icon,
     IconData selectedIcon,
-    String tooltip, {
-    required bool selected,
-    required ColorScheme cs,
-  }) {
+    String tooltip) {
     return NavigationDestination(
       tooltip: tooltip, // accessibility + long-press hint
       icon: _AnimatedNavIcon(
         iconData: icon,
         selected: false,
-        color: cs.onSurfaceVariant,
+        color: Colors.transparent, // Color is set by NavigationBar theme
       ),
       selectedIcon: _AnimatedNavIcon(
         iconData: selectedIcon,
         selected: true,
-        color: cs.primary,
+        color: Colors.transparent, // Color is set by NavigationBar theme
       ),
       label: '', // hidden (we render title above)
     );
