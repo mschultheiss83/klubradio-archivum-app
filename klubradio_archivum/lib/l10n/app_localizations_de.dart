@@ -299,8 +299,20 @@ class AppLocalizationsDe extends AppLocalizations {
   String get podcastDetailScreenSubscribeSuccess => 'Erfolgreich abonniert!';
 
   @override
-  String get podcastDetailScreenUnsubscribeSuccess =>
-      'Abonnement erfolgreich beendet!';
+  String get podcastDetailScreenUnsubscribeSuccess => 'Erfolgreich abbestellt!';
+
+  @override
+  String get unsubscribeDialogTitle => 'Abbestellen';
+
+  @override
+  String get unsubscribeDialogContent =>
+      'Möchten Sie die heruntergeladenen Episoden für diesen Podcast löschen?';
+
+  @override
+  String get unsubscribeDialogDeleteButton => 'Episoden löschen';
+
+  @override
+  String get unsubscribeDialogKeepButton => 'Episoden behalten';
 
   @override
   String get nowPlayingScreenTitle => 'Aktuelle Wiedergabe';

@@ -297,6 +297,19 @@ class AppLocalizationsHu extends AppLocalizations {
   String get podcastDetailScreenUnsubscribeSuccess => 'Leiratkozás sikeres!';
 
   @override
+  String get unsubscribeDialogTitle => 'Leiratkozás';
+
+  @override
+  String get unsubscribeDialogContent =>
+      'Törölni szeretné a letöltött epizódokat ehhez a podcasthoz?';
+
+  @override
+  String get unsubscribeDialogDeleteButton => 'Epizódok törlése';
+
+  @override
+  String get unsubscribeDialogKeepButton => 'Epizódok megtartása';
+
+  @override
   String get nowPlayingScreenTitle => 'Most szól';
 
   @override

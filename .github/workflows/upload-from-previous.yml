@@ -22,9 +22,9 @@ jobs:
       run:
         working-directory: klubradio_scraper_nodejs
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: "22"
           cache: "npm"
@@ -46,7 +46,7 @@ jobs:
           EOF
 
       - name: Download artifact from another workflow run
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v6
         with:
           # If you kept the artifact name as downloads-json-${{ github.run_number }},
           # you need to know that run_number from the source run to form the name.
@@ -60,7 +60,7 @@ jobs:
 
       - name: Upload logs on failure
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: ci-logs-${{ github.run_number }}-previous
           path: |

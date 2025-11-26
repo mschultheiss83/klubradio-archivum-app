@@ -1,0 +1,44 @@
+name: Test Coverage
+
+on:
+  pull_request:
+    branches:
+      - dev
+  push:
+    branches:
+      - dev
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 'stable' # Use 'stable' for the latest stable version
+
+      - name: Install lcov
+        run: sudo apt-get update && sudo apt-get install -y lcov
+
+      - name: Install dependencies
+        run: flutter pub get
+        working-directory: klubradio_archivum
+
+      - name: Run tests with coverage
+        run: flutter test --coverage
+        working-directory: klubradio_archivum
+
+      - name: Generate LCOV report
+        run: genhtml coverage/lcov.info -o coverage/html
+        working-directory: klubradio_archivum
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: code-coverage-report
+          path: klubradio_archivum/coverage/html
+          retention-days: 7

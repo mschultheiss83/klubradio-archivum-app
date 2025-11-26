@@ -2,28 +2,28 @@
   "name": "klubradio_scraper_nodejs",
   "version": "1.0.5",
   "scripts": {
-    "start": "node index.js all",
-    "scrape": "node index.js scrape",
-    "rss": "node index.js rss",
     "lint": "eslint .",
     "format": "prettier -w .",
-    "test": "node --test"
+    "test": "node --test",
+    "scrape:archive": "node scrapeArchiv.js",
+    "scrape:details": "node scrapeArchivDetail.js",
+    "upload:shows": "node speed_upload_shows.js"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.57.4",
+    "@supabase/supabase-js": "^2.84.0",
     "axios": "*",
     "bottleneck": "*",
     "cheerio": "*",
     "dotenv": "*",
     "music-metadata": "*",
     "pino": "*",
-    "puppeteer": "^24.22.0",
+    "puppeteer": "^24.31.0",
     "rss": "*",
     "rss-parser": "*",
-    "winston": "^3.17.0"
+    "winston": "^3.18.3"
   },
   "devDependencies": {
-    "eslint": "^9.11.1",
+    "eslint": "^9.39.1",
     "prettier": "^3.3.3"
   }
 }

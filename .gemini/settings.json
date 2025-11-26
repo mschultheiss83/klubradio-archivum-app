@@ -1,0 +1,38 @@
+{
+  "mcpServers": {
+    "memory": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-memory"
+      ]
+    },
+    "sequential-thinking": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-sequential-thinking"
+      ]
+    }
+  },
+  "model": {
+    "name": "gemini-2.5-flash"
+  },
+  "advanced": {
+    "autoConfigureMemory": true
+  },
+  "tools": {
+    "autoAccept": false,
+    "shell": {
+      "showColor": true
+    }
+  },
+  "ui": {
+    "showMemoryUsage": true,
+    "showLineNumbers": true,
+    "footer": {
+      "hideContextPercentage": false
+    },
+    "showStatusInTitle": true
+  }
+}

@@ -1,0 +1,38 @@
+# .github/dependabot.yml
+version: 2
+updates:
+  # Maintain dependencies for the Flutter app
+  - package-ecosystem: "pub"
+    directory: "/klubradio_archivum"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "dependabot"
+      - "flutter-app"
+    # Optional: assign a reviewer
+    # reviewers:
+    #   - "your-github-username"
+
+  # Maintain dependencies for the Node.js scraper
+  - package-ecosystem: "npm"
+    directory: "/klubradio_scraper_nodejs"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "dependabot"
+      - "scraper"
+    # Optional: assign a reviewer
+    # reviewers:
+    #   - "your-github-username"
+
+  # Maintain dependencies for GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "dependabot"
+      - "github-actions"
+    # Optional: assign a reviewer
+    # reviewers:
+    #   - "your-github-username"

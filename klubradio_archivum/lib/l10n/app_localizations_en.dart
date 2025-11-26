@@ -296,6 +296,19 @@ class AppLocalizationsEn extends AppLocalizations {
       'Unsubscribed successfully!';
 
   @override
+  String get unsubscribeDialogTitle => 'Unsubscribe';
+
+  @override
+  String get unsubscribeDialogContent =>
+      'Do you want to delete the downloaded episodes for this podcast?';
+
+  @override
+  String get unsubscribeDialogDeleteButton => 'Delete Episodes';
+
+  @override
+  String get unsubscribeDialogKeepButton => 'Keep Episodes';
+
+  @override
   String get nowPlayingScreenTitle => 'Now Playing';
 
   @override

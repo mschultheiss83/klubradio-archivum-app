@@ -1,4 +1,3 @@
-// lib/api/podcast_api.dart
 import 'package:klubradio_archivum/services/http_requester.dart';
 import 'package:klubradio_archivum/screens/utils/constants.dart' as constants;
 
@@ -31,6 +30,7 @@ class PodcastApi {
   Future<List<Map<String, dynamic>>> latest({int limit = 10}) async {
     final url =
         '$baseUrl/rest/v1/${constants.podcastsTable}?select=*&order=last_updated.desc&limit=$limit';
+    debugPrint('latest url: $url');
     final json = await _requester.getJson(url);
     return (json as List).cast<Map<String, dynamic>>();
   }
@@ -41,6 +41,7 @@ class PodcastApi {
   Future<List<Map<String, dynamic>>> recommended({int limit = 10}) async {
     final url =
         '$baseUrl/rest/v1/${constants.podcastsTable}?select=*&order=last_updated.desc.nullslast&limit=$limit';
+    debugPrint('recommended url: $url');
     final json = await _requester.getJson(url);
     return (json as List).cast<Map<String, dynamic>>();
   }
@@ -50,7 +51,8 @@ class PodcastApi {
   /// Returns raw JSON data that can be parsed into Podcast models.
   Future<List<Map<String, dynamic>>> trending({int limit = 10}) async {
     final url =
-        '$baseUrl/rest/v1/${constants.podcastsTable}?select=*&limit=$limit';
+        '$baseUrl/rest/v1/${constants.podcastsTable}?select=*&order=id.desc&limit=$limit';
+    debugPrint('trending url: $url');
     final json = await _requester.getJson(url);
     return (json as List).cast<Map<String, dynamic>>();
   }
@@ -62,6 +64,7 @@ class PodcastApi {
   Future<List<Map<String, dynamic>>> recentEpisodes({int limit = 8}) async {
     final url =
         '$baseUrl/rest/v1/${constants.episodesTable}?select=*&order=id.desc&limit=$limit';
+    debugPrint('recentEpisodes url: $url');
     final json = await _requester.getJson(url);
     return (json as List).cast<Map<String, dynamic>>();
   }

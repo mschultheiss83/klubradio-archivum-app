@@ -72,6 +72,9 @@
 ### Inhalt von `klubradio_archivum/lib/models/podcast.dart`
 
 
+### Inhalt von `klubradio_archivum/lib/models/retention_mode.dart`
+
+
 ### Inhalt von `klubradio_archivum/lib/models/show_data.dart`
 
 
@@ -211,6 +214,9 @@
 
 
 ### Inhalt von `klubradio_archivum/lib/screens/widgets/stateless/image_url.dart`
+
+
+### Inhalt von `klubradio_archivum/lib/screens/widgets/stateless/platform_utils.dart`
 
 
 ### Inhalt von `klubradio_archivum/lib/screens/widgets/stateless/podcast_list_item.dart`

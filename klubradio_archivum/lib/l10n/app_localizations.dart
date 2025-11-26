@@ -598,6 +598,30 @@ abstract class AppLocalizations {
   /// **'Unsubscribed successfully!'**
   String get podcastDetailScreenUnsubscribeSuccess;
 
+  /// No description provided for @unsubscribeDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Unsubscribe'**
+  String get unsubscribeDialogTitle;
+
+  /// No description provided for @unsubscribeDialogContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Do you want to delete the downloaded episodes for this podcast?'**
+  String get unsubscribeDialogContent;
+
+  /// No description provided for @unsubscribeDialogDeleteButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Episodes'**
+  String get unsubscribeDialogDeleteButton;
+
+  /// No description provided for @unsubscribeDialogKeepButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep Episodes'**
+  String get unsubscribeDialogKeepButton;
+
   /// Title for the 'Now Playing' screen.
   ///
   /// In en, this message translates to:

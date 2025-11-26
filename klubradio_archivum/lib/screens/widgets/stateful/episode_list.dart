@@ -6,10 +6,10 @@ import 'package:klubradio_archivum/l10n/app_localizations.dart';
 import 'package:klubradio_archivum/models/episode.dart' as model;
 import 'package:klubradio_archivum/providers/episode_provider.dart';
 import 'package:klubradio_archivum/providers/podcast_provider.dart';
-import 'package:klubradio_archivum/db/app_database.dart';
-import 'package:klubradio_archivum/providers/download_provider.dart'
-    show DownloadProvider;
-import 'package:klubradio_archivum/screens/widgets/stateless/episode_list_item.dart';
+import 'package:klubradio_archivum/db/app_database.dart' as db;
+import 'package:klubradio_archivum/providers/download_provider.dart';
+import 'package:klubradio_archivum/screens/widgets/stateless/platform_utils.dart'; // For supportsDownloads
+import 'package:klubradio_archivum/screens/widgets/stateless/episode_list_item.dart'; // Missing import
 
 class EpisodeList extends StatefulWidget {
   const EpisodeList({
@@ -52,7 +52,7 @@ class _EpisodeListState extends State<EpisodeList> {
                     );
                     podcastProvider.addRecentlyPlayed(ep);
                   },
-                  trailing: widget.enableDownloads
+                  trailing: widget.enableDownloads && PlatformUtils.supportsDownloads
                       ? _DownloadButton(episode: ep, queue: widget.episodes)
                       : null,
                 );
@@ -64,22 +64,22 @@ class _EpisodeListState extends State<EpisodeList> {
 }
 
 class _DownloadButton extends StatelessWidget {
-  const _DownloadButton({required this.episode, this.queue, super.key});
+  const _DownloadButton({required this.episode, this.queue});
   final model.Episode episode;
   final List<model.Episode>? queue;
 
   @override
   Widget build(BuildContext context) {
-    final db = context.read<AppDatabase>();
+    final appDb = context.read<db.AppDatabase>(); // Corrected local variable name
     final dl = context.read<DownloadProvider>();
 
     // Reaktiver Status aus SQLite (Drift)
-    final stream = (db.select(
-      db.episodes,
+    final stream = (appDb.select( // Use appDb alias
+      appDb.episodes, // Use appDb alias
     )..where((e) => e.id.equals(episode.id))).watchSingleOrNull();
     final l10n = AppLocalizations.of(context)!;
 
-    return StreamBuilder<Episode?>(
+    return StreamBuilder<db.Episode?>( // Corrected type argument
       stream: stream,
       builder: (context, snap) {
         final row = snap.data;
