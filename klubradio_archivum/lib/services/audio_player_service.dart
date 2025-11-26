@@ -47,7 +47,7 @@ class AudioPlayerService {
       }
 
       // If local failed, was not available, or on web, try remote URL
-      if (!loadedSuccessfully) { // This condition implicitly covers kIsWeb == true if local was not attempted
+      if (!loadedSuccessfully) {
         try {
           await _player.setUrl(episode.audioUrl);
           debugPrint('Successfully loaded remote URL: ${episode.audioUrl}');

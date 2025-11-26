@@ -2,32 +2,44 @@
 
 # Add 'documentation' label to PRs that modify documentation files
 documentation:
-  - '*.md' # Includes README.md, CONTRIBUTING.md etc.
-  - 'docs/**' # Includes images and docs
+  - changed-files:
+      - any-glob-to-any-file: '*.md' # Includes README.md, CONTRIBUTING.md etc.
+  - changed-files:
+      - any-glob-to-any-file: 'docs/**' # Includes images and docs
 
 # Add 'flutter-app' label to PRs that modify the Flutter application code
 flutter-app:
-  - 'klubradio_archivum/**'
+  - changed-files:
+      - any-glob-to-any-file: 'klubradio_archivum/**'
 
 # Add 'scraper' label to PRs that modify the Node.js scraper
 scraper:
-  - 'klubradio_scraper_nodejs/**'
+  - changed-files:
+      - any-glob-to-any-file: 'klubradio_scraper_nodejs/**'
 
 # Add 'database' label to PRs that modify database schema or data
 database:
-  - 'database/**'
+  - changed-files:
+      - any-glob-to-any-file: 'database/**'
 
 # Add 'github-actions' label to PRs that modify workflow files
 github-actions:
-  - '.github/workflows/**'
+  - changed-files:
+      - any-glob-to-any-file: '.github/workflows/**'
 
 # Add 'configuration' label to PRs that modify general configuration files
 configuration:
-  - '.github/**' # Catch-all for other GitHub config files
-  - '.gemini/**'
-  - '.idea/**'
-  - '*.gitignore'
-  - '*.editorconfig'
-  - '**/CLAUDE.md'
-  - '**/GEMINI.md'
-
+  - changed-files:
+      - any-glob-to-any-file: '.github/**' # Catch-all for other GitHub config files
+  - changed-files:
+      - any-glob-to-any-file: '.gemini/**'
+  - changed-files:
+      - any-glob-to-any-file: '.idea/**'
+  - changed-files:
+      - any-glob-to-any-file: '*.gitignore'
+  - changed-files:
+      - any-glob-to-any-file: '*.editorconfig'
+  - changed-files:
+      - any-glob-to-any-file: '**/CLAUDE.md'
+  - changed-files:
+      - any-glob-to-any-file: '**/GEMINI.md'
