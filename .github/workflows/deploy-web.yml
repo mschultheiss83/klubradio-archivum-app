@@ -6,6 +6,10 @@ on:
     branches:
       - dev # Or your main branch for deployments
 
+defaults:
+  run:
+    working-directory: klubradio_archivum
+
 jobs:
   build_and_deploy:
     runs-on: ubuntu-latest
@@ -17,11 +21,10 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
-          flutter-version: '3.38.3'
+          flutter-version: '3.27.1'
 
       - name: Install dependencies
         run: flutter pub get
-        working-directory: klubradio_archivum
 
       - name: Build Web App
         run: flutter build web --release --base-href / # --base-href is important for subdirectories, but for play.gi-td.com it's likely root. Assuming play.gi-td.com is the root of the deployment

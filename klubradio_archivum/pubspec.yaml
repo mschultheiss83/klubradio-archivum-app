@@ -56,6 +56,7 @@ flutter:
     - assets/api/response.json
     - assets/app_icon/app_icon.png
     - assets/app_icon/app_icon_foreground.png
+    - assets/data/
 
 flutter_launcher_icons:
   android: true

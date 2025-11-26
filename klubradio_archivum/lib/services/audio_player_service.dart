@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:flutter/foundation.dart'; // Import for debugPrint
+import 'package:flutter/foundation.dart'; // Import for kIsWeb and debugPrint
 import 'package:just_audio/just_audio.dart';
 
 import '../models/episode.dart';
@@ -34,8 +34,8 @@ class AudioPlayerService {
       final local = episode.localFilePath;
       bool loadedSuccessfully = false;
 
-      // Try loading local file first
-      if (local != null && local.isNotEmpty && await File(local).exists()) {
+      // Try loading local file first, only if not on web
+      if (!kIsWeb && local != null && local.isNotEmpty && await File(local).exists()) {
         try {
           await _player.setFilePath(local);
           debugPrint('Successfully loaded local file: $local');
@@ -46,7 +46,7 @@ class AudioPlayerService {
         }
       }
 
-      // If local failed or was not available, try remote URL
+      // If local failed, was not available, or on web, try remote URL
       if (!loadedSuccessfully) {
         try {
           await _player.setUrl(episode.audioUrl);
