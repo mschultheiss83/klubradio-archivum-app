@@ -21,7 +21,7 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
-          flutter-version: 'stable' # Corrected Flutter version as per PR 32 review
+          flutter-version: '3.27.1'
 
       - name: Install dependencies
         run: flutter pub get
