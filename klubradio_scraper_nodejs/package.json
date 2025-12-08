@@ -20,7 +20,7 @@
     "puppeteer": "^24.31.0",
     "rss": "*",
     "rss-parser": "*",
-    "winston": "^3.18.3"
+    "winston": "^3.19.0"
   },
   "devDependencies": {
     "eslint": "^9.39.1",
