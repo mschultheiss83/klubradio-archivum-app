@@ -91,16 +91,8 @@ class AppBottomNavigationBar extends StatelessWidget {
     String tooltip) {
     return NavigationDestination(
       tooltip: tooltip, // accessibility + long-press hint
-      icon: _AnimatedNavIcon(
-        iconData: icon,
-        selected: false,
-        color: Colors.transparent, // Color is set by NavigationBar theme
-      ),
-      selectedIcon: _AnimatedNavIcon(
-        iconData: selectedIcon,
-        selected: true,
-        color: Colors.transparent, // Color is set by NavigationBar theme
-      ),
+      icon: Icon(icon),
+      selectedIcon: Icon(selectedIcon),
       label: '', // hidden (we render title above)
     );
   }
@@ -134,29 +126,3 @@ class _TitleLabel extends StatelessWidget {
   }
 }
 
-class _AnimatedNavIcon extends StatelessWidget {
-  const _AnimatedNavIcon({
-    required this.iconData,
-    required this.selected,
-    required this.color,
-  });
-
-  final IconData iconData;
-  final bool selected;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    // Slight scale + opacity lift when selected
-    return AnimatedScale(
-      scale: selected ? 1.14 : 1.0,
-      duration: const Duration(milliseconds: 160),
-      curve: Curves.easeOut,
-      child: AnimatedOpacity(
-        opacity: selected ? 1.0 : 0.85,
-        duration: const Duration(milliseconds: 160),
-        child: Icon(iconData, size: selected ? 28 : 24, color: color),
-      ),
-    );
-  }
-}

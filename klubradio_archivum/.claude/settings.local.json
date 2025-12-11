@@ -1,7 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Bash(wait)"
+      "Bash(wait)",
+      "Bash(cat:*)",
+      "Bash(flutter --version:*)"
     ],
     "deny": [],
     "ask": []
