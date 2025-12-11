@@ -1,5 +1,6 @@
 // lib/services/static_data_service.dart
 import 'dart:convert';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 
 /// Service for loading pre-generated static data bundles that ship with the app.
@@ -73,7 +74,9 @@ class StaticDataService {
   /// Returns null if metadata is not available.
   Future<DateTime?> getBundleUpdateTime() async {
     try {
-      final jsonString = await rootBundle.loadString('assets/data/metadata.json');
+      final jsonString = await rootBundle.loadString(
+        'assets/data/metadata.json',
+      );
       final data = jsonDecode(jsonString);
 
       if (data is Map<String, dynamic> && data['updatedAt'] is String) {
