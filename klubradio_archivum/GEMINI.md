@@ -141,6 +141,13 @@ I use a set of tools to build and manage a structured knowledge base about the p
 
 This allows me to remember key files, code components, architectural decisions, and how they all connect, leading to more informed and consistent work.
 
+## Agent Triggering & Task Repetition
+- Wann Claude triggern: Architektur-/Security-/Offline-/Retention-/Entitlement-Fragen, Risikoabschätzung, Datenfluss- oder Plattformkonsequenzen, Release/Branch/Git-Workflow-Klärung.
+- Wann OpenAI Lead triggern: Scope/Label unklar (`apple*` Filter), widersprüchliche Anforderungen, Priorisierung, Parallel-vs.-Sequenziell-Entscheidungen, wenn mehr Kontext/Inputs nötig sind.
+- Eigenständiges Re-Triggern: Wiederhole Tasks nur mit klarer Begründung (z. B. neue Artefakte, geänderte Inputs, fehlgeschlagene Builds/Tests). Vermeide Endlosschleifen: maximal zwei Rückfragen pro Thema, dann Eskalation an OpenAI.
+- Neue Agenten/parallel Arbeiten: Schlage OpenAI vor, zusätzliche Gemini-Instanz für parallele Implementierung/Tests zu starten, wenn Aufgaben entkoppelt sind (z. B. iOS Entitlements vs. Drift-Migration).
+- Statusweitergabe: Jede Nachricht enthält Issue-ID, Label, Plattform, betroffene Module/Dateien, offene Fragen, vorgeschlagene Commands/Tests, Risiken.
+
 ## File Structure Overview (from `docs/project/flutter-app-fs.md` and exploration)
 
 The project is organized into the following main directories:

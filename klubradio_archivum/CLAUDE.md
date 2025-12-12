@@ -302,3 +302,9 @@ Before release, test builds on all supported platforms:
 - `docs/project/release-process.md`: Detailed release instructions
 - `docs/issues/tracking-major-tasks.md`: Current task tracking
 
+## Agent Triggering & Task Repetition
+- Wann Gemini triggern: Implementierungsdetails (Flutter/Provider/Drift/Supabase), Build-/Testkommandos, Performance/Schema-Änderungen, konkrete Pfade oder Codepatches.
+- Wann OpenAI Lead triggern: Unklarer Scope (`apple*` Label), Prioritätenkonflikte, wenn mehr Kontext oder Nutzerinput nötig ist, oder bei wiederholten Schleifen zwischen Agenten.
+- Wiederholung nur mit Grund: Wiederhole/erneuere Aufgaben, wenn Eingaben geändert wurden, neue Artefakte vorliegen oder Tests fehlgeschlagen sind. Maximal zwei Rückfragen pro Thema; sonst Eskalation an OpenAI zur Entscheidung.
+- Neue Agenten/Parallelisierung: Empfehle OpenAI zusätzliche Gemini/Claude-Instanzen, wenn Arbeitspakete entkoppelt sind (z. B. Architektur-Risiko vs. UI/Code-Fix).
+- Statusweitergabe: Jede Nachricht benennt Issue-ID, Label, Plattform, Module/Dateien, Annahmen, Risiken, Commands, Tests, offene Fragen.
