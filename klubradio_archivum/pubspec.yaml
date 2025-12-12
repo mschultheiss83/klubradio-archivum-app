@@ -57,7 +57,6 @@ flutter:
     - assets/api/response.json
     - assets/app_icon/app_icon.png
     - assets/app_icon/app_icon_foreground.png
-    - assets/font/MaterialIcons-Regular.ttf
     - assets/data/
 
 flutter_launcher_icons:
