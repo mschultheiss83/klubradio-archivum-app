@@ -1,14 +1,55 @@
 # Apple App Store Deployment Guide
 
+**Last Updated**: 2025-12-12
+**Current Status**: Ready to begin - Mac available, builds working
+@docs/
+## Current Status Summary
+
+### ✅ Environment Ready
+- **Mac**: Available with macOS 26.1
+- **Xcode**: 26.1.1 installed ✓
+- **Flutter**: 3.38.4 (stable) ✓
+- **CocoaPods**: 1.16.2 ✓
+- **Builds**: iOS and macOS builds working after recent platform fixes
+
+### ✅ iOS Configuration
+- **Bundle ID**: `net.mschultheiss.klubradioarchivum`
+- **Deployment Target**: 14.0 ✓
+- **Version**: 1.0.4
+- **Podfile**: Configured ✓
+
+### ✅ macOS Configuration
+- **Bundle ID**: `net.mschultheiss.klubradioArchivum`
+- **Deployment Target**: 10.15 ✓
+- **Entitlements**: Configured for network, downloads, audio ✓
+- **Version**: 1.0.4
+
+### ⚠️ Needs Attention (iOS)
+- [ ] Privacy descriptions missing in Info.plist
+- [ ] Background modes not configured (for background audio)
+- [ ] iOS entitlements file missing
+- [ ] App icons need verification
+- [ ] Bundle ID decision (keep current or change to `hu.klubradio.archivum`)
+
+### 📋 Not Started
+- [ ] Apple Developer Program enrollment ($99/year)
+- [ ] App Store Connect setup
+- [ ] Code signing configuration
+- [ ] Screenshots and marketing materials
+- [ ] Privacy policy URL
+- [ ] App Store listing content
+
+---
+
 ## Overview
 
-This guide covers deploying the Klubrádió Archive Flutter app to the Apple App Store for iOS devices. Estimated timeline: 2-4 weeks for initial setup and review.
+This guide covers deploying the Klubrádió Archive Flutter app to the Apple App Store for **iOS** and **macOS**. Estimated timeline: 2-4 weeks for initial setup and review.
 
 **IMPORTANT**: This process requires:
-- Mac computer (macOS 11.0 or later)
-- Xcode 13.0 or later
+- Mac computer (macOS 11.0 or later) ✅ Available
+- Xcode 13.0 or later ✅ Xcode 26.1.1 installed
 - Physical iOS device or iOS Simulator for testing
-- Apple Developer Account
+- Apple Developer Account ⚠️ Need to enroll
 
 ---
 
@@ -21,14 +62,132 @@ This guide covers deploying the Klubrádió Archive Flutter app to the Apple App
 - **iOS Device**: iPhone or iPad for testing (recommended but optional with simulator)
 - **Payment Method**: Credit card for Developer Program enrollment
 
-## Timeline
+## Timeline (Updated 2025-12-12)
 
+### Current Timeline (Starting Today)
+- **Technical Configuration** (Phase 0): 1-2 days
 - **Developer Program Enrollment**: 1-2 days (can take up to 48 hours for approval)
-- **Account Verification**: Immediate to 2 days (organization accounts take longer)
+- **Xcode/App Store Connect Setup**: 2-3 days
+- **Build & Test**: 1-2 days
+- **Submit for Review**: -
 - **App Review**: 1-7 days (average 24-48 hours)
-- **Target**: Aim to submit by early December for mid-December release
+- **Estimated Go-Live**: ~2-3 weeks from today (late December 2025 / early January 2026)
 
-**Note**: Plan to start this process once you have access to a Mac (in ~3 weeks).
+### Deployment Targets
+- **iOS**: iPhone and iPad (iOS 14.0+)
+- **macOS**: macOS 10.15+
+
+---
+
+## Phase 0: Immediate Action Items (Start Here!)
+
+### Current Priority Tasks
+
+Before starting Apple Developer enrollment, complete these technical tasks:
+
+#### Task 1: Fix iOS Info.plist Privacy Descriptions
+**Location**: `ios/Runner/Info.plist`
+**What to add**:
+```xml
+<!-- Add these keys to the <dict> section -->
+
+<!-- Required for background audio playback -->
+<key>UIBackgroundModes</key>
+<array>
+    <string>audio</string>
+    <string>fetch</string>
+</array>
+
+<!-- Privacy descriptions (required by App Store) -->
+<key>NSAppleMusicUsageDescription</key>
+<string>Az app letöltött podcast epizódokat tárol a helyi tárhelyen.</string>
+
+<!-- App Transport Security (use HTTPS) -->
+<key>NSAppTransportSecurity</key>
+<dict>
+    <key>NSAllowsArbitraryLoads</key>
+    <false/>
+</dict>
+```
+
+#### Task 2: Create iOS Entitlements File (Optional but Recommended)
+**Location**: `ios/Runner/Runner.entitlements`
+**Create new file with**:
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- Background audio capability -->
+    <key>com.apple.developer.associated-domains</key>
+    <array/>
+</dict>
+</plist>
+```
+
+**Then configure in Xcode**:
+1. Open `ios/Runner.xcworkspace` in Xcode
+2. Select Runner target > Signing & Capabilities
+3. Click "+ Capability" > Background Modes
+4. Check: ☑ Audio, AirPlay, and Picture in Picture
+
+#### Task 3: Verify App Icons
+**Run**:
+```bash
+cd klubradio_archivum
+dart run flutter_launcher_icons
+```
+
+**Then verify in Xcode**:
+```bash
+open ios/Runner.xcworkspace
+```
+Check: Runner > Assets.xcassets > AppIcon (all sizes should be filled)
+
+#### Task 4: Decide on Bundle ID
+**Current**: `net.mschultheiss.klubradioarchivum`
+**Options**:
+- **Keep current** (recommended if this is your personal/solo project)
+- **Change to** `hu.klubradio.archivum` (if official Klubrádió app)
+
+**To change** (if needed):
+1. In Xcode: Runner target > General > Bundle Identifier
+2. Update in `ios/Runner.xcodeproj/project.pbxproj`
+
+#### Task 5: Test iOS Build
+**Run**:
+```bash
+cd klubradio_archivum
+flutter clean
+flutter pub get
+cd ios && pod install --repo-update && cd ..
+flutter build ios --release
+```
+
+**Or test in Simulator**:
+```bash
+flutter run -d "iPhone 15 Pro" --release
+```
+
+### macOS Configuration (Similar Steps)
+
+macOS app is in better shape:
+- ✅ Entitlements already configured
+- ⚠️ May need privacy descriptions in Info.plist (check App Store requirements)
+- ⚠️ Bundle ID capitalization differs: `net.mschultheiss.klubradioArchivum` (vs iOS)
+
+**macOS Build Test**:
+```bash
+flutter build macos --release
+open build/macos/Build/Products/Release/klubradio_archivum.app
+```
+
+### Next Steps After Phase 0
+Once technical configuration is complete:
+1. → **Phase 1**: Enroll in Apple Developer Program ($99/year - covers both iOS and macOS)
+2. → **Phase 2**: Configure Xcode signing (for both platforms)
+3. → **Phase 3**: Create App Store Connect listings (separate for iOS and macOS)
+4. → **Phase 4**: Build and submit (can do both simultaneously)
 
 ---
 
@@ -1214,22 +1373,32 @@ Before submission:
 
 ---
 
-## Key Dates for December Release
+## Key Dates for Release (Updated 2025-12-12)
 
-| Task | Duration | Target Date |
-|------|----------|-------------|
-| Get Mac access | - | ~3 weeks |
-| Enroll in Developer Program | 1-2 days | Dec 1 |
-| Setup Xcode and Flutter | 1 day | Dec 2 |
-| Configure iOS project | 1 day | Dec 3 |
-| Create App Store Connect listing | 2 days | Dec 5 |
-| Build and test | 2 days | Dec 7 |
-| TestFlight testing (optional) | 3-5 days | Dec 12 |
-| Submit for review | - | Dec 13 |
-| App review | 1-7 days | Dec 14-20 |
-| **Go Live** | - | **Dec 15-21** |
+| Task | Duration | Start Date | Target Completion |
+|------|----------|------------|-------------------|
+| ✅ Get Mac access | - | Complete | ✅ Dec 12 |
+| ✅ Setup Xcode and Flutter | - | Complete | ✅ Dec 12 |
+| **Phase 0: Technical Config** | 1-2 days | Dec 12 | **Dec 13-14** |
+| - Fix iOS Info.plist | - | Dec 12 | Dec 12 |
+| - Create entitlements | - | Dec 12 | Dec 12 |
+| - Verify app icons | - | Dec 12 | Dec 12 |
+| - Test builds (iOS/macOS) | - | Dec 13 | Dec 13 |
+| **Phase 1: Apple Developer** | 1-2 days | Dec 13 | **Dec 14-15** |
+| - Enroll in program | - | Dec 13 | Dec 14 |
+| - Wait for approval | - | Dec 14 | Dec 15 |
+| **Phase 2-3: App Store Setup** | 2-3 days | Dec 15 | **Dec 17-18** |
+| - Configure signing | - | Dec 15 | Dec 15 |
+| - Create App Store listings | - | Dec 16 | Dec 17 |
+| - Prepare screenshots | - | Dec 16 | Dec 17 |
+| **Phase 4: Build & Submit** | 1-2 days | Dec 18 | **Dec 19-20** |
+| - Create archives | - | Dec 18 | Dec 18 |
+| - Upload to App Store | - | Dec 18 | Dec 19 |
+| - Submit for review | - | Dec 19 | Dec 19 |
+| **Apple Review** | 1-7 days | Dec 20 | **Dec 21-27** |
+| **Go Live** | - | - | **~Dec 27 or early Jan 2026** |
 
-**Note**: Wait until you have Mac access (3 weeks from now) before starting. Then aim for early December submission.
+**Note**: Timeline assumes starting today (Dec 12). Holiday season may affect Apple review times (potentially slower Dec 24-Jan 2).
 
 ---
 
@@ -1268,17 +1437,34 @@ dart run flutter_launcher_icons
 
 ---
 
-## Next Steps (When You Have Mac Access)
+## Next Steps (Start Now - 2025-12-12)
 
-1. **Enroll in Apple Developer Program**: https://developer.apple.com/programs/enroll/
-2. **Install Xcode** from Mac App Store
-3. **Configure iOS project** in Xcode (bundle ID, signing)
-4. **Create app in App Store Connect**
-5. **Add privacy descriptions** to Info.plist
-6. **Build and test** on iOS Simulator or device
-7. **Create archive** in Xcode
-8. **Upload to App Store Connect**
-9. **Complete App Store listing** (screenshots, description)
-10. **Submit for review**
+### Immediate Actions (Today)
+1. ✅ **Mac and Xcode ready** - Already set up
+2. **Complete Phase 0** - See detailed instructions above:
+   - [ ] Fix iOS Info.plist privacy descriptions
+   - [ ] Create iOS entitlements file
+   - [ ] Verify app icons
+   - [ ] Decide on bundle ID (keep `net.mschultheiss.*` or change to `hu.klubradio.*`)
+   - [ ] Test iOS and macOS builds
+3. **Start Apple Developer Program enrollment**: https://developer.apple.com/programs/enroll/
+   - Decision needed: Individual vs Organization account
+   - Cost: $99 USD/year
+   - Approval time: 1-2 days
 
-**Important**: Start Developer Program enrollment now (even without Mac) as it takes 1-2 days for approval. This way you'll be ready when you get Mac access in 3 weeks.
+### This Week
+4. **Configure code signing** in Xcode (after Developer account approved)
+5. **Create App Store Connect apps** (separate for iOS and macOS)
+6. **Prepare marketing materials**:
+   - Privacy policy URL (required)
+   - App screenshots (4-6 per platform)
+   - App description (Hungarian, English, German)
+   - App Store keywords
+
+### Next Week
+7. **Build and upload** archives to App Store Connect
+8. **Complete App Store listings** with all metadata
+9. **Submit for review** (both iOS and macOS)
+10. **Monitor review process** and respond to any feedback
+
+**Estimated go-live**: Late December 2025 or early January 2026

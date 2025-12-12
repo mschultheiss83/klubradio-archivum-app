@@ -1,5 +1,40 @@
 # Google Play Store Deployment Guide
 
+**Last Updated**: 2025-12-12
+**Current Status**: Ready to begin - Android build working
+
+## Current Status Summary
+
+### ✅ Environment Ready
+- **Android Studio**: Available on Mac
+- **Flutter**: 3.38.4 (stable) ✓
+- **Android builds**: Working ✓
+- **Version**: 1.0.4
+
+### ✅ Android Configuration
+- **Application ID**: `net.mschultheiss.klubradioarchivum`
+- **Min SDK**: 21 (Android 5.0) ✓
+- **Target SDK**: Inherited from Flutter (likely 34) ✓
+- **Permissions**: Configured in AndroidManifest.xml ✓
+
+### ⚠️ Needs Attention
+- [ ] Release signing not configured (still using debug keys)
+- [ ] Need to create signing keystore
+- [ ] Need to create `key.properties` file
+- [ ] Need to add `key.properties` to `.gitignore`
+- [ ] App label shows `klubradio_archivum` (should be "Klubrádió Archívum")
+- [ ] Application ID decision (keep `net.mschultheiss.*` or change to `hu.klubradio.archivum`)
+
+### 📋 Not Started
+- [ ] Google Play Console account registration ($25 one-time)
+- [ ] Identity verification (1-2 days)
+- [ ] Privacy policy URL
+- [ ] Store listing content (screenshots, descriptions)
+- [ ] Content rating questionnaire
+- [ ] Data safety form
+
+---
+
 ## Overview
 
 This guide covers the complete process of deploying the Klubrádió Archive app to the Google Play Store. Estimated timeline: 2-4 weeks for initial setup and review.
@@ -11,12 +46,159 @@ This guide covers the complete process of deploying the Klubrádió Archive app 
 - **Payment Method**: Credit/debit card for the registration fee
 - **App Requirements**: Completed app, privacy policy, screenshots, store listing assets
 
-## Timeline
+## Timeline (Updated 2025-12-12)
 
-- **Initial Registration**: 1-2 days
-- **First-time Account Review**: 1-2 days (Google reviews new developer accounts)
-- **App Review**: 1-7 days (typically 1-3 days for initial submission)
-- **Target**: Aim to submit by early December for mid-December release
+### Current Timeline (Starting Today)
+- **Technical Configuration** (Phase 0): 1 day
+- **Account Registration**: 1-2 days
+- **Identity Verification**: 1-2 days (Google reviews new accounts)
+- **Store Listing Preparation**: 2-3 days
+- **Internal Testing**: 2-3 days (optional but recommended)
+- **Production Submission**: -
+- **App Review**: 1-7 days (typically 1-3 days)
+- **Estimated Go-Live**: ~2-3 weeks from today (late December 2025 / early January 2026)
+
+**Note**: Can run in parallel with Apple App Store deployment!
+
+---
+
+## Phase 0: Immediate Action Items (Start Here!)
+
+### Current Priority Tasks
+
+Before registering Google Play Console account, complete these technical tasks:
+
+#### Task 1: Create Release Signing Keystore
+**Critical**: This keystore will be used for ALL future releases. If lost, you cannot update your app!
+
+```bash
+# Create secure directory for keystore
+mkdir -p ~/.android-signing
+
+# Generate upload keystore (replace YOUR_STRONG_PASSWORD with actual password)
+keytool -genkey -v -keystore ~/.android-signing/klubradio-upload-keystore.jks \
+  -keyalg RSA -keysize 2048 -validity 10000 \
+  -alias klubradio-upload \
+  -storepass "YOUR_STRONG_PASSWORD" \
+  -keypass "YOUR_STRONG_PASSWORD" \
+  -dname "CN=Klubradio Archivum, OU=Mobile, O=Klubradio, L=Budapest, ST=Budapest, C=HU"
+```
+
+**IMPORTANT**:
+- Save the password in a password manager
+- Backup the keystore file to secure location
+- NEVER commit keystore or passwords to git
+
+#### Task 2: Create key.properties File
+**Location**: `android/key.properties`
+**Create with** (adjust paths):
+```properties
+storePassword=YOUR_KEYSTORE_PASSWORD
+keyPassword=YOUR_KEY_PASSWORD
+keyAlias=klubradio-upload
+storeFile=/Users/YOUR_USERNAME/.android-signing/klubradio-upload-keystore.jks
+```
+
+**macOS path example**:
+```properties
+storeFile=/Users/yourname/.android-signing/klubradio-upload-keystore.jks
+```
+
+#### Task 3: Update .gitignore
+**Add to** `/Volumes/2TB/code/klubradio-archivum-app/klubradio_archivum/.gitignore`:
+```gitignore
+# Android signing
+android/key.properties
+*.jks
+*.keystore
+```
+
+#### Task 4: Configure Release Signing
+**Update** `android/app/build.gradle.kts`:
+
+Add after the `plugins` block:
+```kotlin
+// Load signing properties
+val keystoreProperties = Properties()
+val keystorePropertiesFile = rootProject.file("key.properties")
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(FileInputStream(keystorePropertiesFile))
+}
+```
+
+Update the `android` block to add signing configs:
+```kotlin
+android {
+    // ... existing config ...
+
+    signingConfigs {
+        create("release") {
+            if (keystorePropertiesFile.exists()) {
+                keyAlias = keystoreProperties["keyAlias"] as String
+                keyPassword = keystoreProperties["keyPassword"] as String
+                storeFile = file(keystoreProperties["storeFile"] as String)
+                storePassword = keystoreProperties["storePassword"] as String
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            signingConfig = signingConfigs.getByName("release")
+            // ... other release config ...
+        }
+    }
+}
+```
+
+#### Task 5: Fix App Label
+**Update** `android/app/src/main/AndroidManifest.xml`:
+Change:
+```xml
+android:label="klubradio_archivum"
+```
+To:
+```xml
+android:label="Klubrádió Archívum"
+```
+
+#### Task 6: Application ID Decision
+**Current**: `net.mschultheiss.klubradioarchivum`
+**Options**:
+- **Keep current**: For personal project
+- **Change to** `hu.klubradio.archivum`: For official Klubrádió app
+
+**To change**: Update in `android/app/build.gradle.kts`:
+```kotlin
+defaultConfig {
+    applicationId = "hu.klubradio.archivum"  // Change here
+    // ...
+}
+```
+
+Also update in `android/app/src/main/AndroidManifest.xml`:
+```xml
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="hu.klubradio.archivum">
+```
+
+#### Task 7: Test Release Build
+**Build and verify**:
+```bash
+cd /Volumes/2TB/code/klubradio-archivum-app/klubradio_archivum
+flutter clean
+flutter pub get
+flutter build appbundle --release
+```
+
+**Expected output**: `build/app/outputs/bundle/release/app-release.aab`
+
+### Next Steps After Phase 0
+Once technical configuration is complete:
+1. → **Phase 1**: Register Google Play Console account ($25)
+2. → **Phase 2**: Create privacy policy and prepare assets
+3. → **Phase 3**: Create app in Play Console
+4. → **Phase 4**: Upload and submit for review
 
 ---
 
@@ -695,19 +877,34 @@ Before submission:
 
 ---
 
-## Key Dates for December Release
+## Key Dates for Release (Updated 2025-12-12)
 
-| Task | Duration | Target Date |
-|------|----------|-------------|
-| Register developer account | 1-2 days | Dec 1 |
-| Identity verification | 1-2 days | Dec 3 |
-| Create store listing | 2-3 days | Dec 6 |
-| Internal testing | 3-5 days | Dec 11 |
-| Submit for production | - | Dec 12 |
-| Review process | 1-7 days | Dec 13-19 |
-| **Go Live** | - | **Dec 15-20** |
+| Task | Duration | Start Date | Target Completion |
+|------|----------|------------|-------------------|
+| **Phase 0: Technical Config** | 1 day | Dec 12 | **Dec 12** |
+| - Create signing keystore | - | Dec 12 | Dec 12 |
+| - Configure release signing | - | Dec 12 | Dec 12 |
+| - Fix app label | - | Dec 12 | Dec 12 |
+| - Test release build | - | Dec 12 | Dec 12 |
+| **Phase 1: Account Setup** | 1-2 days | Dec 12 | **Dec 13-14** |
+| - Register developer account | - | Dec 12 | Dec 12 |
+| - Pay $25 fee | - | Dec 12 | Dec 12 |
+| - Identity verification | - | Dec 13 | Dec 14 |
+| **Phase 2-3: Store Prep** | 2-3 days | Dec 14 | **Dec 16-17** |
+| - Create privacy policy | - | Dec 14 | Dec 14 |
+| - Prepare screenshots | - | Dec 15 | Dec 15 |
+| - Create store listing | - | Dec 15 | Dec 16 |
+| - Complete content rating | - | Dec 16 | Dec 16 |
+| - Fill data safety form | - | Dec 16 | Dec 16 |
+| **Phase 4: Internal Testing** | 2-3 days | Dec 17 | **Dec 19** |
+| - Upload to internal track | - | Dec 17 | Dec 17 |
+| - Test on devices | - | Dec 18 | Dec 19 |
+| **Phase 5: Production** | 1-7 days | Dec 19 | **Dec 20-26** |
+| - Submit for production | - | Dec 19 | Dec 19 |
+| - Google review | 1-7 days | Dec 19 | Dec 20-26 |
+| **Go Live** | - | - | **~Dec 26 or early Jan 2026** |
 
-**Recommendation**: Start registration process by December 1st to ensure mid-December launch.
+**Note**: Can run in parallel with Apple App Store deployment. Holiday season may affect review times.
 
 ---
 
@@ -742,8 +939,42 @@ bundletool dump manifest --bundle=app-release.aab
 
 ---
 
-**Next Steps**:
-1. Create developer account at https://play.google.com/console/signup
-2. Generate signing key (see Phase 2.1)
-3. Create privacy policy (see Phase 3.1)
-4. Prepare screenshots and feature graphic (see Phase 5.2)
+## Next Steps (Start Now - 2025-12-12)
+
+### Immediate Actions (Today - Phase 0)
+1. **Create signing keystore** - CRITICAL, cannot be recovered if lost
+   - Generate with keytool command (see Phase 0 Task 1)
+   - Save password in password manager
+   - Backup keystore file securely
+2. **Configure release signing** in `android/app/build.gradle.kts`
+3. **Add key.properties to .gitignore**
+4. **Fix app label** to "Klubrádió Archívum" in AndroidManifest.xml
+5. **Decide on Application ID** (keep current or change to `hu.klubradio.archivum`)
+6. **Test release build**: `flutter build appbundle --release`
+
+### Tomorrow (Phase 1)
+7. **Register Google Play Console account**: https://play.google.com/console/signup
+   - Cost: $25 USD (one-time)
+   - Submit identity verification
+   - Wait 1-2 days for approval
+
+### This Week (Phase 2-3)
+8. **Create/host privacy policy** (required)
+9. **Prepare marketing materials**:
+   - Phone screenshots (min 2, recommend 4-6)
+   - Feature graphic (1024x500 px)
+   - App descriptions (Hungarian, English, German)
+10. **Create app in Play Console** and complete:
+    - Content rating questionnaire
+    - Data safety form
+    - Store listing
+
+### Next Week (Phase 4-5)
+11. **Upload to internal testing** track
+12. **Test thoroughly** on multiple devices/Android versions
+13. **Submit for production** review
+14. **Monitor review process**
+
+**Estimated go-live**: Late December 2025 or early January 2026
+
+**Tip**: Run Google Play deployment in parallel with Apple App Store for faster overall launch!

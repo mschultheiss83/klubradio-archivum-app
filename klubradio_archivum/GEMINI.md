@@ -105,6 +105,23 @@ Major tasks are tracked in dedicated markdown files within the `docs/project/` d
 
 To resume work, consult the relevant task file in `docs/project/` and check the current state of the codebase using `git status` and `flutter analyze`.
 
+### GitHub CLI (`gh`) Usage
+
+The GitHub CLI (`gh`) is a powerful tool for interacting with GitHub directly from your terminal. It can be used for managing issues, milestones, and other repository tasks.
+
+-   **Issues**:
+    -   `gh issue list`: List open issues.
+    -   `gh issue create`: Create a new issue.
+    -   `gh issue view <issue-number>`: View details of an issue.
+    -   `gh issue close <issue-number>`: Close an issue.
+-   **Milestones**:
+    -   `gh milestone list`: List milestones.
+    -   `gh milestone create <title>`: Create a new milestone.
+    -   `gh milestone view <number>`: View details of a milestone.
+-   **General Tasks**: The `gh` tool can also be used for various other tasks like managing pull requests, releases, and more. Refer to the official `gh` documentation for a comprehensive list of commands.
+
+This integration allows for efficient task management and helps in keeping track of development progress directly within the command-line environment.
+
 ## Agent Capabilities
 
 This section outlines some of the internal tools I use to reason and maintain context.
