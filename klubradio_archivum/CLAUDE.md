@@ -88,6 +88,17 @@ flutter build ipa
 flutter build windows
 ```
 
+**macOS:**
+```bash
+flutter build macos
+```
+
+**Web:**
+```bash
+flutter build web
+# Note: Web build needs review - audio playback and download features may need adjustments
+```
+
 ## Architecture
 
 ### Layered Architecture
@@ -217,7 +228,10 @@ lib/
 - **Main branch**: `main` (for releases)
 - **Development branch**: `dev`
 - **Feature branches**: Create from `dev` with naming `feature/your-feature-name`
-- **Commit messages**: Use `git commit --quiet` to reduce output verbosity (project convention)
+- **Commit messages**:
+  - Use `git commit --quiet` to reduce output verbosity (project convention)
+  - **Do NOT include** "Generated with Claude Code" or "Co-Authored-By: Claude" signatures
+  - Keep commit messages clean and focused on the actual changes
 
 ```bash
 git checkout dev
@@ -251,6 +265,11 @@ Applied automatically after each download completion via `RetentionDao`.
 - **Mobile (Android/iOS)**: WiFi-only downloads enabled by default, requires permissions
 - **Desktop (Windows/Linux/macOS)**: WiFi restriction disabled, uses application support directory
 - **Audio playback**: just_audio handles both `file://` and `https://` URLs seamlessly
+- **macOS Entitlements**: Required entitlements in `macos/Runner/DebugProfile.entitlements` and `Release.entitlements`:
+  - `com.apple.security.network.client` - Outgoing network connections
+  - `com.apple.security.files.user-selected.read-write` - File access
+  - `com.apple.security.files.downloads.read-write` - Downloads folder access
+  - `com.apple.security.assets.music.read-write` - Audio files access
 
 ### Build Configuration
 - **Application ID**: `hu.klubradio.archivum`
@@ -264,8 +283,18 @@ See `docs/project/release-process.md` for detailed instructions.
 
 **Version updates**: Modify `version` in `pubspec.yaml` (format: `major.minor.patch+build`)
 
-**Android**: Build with `flutter build appbundle`, upload to Google Play Console
-**iOS**: Build with `flutter build ipa`, upload via Transporter or Xcode to App Store Connect
+**Testing on Platforms:**
+Before release, test builds on all supported platforms:
+- **Android**: `flutter build apk` or `flutter build appbundle`
+- **iOS**: `flutter build ipa`
+- **macOS**: `flutter build macos`
+- **Windows**: `flutter build windows`
+- **Web**: `flutter build web` (requires additional testing for audio/download features)
+
+**Release Uploads:**
+- **Android**: Upload to Google Play Console
+- **iOS**: Upload via Transporter or Xcode to App Store Connect
+- **macOS**: Package as .dmg or upload to Mac App Store
 
 ## Related Files
 - `GEMINI.md`: Context file for Gemini AI assistant (similar purpose to this file)

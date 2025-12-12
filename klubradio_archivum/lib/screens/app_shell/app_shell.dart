@@ -28,56 +28,35 @@ class _AppShellState extends State<AppShell> {
   int _index = 0;
   List<GlobalKey<NavigatorState>> _navKeys = [];
   List<Widget> _screens = [];
-  List<NavigationDestination> _destinations = [];
+  bool _initialized = false;
 
   @override
-  void initState() {
-    super.initState();
-    _initializeNavigation();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_initialized) {
+      _initializeNavigation();
+      _initialized = true;
+    }
   }
 
   void _initializeNavigation() {
-    final l10n = AppLocalizations.of(context)!;
-
     _navKeys = [];
     _screens = [];
-    _destinations = [];
 
     // Always include these
     _navKeys.add(GlobalKey<NavigatorState>());
     _screens.add(
       _TabNav(key: _navKeys.last, builder: (_) => const HomeScreen()),
     );
-    _destinations.add(
-      AppBottomNavigationBar.buildDestination(
-        Icons.home_outlined,
-        Icons.home,
-        l10n.bottomNavHome,
-      ),
-    );
 
     _navKeys.add(GlobalKey<NavigatorState>());
     _screens.add(
       _TabNav(key: _navKeys.last, builder: (_) => const DiscoverScreen()),
     );
-    _destinations.add(
-      AppBottomNavigationBar.buildDestination(
-        Icons.explore_outlined,
-        Icons.explore,
-        l10n.bottomNavDiscover,
-      ),
-    );
 
     _navKeys.add(GlobalKey<NavigatorState>());
     _screens.add(
       _TabNav(key: _navKeys.last, builder: (_) => const SearchScreen()),
-    );
-    _destinations.add(
-      AppBottomNavigationBar.buildDestination(
-        Icons.search_outlined,
-        Icons.search,
-        l10n.bottomNavSearch,
-      ),
     );
 
     // Conditionally add Downloads tab
@@ -89,13 +68,6 @@ class _AppShellState extends State<AppShell> {
           builder: (_) => const DownloadManagerScreen(),
         ),
       );
-      _destinations.add(
-        AppBottomNavigationBar.buildDestination(
-          Icons.download_outlined,
-          Icons.download,
-          l10n.bottomNavDownloads,
-        ),
-      );
     }
 
     // Always include these
@@ -103,24 +75,10 @@ class _AppShellState extends State<AppShell> {
     _screens.add(
       _TabNav(key: _navKeys.last, builder: (_) => const ProfileScreen()),
     );
-    _destinations.add(
-      AppBottomNavigationBar.buildDestination(
-        Icons.person_outline,
-        Icons.person,
-        l10n.bottomNavProfile,
-      ),
-    );
 
     _navKeys.add(GlobalKey<NavigatorState>());
     _screens.add(
       _TabNav(key: _navKeys.last, builder: (_) => const SettingsScreen()),
-    );
-    _destinations.add(
-      AppBottomNavigationBar.buildDestination(
-        Icons.settings_outlined,
-        Icons.settings,
-        l10n.bottomNavSettings,
-      ),
     );
 
     // Ensure _index is valid if tabs were removed
@@ -143,6 +101,41 @@ class _AppShellState extends State<AppShell> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final hasCurrent = context.watch<EpisodeProvider>().currentEpisode != null;
+
+    // Build destinations list fresh each time
+    final destinations = <NavigationDestination>[
+      AppBottomNavigationBar.buildDestination(
+        Icons.home_outlined,
+        Icons.home,
+        l10n.bottomNavHome,
+      ),
+      AppBottomNavigationBar.buildDestination(
+        Icons.explore_outlined,
+        Icons.explore,
+        l10n.bottomNavDiscover,
+      ),
+      AppBottomNavigationBar.buildDestination(
+        Icons.search_outlined,
+        Icons.search,
+        l10n.bottomNavSearch,
+      ),
+      if (PlatformUtils.supportsDownloads)
+        AppBottomNavigationBar.buildDestination(
+          Icons.download_outlined,
+          Icons.download,
+          l10n.bottomNavDownloads,
+        ),
+      AppBottomNavigationBar.buildDestination(
+        Icons.person_outline,
+        Icons.person,
+        l10n.bottomNavProfile,
+      ),
+      AppBottomNavigationBar.buildDestination(
+        Icons.settings_outlined,
+        Icons.settings,
+        l10n.bottomNavSettings,
+      ),
+    ];
 
     return PopScope(
       canPop: false, // We handle popping manually
@@ -180,7 +173,7 @@ class _AppShellState extends State<AppShell> {
                   }
                   setState(() => _index = i);
                 },
-                destinations: _destinations, // Pass filtered destinations
+                destinations: destinations,
               ),
             ],
           ),
