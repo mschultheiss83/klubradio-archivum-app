@@ -1,5 +1,18 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.multilevelstudios.klubradioarchivum">
+
+    <!-- Notifications: show background download progress -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- Storage: allow saving downloaded archives -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <!-- Network: stream and download archives -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <!-- Background: run download service -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC"/>
+
     <application
         android:label="Klubrádió Archívum"
         android:name="${applicationName}"
