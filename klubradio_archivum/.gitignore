@@ -49,3 +49,4 @@ android/key.properties
 *.jks
 *.keystore
 
+.gemini/settings.json
