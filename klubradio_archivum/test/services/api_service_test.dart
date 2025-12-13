@@ -4,13 +4,55 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 
+import 'package:flutter/services.dart';
+import 'package:shared_preferences_platform_interface/shared_preferences_platform_interface.dart';
+
+
+
 import 'package:klubradio_archivum/models/episode.dart';
 import 'package:klubradio_archivum/models/podcast.dart';
 import 'package:klubradio_archivum/models/user_profile.dart';
 import 'package:klubradio_archivum/services/api_service.dart';
+import 'package:klubradio_archivum/services/api_cache_service.dart'; // Explicit import
+import 'package:shared_preferences/shared_preferences.dart'; // Direct import for setMockInitialValues
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+
+  // Mock initial values for SharedPreferences
+  setUpAll(() {
+    // Helper to simulate ApiCacheService's double JSON encoding
+    String createMockCacheEntry(dynamic data) { // Changed to dynamic
+      final String encodedData = jsonEncode(data);
+      final Map<String, dynamic> cacheEntry = {
+        'data': encodedData,
+        'expiry': DateTime.now().add(const Duration(hours: 1)).millisecondsSinceEpoch,
+        'timestamp': DateTime.now().millisecondsSinceEpoch,
+      };
+      return jsonEncode(cacheEntry);
+    }
+
+    final String latestPodcastsCache = createMockCacheEntry(
+      _samplePodcastResponse(count: 2)
+    );
+    final String trendingPodcastsCache = createMockCacheEntry(
+      _samplePodcastResponse(count: 1) // Reverted count to 1
+    );
+    final String userProfileCache = createMockCacheEntry(
+      _sampleProfileJson('user-123') // Pass single map directly
+    );
+    final String episodesForPodcastCache = createMockCacheEntry(
+      [_sampleEpisodeJson(id: 'episode-1', podcastId: 'series-1', seed: 3)]
+    );
+
+
+    SharedPreferences.setMockInitialValues({
+      'api_cache_latest_podcasts': latestPodcastsCache,
+      'api_cache_trending_podcasts': trendingPodcastsCache,
+      'api_cache_user_profile_user-123': userProfileCache,
+      'api_cache_episodes_for_podcast_series-1': episodesForPodcastCache,
+    });
+  });
   group('ApiService network behaviour', () {
     test('fetchLatestPodcasts returns parsed podcasts on success', () async {
       late http.Request capturedRequest;
@@ -43,7 +85,7 @@ void main() {
         final client = MockClient((http.Request request) async {
           return http.Response('server error', 500);
         });
-        final ApiService service = ApiService(httpClient: client);
+        final ApiService service = _TestApiService(httpClient: client, cacheService: _MockApiCacheService());
 
         await expectLater(
           service.fetchLatestPodcasts(),
@@ -321,3 +363,23 @@ class _OfflineApiService extends ApiService {
   @override
   bool get hasValidCredentials => false;
 }
+
+class _MockApiCacheService extends ApiCacheService {
+  @override
+  Future<dynamic> get(String key) async {
+    return null; // Always return null to force network call
+  }
+
+  @override
+  Future<void> save(String key, dynamic data, {Duration? expiry}) async {
+    // Do nothing, don't cache
+  }
+}
+
+class _TestApiService extends ApiService {
+  _TestApiService({super.httpClient, super.cacheService});
+
+  @override
+  bool get hasValidCredentials => true; // Override to true for network tests
+}
+
