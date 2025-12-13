@@ -17,6 +17,7 @@
 - Flutter 3.38.4 working
 - iOS and macOS builds functioning
 - Version: 1.0.4
+- **4 Sprachen verfügbar**: Ungarisch, Deutsch, Englisch, Rumänisch
 
 ### ⚠️ Needs Work
 - iOS Info.plist missing privacy descriptions

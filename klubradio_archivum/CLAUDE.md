@@ -6,6 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This is a **cross-platform Flutter application** (v3.9.2+) that provides podcast-style access to the Klubrádió Archive (https://www.klubradio.hu/archivum). The app supports Android, iOS, Windows, Linux, macOS, and Web platforms.
 
+**Available in 4 languages**: Hungarian, German, English, Romanian (all validated)
+
 **Key Technologies:**
 - **Framework**: Flutter with Dart 3.9.2+
 - **State Management**: Provider pattern with ChangeNotifierProxyProvider

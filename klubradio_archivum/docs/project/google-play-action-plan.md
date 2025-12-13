@@ -16,6 +16,7 @@
 - Flutter 3.38.4 installed
 - Version: 1.0.4
 - Permissions configured
+- **4 Sprachen verfügbar**: Ungarisch, Deutsch, Englisch, Rumänisch
 
 ### ⚠️ Needs Work (CRITICAL!)
 - **NO release signing configured** - still using debug keys!
