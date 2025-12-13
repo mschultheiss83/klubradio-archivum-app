@@ -1,0 +1,513 @@
+{
+  "@@locale": "ro",
+
+  "appName": "Arhiva Klubradio",
+  "@appName": {
+    "description": "Numele aplicației"
+  },
+
+  "downloadListTitle": "Descărcări",
+  "@downloadListTitle": {
+    "description": "Titlul ecranului de descărcări"
+  },
+  "downloadStatusQueued": "În așteptare",
+  "@downloadStatusQueued": {
+    "description": "Stare descărcare: Elementul este în coadă pentru a fi descărcat"
+  },
+  "downloadStatusNotDownloaded": "Nu este descărcat",
+  "@downloadStatusNotDownloaded": {
+    "description": "Stare descărcare: Elementul nu a fost descărcat încă"
+  },
+  "downloadStatusDownloaded": "Descărcat",
+  "@downloadStatusDownloaded": {
+    "description": "Stare descărcare: Elementul a fost descărcat cu succes"
+  },
+  "downloadStatusDownloading": "Se descarcă",
+  "@downloadStatusDownloading": {
+    "description": "Stare descărcare: Elementul se descarcă în prezent"
+  },
+  "downloadStatusFailed": "Eșuat",
+  "@downloadStatusFailed": {
+    "description": "Stare descărcare: Descărcarea elementului a eșuat"
+  },
+  "downloadActionRetry": "Reîncercați",
+  "@downloadActionRetry": {
+    "description": "Textul butonului pentru a reîncerca o descărcare eșuată"
+  },
+  "downloadActionCancel": "Anulați",
+  "@downloadActionCancel": {
+    "description": "Textul butonului pentru a anula o descărcare în curs"
+  },
+  "downloadActionDelete": "Ștergeți",
+  "@downloadActionDelete": {
+    "description": "Textul butonului pentru a șterge un element descărcat"
+  },
+  "downloadProgressLabel": "{progressPercentage}%",
+  "@downloadProgressLabel": {
+    "description": "Etichetă care afișează procentul de progres al descărcării",
+    "placeholders": {
+      "progressPercentage": {
+        "type": "int",
+        "example": "50"
+      }
+    }
+  },
+  "noDownloads": "Nicio descărcare încă",
+  "@noDownloads": {
+    "description": "Mesaj afișat când lista de descărcări este goală"
+  },
+
+  "aboutScreenAppBarTitle": "Despre aplicație",
+  "@aboutScreenAppBarTitle": {
+    "description": "Titlul pentru AppBar de pe ecranul Despre"
+  },
+  "aboutScreenAppNameDetail": "Aplicația Arhiva Klubradio",
+  "@aboutScreenAppNameDetail": {
+    "description": "Numele aplicației de pe ecranul Despre"
+  },
+  "aboutScreenPurpose": "Scopul aplicației este de a oferi acces ușor la programele arhivate ale Klubrádió și de a permite crearea de fluxuri RSS pentru playerele podcast.",
+  "@aboutScreenPurpose": {
+    "description": "Descrierea scopului aplicației"
+  },
+  "aboutScreenCommunityProjectInfo": "Acesta este un proiect comunitar care servește la susținerea Klubrádió. Tot conținutul este disponibil gratuit pe site-ul oficial al radioului.",
+  "@aboutScreenCommunityProjectInfo": {
+    "description": "Informații despre natura comunitară a proiectului și disponibilitatea conținutului"
+  },
+  "aboutScreenContactInfo": "Contact: info@klubradio.hu (conținut), multilevelstudios@gmail.com (contact dezvoltator)",
+  "@aboutScreenContactInfo": {
+    "description": "Informații de contact"
+  },
+
+  "settingsTitle": "Setări",
+  "@settingsTitle": {
+    "description": "Titlul ecranului de setări"
+  },
+  "settingsTheme": "Temă",
+  "@settingsTheme": {
+    "description": "Setare pentru a selecta tema (ex: Luminos/Întunecat)"
+  },
+  "settingsLanguage": "Limbă",
+  "@settingsLanguage": {
+    "description": "Setare pentru a selecta limba aplicației"
+  },
+
+  "ok": "OK",
+  "@ok": {
+    "description": "Text generic buton OK"
+  },
+  "cancel": "Anulați",
+  "@cancel": {
+    "description": "Text generic buton Anulați"
+  },
+  "errorDialogTitle": "Eroare",
+  "@errorDialogTitle": {
+    "description": "Titlul ferestrei de dialog de eroare"
+  },
+  "unexpectedError": "A apărut o eroare neașteptată. Vă rugăm să încercați din nou mai târziu.",
+  "@unexpectedError": {
+    "description": "Mesaj generic de eroare pentru probleme neașteptate"
+  },
+
+  "podcastDetailErrorLoading": "A apărut o eroare: {errorDetails}",
+  "@podcastDetailErrorLoading": {
+    "description": "Mesaj de eroare când încărcarea episoadelor podcast eșuează.",
+    "placeholders": {
+      "errorDetails": {
+        "type": "String",
+        "example": "Network connection failed"
+      }
+    }
+  },
+  "podcastDetailSubscriptionSuccess": "Abonare reușită!",
+  "@podcastDetailSubscriptionSuccess": {
+    "description": "Notificare la abonarea cu succes la podcast."
+  },
+  "podcastDetailSubscribeButton": "Abonează-te",
+  "@podcastDetailSubscribeButton": {
+    "description": "Eticheta butonului pentru a te abona la podcast."
+  },
+
+  "homeScreenSubscribedPodcastsEmptyHint": "Nicio abonare încă — descoperiți podcasturi și atingeți „Abonează-te”.",
+  "homeScreenSubscribedPodcastsTitle": "Emisiuni abonate",
+  "@homeScreenSubscribedPodcastsTitle": {
+    "description": "Titlul secțiunii pentru podcasturile abonate pe ecranul principal."
+  },
+  "homeScreenRecentEpisodesTitle": "Episoade recente",
+  "@homeScreenRecentEpisodesTitle": {
+    "description": "Titlul secțiunii pentru episoadele recente pe ecranul principal."
+  },
+  "homeScreenRecentlyPlayedTitle": "Redate recent",
+  "@homeScreenRecentlyPlayedTitle": {
+    "description": "Titlul secțiunii pentru episoadele redate recent pe ecranul principal."
+  },
+
+  "themeSettingSystemDefault": "Implicit sistem",
+  "@themeSettingSystemDefault": {
+    "description": "Opțiune de a utiliza setarea temei sistemului."
+  },
+  "themeSettingLight": "Luminos",
+  "@themeSettingLight": {
+    "description": "Opțiune de a selecta tema luminoasă."
+  },
+  "themeSettingDark": "Întunecat",
+  "@themeSettingDark": {
+    "description": "Opțiune de a selecta tema întunecată."
+  },
+
+  "settingsScreenSupportKlubradioTitle": "Sprijiniți Klubradio",
+  "@settingsScreenSupportKlubradioTitle": {
+    "description": "Titlul secțiunii Sprijiniți Klubradio de pe ecranul de setări."
+  },
+  "settingsScreenSupportKlubradioSubtitle": "Deschideți pagina de suport în browserul dvs.",
+  "@settingsScreenSupportKlubradioSubtitle": {
+    "description": "Subtitlul secțiunii Sprijiniți Klubradio."
+  },
+  "settingsScreenSupportDeveloperTitle": "Sprijiniți dezvoltatorul aplicației",
+  "@settingsScreenSupportDeveloperTitle": {
+    "description": "Titlul secțiunii Sprijiniți dezvoltatorul aplicației."
+  },
+  "settingsScreenSupportDeveloperSubtitle": "Donație voluntară pentru dezvoltare ulterioară.",
+  "@settingsScreenSupportDeveloperSubtitle": {
+    "description": "Subtitlul secțiunii Sprijiniți dezvoltatorul aplicației."
+  },
+  "themeSettingsSectionTitle": "Setări temă",
+  "@themeSettingsSectionTitle": {
+    "description": "Titlul secțiunii pentru setările temei."
+  },
+
+  "bottomNavHome": "Acasă",
+  "@bottomNavHome": {
+    "description": "Etichetă filă de navigare: Acasă"
+  },
+  "bottomNavDiscover": "Descoperiți",
+  "@bottomNavDiscover": {
+    "description": "Etichetă filă de navigare: Descoperiți"
+  },
+  "bottomNavSearch": "Căutați",
+  "@bottomNavSearch": {
+    "description": "Etichetă filă de navigare: Căutați"
+  },
+  "bottomNavDownloads": "Descărcări",
+  "@bottomNavDownloads": {
+    "description": "Etichetă filă de navigare: Descărcări"
+  },
+  "bottomNavProfile": "Profil",
+  "@bottomNavProfile": {
+    "description": "Etichetă filă de navigare: Profil"
+  },
+  "bottomNavSettings": "Setări",
+  "@bottomNavSettings": {
+    "description": "Etichetă filă de navigare: Setări"
+  },
+
+  "playbackSettingsTitle": "Setări redare",
+  "@playbackSettingsTitle": {
+    "description": "Titlul secțiunii pentru setările de redare."
+  },
+  "playbackSettingsSpeedLabel": "Viteză redare:",
+  "@playbackSettingsSpeedLabel": {
+    "description": "Etichetă pentru setarea vitezei de redare."
+  },
+  "playbackSettingsSpeedValue": "{speed}x",
+  "@playbackSettingsSpeedValue": {
+    "description": "Format pentru afișarea valorii vitezei de redare. Exemplu: 1.5x",
+    "placeholders": {
+      "speed": {
+        "type": "double",
+        "example": "1.5"
+      }
+    }
+  },
+  "playbackSettingsAutoDownloadLabel": "Descărcări automate:",
+  "@playbackSettingsAutoDownloadLabel": {
+    "description": "Etichetă pentru setarea numărului de descărcări automate."
+  },
+  "playbackSettingsAutoDownloadValue": "{count,plural, =0{Niciun episod} =1{1 episod} other{{count} episoade}}",
+  "@playbackSettingsAutoDownloadValue": {
+    "description": "Format pentru afișarea numărului de episoade de descărcat automat. Exemplu: 5 episoade",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
+
+  "showSelectedFeedback": "\"{showTitle}\" selectat.",
+  "@showSelectedFeedback": {
+    "description": "Mesaj de feedback afișat când o emisiune este selectată dintr-o listă de jetoane.",
+    "placeholders": {
+      "showTitle": {
+        "type": "String",
+        "example": "Morning Express"
+      }
+    }
+  },
+
+  "discoverScreenFeaturedCategoriesTitle": "Emisiuni populare",
+  "@discoverScreenFeaturedCategoriesTitle": {
+    "description": "Titlul secțiunii de categorii prezentate/populare pe ecranul Descoperiți."
+  },
+  "discoverScreenRecommendedShowsTitle": "Emisiuni recomandate",
+  "@discoverScreenRecommendedShowsTitle": {
+    "description": "Titlul secțiunii de emisiuni recomandate pe ecranul Descoperiți."
+  },
+  "discoverScreenTrendingTitle": "În tendințe",
+  "@discoverScreenTrendingTitle": {
+    "description": "Titlul secțiunii de podcasturi în tendințe pe ecranul Descoperiți."
+  },
+  "discoverScreenNoTopShows": "Nicio emisiune populară disponibilă.",
+
+  "recommendedPodcastsNoRecommendations": "Nicio recomandare disponibilă. Vă rugăm să reîmprospătați datele mai târziu.",
+  "@recommendedPodcastsNoRecommendations": {
+    "description": "Mesaj afișat când nu există podcasturi recomandate de afișat."
+  },
+
+  "trendingPodcastsNoShows": "Nicio emisiune în tendințe în listă.",
+  "@trendingPodcastsNoShows": {
+    "description": "Mesaj afișat când nu există podcasturi în tendințe de afișat."
+  },
+
+  "subscribedPodcastsNoSubscriptions": "Nu v-ați abonat încă la nicio emisiune.",
+  "@subscribedPodcastsNoSubscriptions": {
+    "description": "Mesaj afișat când utilizatorul nu s-a abonat la niciun podcast."
+  },
+
+  "recentSearchesNoHistory": "Niciun istoric de căutări încă.",
+  "@recentSearchesNoHistory": {
+    "description": "Mesaj afișat când nu există căutări recente de afișat."
+  },
+
+  "searchBarHintText": "Emisiuni, gazde, cuvinte cheie...",
+  "@searchBarHintText": {
+    "description": "Text sugestiv afișat în bara de căutare."
+  },
+
+  "searchResultsNoResults": "Nu s-au găsit rezultate pentru căutarea dvs.",
+  "@searchResultsNoResults": {
+    "description": "Mesaj afișat când o căutare nu produce rezultate."
+  },
+
+  "searchScreenInitialPrompt": "Găsiți emisiunile sau gazdele preferate.",
+  "@searchScreenInitialPrompt": {
+    "description": "Mesaj inițial de solicitare pe ecranul de căutare înainte de efectuarea oricărei căutări."
+  },
+  "searchScreenErrorMessage": "A apărut o eroare: {errorDetails}",
+  "@searchScreenErrorMessage": {
+    "description": "Mesaj de eroare afișat pe ecranul de căutare dacă o căutare eșuează.",
+    "placeholders": {
+      "errorDetails": {
+        "type": "String",
+        "example": "Network timeout"
+      }
+    }
+  },
+  "errorParsingData": "A apărut o problemă la procesarea datelor.",
+  "@errorParsingData": {
+    "description": "Mesaj de eroare afișat când procesarea datelor eșuează."
+  },
+  "errorUnknown": "A apărut o eroare necunoscută.",
+  "@errorUnknown": {
+    "description": "Mesaj generic de eroare pentru probleme necunoscute."
+  },
+
+  "profileScreenNoEmail": "Niciun email furnizat",
+  "@profileScreenNoEmail": {
+    "description": "Text afișat pe ecranul de profil când emailul utilizatorului nu este disponibil."
+  },
+  "profileScreenDownloadSettingsTitle": "Setări descărcări",
+  "@profileScreenDownloadSettingsTitle": {
+    "description": "Titlul secțiunii de setări descărcări de pe ecranul de profil."
+  },
+  "profileScreenAutoDownloadsTitle": "Descărcări automate",
+  "@profileScreenAutoDownloadsTitle": {
+    "description": "Titlul opțiunii de descărcări automate din setările de profil."
+  },
+  "profileScreenAutoDownloadsSubtitle": "Număr de episoade: {count}",
+  "@profileScreenAutoDownloadsSubtitle": {
+    "description": "Subtitlu care indică numărul de episoade setate pentru descărcare automată.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
+  "profileScreenRecentlyPlayedTitle": "Episoade redate recent",
+  "@profileScreenRecentlyPlayedTitle": {
+    "description": "Titlul secțiunii de episoade redate recent de pe ecranul de profil."
+  },
+  "profileScreenFavoritesTitle": "Favorite",
+  "@profileScreenFavoritesTitle": {
+    "description": "Titlul secțiunii de favorite de pe ecranul de profil."
+  },
+  "profileScreenNoFavoriteEpisodes": "Niciun episod favorit încă.",
+  "@profileScreenNoFavoriteEpisodes": {
+    "description": "Mesaj afișat când utilizatorul nu are episoade favorite."
+  },
+  "profileScreenGuestUserDisplayName": "Utilizator invitat",
+  "@profileScreenGuestUserDisplayName": {
+    "description": "Nume afișat implicit pentru un utilizator invitat sau când numele nu este setat."
+  },
+
+  "aboutScreenLicenseTitle": "Licență / Legal",
+  "@aboutScreenLicenseTitle": {
+    "description": "Titlul cardului care deschide informațiile despre licență/legale."
+  },
+
+  "aboutScreenLicenseSummary": "Deschideți informațiile despre licență și legale.",
+  "@aboutScreenLicenseSummary": {
+    "description": "Subtitlu/rezumat scurt afișat sub titlul cardului de licență."
+  },
+
+  "aboutScreenVersionTitle": "Versiune",
+  "@aboutScreenVersionTitle": {
+    "description": "Titlul cardului care afișează versiunea/build-ul curent al aplicației."
+  },
+
+  "aboutScreenVersionFormat": "{version} (Build {build})",
+  "@aboutScreenVersionFormat": {
+    "description": "Șir de versiune formatat cu substituenți pentru numărul versiunii și al build-ului.",
+    "placeholders": {
+      "version": {"type": "String", "example": "1.0.0"},
+      "build": {"type": "String", "example": "42"}
+    }
+  },
+
+  "podcastInfoCardHostsLabel": "{hostNames}",
+  "@podcastInfoCardHostsLabel": {
+    "description": "Etichetă pentru lista de gazde de pe cardul de informații podcast.",
+    "placeholders": {
+      "hostNames": {
+        "type": "String",
+        "example": "John Doe, Jane Smith"
+      }
+    }
+  },
+
+  "podcastDetailScreenErrorMessage": "A apărut o eroare la încărcarea episoadelor: {errorDetails}",
+  "@podcastDetailScreenErrorMessage": {
+    "description": "Mesaj de eroare când episoadele unui podcast nu se încarcă.",
+    "placeholders": {
+      "errorDetails": {
+        "type": "String",
+        "example": "Network failed"
+      }
+    }
+  },
+  "podcastDetailScreenSubscribeButton": "Abonează-te",
+  "@podcastDetailScreenSubscribeButton": {
+    "description": "Textul pentru butonul de abonare la un podcast."
+  },
+  "podcastDetailScreenUnsubscribeButton": "Dezabonează-te",
+  "@podcastDetailScreenUnsubscribeButton": {
+    "description": "Textul pentru butonul de dezabonare de la un podcast."
+  },
+  "podcastDetailScreenSubscribeSuccess": "Abonat cu succes!",
+  "@podcastDetailScreenSubscribeSuccess": {
+    "description": "Mesaj Snackbar afișat după abonarea cu succes la un podcast."
+  },
+  "podcastDetailScreenUnsubscribeSuccess": "Dezabonat cu succes!",
+  "@podcastDetailScreenUnsubscribeSuccess": {
+    "description": "Mesaj Snackbar afișat după dezabonarea cu succes de la un podcast."
+  },
+
+  "unsubscribeDialogTitle": "Dezabonare",
+  "unsubscribeDialogContent": "Doriți să ștergeți episoadele descărcate pentru acest podcast?",
+  "unsubscribeDialogDeleteButton": "Ștergeți episoadele",
+  "unsubscribeDialogKeepButton": "Păstrați episoadele",
+
+  "nowPlayingScreenTitle": "Se redă acum",
+  "@nowPlayingScreenTitle": {
+    "description": "Titlul ecranului 'Se redă acum'."
+  },
+  "nowPlayingScreenNoEpisode": "Niciun episod nu se redă în prezent.",
+  "@nowPlayingScreenNoEpisode": {
+    "description": "Mesaj afișat pe ecranul 'Se redă acum' când niciun episod nu a fost selectat."
+  },
+
+  "durationInHoursAndMinutes": "{hours}h {minutes}m",
+  "@durationInHoursAndMinutes": {
+    "description": "Formatează o durată cu ore și minute. Exemplu: 1h 23m",
+    "placeholders": {
+      "hours": {
+        "type": "int",
+        "example": "1"
+      },
+      "minutes": {
+        "type": "int",
+        "example": "23"
+      }
+    }
+  },
+  "durationInMinutes": "{minutes}m",
+  "@durationInMinutes": {
+    "description": "Formatează o durată numai cu minute. Exemplu: 45m",
+    "placeholders": {
+      "minutes": {
+        "type": "int",
+        "example": "45"
+      }
+    }
+  },
+
+  "podcastNotFoundError": "Ne pare rău, emisiunea selectată nu a putut fi găsită.",
+  "@podcastNotFoundError": {
+    "description": "Mesaj de eroare când un podcast selectat dintr-o listă nu poate fi preluat."
+  },
+
+  "podcastListItem_subscribed": "Abonat",
+  "podcastListItem_unsubscribe": "Dezabonare",
+  "podcastListItem_subscribe": "Abonare",
+  "podcastListItem_unsubscribed": "Dezabonat",
+  "podcastListItem_subtitleFallback": "Emisiune Klubrádió",
+  "podcastListItem_openDetails": "Deschide detaliile podcastului",
+
+  "downloads_tab_active": "Active",
+  "downloads_tab_done": "Finalizate",
+  "downloads_empty_active": "Nicio descărcare activă",
+  "downloads_empty_done": "Nicio descărcare finalizată",
+  "downloads_status_waiting": "În așteptare",
+  "downloads_status_running": "Se descarcă",
+  "downloads_status_done": "Finalizat",
+  "downloads_status_failed": "Eșuat",
+  "downloads_status_canceled": "Anulat",
+  "downloads_status_unknown": "Necunoscut",
+  "downloads_action_pause": "Pauză",
+  "downloads_action_resume": "Reluați",
+  "downloads_action_cancel": "Anulați",
+  "downloads_action_delete": "Ștergeți",
+
+  "ep_action_resume": "Reluați",
+  "ep_action_downloaded": "Descărcat",
+  "ep_action_retry": "Reîncercați",
+  "ep_action_download": "Descărcați",
+
+  "settings_title_downloads": "Descărcări",
+  "settings_wifi_only": "Doar Wi-Fi",
+  "settings_wifi_only_mobile_default": "Implicit pe mobil: ACTIVAT",
+  "settings_wifi_only_desktop_default": "Implicit pe desktop: DEZACTIVAT",
+  "settings_max_parallel": "Descărcări concurente maxime",
+  "settings_retention_section": "Retenție",
+  "settings_keep_all": "Păstrați toate",
+  "settings_keep_latest_label": "Păstrați doar ultimele n",
+  "settings_keep_latest": "Păstrați ultimele episoade",
+  "settings_keep_latest_hint": "Păstrează cele mai noi n episoade per podcast.",
+  "settings_delete_after_heard_label": "Ștergeți la x ore după ascultare",
+  "settings_delete_after_hours": "Ștergeți după (ore)",
+  "settings_delete_after_hint": "Eliminați automat la x ore după redare.",
+  "settings_zero_off": "0 = DEZACTIVAT",
+  "settings_autodownload_subscriptions": "Descărcați automat episoadele abonate",
+  "settings_autodownload_subscriptions_hint": "Descărcați automat episoadele noi de la podcasturile abonate.",
+
+  "profileScreenNoRecentlyPlayed": "Niciun episod redat recent încă.",
+  "profileScreenSubscriptionsTitle": "Emisiuni abonate",
+  "profileScreenAppIdTitle": "ID aplicație",
+  "profileScreenIdCopied": "ID copiat",
+  "profileScreenPlaybackSpeedTitle": "Viteză redare",
+  "profileScreenPlaybackSpeedValue": "{value}×",
+  "commonOk": "OK",
+  "commonCancel": "Anulați",
+  "commonCount": "Număr",
+  "commonDone": "Finalizat"
+}
