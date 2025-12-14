@@ -13,20 +13,17 @@
 
 **EN**
 Dear Klubrádió Team,  
-My dad has been a dedicated Klubrádió listener, and I built the HU/DE/EN Klubrádió Archivum app so listeners can browse, stream, and download easily. Romanian is available but not yet validated (I don’t speak it). I’d love your blessing to keep this fan effort aligned with the station and to reach listeners abroad respectfully. If you prefer, we could add a paid/member tier that sends proceeds to Klubrádió, or keep it free with tasteful ads that fund my work — whichever best supports the station.
-I’m Martin Schultheiß, an independent developer (Dipl.-Math), data miner turned automation/IoT builder; I run this as a fan project.
+I’m Martin Schultheiß (Dipl.-Math), independent dev with a data-mining-to-automation/IoT background, running a fan-built HU/DE/EN Klubrádió Archivum app so listeners can browse, stream, and download easily. Romanian is available but not yet validated (I don’t speak it). My dad is a longtime listener. I’d love your blessing to keep this aligned with the station. Revenue options: paid/member tier to Klubrádió or free with light ads (we can decide together). Happy to coordinate by email/phone after 12:00 CET.
 I’m Martin Schultheiß, an independent developer running this as a fan project.
 
 **DE**
 Liebes Klubrádió-Team,  
-mein Vater ist treuer Klubrádió-Hörer, und ich habe die HU/DE/EN Klubrádió Archivum App gebaut, damit Hörer eure Sendungen bequem durchsuchen, streamen und herunterladen können. Rumänisch ist verfügbar, aber noch nicht geprüft (ich spreche es nicht). Ich würde mich über euer Einverständnis freuen, dieses Fan-Projekt im Sinne des Senders fortzuführen und Hörer im Ausland respektvoll zu erreichen. Falls gewünscht, könnten wir ein bezahltes/Member-Modell einführen, dessen Einnahmen an Klubrádió gehen, oder es kostenfrei mit dezenter Werbung lassen, die meine Arbeit trägt — je nachdem, was euch am meisten unterstützt.
-Ich bin Martin Schultheiß (Dipl.-Mathematiker), unabhängiger Entwickler und Data-Miner, heute mit Fokus auf Automation/IoT; das ist ein Fan-Projekt.
+ich bin Martin Schultheiß (Dipl.-Math), unabhängiger Entwickler mit Data-Mining-Background, heute Automation/IoT – und betreibe die HU/DE/EN Klubrádió Archivum App als Fan-Projekt, damit Hörer bequem suchen, streamen und herunterladen können. Rumänisch ist verfügbar, aber noch nicht geprüft (ich spreche es nicht). Mein Vater ist treuer Hörer. Ich würde mich über euer Einverständnis freuen. Erlöse: bezahlter/werbefreier Tarif oder dezente Werbung; gemeinsam festlegen. Abstimmung per E-Mail/Telefon ab 12:00 CET.
 Ich bin Martin Schultheiß, unabhängiger Entwickler, der dieses Fan-Projekt betreibt.
 
 **HU**
 Kedves Klubrádió Csapat!  
-Hallgatóként írok: apukám régóta hallgatja a Klubrádiót, és elkészítettem a HU/DE/EN Klubrádió Archívum appot, hogy a hallgatók könnyen böngésszenek, streameljenek és tölthessenek le. A román nyelv elérhető, de még nincs ellenőrizve (nem beszélem). Örülnék, ha áldásotokat adnátok, és segítenétek a külföldi hallgatókhoz is eljutni, tisztelettel. Ha szeretnétek, lehetne fizetős/tagi csomag, amelynek bevétele a Klubrádióhoz kerül, vagy maradhat ingyenes, visszafogott reklámmal, ami a munkámat fedezi — ahogy nektek a legjobb.
-Schultheiß Martin vagyok, független fejlesztő (matematikus), data-miner háttérrel, ma automatizálás/IoT fókuszsal; rajongói alapon viszem a projektet.
+Schultheiß Martin vagyok (matematikus), független fejlesztő data-miner háttérrel, ma automatizálás/IoT fókuszsal; rajongói alapon készítettem a HU/DE/EN Klubrádió Archívum appot, hogy a hallgatók könnyen böngésszenek, streameljenek és töltsenek le. A román nyelv elérhető, de még nincs validálva (nem beszélem). Apukám régóta hallgatja a Klubrádiót. Örülnék az áldásotoknak. Bevétel: fizetős/werbefreies csomag vagy visszafogott reklám, és közösen dönthetünk a bevételről. Egyeztetés e-mailben vagy telefonon (12:00 után) megfelel.
 Schultheiß Martin vagyok, független fejlesztő, rajongói alapon viszem a projektet.
 
 ## 2) Professional (support/funding/licensing)
