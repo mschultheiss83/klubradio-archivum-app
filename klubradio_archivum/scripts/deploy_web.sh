@@ -40,6 +40,8 @@ DEPLOY_METHOD="${DEPLOY_METHOD:-rsync}"
 echo "Building web (${FLUTTER_BUILD_ARGS})..."
 flutter build web ${FLUTTER_BUILD_ARGS}
 
+WEBROOT_DIR="${ROOT_DIR}/webroot"
+
 if [[ "${DEPLOY_METHOD}" == "sftp" ]]; then
   : "${DEPLOY_PASSWORD:?DEPLOY_PASSWORD is required for DEPLOY_METHOD=sftp}"
   if ! command -v lftp >/dev/null 2>&1; then
@@ -56,6 +58,17 @@ set net:timeout 20
 mirror -R --delete --verbose "${ROOT_DIR}/build/web" "${TARGET_PATH}"
 quit
 LFTP
+
+  if [[ -d "${WEBROOT_DIR}" ]]; then
+    echo "Deploying webroot files to sftp://${DEPLOY_USER}@${DEPLOY_HOST}${DEPLOY_PATH} ..."
+    lftp -u "${DEPLOY_USER},${DEPLOY_PASSWORD}" "sftp://${DEPLOY_HOST}:${DEPLOY_PORT}" <<LFTP
+set sftp:auto-confirm yes
+set net:max-retries 2
+set net:timeout 20
+mirror -R --delete --verbose "${WEBROOT_DIR}" "${DEPLOY_PATH%/}"
+quit
+LFTP
+  fi
 else
   TARGET_PATH="${DEPLOY_PATH%/}/web"
   echo "Deploying build/web to ${DEPLOY_USER}@${DEPLOY_HOST}:${TARGET_PATH} (port ${DEPLOY_PORT})..."
@@ -63,6 +76,14 @@ else
     -e "ssh -p ${DEPLOY_PORT}" \
     "${ROOT_DIR}/build/web/" \
     "${DEPLOY_USER}@${DEPLOY_HOST}:${TARGET_PATH}/"
+
+  if [[ -d "${WEBROOT_DIR}" ]]; then
+    echo "Deploying webroot files to ${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_PATH} (port ${DEPLOY_PORT})..."
+    rsync -avz --delete \
+      -e "ssh -p ${DEPLOY_PORT}" \
+      "${WEBROOT_DIR}/" \
+      "${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_PATH%/}/"
+  fi
 fi
 
 echo "Done."

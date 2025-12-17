@@ -1,0 +1,10 @@
+# Redirect domain root to the Flutter web app under /web/
+RewriteEngine On
+
+# Allow direct access to the /web/ subtree
+RewriteRule ^web(/.*)?$ - [L]
+
+# Everything else goes to /web/
+RewriteRule ^$ /web/ [R=302,L]
+RewriteRule ^(.*)$ /web/ [R=302,L]
+
