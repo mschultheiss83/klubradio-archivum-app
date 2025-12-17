@@ -47,20 +47,22 @@ if [[ "${DEPLOY_METHOD}" == "sftp" ]]; then
     exit 1
   fi
 
-  echo "Deploying build/web to sftp://${DEPLOY_USER}@${DEPLOY_HOST}${DEPLOY_PATH} (port ${DEPLOY_PORT})..."
+  TARGET_PATH="${DEPLOY_PATH%/}/web"
+  echo "Deploying build/web to sftp://${DEPLOY_USER}@${DEPLOY_HOST}${TARGET_PATH} (port ${DEPLOY_PORT})..."
   lftp -u "${DEPLOY_USER},${DEPLOY_PASSWORD}" "sftp://${DEPLOY_HOST}:${DEPLOY_PORT}" <<LFTP
 set sftp:auto-confirm yes
 set net:max-retries 2
 set net:timeout 20
-mirror -R --delete --verbose "${ROOT_DIR}/build/web" "${DEPLOY_PATH}"
+mirror -R --delete --verbose "${ROOT_DIR}/build/web" "${TARGET_PATH}"
 quit
 LFTP
 else
-  echo "Deploying build/web to ${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_PATH} (port ${DEPLOY_PORT})..."
+  TARGET_PATH="${DEPLOY_PATH%/}/web"
+  echo "Deploying build/web to ${DEPLOY_USER}@${DEPLOY_HOST}:${TARGET_PATH} (port ${DEPLOY_PORT})..."
   rsync -avz --delete \
     -e "ssh -p ${DEPLOY_PORT}" \
     "${ROOT_DIR}/build/web/" \
-    "${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_PATH}/"
+    "${DEPLOY_USER}@${DEPLOY_HOST}:${TARGET_PATH}/"
 fi
 
 echo "Done."
