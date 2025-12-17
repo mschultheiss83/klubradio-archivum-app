@@ -50,3 +50,7 @@ android/key.properties
 *.keystore
 
 .gemini/settings.json
+
+# Local env / deploy secrets (never commit)
+.env
+.env.deploy
