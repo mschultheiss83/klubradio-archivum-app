@@ -38,7 +38,7 @@ FLUTTER_BUILD_ARGS="${FLUTTER_BUILD_ARGS:---release}"
 DEPLOY_METHOD="${DEPLOY_METHOD:-rsync}"
 
 echo "Building web (${FLUTTER_BUILD_ARGS})..."
-flutter build web ${FLUTTER_BUILD_ARGS}
+flutter build web ${FLUTTER_BUILD_ARGS} --base-href /web/
 
 WEBROOT_DIR="${ROOT_DIR}/webroot"
 
@@ -49,13 +49,12 @@ if [[ "${DEPLOY_METHOD}" == "sftp" ]]; then
     exit 1
   fi
 
-  TARGET_PATH="${DEPLOY_PATH%/}/web"
-  echo "Deploying build/web to sftp://${DEPLOY_USER}@${DEPLOY_HOST}${TARGET_PATH} (port ${DEPLOY_PORT})..."
+  echo "Deploying build/web to sftp://${DEPLOY_USER}@${DEPLOY_HOST}${DEPLOY_PATH} (port ${DEPLOY_PORT})..."
   lftp -u "${DEPLOY_USER},${DEPLOY_PASSWORD}" "sftp://${DEPLOY_HOST}:${DEPLOY_PORT}" <<LFTP
 set sftp:auto-confirm yes
 set net:max-retries 2
 set net:timeout 20
-mirror -R --delete --verbose "${ROOT_DIR}/build/web" "${TARGET_PATH}"
+mirror -R --delete --verbose "${ROOT_DIR}/build/web" "${DEPLOY_PATH}"
 quit
 LFTP
 
@@ -65,21 +64,22 @@ LFTP
 set sftp:auto-confirm yes
 set net:max-retries 2
 set net:timeout 20
-mirror -R --delete --verbose "${WEBROOT_DIR}" "${DEPLOY_PATH%/}"
+# Do not use --delete here: the hosting root also contains the deployed /web app folder.
+mirror -R --only-newer --verbose "${WEBROOT_DIR}" "${DEPLOY_PATH%/}"
 quit
 LFTP
   fi
 else
-  TARGET_PATH="${DEPLOY_PATH%/}/web"
-  echo "Deploying build/web to ${DEPLOY_USER}@${DEPLOY_HOST}:${TARGET_PATH} (port ${DEPLOY_PORT})..."
+  echo "Deploying build/web to ${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_PATH} (port ${DEPLOY_PORT})..."
   rsync -avz --delete \
     -e "ssh -p ${DEPLOY_PORT}" \
     "${ROOT_DIR}/build/web/" \
-    "${DEPLOY_USER}@${DEPLOY_HOST}:${TARGET_PATH}/"
+    "${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_PATH}/"
 
   if [[ -d "${WEBROOT_DIR}" ]]; then
     echo "Deploying webroot files to ${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_PATH} (port ${DEPLOY_PORT})..."
-    rsync -avz --delete \
+    # Do not use --delete here: the hosting root also contains the deployed /web app folder.
+    rsync -avz \
       -e "ssh -p ${DEPLOY_PORT}" \
       "${WEBROOT_DIR}/" \
       "${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_PATH%/}/"

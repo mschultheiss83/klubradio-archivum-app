@@ -54,3 +54,4 @@ android/key.properties
 # Local env / deploy secrets (never commit)
 .env
 .env.deploy
+supabase/.temp/

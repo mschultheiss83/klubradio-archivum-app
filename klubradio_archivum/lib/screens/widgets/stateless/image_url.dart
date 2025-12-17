@@ -1,6 +1,7 @@
 import 'dart:io' show File;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import '../../../utils/web_image_proxy.dart';
 
 /// Zeigt bevorzugt ein lokales Bild (Dateipfad), andernfalls eine URL.
 /// Fällt bei Fehlern auf ein Icon im Container zurück.
@@ -104,9 +105,12 @@ class ImageUrl extends StatelessWidget {
     }
 
     if (_hasValidUrl) {
+      // Transform URL for web platform to avoid CORS issues
+      final imageUrl = WebImageProxy.transform(url!);
+
       return clip(
         Image.network(
-          url!,
+          imageUrl,
           width: w,
           height: h,
           fit: fit,
