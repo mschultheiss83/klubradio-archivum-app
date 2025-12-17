@@ -1,9 +1,6 @@
-// lib/db/app_database.dart
-import 'dart:io';
 import 'package:drift/drift.dart';
-import 'package:drift/native.dart';
-import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart';
+
+import 'connection/connection.dart';
 
 part 'app_database.g.dart';
 
@@ -68,7 +65,8 @@ class Settings extends Table {
   IntColumn get deleteAfterHours =>
       integer().nullable()(); // z.B. 24 (am nächsten Tag)
   IntColumn get keepLatestN => integer().nullable()();
-  BoolColumn get autodownloadSubscribed => boolean().withDefault(const Constant(false))();
+  BoolColumn get autodownloadSubscribed =>
+      boolean().withDefault(const Constant(false))();
 
   @override
   Set<Column> get primaryKey => {id};
@@ -77,13 +75,7 @@ class Settings extends Table {
 /// ---------- DB ----------
 
 LazyDatabase _openConnection() {
-  return LazyDatabase(() async {
-    final dir = (Platform.isWindows || Platform.isLinux || Platform.isMacOS)
-        ? await getApplicationSupportDirectory()
-        : await getApplicationDocumentsDirectory();
-    final file = File(p.join(dir.path, 'klubradio.db'));
-    return NativeDatabase.createInBackground(file);
-  });
+  return LazyDatabase(openConnection);
 }
 
 @DriftDatabase(tables: [Subscriptions, Episodes, Settings])
