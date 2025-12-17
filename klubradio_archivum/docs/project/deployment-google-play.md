@@ -12,7 +12,7 @@
 - **Version**: 1.0.4
 
 ### ✅ Android Configuration
-- **Application ID**: `net.mschultheiss.klubradioarchivum`
+- **Application ID**: `de.multilevelstudios.klubradioarchivum`
 - **Min SDK**: 21 (Android 5.0) ✓
 - **Target SDK**: Inherited from Flutter (likely 34) ✓
 - **Permissions**: Configured in AndroidManifest.xml ✓
@@ -163,7 +163,7 @@ android:label="Klubrádió Archívum"
 ```
 
 #### Task 6: Application ID Decision
-**Current**: `net.mschultheiss.klubradioarchivum`
+**Current**: `de.multilevelstudios.klubradioarchivum`
 **Options**:
 - **Keep current**: For personal project
 - **Change to** `hu.klubradio.archivum`: For official Klubrádió app

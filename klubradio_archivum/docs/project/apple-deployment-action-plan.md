@@ -136,8 +136,8 @@ Dec 20-27: Apple Review (1-7 days)
 
 ### 1. Bundle ID Choice
 **Current**:
-- iOS: `net.mschultheiss.klubradioarchivum`
-- macOS: `net.mschultheiss.klubradioArchivum` (note capitalization!)
+- iOS: `de.multilevelstudios.klubradioarchivum`
+- macOS: `de.multilevelstudios.klubradioarchivum`
 
 **Options**:
 - **Keep current**: Recommended for personal/solo project

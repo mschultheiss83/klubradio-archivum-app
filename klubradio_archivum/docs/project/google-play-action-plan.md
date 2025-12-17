@@ -140,7 +140,7 @@ Dec 19-26:         Phase 5 - Production review (1-7 days)
 ## Decision Points
 
 ### 1. Application ID Choice
-**Current**: `net.mschultheiss.klubradioarchivum`
+**Current**: `de.multilevelstudios.klubradioarchivum`
 
 **Options**:
 - **Keep current**: For personal project

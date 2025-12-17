@@ -13,13 +13,13 @@
 - **Builds**: iOS and macOS builds working after recent platform fixes
 
 ### ✅ iOS Configuration
-- **Bundle ID**: `net.mschultheiss.klubradioarchivum`
+- **Bundle ID**: `de.multilevelstudios.klubradioarchivum`
 - **Deployment Target**: 14.0 ✓
 - **Version**: 1.0.4
 - **Podfile**: Configured ✓
 
 ### ✅ macOS Configuration
-- **Bundle ID**: `net.mschultheiss.klubradioArchivum`
+- **Bundle ID**: `de.multilevelstudios.klubradioarchivum`
 - **Deployment Target**: 10.15 ✓
 - **Entitlements**: Configured for network, downloads, audio ✓
 - **Version**: 1.0.4
@@ -145,7 +145,7 @@ open ios/Runner.xcworkspace
 Check: Runner > Assets.xcassets > AppIcon (all sizes should be filled)
 
 #### Task 4: Decide on Bundle ID
-**Current**: `net.mschultheiss.klubradioarchivum`
+**Current**: `de.multilevelstudios.klubradioarchivum`
 **Options**:
 - **Keep current** (recommended if this is your personal/solo project)
 - **Change to** `hu.klubradio.archivum` (if official Klubrádió app)
@@ -174,7 +174,7 @@ flutter run -d "iPhone 15 Pro" --release
 macOS app is in better shape:
 - ✅ Entitlements already configured
 - ⚠️ May need privacy descriptions in Info.plist (check App Store requirements)
-- ⚠️ Bundle ID capitalization differs: `net.mschultheiss.klubradioArchivum` (vs iOS)
+- Bundle IDs match across platforms: `de.multilevelstudios.klubradioarchivum`
 
 **macOS Build Test**:
 ```bash

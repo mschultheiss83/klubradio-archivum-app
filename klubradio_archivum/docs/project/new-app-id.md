@@ -1,8 +1,8 @@
 
 old
  
-    applicationId = "net.mschultheiss.klubradioarchivum"          
+    applicationId = "de.multilevelstudios.klubradioarchivum"
 
 │new
 
-    applicationId = "com.multilevelstudios.klubradioarchivum"
+    applicationId = "de.multilevelstudios.klubradioarchivum"
