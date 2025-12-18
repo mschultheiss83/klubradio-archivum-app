@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:klubradio_archivum/l10n/app_localizations.dart';
 import 'package:klubradio_archivum/models/podcast.dart';
+import 'package:klubradio_archivum/screens/widgets/stateless/image_url.dart';
 
 class PodcastInfoCard extends StatelessWidget {
   const PodcastInfoCard({super.key, required this.podcast});
@@ -31,11 +32,12 @@ class PodcastInfoCard extends StatelessWidget {
                           color: theme.colorScheme.primaryContainer,
                           child: const Icon(Icons.radio, size: 48),
                         )
-                      : Image.network(
-                          podcast.coverImageUrl,
+                      : ImageUrl(
+                          url: podcast.coverImageUrl,
                           width: 100,
                           height: 100,
-                          fit: BoxFit.cover,
+                          borderRadius: 0,
+                          icon: Icons.radio,
                         ),
                 ),
                 const SizedBox(width: 16),
