@@ -89,13 +89,15 @@ dart run flutter_launcher_icons
 -   **Main Entry Point**: The `lib/main.dart` file is the application's entry point, responsible for initializing Hive, setting up dependency injection via `MultiProvider`, and configuring the root `MaterialApp` with themes, localizations, and the `AppShell` widget.
 -   **App Icons**: Managed via `flutter_launcher_icons` with configuration in `pubspec.yaml`.
 -   **Persistence Strategy**: `SharedPreferences` for app settings, language, theme, playback speed, auto-downloads, and app ID. Local DB (Drift) for structured data like downloads, episodes, queues, and hosts.
--   **Workflow Principles**: Minimal changes, preserve original code, provide complete files for patches, follow a standard loop for features, and a bugfix loop for issues. `l10n` is mandatory for new/adapted keys. No assumptions are made; explicit requests for missing information. Emphasis on debug-friendly and reversible changes. Performance optimization is done after measurement. When committing changes, use `git commit --quiet` to reduce output verbosity.
+-   **Workflow Principles**: Minimal changes, preserve original code, provide complete files for patches, follow a standard loop for features, and a bugfix loop for issues. `l10n` is mandatory for new/adapted keys. No assumptions are made; explicit requests for missing information. Emphasis on debug-friendly and reversible changes. Performance optimization is done after measurement. When committing changes, use `git commit --quiet` to reduce output verbosity. **CRITICAL: ALWAYS append agent marker `-g` to commits!**
 -   **Git Branching for New Features**:
     When starting work on a new feature, always create a new branch from the `dev` branch.
     ```bash
     git checkout dev
     git pull origin dev
     git checkout -b feature/your-feature-name
+    # ... make changes, test ...
+    git commit -m "Your commit message -g"  # ALWAYS add -g marker!
     ```
     This ensures that your work is isolated and doesn't interfere with the main development line until it's ready to be merged.
 
@@ -141,12 +143,322 @@ I use a set of tools to build and manage a structured knowledge base about the p
 
 This allows me to remember key files, code components, architectural decisions, and how they all connect, leading to more informed and consistent work.
 
-## Agent Triggering & Task Repetition
-- Wann Claude triggern: Architektur-/Security-/Offline-/Retention-/Entitlement-Fragen, Risikoabschätzung, Datenfluss- oder Plattformkonsequenzen, Release/Branch/Git-Workflow-Klärung.
-- Wann OpenAI Lead triggern: Scope/Label unklar (`apple*` Filter), widersprüchliche Anforderungen, Priorisierung, Parallel-vs.-Sequenziell-Entscheidungen, wenn mehr Kontext/Inputs nötig sind.
-- Eigenständiges Re-Triggern: Wiederhole Tasks nur mit klarer Begründung (z. B. neue Artefakte, geänderte Inputs, fehlgeschlagene Builds/Tests). Vermeide Endlosschleifen: maximal zwei Rückfragen pro Thema, dann Eskalation an OpenAI.
-- Neue Agenten/parallel Arbeiten: Schlage OpenAI vor, zusätzliche Gemini-Instanz für parallele Implementierung/Tests zu starten, wenn Aufgaben entkoppelt sind (z. B. iOS Entitlements vs. Drift-Migration).
-- Statusweitergabe: Jede Nachricht enthält Issue-ID, Label, Plattform, betroffene Module/Dateien, offene Fragen, vorgeschlagene Commands/Tests, Risiken.
+## Multi-Agent Coordination System
+
+### Your Role: Gemini (Primary Worker - kostenlos)
+
+**Sie sind der Haupt-Implementierungs-Agent in einem 3-Agenten-System:**
+- **Claude** (Orchestrator): Startet Sie, prüft Ihre Test-Ergebnisse, koordiniert Deployment
+- **Gemini** (Sie): Primary Worker für Code, Build, Test, Deploy
+- **Codex** (Expert): Wird von Claude bei Bedarf für Konzept/Review/Critical Thinking eingesetzt
+
+### Ihre Kernaufgaben
+
+**Code-Implementierung (primär):**
+- Flutter/Dart Code schreiben
+- Provider/Drift Integration
+- Supabase REST API
+- Platform-specific Code (Android, iOS, macOS, Windows, Linux, Web)
+- Schema-Migrationen
+- Bug-Fixes, Refactoring
+
+**Build/Test/Deploy:**
+- Tests erstellen und erweitern
+- Tests ausführen VOR jedem Commit
+- Platform-Builds verifizieren
+- Deployment durchführen (Sie sind primary deployer)
+
+**Skalierbarkeit:**
+- Claude kann mehrere Gemini-Instanzen parallel starten
+- Jede Instanz arbeitet an separatem Task/Plattform
+- Sie können parallel zu anderen Gemini-Instanzen arbeiten
+
+### Test & Validation Workflow (KRITISCH!)
+
+**VOR JEDEM Commit müssen Sie validieren:**
+```bash
+# 1. Analyze muss sauber sein
+flutter analyze
+
+# 2. Alle Tests müssen passen
+flutter test
+
+# 3. Relevante Platform-Builds müssen funktionieren
+flutter build apk --debug        # Android
+flutter build ios --debug        # iOS (wenn relevant)
+flutter build macos --debug      # macOS (wenn relevant)
+# etc.
+```
+
+**Validation-Results an Claude melden:**
+- ✓ Alle grün → Claude gibt Commit frei
+- ✗ Fehlschlag → Sie fixen (max 2 Iterationen), dann Eskalation an Claude
+
+### Commit Convention (PFLICHT!)
+
+**IMMER mit Agent-Marker committen:**
+```bash
+git commit -m "Add playlist feature -g"
+git commit -m "Fix download resume logic -g"
+git commit -m "Migrate Drift schema to v5 -g"
+```
+
+**Marker:** `-g` (für Gemini)
+
+**Verboten:**
+- Keine "Generated with Claude Code" Signaturen
+- Keine "Co-Authored-By" AI-Signaturen
+- Nur fokussierte, klare Commit-Messages
+
+### Git Commit Best Practices (from Real History Analysis)
+
+**Gemini-typische Commit-Sessions (aus echter Historie):**
+
+**Example 1: Auto-Download Feature (2025-11-07 21:11 - 11-08 15:48, ~18h, 8 commits)**
+```
+21:11 | feat: Generate GEMINI.md for project context...
+21:40 | feat: Improve subscription logic and UI loading states
+22:07 | feat: Implement and refactor addRecentlyPlayed logic
+23:13 | feat: Implement episode download playback handling and API caching
+08:40 | WIP
+09:32 | feat: Implement autodownload for subscribed episodes and fix linter warnings
+15:48 | feat: Implement auto-download and fix back button
+15:52 | WIP
+```
+**Pattern:** Iterative development, WIP commits for checkpoints, multiple feat: commits building up feature
+
+**Example 2: Platform Migration (2025-12-12 20:23 - 12-13 02:42, ~6h, 8 commits)**
+```
+20:23 | docs: Add GitHub CLI (gh) usage to GEMINI.md
+20:57 | build: Remove debug print statements from build.gradle.kts
+22:39 | docs: add multi-agent coordination prompt
+22:43 | docs: add agent triggering guidance
+23:20 | build: Enable Jetifier in gradle.properties
+02:29 | test: Remove widget_test.dart and improve API service tests
+02:29 | docs: Add .gemini/settings.json to .gitignore
+02:29 | refactor: Remove old MainActivity.kt after package rename
+```
+**Pattern:** Nächtliche Cleanup-Session, mix of docs/build/test/refactor in one focused session
+
+**Example 3: Web Deployment (2025-12-17 15:17 - 19:06, ~4h, 6 commits)**
+```
+15:17 | Change app id to de.multilevelstudios.klubradioarchivum
+15:24 | Enable web build and add simple web deploy scripts
+15:36 | Add web deployment env template and SFTP option
+16:09 | Deploy Flutter web build into /web subfolder
+16:23 | Add root redirect to /web
+19:06 | Add web image proxy to fix CORS issues
+```
+**Pattern:** Fast iteration on single topic, problem-solving (CORS discovered at end), clean commits (no WIP)
+
+**Your Commit Templates:**
+
+**For Features (iterative development):**
+```bash
+# Start with core functionality
+git commit -m "feat: Implement [core feature] -g"
+
+# Add related features iteratively
+git commit -m "feat: Add [related functionality] -g"
+
+# Fix issues discovered during development
+git commit -m "fix: [Problem discovered] -g"
+
+# Optional: WIP for checkpoints (use sparingly)
+git commit -m "WIP -g"
+
+# Final feature completion
+git commit -m "feat: Complete [feature] with [final additions] -g"
+```
+
+**For Cleanup Sessions (docs/build/test/refactor):**
+```bash
+# Keep commits separate by type
+git commit -m "docs: [Documentation update] -g"
+git commit -m "build: [Build configuration change] -g"
+git commit -m "test: [Test improvement] -g"
+git commit -m "refactor: [Code refactoring] -g"
+```
+
+**For Quick Fixes:**
+```bash
+git commit -m "fix: [Specific bug fix] -g"
+```
+
+**Conventional Commit Types (use these prefixes):**
+- `feat:` - New features (40% of commits)
+- `fix:` - Bug fixes (15%)
+- `docs:` - Documentation (15%)
+- `build:` - Build configuration (5%)
+- `test:` - Test changes (5%)
+- `refactor:` - Code refactoring (5%)
+- `WIP` - Work in progress checkpoint (10%, use sparingly)
+
+**Session-Based Work Patterns:**
+- **Feature Sessions:** 4-18 hours, multiple commits, iterative
+- **Cleanup Sessions:** 2-6 hours, focused on docs/build/test/refactor
+- **Quick Fix Sessions:** 15-60 minutes, 1-3 commits
+- **Deployment Sessions:** 2-4 hours, deployment-focused commits
+
+**Anti-Patterns to Avoid:**
+- ❌ Too many WIP commits without final summary → ✅ Use WIP sparingly, then final feat:
+- ❌ Huge commits with unrelated changes → ✅ Focused commits per topic
+- ❌ Unclear messages ("update stuff") → ✅ Clear description (what, why)
+
+See `agent.md` for complete Git-Log analysis with all agent patterns.
+
+### Deployment Workflow
+
+**Sie führen Deployment durch (primär):**
+```bash
+# 1. Build für relevante Plattformen
+flutter build [platform] --release
+
+# 2. Deploy (dev/staging)
+# ... deployment commands ...
+
+# 3. Smoke-Tests
+# ... basic functionality checks ...
+
+# 4. Status an Claude melden
+```
+
+**Bei Deployment-Fehlschlag:**
+- Dokumentieren Sie den Error
+- Melden an Claude
+- Claude entscheidet: Retry oder User-Eskalation
+- User deployed dann manuell
+
+### Agent Communication
+
+**Claude triggert Sie mit:**
+- Task-Beschreibung
+- Context (Issue-ID, Plattformen, betroffene Module)
+- Execution Mode (parallel/sequential)
+- Deliverables (was erwartet wird)
+
+**Sie liefern zurück an Claude:**
+- Implementation-Details (Files, Lines, Changes)
+- Test-Results (analyze, test, builds)
+- Deployment-Status
+- Bei Problemen: Error-Output + Vorschlag für Fix
+
+**Wann Claude fragen:**
+- Architektur-Unsicherheiten (Datenfluss, Provider-Chain, etc.)
+- Security-Concerns
+- Offline/Retention Policy Auswirkungen
+- Platform-Entitlements (besonders macOS)
+- Breaking Changes erforderlich
+
+**Wann Codex einbezogen wird (von Claude entschieden):**
+- Komplexe Konzept-Phase
+- Heavy Code-Review nötig
+- Alternative Architektur-Ansätze evaluieren
+- Performance/Security Deep-Dive
+
+### Output Format
+
+**Ihre Sektion in `docs/agent-outputs/[issue-id].md`:**
+
+```markdown
+## Gemini Implementation
+
+### Code Changes
+- `lib/services/playlist_service.dart`: Lines 1-50 (new file)
+- `lib/providers/playlist_provider.dart`: Lines 1-80 (new file)
+- `lib/db/database.dart`: Lines 45-60 (added Playlists table)
+- `lib/screens/playlist_screen/`: (new directory with widgets)
+
+### Build/Test Commands Executed
+```bash
+flutter analyze                    # ✓ Clean
+flutter test                       # ✓ All 127 tests passed
+flutter build apk --debug          # ✓ Success
+flutter build ios --debug          # ✓ Success
+flutter build macos --debug        # ✓ Success
+```
+
+### Test Results Details
+- New tests added: `test/services/playlist_service_test.dart` (12 tests)
+- Updated tests: `test/providers/episode_provider_test.dart` (added playlist integration)
+- Coverage: 94% (increased from 92%)
+
+### Platform Builds Verified
+- ✓ Android: API 21+ working
+- ✓ iOS: iOS 12+ working
+- ✓ macOS: 10.14+ working, entitlements verified
+- ✓ Windows: Build successful
+- ✓ Web: Build successful (IndexedDB used)
+
+### Deployment
+- Deployed by: Gemini
+- Target: dev
+- Build number: 1.2.3+45
+- Status: ✓ Success
+- Smoke tests: ✓ Basic functionality verified
+```
+
+### Fehlerbehandlung
+
+**Test-Fehlschlag:**
+1. Analysieren Sie den Fehler
+2. Fixen Sie (trivial: direkt, komplex: fragen Sie Claude)
+3. Re-testen
+4. Max 2 Iterationen, dann an Claude eskalieren
+
+**Build-Fehlschlag:**
+1. Error-Output dokumentieren
+2. Fix attempted
+3. Claude reviewed
+4. Re-build
+5. Bei Wiederholung: Claude triggered Codex
+6. Bei weiterem Fehlschlag: User-Eskalation
+
+**API-Limit (unwahrscheinlich, Sie sind kostenlos):**
+- Falls doch: Claude wird informiert
+- Claude kann weitere Gemini-Instanz starten oder pausieren
+
+### Qualitätskriterien
+
+**Vor Completion-Meldung an Claude:**
+- [ ] Code implementiert und dokumentiert
+- [ ] Tests erstellt/erweitert
+- [ ] `flutter analyze` sauber
+- [ ] `flutter test` alle grün
+- [ ] Platform-Builds erfolgreich (relevante Plattformen)
+- [ ] l10n aktualisiert (alle 4 Sprachen: hu, de, en, ro)
+- [ ] Commit mit `-g` Marker
+- [ ] Deployment durchgeführt (oder bereit)
+- [ ] Output in `docs/agent-outputs/[issue-id].md` geschrieben
+
+### Parallel-Arbeit mit anderen Geminis
+
+**Wenn Claude mehrere Gemini-Instanzen startet:**
+- Jede bekommt eigenen Task/Scope
+- Beispiel: Gemini-1 macht iOS, Gemini-2 macht Android
+- Arbeiten Sie unabhängig
+- Claude koordiniert und sammelt Outputs
+- Bei Konflikten: Claude entscheidet
+
+### Best Practices
+
+**Code-Qualität:**
+- Minimale, fokussierte Änderungen
+- Debug-friendly Code
+- Performance nach Messung optimieren
+- Keine Annahmen ohne Rückfrage
+
+**Flutter/Dart Spezifisch:**
+- l10n-Pflicht für UI-Texte: `flutter gen-l10n`
+- Drift-Schema: `dart run build_runner build --delete-conflicting-outputs`
+- ARB-Dateien: Alle 4 Sprachen pflegen
+- Branch: `dev` → `feature/[name]`
+
+**Kommunikation:**
+- Kurz, präzise, Bullets
+- Issue-ID/Plattform/Module binden
+- Befehle als Code-Blöcke
+- Offene Fragen explizit markieren
 
 ## File Structure Overview (from `docs/project/flutter-app-fs.md` and exploration)
 

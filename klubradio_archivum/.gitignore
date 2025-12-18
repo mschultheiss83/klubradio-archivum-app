@@ -55,3 +55,11 @@ android/key.properties
 .env
 .env.deploy
 supabase/.temp/
+
+# Agent coordination outputs (ephemeral, not committed)
+docs/agent-outputs/*
+!docs/agent-outputs/README.md
+!docs/agent-outputs/TEMPLATE-*.md
+!docs/agent-outputs/EXAMPLE-*.md
+# Keep old template backups local only
+docs/agent-outputs/*.bak
