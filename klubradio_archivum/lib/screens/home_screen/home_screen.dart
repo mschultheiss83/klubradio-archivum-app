@@ -37,7 +37,8 @@ class _HomeScreenState extends State<HomeScreen> {
           podcastProvider.recentEpisodes.first,
           queue: podcastProvider.recentEpisodes,
         );
-        await episodeProvider.togglePlayPause();
+        // TODO: Test autoplay on app startup across all platforms (web, mobile, desktop)
+        // Currently disabled - togglePlayPause() removed to prevent autoplay issues
       }
     });
   }
