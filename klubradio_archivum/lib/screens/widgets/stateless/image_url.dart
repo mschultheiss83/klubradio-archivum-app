@@ -1,6 +1,7 @@
 import 'dart:io' show File;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:klubradio_archivum/utils/web_image_proxy.dart';
 
 /// Zeigt bevorzugt ein lokales Bild (Dateipfad), andernfalls eine URL.
 /// Fällt bei Fehlern auf ein Icon im Container zurück.
@@ -22,6 +23,8 @@ class ImageUrl extends StatelessWidget {
     this.icon = Icons.podcasts_outlined,
     this.fit = BoxFit.cover,
     this.preferLocal = true,
+    this.backgroundColor,
+    this.loadingBackgroundColor,
   });
 
   /// Absoluter Dateipfad (z. B. `C:\Users\...\52775.jpg` oder `/data/.../52775.jpg`)
@@ -38,6 +41,12 @@ class ImageUrl extends StatelessWidget {
 
   /// True ⇒ lokales Bild hat Vorrang, wenn vorhanden.
   final bool preferLocal;
+
+  /// Background color for the fallback/error state.
+  final Color? backgroundColor;
+
+  /// Background color for the loading placeholder.
+  final Color? loadingBackgroundColor;
 
   bool get _hasValidUrl {
     final u = url ?? '';
@@ -63,11 +72,15 @@ class ImageUrl extends StatelessWidget {
   Widget build(BuildContext context) {
     final w = width ?? 72.0;
     final h = height ?? 72.0;
+    final baseBackgroundColor =
+        backgroundColor ?? Theme.of(context).colorScheme.primaryContainer;
+    final resolvedLoadingBackgroundColor = loadingBackgroundColor ??
+        Theme.of(context).colorScheme.surfaceContainerHighest;
 
     Widget fallback([Color? color]) => Container(
       width: w,
       height: h,
-      color: color ?? Theme.of(context).colorScheme.primaryContainer,
+      color: color ?? baseBackgroundColor,
       alignment: Alignment.center,
       child: Icon(icon, size: w * 0.5),
     );
@@ -104,16 +117,19 @@ class ImageUrl extends StatelessWidget {
     }
 
     if (_hasValidUrl) {
+      // Transform URL for web platform to avoid CORS issues
+      final imageUrl = WebImageProxy.transform(url!);
+
       return clip(
         Image.network(
-          url!,
+          imageUrl,
           width: w,
           height: h,
           fit: fit,
           // Leichtgewichtiger Placeholder beim Laden
           loadingBuilder: (ctx, child, progress) {
             if (progress == null) return child;
-            return fallback(Theme.of(ctx).colorScheme.surfaceContainerHighest);
+            return fallback(resolvedLoadingBackgroundColor);
           },
           // Bei 404/Netz/Decode-Fehlern: Fallback statt rotem Fehler
           errorBuilder: (ctx, error, stack) => fallback(),

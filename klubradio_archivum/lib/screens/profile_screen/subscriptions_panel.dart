@@ -4,6 +4,7 @@ import 'package:klubradio_archivum/db/daos.dart';
 import 'package:klubradio_archivum/models/podcast.dart';
 import 'package:klubradio_archivum/l10n/app_localizations.dart';
 import 'package:klubradio_archivum/screens/podcast_detail_screen/podcast_detail_screen.dart';
+import 'package:klubradio_archivum/screens/widgets/stateless/image_url.dart';
 
 class SubscriptionsPanel extends StatelessWidget {
   const SubscriptionsPanel({super.key, required this.podcasts});
@@ -52,13 +53,14 @@ class _PodcastTile extends StatelessWidget {
       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       leading: ClipRRect(
         borderRadius: BorderRadius.circular(8),
-        child: Image.network(
-          podcast.coverImageUrl,
+        child: ImageUrl(
+          url: podcast.coverImageUrl,
           width: 56,
           height: 56,
-          fit: BoxFit.cover,
-          errorBuilder: (_, _, _) =>
-              Container(width: 56, height: 56, color: cs.surfaceContainerHighest),
+          borderRadius: 0,
+          icon: Icons.radio,
+          backgroundColor: cs.surfaceContainerHighest,
+          loadingBackgroundColor: cs.surfaceContainerHighest,
         ),
       ),
       title: Text(podcast.title, maxLines: 1, overflow: TextOverflow.ellipsis),

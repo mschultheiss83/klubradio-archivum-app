@@ -28,7 +28,9 @@ class AudioPlayerService {
   bool get isPlaying => _player.playing;
   Duration? get totalDuration => _player.duration;
 
-  Future<void> loadEpisode(Episode episode, {bool autoplay = true}) async {
+  // TODO: Test autoplay functionality across all platforms (web, mobile, desktop)
+  // Currently disabled due to issues on web and other platforms
+  Future<void> loadEpisode(Episode episode, {bool autoplay = false}) async {
     _currentEpisode = episode;
     try {
       final local = episode.localFilePath;

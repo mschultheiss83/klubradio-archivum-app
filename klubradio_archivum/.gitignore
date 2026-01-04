@@ -43,3 +43,23 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Android signing
+android/key.properties
+*.jks
+*.keystore
+
+.gemini/settings.json
+
+# Local env / deploy secrets (never commit)
+.env
+.env.deploy
+supabase/.temp/
+
+# Agent coordination outputs (ephemeral, not committed)
+docs/agent-outputs/*
+!docs/agent-outputs/README.md
+!docs/agent-outputs/TEMPLATE-*.md
+!docs/agent-outputs/EXAMPLE-*.md
+# Keep old template backups local only
+docs/agent-outputs/*.bak

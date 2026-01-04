@@ -3,7 +3,10 @@
     "allow": [
       "Bash(wait)",
       "Bash(cat:*)",
-      "Bash(flutter --version:*)"
+      "Bash(flutter --version:*)",
+      "Bash(gh label:*)",
+      "Bash(gh issue:*)",
+      "Bash(gh api:*)"
     ],
     "deny": [],
     "ask": []
