@@ -39,7 +39,7 @@ jobs:
           EOF
 
       - name: Download latest artifact (fixed name)
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: downloads-json-latest
           path: klubradio_scraper_nodejs/downloads
