@@ -30,7 +30,7 @@ jobs:
         run: flutter build web --release --base-href / # --base-href is important for subdirectories, but for play.gi-td.com it's likely root. Assuming play.gi-td.com is the root of the deployment
 
       - name: Upload Web Build Artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: web-app
           path: klubradio_archivum/build/web
