@@ -10,7 +10,7 @@
     "upload:shows": "node speed_upload_shows.js"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.89.0",
+    "@supabase/supabase-js": "^2.90.1",
     "axios": "*",
     "bottleneck": "*",
     "cheerio": "*",
