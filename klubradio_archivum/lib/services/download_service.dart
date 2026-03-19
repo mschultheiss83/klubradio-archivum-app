@@ -426,16 +426,18 @@ class DownloadService {
     // These are the episodes we want to have locally.
     final targetEpisodes = latestEpisodes.take(keepN);
 
-    // Get what we already have.
-    final downloadedEpisodes = await episodesDao.getEpisodesByPodcastId(
-      podcastId,
-    );
-    final downloadedEpisodeIds = downloadedEpisodes.map((e) => e.id).toSet();
+    // Skip episodes that are already downloaded, queued, or downloading
+    final allEpisodes = await episodesDao.getEpisodesByPodcastId(podcastId);
+    final skipIds = allEpisodes
+        .where((e) => e.status == EpisodeStatusDB.completed ||
+                      e.status == EpisodeStatusDB.queued ||
+                      e.status == EpisodeStatusDB.downloading)
+        .map((e) => e.id)
+        .toSet();
 
     int downloadCount = 0;
     for (final episodeToDownload in targetEpisodes) {
-      if (!downloadedEpisodeIds.contains(episodeToDownload.id)) {
-        // This is a new episode that we don't have, enqueue it.
+      if (!skipIds.contains(episodeToDownload.id)) {
         await enqueueEpisode(episodeToDownload);
         downloadCount++;
       }
