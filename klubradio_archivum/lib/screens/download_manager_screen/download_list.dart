@@ -210,18 +210,7 @@ class _CompletedDownloads extends StatelessWidget {
                 onSelected: (value) async {
                   switch (value) {
                     case 'play':
-                      final m = model.Episode(
-                        id: ep.id,
-                        podcastId: ep.podcastId,
-                        title: ep.title,
-                        description: '',
-                        audioUrl: ep.audioUrl,
-                        publishedAt: ep.publishedAt ?? DateTime.now(),
-                        duration: Duration.zero,
-                        hosts: const [],
-                        showDate: '',
-                      );
-                      // bevorzugt lokal (Provider liest cachedMetaPath bei Step 1)
+                      final m = model.Episode.fromDb(ep);
                       // ignore: use_build_context_synchronously
                       context.read<EpisodeProvider>().playEpisode(
                         m,
@@ -275,23 +264,11 @@ class _CompletedDownloads extends StatelessWidget {
                 ],
               ),
               onTap: () {
-                final m = model.Episode(
-                  id: ep.id,
-                  podcastId: ep.podcastId,
-                  title: ep.title,
-                  description: '',
-                  audioUrl: ep.audioUrl,
-                  publishedAt: ep.publishedAt ?? DateTime.now(),
-                  duration: Duration.zero,
-                  hosts: const [],
-                  showDate: '',
-                );
-
-                // bevorzugt lokalen Pfad verwenden (EpisodeProvider prüft DB & localPath)
+                final m = model.Episode.fromDb(ep);
                 context.read<EpisodeProvider>().playEpisode(
                   m,
-                  queue: [m], // optional: Queue nur diese eine
-                  preferLocal: true, // explizit
+                  queue: [m],
+                  preferLocal: true,
                 );
               },
             );

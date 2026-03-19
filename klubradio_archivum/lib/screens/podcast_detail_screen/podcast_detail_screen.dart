@@ -77,8 +77,8 @@ class _PodcastDetailScreenState extends State<PodcastDetailScreen> {
           if (PlatformUtils.supportsSubscriptions)
             Consumer<SubscriptionProvider>(
               builder: (context, subscriptionProvider, child) {
-                if (subscriptionProvider.currentSubscription == null && !subscriptionProvider.busy) {
-                  // Initial loading state or no subscription found yet
+                if (!subscriptionProvider.loaded) {
+                  // Still loading subscription state
                   return const Padding(
                     padding: EdgeInsets.only(right: 8.0),
                     child: SizedBox(

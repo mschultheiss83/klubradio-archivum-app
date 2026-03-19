@@ -3,7 +3,8 @@ import 'package:flutter/foundation.dart';
 import 'package:klubradio_archivum/db/app_database.dart';
 import 'package:klubradio_archivum/db/daos.dart';
 import 'package:klubradio_archivum/providers/download_provider.dart';
-import 'package:klubradio_archivum/screens/widgets/stateless/platform_utils.dart'; // Import PlatformUtils
+import 'package:klubradio_archivum/screens/utils/constants.dart' as constants;
+import 'package:klubradio_archivum/screens/widgets/stateless/platform_utils.dart';
 
 class SubscriptionProvider extends ChangeNotifier {
   SubscriptionProvider({
@@ -24,6 +25,9 @@ class SubscriptionProvider extends ChangeNotifier {
   bool _busy = false;
   bool get busy => _busy;
 
+  bool _loaded = false;
+  bool get loaded => _loaded;
+
   bool _isSubscriptionsSupported = false; // Flag for platform support
 
   void updateDependencies({
@@ -35,8 +39,12 @@ class SubscriptionProvider extends ChangeNotifier {
   }
 
   Future<void> loadSubscription(String podcastId) async {
-    if (!_isSubscriptionsSupported) return;
+    if (!_isSubscriptionsSupported) {
+      _loaded = true;
+      return;
+    }
     _currentSubscription = await subscriptionsDao.getById(podcastId);
+    _loaded = true;
     notifyListeners();
   }
 
@@ -56,6 +64,7 @@ class SubscriptionProvider extends ChangeNotifier {
       await subscriptionsDao.toggleSubscribe(
         podcastId: podcastId,
         active: !isSubscribed,
+        autoDownloadN: !isSubscribed ? constants.defaultAutoDownloadCount : null,
       );
       _currentSubscription = await subscriptionsDao.getById(podcastId);
       debugPrint(

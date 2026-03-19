@@ -410,11 +410,13 @@ class DownloadService {
   }
 
   Future<int> autodownloadPodcast(String podcastId) async {
+    // Per-podcast autoDownloadN takes priority, then global keepLatestN
+    final sub = await subscriptionsDao.getById(podcastId);
     final settings = await settingsDao.getOne();
-    final keepN = settings?.keepLatestN ?? 0;
+    final keepN = sub?.autoDownloadN ?? settings?.keepLatestN ?? 0;
 
     if (keepN <= 0) {
-      return 0; // If keepN is 0 or less, do nothing.
+      return 0;
     }
 
     // Fetch latest episodes for this podcast from the API and sort them.
