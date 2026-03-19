@@ -565,6 +565,50 @@ class $EpisodesTable extends Episodes with TableInfo<$EpisodesTable, Episode> {
     type: DriftSqlType.dateTime,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _durationSecondsMeta = const VerificationMeta(
+    'durationSeconds',
+  );
+  @override
+  late final GeneratedColumn<int> durationSeconds = GeneratedColumn<int>(
+    'duration_seconds',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _descriptionMeta = const VerificationMeta(
+    'description',
+  );
+  @override
+  late final GeneratedColumn<String> description = GeneratedColumn<String>(
+    'description',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _showDateMeta = const VerificationMeta(
+    'showDate',
+  );
+  @override
+  late final GeneratedColumn<String> showDate = GeneratedColumn<String>(
+    'show_date',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _imageUrlMeta = const VerificationMeta(
+    'imageUrl',
+  );
+  @override
+  late final GeneratedColumn<String> imageUrl = GeneratedColumn<String>(
+    'image_url',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _statusMeta = const VerificationMeta('status');
   @override
   late final GeneratedColumn<int> status = GeneratedColumn<int>(
@@ -720,6 +764,10 @@ class $EpisodesTable extends Episodes with TableInfo<$EpisodesTable, Episode> {
     title,
     audioUrl,
     publishedAt,
+    durationSeconds,
+    description,
+    showDate,
+    imageUrl,
     status,
     progress,
     localPath,
@@ -782,6 +830,36 @@ class $EpisodesTable extends Episodes with TableInfo<$EpisodesTable, Episode> {
           data['published_at']!,
           _publishedAtMeta,
         ),
+      );
+    }
+    if (data.containsKey('duration_seconds')) {
+      context.handle(
+        _durationSecondsMeta,
+        durationSeconds.isAcceptableOrUnknown(
+          data['duration_seconds']!,
+          _durationSecondsMeta,
+        ),
+      );
+    }
+    if (data.containsKey('description')) {
+      context.handle(
+        _descriptionMeta,
+        description.isAcceptableOrUnknown(
+          data['description']!,
+          _descriptionMeta,
+        ),
+      );
+    }
+    if (data.containsKey('show_date')) {
+      context.handle(
+        _showDateMeta,
+        showDate.isAcceptableOrUnknown(data['show_date']!, _showDateMeta),
+      );
+    }
+    if (data.containsKey('image_url')) {
+      context.handle(
+        _imageUrlMeta,
+        imageUrl.isAcceptableOrUnknown(data['image_url']!, _imageUrlMeta),
       );
     }
     if (data.containsKey('status')) {
@@ -906,6 +984,22 @@ class $EpisodesTable extends Episodes with TableInfo<$EpisodesTable, Episode> {
         DriftSqlType.dateTime,
         data['${effectivePrefix}published_at'],
       ),
+      durationSeconds: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}duration_seconds'],
+      ),
+      description: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}description'],
+      ),
+      showDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}show_date'],
+      ),
+      imageUrl: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}image_url'],
+      ),
       status: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}status'],
@@ -973,6 +1067,10 @@ class Episode extends DataClass implements Insertable<Episode> {
   final String title;
   final String audioUrl;
   final DateTime? publishedAt;
+  final int? durationSeconds;
+  final String? description;
+  final String? showDate;
+  final String? imageUrl;
 
   /// Download-Status:
   /// 0=none, 1=queued, 2=downloading, 3=completed, 4=failed, 5=canceled
@@ -997,6 +1095,10 @@ class Episode extends DataClass implements Insertable<Episode> {
     required this.title,
     required this.audioUrl,
     this.publishedAt,
+    this.durationSeconds,
+    this.description,
+    this.showDate,
+    this.imageUrl,
     required this.status,
     required this.progress,
     this.localPath,
@@ -1020,6 +1122,18 @@ class Episode extends DataClass implements Insertable<Episode> {
     map['audio_url'] = Variable<String>(audioUrl);
     if (!nullToAbsent || publishedAt != null) {
       map['published_at'] = Variable<DateTime>(publishedAt);
+    }
+    if (!nullToAbsent || durationSeconds != null) {
+      map['duration_seconds'] = Variable<int>(durationSeconds);
+    }
+    if (!nullToAbsent || description != null) {
+      map['description'] = Variable<String>(description);
+    }
+    if (!nullToAbsent || showDate != null) {
+      map['show_date'] = Variable<String>(showDate);
+    }
+    if (!nullToAbsent || imageUrl != null) {
+      map['image_url'] = Variable<String>(imageUrl);
     }
     map['status'] = Variable<int>(status);
     map['progress'] = Variable<double>(progress);
@@ -1064,6 +1178,18 @@ class Episode extends DataClass implements Insertable<Episode> {
       publishedAt: publishedAt == null && nullToAbsent
           ? const Value.absent()
           : Value(publishedAt),
+      durationSeconds: durationSeconds == null && nullToAbsent
+          ? const Value.absent()
+          : Value(durationSeconds),
+      description: description == null && nullToAbsent
+          ? const Value.absent()
+          : Value(description),
+      showDate: showDate == null && nullToAbsent
+          ? const Value.absent()
+          : Value(showDate),
+      imageUrl: imageUrl == null && nullToAbsent
+          ? const Value.absent()
+          : Value(imageUrl),
       status: Value(status),
       progress: Value(progress),
       localPath: localPath == null && nullToAbsent
@@ -1109,6 +1235,10 @@ class Episode extends DataClass implements Insertable<Episode> {
       title: serializer.fromJson<String>(json['title']),
       audioUrl: serializer.fromJson<String>(json['audioUrl']),
       publishedAt: serializer.fromJson<DateTime?>(json['publishedAt']),
+      durationSeconds: serializer.fromJson<int?>(json['durationSeconds']),
+      description: serializer.fromJson<String?>(json['description']),
+      showDate: serializer.fromJson<String?>(json['showDate']),
+      imageUrl: serializer.fromJson<String?>(json['imageUrl']),
       status: serializer.fromJson<int>(json['status']),
       progress: serializer.fromJson<double>(json['progress']),
       localPath: serializer.fromJson<String?>(json['localPath']),
@@ -1133,6 +1263,10 @@ class Episode extends DataClass implements Insertable<Episode> {
       'title': serializer.toJson<String>(title),
       'audioUrl': serializer.toJson<String>(audioUrl),
       'publishedAt': serializer.toJson<DateTime?>(publishedAt),
+      'durationSeconds': serializer.toJson<int?>(durationSeconds),
+      'description': serializer.toJson<String?>(description),
+      'showDate': serializer.toJson<String?>(showDate),
+      'imageUrl': serializer.toJson<String?>(imageUrl),
       'status': serializer.toJson<int>(status),
       'progress': serializer.toJson<double>(progress),
       'localPath': serializer.toJson<String?>(localPath),
@@ -1155,6 +1289,10 @@ class Episode extends DataClass implements Insertable<Episode> {
     String? title,
     String? audioUrl,
     Value<DateTime?> publishedAt = const Value.absent(),
+    Value<int?> durationSeconds = const Value.absent(),
+    Value<String?> description = const Value.absent(),
+    Value<String?> showDate = const Value.absent(),
+    Value<String?> imageUrl = const Value.absent(),
     int? status,
     double? progress,
     Value<String?> localPath = const Value.absent(),
@@ -1174,6 +1312,12 @@ class Episode extends DataClass implements Insertable<Episode> {
     title: title ?? this.title,
     audioUrl: audioUrl ?? this.audioUrl,
     publishedAt: publishedAt.present ? publishedAt.value : this.publishedAt,
+    durationSeconds: durationSeconds.present
+        ? durationSeconds.value
+        : this.durationSeconds,
+    description: description.present ? description.value : this.description,
+    showDate: showDate.present ? showDate.value : this.showDate,
+    imageUrl: imageUrl.present ? imageUrl.value : this.imageUrl,
     status: status ?? this.status,
     progress: progress ?? this.progress,
     localPath: localPath.present ? localPath.value : this.localPath,
@@ -1203,6 +1347,14 @@ class Episode extends DataClass implements Insertable<Episode> {
       publishedAt: data.publishedAt.present
           ? data.publishedAt.value
           : this.publishedAt,
+      durationSeconds: data.durationSeconds.present
+          ? data.durationSeconds.value
+          : this.durationSeconds,
+      description: data.description.present
+          ? data.description.value
+          : this.description,
+      showDate: data.showDate.present ? data.showDate.value : this.showDate,
+      imageUrl: data.imageUrl.present ? data.imageUrl.value : this.imageUrl,
       status: data.status.present ? data.status.value : this.status,
       progress: data.progress.present ? data.progress.value : this.progress,
       localPath: data.localPath.present ? data.localPath.value : this.localPath,
@@ -1239,6 +1391,10 @@ class Episode extends DataClass implements Insertable<Episode> {
           ..write('title: $title, ')
           ..write('audioUrl: $audioUrl, ')
           ..write('publishedAt: $publishedAt, ')
+          ..write('durationSeconds: $durationSeconds, ')
+          ..write('description: $description, ')
+          ..write('showDate: $showDate, ')
+          ..write('imageUrl: $imageUrl, ')
           ..write('status: $status, ')
           ..write('progress: $progress, ')
           ..write('localPath: $localPath, ')
@@ -1257,12 +1413,16 @@ class Episode extends DataClass implements Insertable<Episode> {
   }
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     id,
     podcastId,
     title,
     audioUrl,
     publishedAt,
+    durationSeconds,
+    description,
+    showDate,
+    imageUrl,
     status,
     progress,
     localPath,
@@ -1276,7 +1436,7 @@ class Episode extends DataClass implements Insertable<Episode> {
     cachedImagePath,
     cachedMetaPath,
     resumable,
-  );
+  ]);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1286,6 +1446,10 @@ class Episode extends DataClass implements Insertable<Episode> {
           other.title == this.title &&
           other.audioUrl == this.audioUrl &&
           other.publishedAt == this.publishedAt &&
+          other.durationSeconds == this.durationSeconds &&
+          other.description == this.description &&
+          other.showDate == this.showDate &&
+          other.imageUrl == this.imageUrl &&
           other.status == this.status &&
           other.progress == this.progress &&
           other.localPath == this.localPath &&
@@ -1307,6 +1471,10 @@ class EpisodesCompanion extends UpdateCompanion<Episode> {
   final Value<String> title;
   final Value<String> audioUrl;
   final Value<DateTime?> publishedAt;
+  final Value<int?> durationSeconds;
+  final Value<String?> description;
+  final Value<String?> showDate;
+  final Value<String?> imageUrl;
   final Value<int> status;
   final Value<double> progress;
   final Value<String?> localPath;
@@ -1327,6 +1495,10 @@ class EpisodesCompanion extends UpdateCompanion<Episode> {
     this.title = const Value.absent(),
     this.audioUrl = const Value.absent(),
     this.publishedAt = const Value.absent(),
+    this.durationSeconds = const Value.absent(),
+    this.description = const Value.absent(),
+    this.showDate = const Value.absent(),
+    this.imageUrl = const Value.absent(),
     this.status = const Value.absent(),
     this.progress = const Value.absent(),
     this.localPath = const Value.absent(),
@@ -1348,6 +1520,10 @@ class EpisodesCompanion extends UpdateCompanion<Episode> {
     required String title,
     required String audioUrl,
     this.publishedAt = const Value.absent(),
+    this.durationSeconds = const Value.absent(),
+    this.description = const Value.absent(),
+    this.showDate = const Value.absent(),
+    this.imageUrl = const Value.absent(),
     this.status = const Value.absent(),
     this.progress = const Value.absent(),
     this.localPath = const Value.absent(),
@@ -1372,6 +1548,10 @@ class EpisodesCompanion extends UpdateCompanion<Episode> {
     Expression<String>? title,
     Expression<String>? audioUrl,
     Expression<DateTime>? publishedAt,
+    Expression<int>? durationSeconds,
+    Expression<String>? description,
+    Expression<String>? showDate,
+    Expression<String>? imageUrl,
     Expression<int>? status,
     Expression<double>? progress,
     Expression<String>? localPath,
@@ -1393,6 +1573,10 @@ class EpisodesCompanion extends UpdateCompanion<Episode> {
       if (title != null) 'title': title,
       if (audioUrl != null) 'audio_url': audioUrl,
       if (publishedAt != null) 'published_at': publishedAt,
+      if (durationSeconds != null) 'duration_seconds': durationSeconds,
+      if (description != null) 'description': description,
+      if (showDate != null) 'show_date': showDate,
+      if (imageUrl != null) 'image_url': imageUrl,
       if (status != null) 'status': status,
       if (progress != null) 'progress': progress,
       if (localPath != null) 'local_path': localPath,
@@ -1416,6 +1600,10 @@ class EpisodesCompanion extends UpdateCompanion<Episode> {
     Value<String>? title,
     Value<String>? audioUrl,
     Value<DateTime?>? publishedAt,
+    Value<int?>? durationSeconds,
+    Value<String?>? description,
+    Value<String?>? showDate,
+    Value<String?>? imageUrl,
     Value<int>? status,
     Value<double>? progress,
     Value<String?>? localPath,
@@ -1437,6 +1625,10 @@ class EpisodesCompanion extends UpdateCompanion<Episode> {
       title: title ?? this.title,
       audioUrl: audioUrl ?? this.audioUrl,
       publishedAt: publishedAt ?? this.publishedAt,
+      durationSeconds: durationSeconds ?? this.durationSeconds,
+      description: description ?? this.description,
+      showDate: showDate ?? this.showDate,
+      imageUrl: imageUrl ?? this.imageUrl,
       status: status ?? this.status,
       progress: progress ?? this.progress,
       localPath: localPath ?? this.localPath,
@@ -1471,6 +1663,18 @@ class EpisodesCompanion extends UpdateCompanion<Episode> {
     }
     if (publishedAt.present) {
       map['published_at'] = Variable<DateTime>(publishedAt.value);
+    }
+    if (durationSeconds.present) {
+      map['duration_seconds'] = Variable<int>(durationSeconds.value);
+    }
+    if (description.present) {
+      map['description'] = Variable<String>(description.value);
+    }
+    if (showDate.present) {
+      map['show_date'] = Variable<String>(showDate.value);
+    }
+    if (imageUrl.present) {
+      map['image_url'] = Variable<String>(imageUrl.value);
     }
     if (status.present) {
       map['status'] = Variable<int>(status.value);
@@ -1525,6 +1729,10 @@ class EpisodesCompanion extends UpdateCompanion<Episode> {
           ..write('title: $title, ')
           ..write('audioUrl: $audioUrl, ')
           ..write('publishedAt: $publishedAt, ')
+          ..write('durationSeconds: $durationSeconds, ')
+          ..write('description: $description, ')
+          ..write('showDate: $showDate, ')
+          ..write('imageUrl: $imageUrl, ')
           ..write('status: $status, ')
           ..write('progress: $progress, ')
           ..write('localPath: $localPath, ')
@@ -2247,6 +2455,10 @@ typedef $$EpisodesTableCreateCompanionBuilder =
       required String title,
       required String audioUrl,
       Value<DateTime?> publishedAt,
+      Value<int?> durationSeconds,
+      Value<String?> description,
+      Value<String?> showDate,
+      Value<String?> imageUrl,
       Value<int> status,
       Value<double> progress,
       Value<String?> localPath,
@@ -2269,6 +2481,10 @@ typedef $$EpisodesTableUpdateCompanionBuilder =
       Value<String> title,
       Value<String> audioUrl,
       Value<DateTime?> publishedAt,
+      Value<int?> durationSeconds,
+      Value<String?> description,
+      Value<String?> showDate,
+      Value<String?> imageUrl,
       Value<int> status,
       Value<double> progress,
       Value<String?> localPath,
@@ -2316,6 +2532,26 @@ class $$EpisodesTableFilterComposer
 
   ColumnFilters<DateTime> get publishedAt => $composableBuilder(
     column: $table.publishedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get durationSeconds => $composableBuilder(
+    column: $table.durationSeconds,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get showDate => $composableBuilder(
+    column: $table.showDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get imageUrl => $composableBuilder(
+    column: $table.imageUrl,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -2419,6 +2655,26 @@ class $$EpisodesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get durationSeconds => $composableBuilder(
+    column: $table.durationSeconds,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get showDate => $composableBuilder(
+    column: $table.showDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get imageUrl => $composableBuilder(
+    column: $table.imageUrl,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<int> get status => $composableBuilder(
     column: $table.status,
     builder: (column) => ColumnOrderings(column),
@@ -2511,6 +2767,22 @@ class $$EpisodesTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<int> get durationSeconds => $composableBuilder(
+    column: $table.durationSeconds,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get showDate =>
+      $composableBuilder(column: $table.showDate, builder: (column) => column);
+
+  GeneratedColumn<String> get imageUrl =>
+      $composableBuilder(column: $table.imageUrl, builder: (column) => column);
+
   GeneratedColumn<int> get status =>
       $composableBuilder(column: $table.status, builder: (column) => column);
 
@@ -2596,6 +2868,10 @@ class $$EpisodesTableTableManager
                 Value<String> title = const Value.absent(),
                 Value<String> audioUrl = const Value.absent(),
                 Value<DateTime?> publishedAt = const Value.absent(),
+                Value<int?> durationSeconds = const Value.absent(),
+                Value<String?> description = const Value.absent(),
+                Value<String?> showDate = const Value.absent(),
+                Value<String?> imageUrl = const Value.absent(),
                 Value<int> status = const Value.absent(),
                 Value<double> progress = const Value.absent(),
                 Value<String?> localPath = const Value.absent(),
@@ -2616,6 +2892,10 @@ class $$EpisodesTableTableManager
                 title: title,
                 audioUrl: audioUrl,
                 publishedAt: publishedAt,
+                durationSeconds: durationSeconds,
+                description: description,
+                showDate: showDate,
+                imageUrl: imageUrl,
                 status: status,
                 progress: progress,
                 localPath: localPath,
@@ -2638,6 +2918,10 @@ class $$EpisodesTableTableManager
                 required String title,
                 required String audioUrl,
                 Value<DateTime?> publishedAt = const Value.absent(),
+                Value<int?> durationSeconds = const Value.absent(),
+                Value<String?> description = const Value.absent(),
+                Value<String?> showDate = const Value.absent(),
+                Value<String?> imageUrl = const Value.absent(),
                 Value<int> status = const Value.absent(),
                 Value<double> progress = const Value.absent(),
                 Value<String?> localPath = const Value.absent(),
@@ -2658,6 +2942,10 @@ class $$EpisodesTableTableManager
                 title: title,
                 audioUrl: audioUrl,
                 publishedAt: publishedAt,
+                durationSeconds: durationSeconds,
+                description: description,
+                showDate: showDate,
+                imageUrl: imageUrl,
                 status: status,
                 progress: progress,
                 localPath: localPath,

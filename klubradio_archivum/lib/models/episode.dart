@@ -30,14 +30,16 @@ class Episode {
       id: dbEpisode.id,
       podcastId: dbEpisode.podcastId,
       title: dbEpisode.title,
-      description: dbEpisode.cachedTitle ?? '', // Use cachedTitle as fallback
+      description: dbEpisode.description ?? dbEpisode.cachedTitle ?? '',
       audioUrl: dbEpisode.audioUrl,
-      publishedAt: dbEpisode.publishedAt ?? DateTime.now(), // Handle nullability
-      showDate: dbEpisode.publishedAt?.toIso8601String().substring(0, 10) ?? '', // Derive from publishedAt
-      duration: Duration.zero, // Not in db.Episode
-      imageUrl: dbEpisode.cachedImagePath, // Use cachedImagePath as fallback
-      hosts: const <String>[], // Not in db.Episode
-      isFavourite: false, // Not in db.Episode
+      publishedAt: dbEpisode.publishedAt ?? DateTime.now(),
+      showDate: dbEpisode.showDate ?? dbEpisode.publishedAt?.toIso8601String().substring(0, 10) ?? '',
+      duration: dbEpisode.durationSeconds != null
+          ? Duration(seconds: dbEpisode.durationSeconds!)
+          : Duration.zero,
+      imageUrl: dbEpisode.cachedImagePath ?? dbEpisode.imageUrl,
+      hosts: const <String>[],
+      isFavourite: false,
       downloadStatus: _downloadStatusFromJson(dbEpisode.status),
       downloadProgress: dbEpisode.progress,
       localFilePath: dbEpisode.localPath,

@@ -28,6 +28,12 @@ class Episodes extends Table {
   TextColumn get audioUrl => text()();
   DateTimeColumn get publishedAt => dateTime().nullable()();
 
+  // Metadata from API (v2)
+  IntColumn get durationSeconds => integer().nullable()(); // Duration in seconds
+  TextColumn get description => text().nullable()();
+  TextColumn get showDate => text().nullable()();
+  TextColumn get imageUrl => text().nullable()();
+
   /// Download-Status:
   /// 0=none, 1=queued, 2=downloading, 3=completed, 4=failed, 5=canceled
   IntColumn get status => integer().withDefault(const Constant(0))();
@@ -83,7 +89,20 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
+
+  @override
+  MigrationStrategy get migration => MigrationStrategy(
+    onUpgrade: (Migrator m, int from, int to) async {
+      if (from < 2) {
+        // v2: add metadata columns to episodes
+        await m.addColumn(episodes, episodes.durationSeconds);
+        await m.addColumn(episodes, episodes.description);
+        await m.addColumn(episodes, episodes.showDate);
+        await m.addColumn(episodes, episodes.imageUrl);
+      }
+    },
+  );
 
   /// Convenience: Timestamps aktualisieren
   Future<int> touchEpisode(String id) =>

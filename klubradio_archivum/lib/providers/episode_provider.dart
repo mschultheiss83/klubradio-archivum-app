@@ -3,7 +3,9 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:just_audio/just_audio.dart';
 
+import 'package:drift/drift.dart';
 import 'package:klubradio_archivum/db/app_database.dart' as db;
+import 'package:klubradio_archivum/db/daos.dart';
 import 'package:klubradio_archivum/models/episode.dart' as model;
 import 'package:klubradio_archivum/services/api_service.dart';
 import 'package:klubradio_archivum/services/audio_player_service.dart';
@@ -81,6 +83,36 @@ class EpisodeProvider extends ChangeNotifier {
 
   Future<List<model.Episode>> fetchEpisodes(String podcastId) async {
     return _apiService.fetchEpisodesForPodcast(podcastId);
+  }
+
+  final Set<String> _loadedPodcasts = {};
+
+  /// Fetches episodes from the API and upserts them into the local DB.
+  /// Skips if already loaded this session. The StreamBuilder in
+  /// PodcastDetailScreen will reactively update.
+  Future<void> loadEpisodesIntoDb(String podcastId) async {
+    if (_loadedPodcasts.contains(podcastId)) return;
+    _loadedPodcasts.add(podcastId);
+    try {
+      final episodes = await _apiService.fetchEpisodesForPodcast(podcastId);
+      final companions = episodes.map((ep) => db.EpisodesCompanion(
+        id: Value(ep.id),
+        podcastId: Value(ep.podcastId),
+        title: Value(ep.title),
+        audioUrl: Value(ep.audioUrl),
+        publishedAt: Value(ep.publishedAt),
+        durationSeconds: Value(ep.duration.inSeconds),
+        description: Value(ep.description),
+        showDate: Value(ep.showDate),
+        imageUrl: Value(ep.imageUrl),
+      )).toList();
+      if (companions.isNotEmpty) {
+        await EpisodesDao(_db).upsertAll(companions);
+      }
+    } catch (e) {
+      _loadedPodcasts.remove(podcastId);
+      debugPrint('loadEpisodesIntoDb($podcastId): $e');
+    }
   }
 
   Future<void> playEpisode(

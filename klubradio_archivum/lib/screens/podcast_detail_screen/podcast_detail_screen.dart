@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 
 import 'package:klubradio_archivum/l10n/app_localizations.dart';
 import 'package:klubradio_archivum/services/api_service.dart';
-// import 'package:klubradio_archivum/providers/podcast_provider.dart'; // Removed
+import 'package:klubradio_archivum/providers/episode_provider.dart';
 import 'package:klubradio_archivum/providers/download_provider.dart';
 import 'package:klubradio_archivum/models/episode.dart' as model; // Alias for model.Episode
 import 'package:klubradio_archivum/models/podcast.dart';
@@ -28,6 +28,7 @@ class _PodcastDetailScreenState extends State<PodcastDetailScreen> {
   void initState() {
     super.initState();
     context.read<SubscriptionProvider>().loadSubscription(widget.podcast.id);
+    context.read<EpisodeProvider>().loadEpisodesIntoDb(widget.podcast.id);
   }
 
   Future<void> _showUnsubscribeDialog(
