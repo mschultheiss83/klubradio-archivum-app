@@ -18,7 +18,7 @@ cd "$PROJECT_ROOT" || { echo "Fehler: Konnte nicht ins Projekt-Root ($PROJECT_RO
 # `-print0` zur Null-Trennung (pfadsicher), `sort -z` für sortierte Ausgabe
 # echo "Debug: Suche nach *.dart-Dateien..." >&2
 # Speicherung der Dateipfade in einer Variablen mit Null-Trennung
-mapfile -d '' DART_FILES < <(find . -type f -name "*.dart" -print0 | sort -z)
+mapfile -d '' DART_FILES < <(find . -type f -name "*.dart" -not -path '*/.dart_tool/*' -not -path '*/build/*' -print0 | sort -z)
 
 if [ ${#DART_FILES[@]} -eq 0 ]; then
   echo "Warnung: Keine *.dart-Dateien gefunden." >&2

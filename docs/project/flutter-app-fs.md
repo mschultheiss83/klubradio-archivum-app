@@ -6,15 +6,6 @@
 
 ## Inhalt der *.dart-Dateien
 
-### Inhalt von `klubradio_archivum/.dart_tool/build/entrypoint/build.dart`
-
-
-### Inhalt von `klubradio_archivum/.dart_tool/dartpad/web_plugin_registrant.dart`
-
-
-### Inhalt von `klubradio_archivum/.dart_tool/flutter_build/dart_plugin_registrant.dart`
-
-
 ### Inhalt von `klubradio_archivum/integration_test/app_web_test.dart`
 
 
