@@ -52,12 +52,12 @@ mkdir -p "$(dirname "$OUTPUT_FILE")"
   echo ""
   echo "## Verzeichnisbaum der *.dart-Dateien"
   echo ""
-  echo "```"
+  echo '```'
   for file in "${DART_FILES[@]}"; do
     rel_path="${file#./}"
     echo "├── $rel_path"
   done
-  echo "```"
+  echo '```'
   echo ""
   echo "## Inhalt der *.dart-Dateien"
   for file in "${DART_FILES[@]}"; do
@@ -65,10 +65,10 @@ mkdir -p "$(dirname "$OUTPUT_FILE")"
     if [ -f "$file" ] && [ -r "$file" ]; then
       echo ""
       echo "### Inhalt von \`$rel_path\`"
-      echo "```dart"
+      echo '```dart'
       # Inhalt direkt in die Ausgabe schreiben (keine Variable, keine Shell-Expansion)
       cat "$file" 2>/dev/null || echo "Fehler: Konnte Inhalt von $file nicht lesen"
-      echo "```"
+      echo '```'
     else
       echo "Warnung: Datei $rel_path nicht lesbar oder nicht gefunden"
     fi
