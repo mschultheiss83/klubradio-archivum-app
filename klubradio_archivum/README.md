@@ -19,19 +19,27 @@ The Klubrádió Archive App is a cross-platform mobile application built with Fl
 flutter pub get
 ```
 
-**Linux** — SQLite3 muss als System-Library installiert sein (wird nicht in die App gebündelt):
+**Linux** — SQLite3 und MPV müssen als System-Libraries installiert sein:
 
 | Distribution | Befehl |
 |---|---|
-| Ubuntu / Debian | `sudo apt install libsqlite3-dev` |
-| Fedora / RHEL | `sudo dnf install sqlite-devel` |
-| Arch / Manjaro | `sudo pacman -S sqlite` |
-| openSUSE | `sudo zypper install sqlite3-devel` |
+| Ubuntu / Debian | `sudo apt install libsqlite3-dev libmpv-dev` |
+| Fedora / RHEL | `sudo dnf install sqlite-devel mpv-libs-devel` |
+| Arch / Manjaro | `sudo pacman -S sqlite mpv` |
+| openSUSE | `sudo zypper install sqlite3-devel mpv-devel` |
 
-Ohne diese Library stürzt die App beim Start mit folgendem Fehler ab:
-```
-Failed to load dynamic library 'libsqlite3.so': libsqlite3.so: cannot open shared object file: No such file or directory
-```
+- **SQLite3** wird für die Drift-Datenbank benötigt. Ohne diese Library:
+  ```
+  Failed to load dynamic library 'libsqlite3.so': libsqlite3.so: cannot open shared object file
+  ```
+- **MPV** wird für die Audiowiedergabe benötigt (`just_audio_media_kit`). Ohne MPV:
+  ```
+  MissingPluginException(No implementation found for method init on channel com.ryanheise.just_audio.methods)
+  ```
+
+### Known Issues (Linux)
+
+- `just_audio` sendet Events auf einem non-platform Thread. Dies erzeugt Warnungen in der Konsole (`The '...just_audio.events...' channel sent a message on a non-platform thread`), hat aber keinen Einfluss auf die Funktionalität. Fix muss upstream im Plugin erfolgen.
 
 **Windows** — Visual Studio Build Tools mit "Desktop development with C++" Workload.
 

@@ -23,6 +23,7 @@ dependencies:
   image: ^4.5.4
   intl: ^0.20.2
   just_audio: ^0.10.5
+  just_audio_media_kit: ^2.1.0
   just_audio_windows: ^0.2.2
   markdown_widget: ^2.3.2+8
   package_info_plus: ^9.0.0
