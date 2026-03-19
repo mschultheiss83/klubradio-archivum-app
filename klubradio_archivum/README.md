@@ -10,13 +10,32 @@ The Klubrádió Archive App is a cross-platform mobile application built with Fl
 - **Smart Management**: Auto-download, retention policies, WiFi-only mode
 - **Modern Player**: Background playback, speed control, sleep timer
 
-## SETUP
+## Setup
 
-TODO
+### Prerequisites
 
-```powershell
-Get-ChildItem -Path .\lib -Filter *.dart* -Recurse | ForEach-Object { $_.FullName | Resolve-Path -Relative }
+**All platforms:**
+```bash
+flutter pub get
 ```
+
+**Linux** — SQLite3 muss als System-Library installiert sein (wird nicht in die App gebündelt):
+
+| Distribution | Befehl |
+|---|---|
+| Ubuntu / Debian | `sudo apt install libsqlite3-dev` |
+| Fedora / RHEL | `sudo dnf install sqlite-devel` |
+| Arch / Manjaro | `sudo pacman -S sqlite` |
+| openSUSE | `sudo zypper install sqlite3-devel` |
+
+Ohne diese Library stürzt die App beim Start mit folgendem Fehler ab:
+```
+Failed to load dynamic library 'libsqlite3.so': libsqlite3.so: cannot open shared object file: No such file or directory
+```
+
+**Windows** — Visual Studio Build Tools mit "Desktop development with C++" Workload.
+
+**macOS** — Xcode Command Line Tools (`xcode-select --install`).
 
 ## Update
 
