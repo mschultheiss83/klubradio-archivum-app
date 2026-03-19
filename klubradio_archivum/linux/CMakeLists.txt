@@ -1,5 +1,21 @@
 # Project-level configuration.
 cmake_minimum_required(VERSION 3.13)
+
+# Flutter + CMake 4.x compatibility: CMake 4.x no longer writes CMAKE_CXX_COMPILER
+# to CMakeCache.txt, but Flutter's build tools expect it there. Also, Flutter
+# requires a 'clang' executable next to the resolved clang++ path. We use wrapper
+# scripts in ~/.local/bin/ when available (needed in sandboxed environments like
+# Flatpak where system clang++ is inaccessible).
+if(NOT CMAKE_CXX_COMPILER)
+  set(_user_clangpp "$ENV{HOME}/.local/bin/clang++")
+  if(EXISTS "${_user_clangpp}")
+    set(CMAKE_CXX_COMPILER "${_user_clangpp}" CACHE FILEPATH "CXX compiler" FORCE)
+  else()
+    find_program(_found_cxx NAMES clang++ g++)
+    set(CMAKE_CXX_COMPILER "${_found_cxx}" CACHE FILEPATH "CXX compiler" FORCE)
+  endif()
+endif()
+
 project(runner LANGUAGES CXX)
 
 # The name of the executable created for the application. Change this to change
