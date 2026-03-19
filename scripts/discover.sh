@@ -12,11 +12,11 @@ PROJECT_ROOT="$SCRIPT_DIR/.."
 OUTPUT_FILE="docs/project/flutter-app-fs.md"
 
 cd "$PROJECT_ROOT" || { echo "Fehler: Konnte nicht ins Projekt-Root ($PROJECT_ROOT) wechseln" >&2; exit 1; }
-echo "Debug: Arbeitsverzeichnis gesetzt auf $(pwd)" >&2
+# echo "Debug: Arbeitsverzeichnis gesetzt auf $(pwd)" >&2
 
 # **Alle .dart-Dateien rekursiv und pfadsicher finden**
 # `-print0` zur Null-Trennung (pfadsicher), `sort -z` für sortierte Ausgabe
-echo "Debug: Suche nach *.dart-Dateien..." >&2
+# echo "Debug: Suche nach *.dart-Dateien..." >&2
 # Speicherung der Dateipfade in einer Variablen mit Null-Trennung
 mapfile -d '' DART_FILES < <(find . -type f -name "*.dart" -print0 | sort -z)
 
@@ -25,10 +25,10 @@ if [ ${#DART_FILES[@]} -eq 0 ]; then
   exit 0
 fi
 
-echo "Debug: Gefundene Dateien (${#DART_FILES[@]} Stück)." >&2
+# echo "Debug: Gefundene Dateien (${#DART_FILES[@]} Stück)." >&2
 
 # **Normalisiere Zeilenumbrüche in .dart-Dateien**
-echo "Debug: Normalisiere Zeilenumbrüche..." >&2
+# echo "Debug: Normalisiere Zeilenumbrüche..." >&2
 for file in "${DART_FILES[@]}"; do
   # Universelle sed-Variante für In-Place-Bearbeitung
   if ! sed -i.bak 's/\r$//' "$file" 2>/dev/null; then
@@ -39,7 +39,7 @@ for file in "${DART_FILES[@]}"; do
   # Lösche die Backup-Datei, falls sie erstellt wurde
   [ -f "${file}.bak" ] && rm "${file}.bak" 2>/dev/null
 
-  echo "Debug: Normalisiert: $file" >&2
+  # echo "Debug: Normalisiert: $file" >&2
 done
 
 # **Markdown-Datei erstellen (Umleitung aller Ausgaben in die Datei, Fehlermeldungen in stderr)**
