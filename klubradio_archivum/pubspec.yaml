@@ -32,7 +32,7 @@ dependencies:
   provider: ^6.1.5+1
   shared_preferences: ^2.5.3
   sqlite3: ^2.4.0
-  sqlite3_flutter_libs: ^0.5.40
+  sqlite3_flutter_libs: ^0.6.0+eol
   url_launcher: ^6.3.2
   uuid: ^4.5.1
   xml: ^6.6.1
@@ -49,6 +49,7 @@ dev_dependencies:
     sdk: flutter
   intl_translation: ^0.21.0
   shared_preferences_platform_interface: ^2.3.2
+  mockito: ^5.4.4
 
 flutter:
   uses-material-design: true
