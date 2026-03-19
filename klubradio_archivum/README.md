@@ -41,6 +41,13 @@ flutter pub get
 
 - `just_audio` sendet Events auf einem non-platform Thread. Dies erzeugt Warnungen in der Konsole (`The '...just_audio.events...' channel sent a message on a non-platform thread`), hat aber keinen Einfluss auf die Funktionalität. Fix muss upstream im Plugin erfolgen.
 
+- **`Non-C locale detected`** — MPV crasht bei nicht-englischen Locale-Einstellungen (Dezimaltrennzeichen-Problem). Die App verliert die Verbindung zum Device (`Lost connection to device`). Workaround:
+  ```bash
+  LC_NUMERIC=C flutter run -d linux
+  ```
+
+- **`lavf: Failed to create file cache`** — MPV/libavformat kann keinen Datei-Cache anlegen. Dies ist eine harmlose Warnung, die Audio-Wiedergabe funktioniert trotzdem ohne Cache. Keine Aktion erforderlich.
+
 **Windows** — Visual Studio Build Tools mit "Desktop development with C++" Workload.
 
 **macOS** — Xcode Command Line Tools (`xcode-select --install`).
