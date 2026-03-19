@@ -66,14 +66,8 @@ mkdir -p "$(dirname "$OUTPUT_FILE")"
       echo ""
       echo "### Inhalt von \`$rel_path\`"
       echo "```dart"
-      # Inhalt einlesen und in die Markdown-Datei schreiben
-      if ! content=$(cat "$file" 2>/dev/null); then
-        echo "Fehler: Konnte Inhalt von $file nicht lesen"
-      elif [ -n "$content" ]; then
-        echo "$content"
-      else
-        echo "Warnung: Datei $file ist leer"
-      fi
+      # Inhalt direkt in die Ausgabe schreiben (keine Variable, keine Shell-Expansion)
+      cat "$file" 2>/dev/null || echo "Fehler: Konnte Inhalt von $file nicht lesen"
       echo "```"
     else
       echo "Warnung: Datei $rel_path nicht lesbar oder nicht gefunden"
