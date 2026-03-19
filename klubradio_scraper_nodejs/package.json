@@ -23,7 +23,7 @@
     "winston": "^3.19.0"
   },
   "devDependencies": {
-    "eslint": "^9.39.2",
+    "eslint": "^10.0.3",
     "prettier": "^3.8.1"
   }
 }
