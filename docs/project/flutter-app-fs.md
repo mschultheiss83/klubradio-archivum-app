@@ -5758,6 +5758,42 @@ abstract class AppLocalizations {
   /// **'Delete'**
   String get downloads_action_delete;
 
+  /// No description provided for @downloads_section_active.
+  ///
+  /// In en, this message translates to:
+  /// **'Active Downloads'**
+  String get downloads_section_active;
+
+  /// No description provided for @downloads_section_completed.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed Downloads'**
+  String get downloads_section_completed;
+
+  /// No description provided for @downloads_menu_play.
+  ///
+  /// In en, this message translates to:
+  /// **'Play'**
+  String get downloads_menu_play;
+
+  /// No description provided for @downloads_menu_open_folder.
+  ///
+  /// In en, this message translates to:
+  /// **'Open in folder'**
+  String get downloads_menu_open_folder;
+
+  /// No description provided for @downloads_menu_delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get downloads_menu_delete;
+
+  /// No description provided for @downloads_menu_add_to_queue.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to playlist'**
+  String get downloads_menu_add_to_queue;
+
   /// No description provided for @ep_action_resume.
   ///
   /// In en, this message translates to:
@@ -6004,17 +6040,17 @@ abstract class AppLocalizations {
   /// **'App-ID'**
   String get aboutScreenAppIdLabel;
 
-  /// Title for the contributions/donors section on the About screen.
+  /// Title for the supporters/donors section on the About screen.
   ///
   /// In en, this message translates to:
-  /// **'Contributions'**
+  /// **'Supporters'**
   String get aboutScreenContributionsTitle;
 
-  /// Placeholder text for the contributions section.
+  /// Message shown when the supporters list is empty.
   ///
   /// In en, this message translates to:
-  /// **'Supporters and donors will be listed here in the future.'**
-  String get aboutScreenContributionsPlaceholder;
+  /// **'Become a supporter!'**
+  String get aboutScreenContributionsEmpty;
 }
 
 class _AppLocalizationsDelegate
@@ -6462,6 +6498,24 @@ class AppLocalizationsDe extends AppLocalizations {
   String get downloads_action_delete => 'Löschen';
 
   @override
+  String get downloads_section_active => 'Aktive Downloads';
+
+  @override
+  String get downloads_section_completed => 'Fertige Downloads';
+
+  @override
+  String get downloads_menu_play => 'Abspielen';
+
+  @override
+  String get downloads_menu_open_folder => 'Im Ordner öffnen';
+
+  @override
+  String get downloads_menu_delete => 'Löschen';
+
+  @override
+  String get downloads_menu_add_to_queue => 'Zur Playlist hinzufügen';
+
+  @override
   String get ep_action_resume => 'Fortsetzen';
 
   @override
@@ -6598,8 +6652,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get aboutScreenContributionsTitle => 'Unterstützer';
 
   @override
-  String get aboutScreenContributionsPlaceholder =>
-      'Unterstützer und Spender werden hier in Zukunft aufgeführt.';
+  String get aboutScreenContributionsEmpty => 'Werde Unterstützer!';
 }
 ```
 
@@ -7002,6 +7055,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get downloads_action_delete => 'Delete';
 
   @override
+  String get downloads_section_active => 'Active Downloads';
+
+  @override
+  String get downloads_section_completed => 'Completed Downloads';
+
+  @override
+  String get downloads_menu_play => 'Play';
+
+  @override
+  String get downloads_menu_open_folder => 'Open in folder';
+
+  @override
+  String get downloads_menu_delete => 'Delete';
+
+  @override
+  String get downloads_menu_add_to_queue => 'Add to playlist';
+
+  @override
   String get ep_action_resume => 'Resume';
 
   @override
@@ -7136,11 +7207,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get aboutScreenAppIdLabel => 'App-ID';
 
   @override
-  String get aboutScreenContributionsTitle => 'Contributions';
+  String get aboutScreenContributionsTitle => 'Supporters';
 
   @override
-  String get aboutScreenContributionsPlaceholder =>
-      'Supporters and donors will be listed here in the future.';
+  String get aboutScreenContributionsEmpty => 'Become a supporter!';
 }
 ```
 
@@ -7544,6 +7614,24 @@ class AppLocalizationsHu extends AppLocalizations {
   String get downloads_action_delete => 'Törlés';
 
   @override
+  String get downloads_section_active => 'Aktív letöltések';
+
+  @override
+  String get downloads_section_completed => 'Kész letöltések';
+
+  @override
+  String get downloads_menu_play => 'Lejátszás';
+
+  @override
+  String get downloads_menu_open_folder => 'Megnyitás mappában';
+
+  @override
+  String get downloads_menu_delete => 'Törlés';
+
+  @override
+  String get downloads_menu_add_to_queue => 'Hozzáadás a lejátszási listához';
+
+  @override
   String get ep_action_resume => 'Folytatás';
 
   @override
@@ -7682,8 +7770,7 @@ class AppLocalizationsHu extends AppLocalizations {
   String get aboutScreenContributionsTitle => 'Támogatók';
 
   @override
-  String get aboutScreenContributionsPlaceholder =>
-      'A támogatók és adományozók listája a jövőben itt jelenik meg.';
+  String get aboutScreenContributionsEmpty => 'Légy támogató!';
 }
 ```
 
@@ -8089,6 +8176,24 @@ class AppLocalizationsRo extends AppLocalizations {
   String get downloads_action_delete => 'Ștergeți';
 
   @override
+  String get downloads_section_active => 'Descărcări active';
+
+  @override
+  String get downloads_section_completed => 'Descărcări finalizate';
+
+  @override
+  String get downloads_menu_play => 'Redare';
+
+  @override
+  String get downloads_menu_open_folder => 'Deschide în dosar';
+
+  @override
+  String get downloads_menu_delete => 'Ștergeți';
+
+  @override
+  String get downloads_menu_add_to_queue => 'Adăugați la playlist';
+
+  @override
   String get ep_action_resume => 'Reluați';
 
   @override
@@ -8226,11 +8331,10 @@ class AppLocalizationsRo extends AppLocalizations {
   String get aboutScreenAppIdLabel => 'ID aplicație';
 
   @override
-  String get aboutScreenContributionsTitle => 'Contribuții';
+  String get aboutScreenContributionsTitle => 'Susținători';
 
   @override
-  String get aboutScreenContributionsPlaceholder =>
-      'Susținătorii și donatorii vor fi listați aici în viitor.';
+  String get aboutScreenContributionsEmpty => 'Devino susținător!';
 }
 ```
 
@@ -10176,7 +10280,10 @@ class ProfileRepository {
 
 ### Inhalt von `klubradio_archivum/lib/screens/about_screen/about_screen.dart`
 ```dart
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:klubradio_archivum/l10n/app_localizations.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:klubradio_archivum/screens/about_screen/legal_screen.dart';
@@ -10191,11 +10298,13 @@ class AboutScreen extends StatefulWidget {
 
 class _AboutScreenState extends State<AboutScreen> {
   String? versionText;
+  List<String> _contributors = [];
 
   @override
   void initState() {
     super.initState();
     _loadVersion();
+    _loadContributors();
   }
 
   Future<void> _loadVersion() async {
@@ -10208,6 +10317,22 @@ class _AboutScreenState extends State<AboutScreen> {
         info.buildNumber,
       );
     });
+  }
+
+  Future<void> _loadContributors() async {
+    try {
+      final jsonString =
+          await rootBundle.loadString('assets/contributions.json');
+      final List<dynamic> data = json.decode(jsonString) as List<dynamic>;
+      if (!mounted) return;
+      setState(() {
+        _contributors = data
+            .map((e) => (e as Map<String, dynamic>)['name'] as String)
+            .toList();
+      });
+    } catch (_) {
+      // If the file can't be loaded, keep the list empty.
+    }
   }
 
   @override
@@ -10317,13 +10442,56 @@ class _AboutScreenState extends State<AboutScreen> {
 
             const SizedBox(height: 16),
 
-            // Contributions Placeholder Card
+            // Supporters Card
             Card(
               clipBehavior: Clip.antiAlias,
-              child: ListTile(
-                leading: const Icon(Icons.volunteer_activism_outlined),
-                title: Text(l10n.aboutScreenContributionsTitle),
-                subtitle: Text(l10n.aboutScreenContributionsPlaceholder),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.volunteer_activism_outlined,
+                            color: cs.primary),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            l10n.aboutScreenContributionsTitle,
+                            style: textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    if (_contributors.isEmpty)
+                      Text(
+                        l10n.aboutScreenContributionsEmpty,
+                        style: textTheme.bodyMedium?.copyWith(
+                          color: cs.onSurfaceVariant,
+                        ),
+                      )
+                    else
+                      ...List.generate(_contributors.length, (index) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 4),
+                          child: Row(
+                            children: [
+                              Icon(Icons.favorite,
+                                  size: 16, color: cs.primary),
+                              const SizedBox(width: 8),
+                              Text(
+                                _contributors[index],
+                                style: textTheme.bodyMedium,
+                              ),
+                            ],
+                          ),
+                        );
+                      }),
+                  ],
+                ),
               ),
             ),
           ],
@@ -10922,7 +11090,7 @@ import 'package:klubradio_archivum/screens/utils/helpers.dart';
 import 'package:klubradio_archivum/utils/episode_cache_reader.dart';
 
 /// ---------------------------------------------------------------------------
-/// DownloadList (Tab-Ansicht für Download-Manager-Screen)
+/// DownloadList (single scrollable view for Download-Manager-Screen)
 /// ---------------------------------------------------------------------------
 class DownloadList extends StatelessWidget {
   const DownloadList({super.key});
@@ -10945,28 +11113,79 @@ class DownloadList extends StatelessWidget {
               ..orderBy([(e) => d.OrderingTerm.desc(e.completedAt)]))
             .watch();
 
-    return DefaultTabController(
-      length: 2,
-      child: Column(
-        children: [
-          TabBar(
-            tabs: [
-              Tab(
-                icon: const Icon(Icons.downloading),
-                text: l10n.downloads_tab_active,
-              ),
-              Tab(
-                icon: const Icon(Icons.check_circle_outline),
-                text: l10n.downloads_tab_done,
-              ),
-            ],
-          ),
-          Expanded(
-            child: TabBarView(
+    return StreamBuilder<List<Episode>>(
+      stream: activeStream,
+      builder: (context, activeSnap) {
+        return StreamBuilder<List<Episode>>(
+          stream: completedStream,
+          builder: (context, completedSnap) {
+            final activeItems = activeSnap.data ?? const [];
+            final completedItems = completedSnap.data ?? const [];
+
+            // Show loading only if both streams are still waiting
+            final bothWaiting =
+                activeSnap.connectionState == ConnectionState.waiting &&
+                completedSnap.connectionState == ConnectionState.waiting;
+            if (bothWaiting && activeItems.isEmpty && completedItems.isEmpty) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            // Show empty state if both lists are empty
+            if (activeItems.isEmpty && completedItems.isEmpty) {
+              return Center(child: Text(l10n.noDownloads));
+            }
+
+            return ListView(
               children: [
-                _ActiveDownloads(stream: activeStream),
-                _CompletedDownloads(stream: completedStream),
+                // ── Active Downloads section ──
+                if (activeItems.isNotEmpty) ...[
+                  _SectionHeader(
+                    icon: Icons.downloading,
+                    title: l10n.downloads_section_active,
+                  ),
+                  ...activeItems.map(
+                    (ep) => _ActiveDownloadTile(episode: ep),
+                  ),
+                ],
+                // ── Completed Downloads section ──
+                if (completedItems.isNotEmpty) ...[
+                  _SectionHeader(
+                    icon: Icons.check_circle_outline,
+                    title: l10n.downloads_section_completed,
+                  ),
+                  ...completedItems.map(
+                    (ep) => _CompletedDownloadTile(episode: ep),
+                  ),
+                ],
               ],
+            );
+          },
+        );
+      },
+    );
+  }
+}
+
+/// Section header widget for visual separation.
+class _SectionHeader extends StatelessWidget {
+  const _SectionHeader({required this.icon, required this.title});
+
+  final IconData icon;
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
+      child: Row(
+        children: [
+          Icon(icon, size: 20, color: Theme.of(context).colorScheme.primary),
+          const SizedBox(width: 8),
+          Text(
+            title,
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+              color: Theme.of(context).colorScheme.primary,
+              fontWeight: FontWeight.bold,
             ),
           ),
         ],
@@ -10975,213 +11194,197 @@ class DownloadList extends StatelessWidget {
   }
 }
 
-class _ActiveDownloads extends StatelessWidget {
-  const _ActiveDownloads({required this.stream});
+class _ActiveDownloadTile extends StatelessWidget {
+  const _ActiveDownloadTile({required this.episode});
 
-  final Stream<List<Episode>> stream;
+  final Episode episode;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final provider = context.read<DownloadProvider>();
+    final ep = episode;
+    final status = _statusLabel(context, ep.status);
+    final percentLabel = formatProgress(ep.progress);
 
-    return StreamBuilder<List<Episode>>(
-      stream: stream,
-      builder: (context, snap) {
-        final items = snap.data ?? const [];
-        if (snap.connectionState == ConnectionState.waiting && items.isEmpty) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        if (items.isEmpty) {
-          return Center(child: Text(l10n.downloads_empty_active));
-        }
-        return ListView.separated(
-          itemCount: items.length,
-          separatorBuilder: (_, _) => const Divider(height: 1),
-          itemBuilder: (context, i) {
-            final ep = items[i];
-            final status = _statusLabel(context, ep.status);
-            final percentLabel = formatProgress(ep.progress);
+    final bytesMB = (ep.bytesDownloaded != null)
+        ? (ep.bytesDownloaded! / (1024 * 1024)).toStringAsFixed(1)
+        : null;
+    final totalMB = (ep.totalBytes != null)
+        ? (ep.totalBytes! / (1024 * 1024)).toStringAsFixed(1)
+        : null;
+    final detail = (bytesMB != null && totalMB != null)
+        ? ' ($bytesMB / $totalMB MB)'
+        : '';
 
-            final bytesMB = (ep.bytesDownloaded != null)
-                ? (ep.bytesDownloaded! / (1024 * 1024)).toStringAsFixed(1)
-                : null;
-            final totalMB = (ep.totalBytes != null)
-                ? (ep.totalBytes! / (1024 * 1024)).toStringAsFixed(1)
-                : null;
-            final detail = (bytesMB != null && totalMB != null)
-                ? ' ($bytesMB / $totalMB MB)'
-                : '';
-
-            final activeSubtitle = '$status · $percentLabel$detail';
-            return ListTile(
-              leading: _statusIcon(ep.status),
-              title: Text(ep.title),
-              subtitle: Text(activeSubtitle),
-              trailing: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (ep.status == 2)
-                    SizedBox(
-                      width: 24,
-                      height: 24,
-                      child: CircularProgressIndicator(
-                        value: (ep.progress),
-                        strokeWidth: 3,
-                      ),
-                    ),
-                  if (ep.status == 2) const SizedBox(width: 8),
-                  if (ep.status == 2) Text(percentLabel),
-
-                  if (ep.status == 2 &&
-                      (ep.resumable ?? false)) // downloading & resumable
-                    IconButton(
-                      tooltip: l10n.downloads_action_pause,
-                      icon: const Icon(Icons.pause),
-                      onPressed: () => provider.pause(ep.id),
-                    ),
-
-                  if (ep.status == 1 &&
-                      (ep.resumable ?? false)) // queued & resumable
-                    IconButton(
-                      tooltip: l10n.downloads_action_resume,
-                      icon: const Icon(Icons.play_arrow),
-                      onPressed: () => provider.resume(ep.id),
-                    ),
-                  IconButton(
-                    tooltip: l10n.downloads_action_cancel,
-                    icon: const Icon(Icons.stop),
-                    onPressed: () => provider.cancel(ep.id),
+    final activeSubtitle = '$status · $percentLabel$detail';
+    return Column(
+      children: [
+        ListTile(
+          leading: _statusIcon(ep.status),
+          title: Text(ep.title),
+          subtitle: Text(activeSubtitle),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (ep.status == 2)
+                SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(
+                    value: (ep.progress),
+                    strokeWidth: 3,
                   ),
-                ],
+                ),
+              if (ep.status == 2) const SizedBox(width: 8),
+              if (ep.status == 2) Text(percentLabel),
+
+              if (ep.status == 2 &&
+                  (ep.resumable ?? false)) // downloading & resumable
+                IconButton(
+                  tooltip: l10n.downloads_action_pause,
+                  icon: const Icon(Icons.pause),
+                  onPressed: () => provider.pause(ep.id),
+                ),
+
+              if (ep.status == 1 &&
+                  (ep.resumable ?? false)) // queued & resumable
+                IconButton(
+                  tooltip: l10n.downloads_action_resume,
+                  icon: const Icon(Icons.play_arrow),
+                  onPressed: () => provider.resume(ep.id),
+                ),
+              IconButton(
+                tooltip: l10n.downloads_action_cancel,
+                icon: const Icon(Icons.stop),
+                onPressed: () => provider.cancel(ep.id),
               ),
-            );
-          },
-        );
-      },
+            ],
+          ),
+        ),
+        const Divider(height: 1),
+      ],
     );
   }
 }
 
-class _CompletedDownloads extends StatelessWidget {
-  const _CompletedDownloads({required this.stream});
+class _CompletedDownloadTile extends StatelessWidget {
+  const _CompletedDownloadTile({required this.episode});
 
-  final Stream<List<Episode>> stream;
+  final Episode episode;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final ep = episode;
 
-    return StreamBuilder<List<Episode>>(
-      stream: stream,
-      builder: (context, snap) {
-        final items = snap.data ?? const [];
-        if (snap.connectionState == ConnectionState.waiting && items.isEmpty) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        if (items.isEmpty) {
-          return Center(child: Text(l10n.downloads_empty_done));
-        }
-        return ListView.separated(
-          itemCount: items.length,
-          separatorBuilder: (_, _) => const Divider(height: 1),
-          itemBuilder: (context, i) {
-            final ep = items[i];
-
-            return ListTile(
-              leading: ImageUrl(path: ep.cachedImagePath),
-              title: Text('${ep.podcastId} • ${ep.title}'),
-              subtitle: FutureBuilder<model.Episode?>(
-                future:
-                    // (ep.cachedMetaPath != null && ep.cachedMetaPath!.isNotEmpty)
-                    (ep.cachedMetaPath?.isNotEmpty ?? false)
-                    ? readEpisodeFromCacheJson(ep.cachedMetaPath!)
-                    : Future.value(null),
-                builder: (context, snap) {
-                  if (snap.connectionState == ConnectionState.waiting) {
-                    return const CircularProgressIndicator(); // Or any other loading indicator
+    return Column(
+      children: [
+        ListTile(
+          leading: ImageUrl(path: ep.cachedImagePath),
+          title: Text('${ep.podcastId} • ${ep.title}'),
+          subtitle: FutureBuilder<model.Episode?>(
+            future: (ep.cachedMetaPath?.isNotEmpty ?? false)
+                ? readEpisodeFromCacheJson(ep.cachedMetaPath!)
+                : Future.value(null),
+            builder: (context, snap) {
+              if (snap.connectionState == ConnectionState.waiting) {
+                return const CircularProgressIndicator();
+              }
+              if (snap.hasError) {
+                return Text('Error: ${snap.error}');
+              }
+              final showDate =
+                  snap.data?.showDate ?? ''; // bereits formatiert
+              final base =
+                  '${l10n.downloads_status_done} • ${ep.id} - ${ep.localPath}';
+              final text = showDate.isNotEmpty ? '$base · $showDate' : base;
+              return Text(text);
+            },
+          ),
+          trailing: PopupMenuButton<String>(
+            onSelected: (value) async {
+              switch (value) {
+                case 'play':
+                  final m = model.Episode.fromDb(ep);
+                  // ignore: use_build_context_synchronously
+                  context.read<EpisodeProvider>().playEpisode(
+                    m,
+                    queue: [m],
+                    preferLocal: true,
+                  );
+                  break;
+                case 'queue':
+                  final m = model.Episode.fromDb(ep);
+                  // ignore: use_build_context_synchronously
+                  context.read<EpisodeProvider>().addToQueue(m);
+                  break;
+                case 'open':
+                  if (ep.localPath != null && ep.localPath!.isNotEmpty) {
+                    _openInFolder(ep.localPath!);
                   }
-                  if (snap.hasError) {
-                    return Text('Error: ${snap.error}'); // Show error message
-                  }
-                  final l10n = AppLocalizations.of(context)!;
-                  final showDate =
-                      snap.data?.showDate ?? ''; // bereits formatiert
-                  final base =
-                      '${l10n.downloads_status_done} • ${ep.id} - ${ep.localPath}';
-                  final text = showDate.isNotEmpty ? '$base · $showDate' : base;
-                  return Text(text);
-                },
+                  break;
+                case 'delete':
+                  // ignore: use_build_context_synchronously
+                  context.read<DownloadProvider>().removeLocalFile(ep.id);
+                  break;
+              }
+            },
+            itemBuilder: (ctx) => [
+              PopupMenuItem(
+                value: 'play',
+                child: Row(
+                  children: [
+                    const Icon(Icons.play_arrow, size: 18),
+                    const SizedBox(width: 8),
+                    Text(l10n.downloads_menu_play),
+                  ],
+                ),
               ),
-              trailing: PopupMenuButton<String>(
-                onSelected: (value) async {
-                  switch (value) {
-                    case 'play':
-                      final m = model.Episode.fromDb(ep);
-                      // ignore: use_build_context_synchronously
-                      context.read<EpisodeProvider>().playEpisode(
-                        m,
-                        queue: [m],
-                        preferLocal: true,
-                      );
-                      break;
-                    case 'open':
-                      if (ep.localPath != null && ep.localPath!.isNotEmpty) {
-                        _openInFolder(ep.localPath!);
-                      }
-                      break;
-                    case 'delete':
-                      // ignore: use_build_context_synchronously
-                      context.read<DownloadProvider>().removeLocalFile(ep.id);
-                      break;
-                  }
-                },
-                itemBuilder: (ctx) => [
-                  PopupMenuItem(
-                    value: 'play',
-                    child: Row(
-                      children: const [
-                        Icon(Icons.play_arrow, size: 18),
-                        SizedBox(width: 8),
-                        Text('Abspielen'),
-                      ],
-                    ),
-                  ),
-                  PopupMenuItem(
-                    value: 'open',
-                    child: Row(
-                      children: const [
-                        Icon(Icons.folder_open, size: 18),
-                        SizedBox(width: 8),
-                        Text('Im Ordner öffnen'),
-                      ],
-                    ),
-                  ),
-                  const PopupMenuDivider(),
-                  PopupMenuItem(
-                    value: 'delete',
-                    child: Row(
-                      children: const [
-                        Icon(Icons.delete_outline, size: 18),
-                        SizedBox(width: 8),
-                        Text('Löschen'),
-                      ],
-                    ),
-                  ),
-                ],
+              PopupMenuItem(
+                value: 'queue',
+                child: Row(
+                  children: [
+                    const Icon(Icons.playlist_add, size: 18),
+                    const SizedBox(width: 8),
+                    Text(l10n.downloads_menu_add_to_queue),
+                  ],
+                ),
               ),
-              onTap: () {
-                final m = model.Episode.fromDb(ep);
-                context.read<EpisodeProvider>().playEpisode(
-                  m,
-                  queue: [m],
-                  preferLocal: true,
-                );
-              },
+              PopupMenuItem(
+                value: 'open',
+                child: Row(
+                  children: [
+                    const Icon(Icons.folder_open, size: 18),
+                    const SizedBox(width: 8),
+                    Text(l10n.downloads_menu_open_folder),
+                  ],
+                ),
+              ),
+              const PopupMenuDivider(),
+              PopupMenuItem(
+                value: 'delete',
+                child: Row(
+                  children: [
+                    const Icon(Icons.delete_outline, size: 18),
+                    const SizedBox(width: 8),
+                    Text(l10n.downloads_menu_delete),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          onTap: () {
+            final m = model.Episode.fromDb(ep);
+            context.read<EpisodeProvider>().playEpisode(
+              m,
+              queue: [m],
+              preferLocal: true,
             );
           },
-        );
-      },
+        ),
+        const Divider(height: 1),
+      ],
     );
   }
 }

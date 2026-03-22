@@ -9,20 +9,14 @@
 ### Mittlerer Aufwand
 
 - [ ] **Lazy Loading**: Alle Listen mit **mehr als 15 Einträgen** (Schwellwert → Settings) als Lazy Loader implementieren. Prüfen welche Listen betroffen sind und ob `ListView.builder` bereits verwendet wird.
-- [ ] **Download-Übersicht verbessern**:
-  - Aktuelle und fertige Downloads **zusammen** anzeigen (nicht getrennt)
-  - **"+ zur Playlist hinzufügen"** direkt aus der Übersicht
-  - Gruppierung: nach Podcast, neuester Download oben (wie bisher)
-- [ ] **Contributions**: GitHub-Datei-Format und -Ort festlegen (wenn Feature umgesetzt wird)
 
 ### Aufwändig
 
 - [ ] **Podcast-spezifische Settings** (pro Podcast konfigurierbar, eigener Screen):
-  - Hörrichtung (neueste / älteste zuerst)
+  - Hörrichtung (neueste / älteste zuerst) — Basis: globales `playOrder` Setting existiert jetzt
   - Anzahl der Downloads (Keep N)
   - Ungehörte Episoden löschen: ja / nein
   - Episode als gehört markieren
-- [ ] **Podcast-spezifische Settings UI** — eigener Screen pro Podcast (Basis: globales playOrder Setting existiert jetzt)
 
 ---
 
@@ -39,7 +33,7 @@
 | **autodownloadSubscribed** | ✅ | ✅ | SQLite (Settings) |
 | **Playback Speed** | ✅ | ✅ | SharedPreferences (UserProfile) |
 | **Sprache** | ✅ | ✅ | SharedPreferences (UserProfile) |
-| **Theme (Light/Dark)** | ❌ | nur bis Restart | nur Memory (`ThemeProvider`) |
+| **Theme (Light/Dark)** | ✅ | ✅ | SharedPreferences (`ThemeProvider`) |
 
 **Hinweis**: `SettingsDao.ensureDefaults()` wird lazy aufgerufen (erst beim Öffnen von Settings/DownloadManager). Wenn der User nie Settings öffnet, werden Fallback-Defaults im Code verwendet (funktioniert, aber Design-Entscheidung).
 
@@ -134,6 +128,12 @@ download_service.dart:416  →  keepN = sub.autoDownloadN ?? settings.keepLatest
   - Info-Button in AppBar auf allen Tabs
   - Datenschutz-Zeile in Settings
   - Texte in 4 Sprachen (hu, de, en, ro) — Entwürfe, werden noch verfeinert
+- [x] **Download-Übersicht** — Active+Completed in einer Liste, "zur Playlist hinzufügen" Button ✅ 2026-03-22
+  - Tabs entfernt, Section-Headers statt Tabs
+  - Hardcoded deutsche Menü-Texte durch l10n ersetzt
+- [x] **Contributions** — JSON-basierte Unterstützerliste im About-Screen ✅ 2026-03-22
+  - `assets/contributions.json` mit Placeholder-Einträgen
+  - Anzeige im About-Screen mit Empty-State
 
 ---
 

@@ -786,6 +786,42 @@ abstract class AppLocalizations {
   /// **'Delete'**
   String get downloads_action_delete;
 
+  /// No description provided for @downloads_section_active.
+  ///
+  /// In en, this message translates to:
+  /// **'Active Downloads'**
+  String get downloads_section_active;
+
+  /// No description provided for @downloads_section_completed.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed Downloads'**
+  String get downloads_section_completed;
+
+  /// No description provided for @downloads_menu_play.
+  ///
+  /// In en, this message translates to:
+  /// **'Play'**
+  String get downloads_menu_play;
+
+  /// No description provided for @downloads_menu_open_folder.
+  ///
+  /// In en, this message translates to:
+  /// **'Open in folder'**
+  String get downloads_menu_open_folder;
+
+  /// No description provided for @downloads_menu_delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get downloads_menu_delete;
+
+  /// No description provided for @downloads_menu_add_to_queue.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to playlist'**
+  String get downloads_menu_add_to_queue;
+
   /// No description provided for @ep_action_resume.
   ///
   /// In en, this message translates to:
@@ -1032,17 +1068,17 @@ abstract class AppLocalizations {
   /// **'App-ID'**
   String get aboutScreenAppIdLabel;
 
-  /// Title for the contributions/donors section on the About screen.
+  /// Title for the supporters/donors section on the About screen.
   ///
   /// In en, this message translates to:
-  /// **'Contributions'**
+  /// **'Supporters'**
   String get aboutScreenContributionsTitle;
 
-  /// Placeholder text for the contributions section.
+  /// Message shown when the supporters list is empty.
   ///
   /// In en, this message translates to:
-  /// **'Supporters and donors will be listed here in the future.'**
-  String get aboutScreenContributionsPlaceholder;
+  /// **'Become a supporter!'**
+  String get aboutScreenContributionsEmpty;
 }
 
 class _AppLocalizationsDelegate

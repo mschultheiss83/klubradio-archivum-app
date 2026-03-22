@@ -15,7 +15,7 @@ import 'package:klubradio_archivum/screens/utils/helpers.dart';
 import 'package:klubradio_archivum/utils/episode_cache_reader.dart';
 
 /// ---------------------------------------------------------------------------
-/// DownloadList (Tab-Ansicht für Download-Manager-Screen)
+/// DownloadList (single scrollable view for Download-Manager-Screen)
 /// ---------------------------------------------------------------------------
 class DownloadList extends StatelessWidget {
   const DownloadList({super.key});
@@ -38,28 +38,79 @@ class DownloadList extends StatelessWidget {
               ..orderBy([(e) => d.OrderingTerm.desc(e.completedAt)]))
             .watch();
 
-    return DefaultTabController(
-      length: 2,
-      child: Column(
-        children: [
-          TabBar(
-            tabs: [
-              Tab(
-                icon: const Icon(Icons.downloading),
-                text: l10n.downloads_tab_active,
-              ),
-              Tab(
-                icon: const Icon(Icons.check_circle_outline),
-                text: l10n.downloads_tab_done,
-              ),
-            ],
-          ),
-          Expanded(
-            child: TabBarView(
+    return StreamBuilder<List<Episode>>(
+      stream: activeStream,
+      builder: (context, activeSnap) {
+        return StreamBuilder<List<Episode>>(
+          stream: completedStream,
+          builder: (context, completedSnap) {
+            final activeItems = activeSnap.data ?? const [];
+            final completedItems = completedSnap.data ?? const [];
+
+            // Show loading only if both streams are still waiting
+            final bothWaiting =
+                activeSnap.connectionState == ConnectionState.waiting &&
+                completedSnap.connectionState == ConnectionState.waiting;
+            if (bothWaiting && activeItems.isEmpty && completedItems.isEmpty) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            // Show empty state if both lists are empty
+            if (activeItems.isEmpty && completedItems.isEmpty) {
+              return Center(child: Text(l10n.noDownloads));
+            }
+
+            return ListView(
               children: [
-                _ActiveDownloads(stream: activeStream),
-                _CompletedDownloads(stream: completedStream),
+                // ── Active Downloads section ──
+                if (activeItems.isNotEmpty) ...[
+                  _SectionHeader(
+                    icon: Icons.downloading,
+                    title: l10n.downloads_section_active,
+                  ),
+                  ...activeItems.map(
+                    (ep) => _ActiveDownloadTile(episode: ep),
+                  ),
+                ],
+                // ── Completed Downloads section ──
+                if (completedItems.isNotEmpty) ...[
+                  _SectionHeader(
+                    icon: Icons.check_circle_outline,
+                    title: l10n.downloads_section_completed,
+                  ),
+                  ...completedItems.map(
+                    (ep) => _CompletedDownloadTile(episode: ep),
+                  ),
+                ],
               ],
+            );
+          },
+        );
+      },
+    );
+  }
+}
+
+/// Section header widget for visual separation.
+class _SectionHeader extends StatelessWidget {
+  const _SectionHeader({required this.icon, required this.title});
+
+  final IconData icon;
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
+      child: Row(
+        children: [
+          Icon(icon, size: 20, color: Theme.of(context).colorScheme.primary),
+          const SizedBox(width: 8),
+          Text(
+            title,
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+              color: Theme.of(context).colorScheme.primary,
+              fontWeight: FontWeight.bold,
             ),
           ),
         ],
@@ -68,213 +119,197 @@ class DownloadList extends StatelessWidget {
   }
 }
 
-class _ActiveDownloads extends StatelessWidget {
-  const _ActiveDownloads({required this.stream});
+class _ActiveDownloadTile extends StatelessWidget {
+  const _ActiveDownloadTile({required this.episode});
 
-  final Stream<List<Episode>> stream;
+  final Episode episode;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final provider = context.read<DownloadProvider>();
+    final ep = episode;
+    final status = _statusLabel(context, ep.status);
+    final percentLabel = formatProgress(ep.progress);
 
-    return StreamBuilder<List<Episode>>(
-      stream: stream,
-      builder: (context, snap) {
-        final items = snap.data ?? const [];
-        if (snap.connectionState == ConnectionState.waiting && items.isEmpty) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        if (items.isEmpty) {
-          return Center(child: Text(l10n.downloads_empty_active));
-        }
-        return ListView.separated(
-          itemCount: items.length,
-          separatorBuilder: (_, _) => const Divider(height: 1),
-          itemBuilder: (context, i) {
-            final ep = items[i];
-            final status = _statusLabel(context, ep.status);
-            final percentLabel = formatProgress(ep.progress);
+    final bytesMB = (ep.bytesDownloaded != null)
+        ? (ep.bytesDownloaded! / (1024 * 1024)).toStringAsFixed(1)
+        : null;
+    final totalMB = (ep.totalBytes != null)
+        ? (ep.totalBytes! / (1024 * 1024)).toStringAsFixed(1)
+        : null;
+    final detail = (bytesMB != null && totalMB != null)
+        ? ' ($bytesMB / $totalMB MB)'
+        : '';
 
-            final bytesMB = (ep.bytesDownloaded != null)
-                ? (ep.bytesDownloaded! / (1024 * 1024)).toStringAsFixed(1)
-                : null;
-            final totalMB = (ep.totalBytes != null)
-                ? (ep.totalBytes! / (1024 * 1024)).toStringAsFixed(1)
-                : null;
-            final detail = (bytesMB != null && totalMB != null)
-                ? ' ($bytesMB / $totalMB MB)'
-                : '';
-
-            final activeSubtitle = '$status · $percentLabel$detail';
-            return ListTile(
-              leading: _statusIcon(ep.status),
-              title: Text(ep.title),
-              subtitle: Text(activeSubtitle),
-              trailing: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (ep.status == 2)
-                    SizedBox(
-                      width: 24,
-                      height: 24,
-                      child: CircularProgressIndicator(
-                        value: (ep.progress),
-                        strokeWidth: 3,
-                      ),
-                    ),
-                  if (ep.status == 2) const SizedBox(width: 8),
-                  if (ep.status == 2) Text(percentLabel),
-
-                  if (ep.status == 2 &&
-                      (ep.resumable ?? false)) // downloading & resumable
-                    IconButton(
-                      tooltip: l10n.downloads_action_pause,
-                      icon: const Icon(Icons.pause),
-                      onPressed: () => provider.pause(ep.id),
-                    ),
-
-                  if (ep.status == 1 &&
-                      (ep.resumable ?? false)) // queued & resumable
-                    IconButton(
-                      tooltip: l10n.downloads_action_resume,
-                      icon: const Icon(Icons.play_arrow),
-                      onPressed: () => provider.resume(ep.id),
-                    ),
-                  IconButton(
-                    tooltip: l10n.downloads_action_cancel,
-                    icon: const Icon(Icons.stop),
-                    onPressed: () => provider.cancel(ep.id),
+    final activeSubtitle = '$status · $percentLabel$detail';
+    return Column(
+      children: [
+        ListTile(
+          leading: _statusIcon(ep.status),
+          title: Text(ep.title),
+          subtitle: Text(activeSubtitle),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (ep.status == 2)
+                SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(
+                    value: (ep.progress),
+                    strokeWidth: 3,
                   ),
-                ],
+                ),
+              if (ep.status == 2) const SizedBox(width: 8),
+              if (ep.status == 2) Text(percentLabel),
+
+              if (ep.status == 2 &&
+                  (ep.resumable ?? false)) // downloading & resumable
+                IconButton(
+                  tooltip: l10n.downloads_action_pause,
+                  icon: const Icon(Icons.pause),
+                  onPressed: () => provider.pause(ep.id),
+                ),
+
+              if (ep.status == 1 &&
+                  (ep.resumable ?? false)) // queued & resumable
+                IconButton(
+                  tooltip: l10n.downloads_action_resume,
+                  icon: const Icon(Icons.play_arrow),
+                  onPressed: () => provider.resume(ep.id),
+                ),
+              IconButton(
+                tooltip: l10n.downloads_action_cancel,
+                icon: const Icon(Icons.stop),
+                onPressed: () => provider.cancel(ep.id),
               ),
-            );
-          },
-        );
-      },
+            ],
+          ),
+        ),
+        const Divider(height: 1),
+      ],
     );
   }
 }
 
-class _CompletedDownloads extends StatelessWidget {
-  const _CompletedDownloads({required this.stream});
+class _CompletedDownloadTile extends StatelessWidget {
+  const _CompletedDownloadTile({required this.episode});
 
-  final Stream<List<Episode>> stream;
+  final Episode episode;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final ep = episode;
 
-    return StreamBuilder<List<Episode>>(
-      stream: stream,
-      builder: (context, snap) {
-        final items = snap.data ?? const [];
-        if (snap.connectionState == ConnectionState.waiting && items.isEmpty) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        if (items.isEmpty) {
-          return Center(child: Text(l10n.downloads_empty_done));
-        }
-        return ListView.separated(
-          itemCount: items.length,
-          separatorBuilder: (_, _) => const Divider(height: 1),
-          itemBuilder: (context, i) {
-            final ep = items[i];
-
-            return ListTile(
-              leading: ImageUrl(path: ep.cachedImagePath),
-              title: Text('${ep.podcastId} • ${ep.title}'),
-              subtitle: FutureBuilder<model.Episode?>(
-                future:
-                    // (ep.cachedMetaPath != null && ep.cachedMetaPath!.isNotEmpty)
-                    (ep.cachedMetaPath?.isNotEmpty ?? false)
-                    ? readEpisodeFromCacheJson(ep.cachedMetaPath!)
-                    : Future.value(null),
-                builder: (context, snap) {
-                  if (snap.connectionState == ConnectionState.waiting) {
-                    return const CircularProgressIndicator(); // Or any other loading indicator
+    return Column(
+      children: [
+        ListTile(
+          leading: ImageUrl(path: ep.cachedImagePath),
+          title: Text('${ep.podcastId} • ${ep.title}'),
+          subtitle: FutureBuilder<model.Episode?>(
+            future: (ep.cachedMetaPath?.isNotEmpty ?? false)
+                ? readEpisodeFromCacheJson(ep.cachedMetaPath!)
+                : Future.value(null),
+            builder: (context, snap) {
+              if (snap.connectionState == ConnectionState.waiting) {
+                return const CircularProgressIndicator();
+              }
+              if (snap.hasError) {
+                return Text('Error: ${snap.error}');
+              }
+              final showDate =
+                  snap.data?.showDate ?? ''; // bereits formatiert
+              final base =
+                  '${l10n.downloads_status_done} • ${ep.id} - ${ep.localPath}';
+              final text = showDate.isNotEmpty ? '$base · $showDate' : base;
+              return Text(text);
+            },
+          ),
+          trailing: PopupMenuButton<String>(
+            onSelected: (value) async {
+              switch (value) {
+                case 'play':
+                  final m = model.Episode.fromDb(ep);
+                  // ignore: use_build_context_synchronously
+                  context.read<EpisodeProvider>().playEpisode(
+                    m,
+                    queue: [m],
+                    preferLocal: true,
+                  );
+                  break;
+                case 'queue':
+                  final m = model.Episode.fromDb(ep);
+                  // ignore: use_build_context_synchronously
+                  context.read<EpisodeProvider>().addToQueue(m);
+                  break;
+                case 'open':
+                  if (ep.localPath != null && ep.localPath!.isNotEmpty) {
+                    _openInFolder(ep.localPath!);
                   }
-                  if (snap.hasError) {
-                    return Text('Error: ${snap.error}'); // Show error message
-                  }
-                  final l10n = AppLocalizations.of(context)!;
-                  final showDate =
-                      snap.data?.showDate ?? ''; // bereits formatiert
-                  final base =
-                      '${l10n.downloads_status_done} • ${ep.id} - ${ep.localPath}';
-                  final text = showDate.isNotEmpty ? '$base · $showDate' : base;
-                  return Text(text);
-                },
+                  break;
+                case 'delete':
+                  // ignore: use_build_context_synchronously
+                  context.read<DownloadProvider>().removeLocalFile(ep.id);
+                  break;
+              }
+            },
+            itemBuilder: (ctx) => [
+              PopupMenuItem(
+                value: 'play',
+                child: Row(
+                  children: [
+                    const Icon(Icons.play_arrow, size: 18),
+                    const SizedBox(width: 8),
+                    Text(l10n.downloads_menu_play),
+                  ],
+                ),
               ),
-              trailing: PopupMenuButton<String>(
-                onSelected: (value) async {
-                  switch (value) {
-                    case 'play':
-                      final m = model.Episode.fromDb(ep);
-                      // ignore: use_build_context_synchronously
-                      context.read<EpisodeProvider>().playEpisode(
-                        m,
-                        queue: [m],
-                        preferLocal: true,
-                      );
-                      break;
-                    case 'open':
-                      if (ep.localPath != null && ep.localPath!.isNotEmpty) {
-                        _openInFolder(ep.localPath!);
-                      }
-                      break;
-                    case 'delete':
-                      // ignore: use_build_context_synchronously
-                      context.read<DownloadProvider>().removeLocalFile(ep.id);
-                      break;
-                  }
-                },
-                itemBuilder: (ctx) => [
-                  PopupMenuItem(
-                    value: 'play',
-                    child: Row(
-                      children: const [
-                        Icon(Icons.play_arrow, size: 18),
-                        SizedBox(width: 8),
-                        Text('Abspielen'),
-                      ],
-                    ),
-                  ),
-                  PopupMenuItem(
-                    value: 'open',
-                    child: Row(
-                      children: const [
-                        Icon(Icons.folder_open, size: 18),
-                        SizedBox(width: 8),
-                        Text('Im Ordner öffnen'),
-                      ],
-                    ),
-                  ),
-                  const PopupMenuDivider(),
-                  PopupMenuItem(
-                    value: 'delete',
-                    child: Row(
-                      children: const [
-                        Icon(Icons.delete_outline, size: 18),
-                        SizedBox(width: 8),
-                        Text('Löschen'),
-                      ],
-                    ),
-                  ),
-                ],
+              PopupMenuItem(
+                value: 'queue',
+                child: Row(
+                  children: [
+                    const Icon(Icons.playlist_add, size: 18),
+                    const SizedBox(width: 8),
+                    Text(l10n.downloads_menu_add_to_queue),
+                  ],
+                ),
               ),
-              onTap: () {
-                final m = model.Episode.fromDb(ep);
-                context.read<EpisodeProvider>().playEpisode(
-                  m,
-                  queue: [m],
-                  preferLocal: true,
-                );
-              },
+              PopupMenuItem(
+                value: 'open',
+                child: Row(
+                  children: [
+                    const Icon(Icons.folder_open, size: 18),
+                    const SizedBox(width: 8),
+                    Text(l10n.downloads_menu_open_folder),
+                  ],
+                ),
+              ),
+              const PopupMenuDivider(),
+              PopupMenuItem(
+                value: 'delete',
+                child: Row(
+                  children: [
+                    const Icon(Icons.delete_outline, size: 18),
+                    const SizedBox(width: 8),
+                    Text(l10n.downloads_menu_delete),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          onTap: () {
+            final m = model.Episode.fromDb(ep);
+            context.read<EpisodeProvider>().playEpisode(
+              m,
+              queue: [m],
+              preferLocal: true,
             );
           },
-        );
-      },
+        ),
+        const Divider(height: 1),
+      ],
     );
   }
 }

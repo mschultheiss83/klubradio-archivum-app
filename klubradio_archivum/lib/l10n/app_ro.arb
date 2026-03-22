@@ -479,6 +479,12 @@
   "downloads_action_resume": "Reluați",
   "downloads_action_cancel": "Anulați",
   "downloads_action_delete": "Ștergeți",
+  "downloads_section_active": "Descărcări active",
+  "downloads_section_completed": "Descărcări finalizate",
+  "downloads_menu_play": "Redare",
+  "downloads_menu_open_folder": "Deschide în dosar",
+  "downloads_menu_delete": "Ștergeți",
+  "downloads_menu_add_to_queue": "Adăugați la playlist",
 
   "ep_action_resume": "Reluați",
   "ep_action_downloaded": "Descărcat",
@@ -525,6 +531,6 @@
   "privacySettingsRow": "Notificare de confidențialitate și securitate",
   "privacySettingsRowSubtitle": "Atingeți pentru a vizualiza informațiile de confidențialitate și securitate.",
   "aboutScreenAppIdLabel": "ID aplicație",
-  "aboutScreenContributionsTitle": "Contribuții",
-  "aboutScreenContributionsPlaceholder": "Susținătorii și donatorii vor fi listați aici în viitor."
+  "aboutScreenContributionsTitle": "Susținători",
+  "aboutScreenContributionsEmpty": "Devino susținător!"
 }

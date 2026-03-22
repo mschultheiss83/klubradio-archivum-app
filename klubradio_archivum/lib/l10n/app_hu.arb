@@ -477,6 +477,12 @@
   "downloads_action_resume": "Folytatás",
   "downloads_action_cancel": "Megállítás",
   "downloads_action_delete": "Törlés",
+  "downloads_section_active": "Aktív letöltések",
+  "downloads_section_completed": "Kész letöltések",
+  "downloads_menu_play": "Lejátszás",
+  "downloads_menu_open_folder": "Megnyitás mappában",
+  "downloads_menu_delete": "Törlés",
+  "downloads_menu_add_to_queue": "Hozzáadás a lejátszási listához",
 
   "ep_action_resume": "Folytatás",
   "ep_action_downloaded": "Letöltve",
@@ -524,5 +530,5 @@
   "privacySettingsRowSubtitle": "Koppints az adatvédelmi és biztonsági információk megtekintéséhez.",
   "aboutScreenAppIdLabel": "Alkalmazás-azonosító",
   "aboutScreenContributionsTitle": "Támogatók",
-  "aboutScreenContributionsPlaceholder": "A támogatók és adományozók listája a jövőben itt jelenik meg."
+  "aboutScreenContributionsEmpty": "Légy támogató!"
 }

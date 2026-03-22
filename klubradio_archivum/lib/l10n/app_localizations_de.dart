@@ -402,6 +402,24 @@ class AppLocalizationsDe extends AppLocalizations {
   String get downloads_action_delete => 'Löschen';
 
   @override
+  String get downloads_section_active => 'Aktive Downloads';
+
+  @override
+  String get downloads_section_completed => 'Fertige Downloads';
+
+  @override
+  String get downloads_menu_play => 'Abspielen';
+
+  @override
+  String get downloads_menu_open_folder => 'Im Ordner öffnen';
+
+  @override
+  String get downloads_menu_delete => 'Löschen';
+
+  @override
+  String get downloads_menu_add_to_queue => 'Zur Playlist hinzufügen';
+
+  @override
   String get ep_action_resume => 'Fortsetzen';
 
   @override
@@ -538,6 +556,5 @@ class AppLocalizationsDe extends AppLocalizations {
   String get aboutScreenContributionsTitle => 'Unterstützer';
 
   @override
-  String get aboutScreenContributionsPlaceholder =>
-      'Unterstützer und Spender werden hier in Zukunft aufgeführt.';
+  String get aboutScreenContributionsEmpty => 'Werde Unterstützer!';
 }

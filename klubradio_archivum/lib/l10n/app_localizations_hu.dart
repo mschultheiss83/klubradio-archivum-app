@@ -396,6 +396,24 @@ class AppLocalizationsHu extends AppLocalizations {
   String get downloads_action_delete => 'Törlés';
 
   @override
+  String get downloads_section_active => 'Aktív letöltések';
+
+  @override
+  String get downloads_section_completed => 'Kész letöltések';
+
+  @override
+  String get downloads_menu_play => 'Lejátszás';
+
+  @override
+  String get downloads_menu_open_folder => 'Megnyitás mappában';
+
+  @override
+  String get downloads_menu_delete => 'Törlés';
+
+  @override
+  String get downloads_menu_add_to_queue => 'Hozzáadás a lejátszási listához';
+
+  @override
   String get ep_action_resume => 'Folytatás';
 
   @override
@@ -534,6 +552,5 @@ class AppLocalizationsHu extends AppLocalizations {
   String get aboutScreenContributionsTitle => 'Támogatók';
 
   @override
-  String get aboutScreenContributionsPlaceholder =>
-      'A támogatók és adományozók listája a jövőben itt jelenik meg.';
+  String get aboutScreenContributionsEmpty => 'Légy támogató!';
 }

@@ -479,6 +479,12 @@
   "downloads_action_resume": "Fortsetzen",
   "downloads_action_cancel": "Abbrechen",
   "downloads_action_delete": "Löschen",
+  "downloads_section_active": "Aktive Downloads",
+  "downloads_section_completed": "Fertige Downloads",
+  "downloads_menu_play": "Abspielen",
+  "downloads_menu_open_folder": "Im Ordner öffnen",
+  "downloads_menu_delete": "Löschen",
+  "downloads_menu_add_to_queue": "Zur Playlist hinzufügen",
 
   "ep_action_resume": "Fortsetzen",
   "ep_action_downloaded": "Heruntergeladen",
@@ -526,6 +532,6 @@
   "privacySettingsRowSubtitle": "Tippen, um die Datenschutz- und Sicherheitshinweise anzuzeigen.",
   "aboutScreenAppIdLabel": "App-ID",
   "aboutScreenContributionsTitle": "Unterstützer",
-  "aboutScreenContributionsPlaceholder": "Unterstützer und Spender werden hier in Zukunft aufgeführt."
+  "aboutScreenContributionsEmpty": "Werde Unterstützer!"
 
 }

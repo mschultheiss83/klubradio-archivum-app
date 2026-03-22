@@ -62,6 +62,7 @@ flutter:
     - assets/app_icon/app_icon.png
     - assets/app_icon/app_icon_foreground.png
     - assets/data/
+    - assets/contributions.json
 
 flutter_launcher_icons:
   android: true

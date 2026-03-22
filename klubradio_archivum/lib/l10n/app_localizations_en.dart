@@ -395,6 +395,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get downloads_action_delete => 'Delete';
 
   @override
+  String get downloads_section_active => 'Active Downloads';
+
+  @override
+  String get downloads_section_completed => 'Completed Downloads';
+
+  @override
+  String get downloads_menu_play => 'Play';
+
+  @override
+  String get downloads_menu_open_folder => 'Open in folder';
+
+  @override
+  String get downloads_menu_delete => 'Delete';
+
+  @override
+  String get downloads_menu_add_to_queue => 'Add to playlist';
+
+  @override
   String get ep_action_resume => 'Resume';
 
   @override
@@ -529,9 +547,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get aboutScreenAppIdLabel => 'App-ID';
 
   @override
-  String get aboutScreenContributionsTitle => 'Contributions';
+  String get aboutScreenContributionsTitle => 'Supporters';
 
   @override
-  String get aboutScreenContributionsPlaceholder =>
-      'Supporters and donors will be listed here in the future.';
+  String get aboutScreenContributionsEmpty => 'Become a supporter!';
 }

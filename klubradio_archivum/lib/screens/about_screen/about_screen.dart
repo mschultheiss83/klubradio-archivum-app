@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:klubradio_archivum/l10n/app_localizations.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:klubradio_archivum/screens/about_screen/legal_screen.dart';
@@ -13,11 +16,13 @@ class AboutScreen extends StatefulWidget {
 
 class _AboutScreenState extends State<AboutScreen> {
   String? versionText;
+  List<String> _contributors = [];
 
   @override
   void initState() {
     super.initState();
     _loadVersion();
+    _loadContributors();
   }
 
   Future<void> _loadVersion() async {
@@ -30,6 +35,22 @@ class _AboutScreenState extends State<AboutScreen> {
         info.buildNumber,
       );
     });
+  }
+
+  Future<void> _loadContributors() async {
+    try {
+      final jsonString =
+          await rootBundle.loadString('assets/contributions.json');
+      final List<dynamic> data = json.decode(jsonString) as List<dynamic>;
+      if (!mounted) return;
+      setState(() {
+        _contributors = data
+            .map((e) => (e as Map<String, dynamic>)['name'] as String)
+            .toList();
+      });
+    } catch (_) {
+      // If the file can't be loaded, keep the list empty.
+    }
   }
 
   @override
@@ -139,13 +160,56 @@ class _AboutScreenState extends State<AboutScreen> {
 
             const SizedBox(height: 16),
 
-            // Contributions Placeholder Card
+            // Supporters Card
             Card(
               clipBehavior: Clip.antiAlias,
-              child: ListTile(
-                leading: const Icon(Icons.volunteer_activism_outlined),
-                title: Text(l10n.aboutScreenContributionsTitle),
-                subtitle: Text(l10n.aboutScreenContributionsPlaceholder),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.volunteer_activism_outlined,
+                            color: cs.primary),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            l10n.aboutScreenContributionsTitle,
+                            style: textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    if (_contributors.isEmpty)
+                      Text(
+                        l10n.aboutScreenContributionsEmpty,
+                        style: textTheme.bodyMedium?.copyWith(
+                          color: cs.onSurfaceVariant,
+                        ),
+                      )
+                    else
+                      ...List.generate(_contributors.length, (index) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 4),
+                          child: Row(
+                            children: [
+                              Icon(Icons.favorite,
+                                  size: 16, color: cs.primary),
+                              const SizedBox(width: 8),
+                              Text(
+                                _contributors[index],
+                                style: textTheme.bodyMedium,
+                              ),
+                            ],
+                          ),
+                        );
+                      }),
+                  ],
+                ),
               ),
             ),
           ],

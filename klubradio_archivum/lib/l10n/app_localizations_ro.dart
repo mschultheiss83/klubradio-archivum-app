@@ -398,6 +398,24 @@ class AppLocalizationsRo extends AppLocalizations {
   String get downloads_action_delete => 'Ștergeți';
 
   @override
+  String get downloads_section_active => 'Descărcări active';
+
+  @override
+  String get downloads_section_completed => 'Descărcări finalizate';
+
+  @override
+  String get downloads_menu_play => 'Redare';
+
+  @override
+  String get downloads_menu_open_folder => 'Deschide în dosar';
+
+  @override
+  String get downloads_menu_delete => 'Ștergeți';
+
+  @override
+  String get downloads_menu_add_to_queue => 'Adăugați la playlist';
+
+  @override
   String get ep_action_resume => 'Reluați';
 
   @override
@@ -535,9 +553,8 @@ class AppLocalizationsRo extends AppLocalizations {
   String get aboutScreenAppIdLabel => 'ID aplicație';
 
   @override
-  String get aboutScreenContributionsTitle => 'Contribuții';
+  String get aboutScreenContributionsTitle => 'Susținători';
 
   @override
-  String get aboutScreenContributionsPlaceholder =>
-      'Susținătorii și donatorii vor fi listați aici în viitor.';
+  String get aboutScreenContributionsEmpty => 'Devino susținător!';
 }

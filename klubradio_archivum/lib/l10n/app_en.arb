@@ -478,6 +478,12 @@
   "downloads_action_resume": "Resume",
   "downloads_action_cancel": "Cancel",
   "downloads_action_delete": "Delete",
+  "downloads_section_active": "Active Downloads",
+  "downloads_section_completed": "Completed Downloads",
+  "downloads_menu_play": "Play",
+  "downloads_menu_open_folder": "Open in folder",
+  "downloads_menu_delete": "Delete",
+  "downloads_menu_add_to_queue": "Add to playlist",
 
   "ep_action_resume": "Resume",
   "ep_action_downloaded": "Downloaded",
@@ -557,13 +563,13 @@
   "@aboutScreenAppIdLabel": {
     "description": "Label for the App-ID card on the About screen."
   },
-  "aboutScreenContributionsTitle": "Contributions",
+  "aboutScreenContributionsTitle": "Supporters",
   "@aboutScreenContributionsTitle": {
-    "description": "Title for the contributions/donors section on the About screen."
+    "description": "Title for the supporters/donors section on the About screen."
   },
-  "aboutScreenContributionsPlaceholder": "Supporters and donors will be listed here in the future.",
-  "@aboutScreenContributionsPlaceholder": {
-    "description": "Placeholder text for the contributions section."
+  "aboutScreenContributionsEmpty": "Become a supporter!",
+  "@aboutScreenContributionsEmpty": {
+    "description": "Message shown when the supporters list is empty."
   }
 
 }
