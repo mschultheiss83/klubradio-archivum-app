@@ -12,8 +12,11 @@
       "Bash(gh api:*)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
+      "Bash(git diff:*)",
       "Bash(git push:*)",
-      "Bash(wait)"
+      "Bash(wait)",
+      "Search(*)",
+      "Read(*)"
     ],
     "deny": [],
     "ask": []
