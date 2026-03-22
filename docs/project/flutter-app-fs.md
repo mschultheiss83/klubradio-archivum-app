@@ -73,6 +73,7 @@
 ├── klubradio_archivum/lib/screens/utils/helpers.dart
 ├── klubradio_archivum/lib/screens/widgets/stateful/episode_list.dart
 ├── klubradio_archivum/lib/screens/widgets/stateful/now_playing_bar.dart
+├── klubradio_archivum/lib/screens/widgets/stateful/queue_sheet.dart
 ├── klubradio_archivum/lib/screens/widgets/stateless/bottom_navigation_bar.dart
 ├── klubradio_archivum/lib/screens/widgets/stateless/episode_list_item.dart
 ├── klubradio_archivum/lib/screens/widgets/stateless/image_url.dart
@@ -90,17 +91,22 @@
 ├── klubradio_archivum/lib/utils/web_image_proxy.dart
 ├── klubradio_archivum/test/api/episode_api_test.dart
 ├── klubradio_archivum/test/api/episode_api_test.mocks.dart
+├── klubradio_archivum/test/api/search_api_test.dart
 ├── klubradio_archivum/test/models/episode_test.dart
 ├── klubradio_archivum/test/models/podcast_test.dart
 ├── klubradio_archivum/test/models/retention_mode_test.dart
 ├── klubradio_archivum/test/models/show_data_test.dart
 ├── klubradio_archivum/test/models/show_host_test.dart
 ├── klubradio_archivum/test/models/user_profile_test.dart
+├── klubradio_archivum/test/providers/episode_provider_queue_test.dart
+├── klubradio_archivum/test/providers/episode_provider_queue_test.mocks.dart
+├── klubradio_archivum/test/providers/podcast_provider_search_test.dart
 ├── klubradio_archivum/test/screens/podcast_detail_screen_test.dart
 ├── klubradio_archivum/test/screens/subscription_download_test.dart
 ├── klubradio_archivum/test/screens/utils/constants_test.dart
 ├── klubradio_archivum/test/screens/utils/helpers_test.dart
 ├── klubradio_archivum/test/screens/utils/platform_utils_test.dart
+├── klubradio_archivum/test/screens/widgets/queue_sheet_test.dart
 ├── klubradio_archivum/test/services/api_live_validation_test.dart
 ├── klubradio_archivum/test/services/api_model_validation_test.dart
 ├── klubradio_archivum/test/services/api_service_live_test.dart
@@ -8838,7 +8844,7 @@ class EpisodeProvider extends ChangeNotifier {
     bool preferLocal = true,
   }) async {
     if (queue != null) {
-      _queue = queue;
+      _queue = List<model.Episode>.of(queue);
     } else if (!_queue.any((model.Episode item) => item.id == episode.id)) {
       _queue.insert(0, episode);
     }
@@ -13271,7 +13277,7 @@ import 'package:provider/provider.dart';
 import 'package:klubradio_archivum/providers/episode_provider.dart';
 import 'package:klubradio_archivum/screens/now_playing_screen/now_playing_screen.dart';
 import 'package:klubradio_archivum/screens/utils/helpers.dart';
-import 'package:klubradio_archivum/screens/widgets/stateless/image_url.dart';
+import 'package:klubradio_archivum/screens/widgets/stateful/queue_sheet.dart';
 
 class NowPlayingBar extends StatelessWidget {
   const NowPlayingBar({super.key});
@@ -13357,7 +13363,7 @@ class NowPlayingBar extends StatelessWidget {
                               showModalBottomSheet<void>(
                                 context: context,
                                 builder: (BuildContext context) {
-                                  return _QueueSheet(provider: provider);
+                                  return QueueSheet(provider: provider);
                                 },
                               );
                             },
@@ -13377,14 +13383,30 @@ class NowPlayingBar extends StatelessWidget {
     );
   }
 }
+```
 
-class _QueueSheet extends StatelessWidget {
-  const _QueueSheet({required this.provider});
+### Inhalt von `klubradio_archivum/lib/screens/widgets/stateful/queue_sheet.dart`
+```dart
+import 'package:flutter/material.dart';
+
+import 'package:klubradio_archivum/providers/episode_provider.dart';
+import 'package:klubradio_archivum/screens/utils/helpers.dart';
+import 'package:klubradio_archivum/screens/widgets/stateless/image_url.dart';
+
+class QueueSheet extends StatelessWidget {
+  const QueueSheet({super.key, required this.provider});
 
   final EpisodeProvider provider;
 
   @override
   Widget build(BuildContext context) {
+    return ListenableBuilder(
+      listenable: provider,
+      builder: (context, _) => _buildList(context),
+    );
+  }
+
+  Widget _buildList(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
 
     return ReorderableListView.builder(
@@ -13402,8 +13424,24 @@ class _QueueSheet extends StatelessWidget {
             .split('\n')
             .where((s) => s.isNotEmpty)
             .join(' ');
-        return ListTile(
+        return Dismissible(
           key: ValueKey(episode.id),
+          direction: isCurrent
+              ? DismissDirection.none
+              : DismissDirection.endToStart,
+          onDismissed: (_) => provider.removeFromQueue(episode.id),
+          background: ColoredBox(
+            color: cs.errorContainer,
+            child: Align(
+              alignment: Alignment.centerRight,
+              child: Padding(
+                padding: const EdgeInsets.only(right: 20),
+                child: Icon(Icons.delete_outline, color: cs.onErrorContainer),
+              ),
+            ),
+          ),
+          child: ListTile(
+          key: ValueKey('tile-${episode.id}'),
           selected: isCurrent,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
@@ -13412,48 +13450,55 @@ class _QueueSheet extends StatelessWidget {
               width: 1,
             ),
           ),
-
-          // Material 3-friendly colors
-          tileColor: cs.surfaceContainerLow, // unselected bg
-          selectedTileColor: cs.secondaryContainer, // selected bg
+          tileColor: cs.surfaceContainerLow,
+          selectedTileColor: cs.secondaryContainer,
           textColor: isCurrent ? cs.onSecondaryContainer : cs.onSurface,
-          iconColor: isCurrent ? cs.onSecondaryContainer : cs.onSurfaceVariant,
-
+          iconColor:
+              isCurrent ? cs.onSecondaryContainer : cs.onSurfaceVariant,
           leading: ReorderableDragStartListener(
             index: index,
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.drag_indicator),
-                SizedBox(width: 8),
+                const Icon(Icons.drag_indicator),
+                const SizedBox(width: 8),
                 Icon(isCurrent ? Icons.play_arrow : Icons.queue_music),
               ],
             ),
           ),
-          trailing: Padding(
-            padding: const EdgeInsets.only(right: 8.0),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: ImageUrl(
-                url: episode.imageUrl ?? "",
-                path: episode.cachedImagePath ?? "",
-                width: 56,
-                height: 56,
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (!isCurrent)
+                IconButton(
+                  icon: const Icon(Icons.delete_outline),
+                  tooltip: 'Entfernen',
+                  onPressed: () => provider.removeFromQueue(episode.id),
+                ),
+              Padding(
+                padding: const EdgeInsets.only(left: 4),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: ImageUrl(
+                    url: episode.imageUrl ?? '',
+                    path: episode.cachedImagePath ?? '',
+                    width: 56,
+                    height: 56,
+                  ),
+                ),
               ),
-            ),
+            ],
           ),
           title: Text('${episode.title}, ${episode.showDate}'),
           subtitle: Text(
             '${formatDuration(context, episode.duration)} - $hosts',
           ),
-
-          // Nice pressed/hover overlay
           hoverColor: cs.onSurface.withValues(alpha: 0.12),
-
           onTap: () async {
             Navigator.of(context).pop();
             await provider.playEpisode(episode, queue: provider.queue);
           },
+        ),
         );
       },
     );
@@ -15730,6 +15775,154 @@ class MockHttpRequester extends _i1.Mock implements _i2.HttpRequester {
 }
 ```
 
+### Inhalt von `klubradio_archivum/test/api/search_api_test.dart`
+```dart
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/mockito.dart';
+import 'package:klubradio_archivum/api/search_api.dart';
+import 'package:klubradio_archivum/screens/utils/constants.dart' as constants;
+
+import 'episode_api_test.mocks.dart'; // Reuse existing MockHttpRequester
+
+void main() {
+  group('SearchApi', () {
+    late SearchApi searchApi;
+    late MockHttpRequester mockRequester;
+    const String baseUrl = 'http://localhost:8000';
+    const String apiKey = 'test_api_key';
+
+    setUp(() {
+      mockRequester = MockHttpRequester();
+      searchApi = SearchApi(
+        baseUrl: baseUrl,
+        apiKey: apiKey,
+        requester: mockRequester,
+      );
+    });
+
+    // ---- podcasts() ----
+
+    group('podcasts()', () {
+      test('returns empty list for blank query', () async {
+        final result = await searchApi.podcasts('');
+        expect(result, isEmpty);
+        verifyNever(mockRequester.getJson(any));
+      });
+
+      test('returns empty list for whitespace-only query', () async {
+        final result = await searchApi.podcasts('   ');
+        expect(result, isEmpty);
+        verifyNever(mockRequester.getJson(any));
+      });
+
+      test('returns parsed podcast list on valid query', () async {
+        final mockResponse = <Map<String, dynamic>>[
+          {'id': '3', 'title': 'A lényeg', 'description': 'Hírműsor'},
+          {'id': '14', 'title': 'Esti gyors', 'description': 'Napzáró'},
+        ];
+        when(mockRequester.getJson(any)).thenAnswer((_) async => mockResponse);
+
+        final result = await searchApi.podcasts('lényeg');
+
+        expect(result, hasLength(2));
+        expect(result.first['title'], 'A lényeg');
+        verify(mockRequester.getJson(
+          '$baseUrl/rest/v1/${constants.podcastsTable}?select=*&title=ilike.%25lényeg%25',
+        )).called(1);
+      });
+
+      test('escapes single quotes in query (SQL injection prevention)', () async {
+        when(mockRequester.getJson(any)).thenAnswer((_) async => <Map<String, dynamic>>[]);
+
+        await searchApi.podcasts("O'Connor");
+
+        verify(mockRequester.getJson(
+          "$baseUrl/rest/v1/${constants.podcastsTable}?select=*&title=ilike.%25O''Connor%25",
+        )).called(1);
+      });
+
+      test('escapes multiple single quotes', () async {
+        when(mockRequester.getJson(any)).thenAnswer((_) async => <Map<String, dynamic>>[]);
+
+        await searchApi.podcasts("it's a 'test'");
+
+        verify(mockRequester.getJson(
+          "$baseUrl/rest/v1/${constants.podcastsTable}?select=*&title=ilike.%25it''s a ''test''%25",
+        )).called(1);
+      });
+
+      test('handles single-character query', () async {
+        when(mockRequester.getJson(any)).thenAnswer((_) async => <Map<String, dynamic>>[]);
+
+        final result = await searchApi.podcasts('a');
+
+        expect(result, isEmpty);
+        verify(mockRequester.getJson(any)).called(1);
+      });
+
+      test('propagates HTTP errors from requester', () async {
+        when(mockRequester.getJson(any)).thenThrow(Exception('Network error'));
+
+        expect(
+          () => searchApi.podcasts('test'),
+          throwsA(isA<Exception>()),
+        );
+      });
+    });
+
+    // ---- episodes() ----
+
+    group('episodes()', () {
+      test('returns empty list for blank query', () async {
+        final result = await searchApi.episodes('');
+        expect(result, isEmpty);
+        verifyNever(mockRequester.getJson(any));
+      });
+
+      test('returns empty list for whitespace-only query', () async {
+        final result = await searchApi.episodes('  \t  ');
+        expect(result, isEmpty);
+        verifyNever(mockRequester.getJson(any));
+      });
+
+      test('returns parsed episode list on valid query', () async {
+        final mockResponse = <Map<String, dynamic>>[
+          {'id': '100', 'title': 'A lényeg 2026-03-22', 'podcastId': '3'},
+        ];
+        when(mockRequester.getJson(any)).thenAnswer((_) async => mockResponse);
+
+        final result = await searchApi.episodes('lényeg');
+
+        expect(result, hasLength(1));
+        expect(result.first['id'], '100');
+        verify(mockRequester.getJson(
+          '$baseUrl/rest/v1/${constants.episodesTable}?select=*&title=ilike.%25lényeg%25',
+        )).called(1);
+      });
+
+      test('escapes single quotes in episode search', () async {
+        when(mockRequester.getJson(any)).thenAnswer((_) async => <Map<String, dynamic>>[]);
+
+        await searchApi.episodes("host's show");
+
+        verify(mockRequester.getJson(
+          "$baseUrl/rest/v1/${constants.episodesTable}?select=*&title=ilike.%25host''s show%25",
+        )).called(1);
+      });
+
+      test('propagates HTTP errors from requester', () async {
+        when(mockRequester.getJson(any)).thenThrow(Exception('Timeout'));
+
+        expect(
+          () => searchApi.episodes('test'),
+          throwsA(isA<Exception>()),
+        );
+      });
+    });
+  });
+}
+```
+
 ### Inhalt von `klubradio_archivum/test/models/episode_test.dart`
 ```dart
 import 'package:flutter_test/flutter_test.dart';
@@ -16523,6 +16716,1845 @@ void main() {
 }
 ```
 
+### Inhalt von `klubradio_archivum/test/providers/episode_provider_queue_test.dart`
+```dart
+// test/providers/episode_provider_queue_test.dart
+//
+// Unit tests for queue/playlist management in EpisodeProvider.
+//
+// Covers:
+//   - addToQueue     : append, duplicate prevention, notifyListeners
+//   - removeFromQueue: remove by id, edge cases, notifyListeners
+//   - reorderQueue   : forward/backward moves, index-correction logic
+//   - queue getter   : unmodifiable, empty initial state
+//   - getNextEpisode : navigation, boundary, missing episode
+//   - getPreviousEpisode: navigation, boundary
+//   - playEpisode    : queue parameter sets list, without param prepends/deduplicates
+//
+// Widget tests for _QueueSheet (now_playing_bar.dart) are intentionally skipped
+// because the widget depends on the AudioPlayer native plugin.
+// See test/screens/podcast_detail_screen_test.dart for the documented pattern.
+
+import 'dart:async';
+
+import 'package:flutter_test/flutter_test.dart';
+import 'package:just_audio/just_audio.dart';
+import 'package:mockito/annotations.dart';
+import 'package:mockito/mockito.dart';
+
+import 'package:klubradio_archivum/db/app_database.dart' as db;
+import 'package:klubradio_archivum/models/episode.dart';
+import 'package:klubradio_archivum/providers/episode_provider.dart';
+import 'package:klubradio_archivum/services/api_service.dart';
+import 'package:klubradio_archivum/services/audio_player_service.dart';
+
+import 'episode_provider_queue_test.mocks.dart';
+
+@GenerateMocks([AudioPlayerService, ApiService, db.AppDatabase])
+void main() {
+  // ==================== Helpers ====================
+
+  /// Creates a minimal Episode with the given [id].
+  Episode ep(String id, {String title = ''}) => Episode(
+        id: id,
+        podcastId: 'pod-1',
+        title: title.isEmpty ? 'Episode $id' : title,
+        description: 'Desc',
+        audioUrl: 'https://example.com/$id.mp3',
+        publishedAt: DateTime(2024, 1, 1),
+        showDate: '2024-01-01',
+        duration: const Duration(minutes: 30),
+      );
+
+  // ==================== Test fixtures ====================
+
+  late MockAudioPlayerService mockAudio;
+  late MockApiService mockApi;
+  late MockAppDatabase mockDb;
+  late StreamController<Duration> positionCtrl;
+  late StreamController<PlayerState> playerStateCtrl;
+  late StreamController<bool> bufferingCtrl;
+  late EpisodeProvider provider;
+
+  setUp(() {
+    positionCtrl = StreamController<Duration>.broadcast();
+    playerStateCtrl = StreamController<PlayerState>.broadcast();
+    bufferingCtrl = StreamController<bool>.broadcast();
+
+    mockAudio = MockAudioPlayerService();
+    mockApi = MockApiService();
+    mockDb = MockAppDatabase();
+
+    // Stub streams required by EpisodeProvider constructor
+    when(mockAudio.positionStream).thenAnswer((_) => positionCtrl.stream);
+    when(mockAudio.playerStateStream)
+        .thenAnswer((_) => playerStateCtrl.stream);
+    when(mockAudio.bufferingStream).thenAnswer((_) => bufferingCtrl.stream);
+    when(mockAudio.isPlaying).thenReturn(false);
+    when(mockAudio.totalDuration).thenReturn(null);
+    // loadEpisode is called by playEpisode; return immediately without errors
+    when(mockAudio.loadEpisode(any)).thenAnswer((_) async {});
+
+    provider = EpisodeProvider(
+      apiService: mockApi,
+      audioPlayerService: mockAudio,
+      db: mockDb,
+    );
+  });
+
+  tearDown(() async {
+    await positionCtrl.close();
+    await playerStateCtrl.close();
+    await bufferingCtrl.close();
+    await provider.dispose();
+  });
+
+  // ==================== addToQueue ====================
+
+  group('addToQueue', () {
+    test('appends episodes in order', () {
+      provider.addToQueue(ep('a'));
+      provider.addToQueue(ep('b'));
+      provider.addToQueue(ep('c'));
+
+      expect(provider.queue.map((e) => e.id), ['a', 'b', 'c']);
+    });
+
+    test('does not add duplicate (same id)', () {
+      provider.addToQueue(ep('a'));
+      provider.addToQueue(ep('a'));
+
+      expect(provider.queue.length, 1);
+    });
+
+    test('notifies listeners when episode is added', () {
+      int calls = 0;
+      provider.addListener(() => calls++);
+
+      provider.addToQueue(ep('x'));
+
+      expect(calls, 1);
+    });
+
+    test('does not notify listeners when duplicate is rejected', () {
+      provider.addToQueue(ep('x')); // first add succeeds
+      int calls = 0;
+      provider.addListener(() => calls++);
+
+      provider.addToQueue(ep('x')); // duplicate → rejected silently
+
+      expect(calls, 0);
+    });
+  });
+
+  // ==================== removeFromQueue ====================
+
+  group('removeFromQueue', () {
+    test('removes episode by id from the middle', () {
+      provider.addToQueue(ep('a'));
+      provider.addToQueue(ep('b'));
+      provider.addToQueue(ep('c'));
+
+      provider.removeFromQueue('b');
+
+      expect(provider.queue.map((e) => e.id), ['a', 'c']);
+    });
+
+    test('removes first episode', () {
+      provider.addToQueue(ep('a'));
+      provider.addToQueue(ep('b'));
+
+      provider.removeFromQueue('a');
+
+      expect(provider.queue.map((e) => e.id), ['b']);
+    });
+
+    test('removes last episode', () {
+      provider.addToQueue(ep('a'));
+      provider.addToQueue(ep('b'));
+
+      provider.removeFromQueue('b');
+
+      expect(provider.queue.map((e) => e.id), ['a']);
+    });
+
+    test('is a no-op when id is not in queue', () {
+      provider.addToQueue(ep('a'));
+
+      provider.removeFromQueue('does-not-exist');
+
+      expect(provider.queue.length, 1);
+    });
+
+    test('empties queue when only episode is removed', () {
+      provider.addToQueue(ep('only'));
+
+      provider.removeFromQueue('only');
+
+      expect(provider.queue, isEmpty);
+    });
+
+    test('notifies listeners on remove', () {
+      provider.addToQueue(ep('x'));
+      int calls = 0;
+      provider.addListener(() => calls++);
+
+      provider.removeFromQueue('x');
+
+      expect(calls, 1);
+    });
+  });
+
+  // ==================== reorderQueue ====================
+  //
+  // reorderQueue mirrors the Flutter ReorderableListView contract:
+  //   - When dragging FORWARD (oldIndex < newIndex), the widget passes
+  //     newIndex = targetPosition + 1. The provider adjusts: newIndex -= 1.
+  //   - When dragging BACKWARD (oldIndex >= newIndex), no adjustment.
+  //
+  // Queue before each test: [a(0), b(1), c(2), d(3)]
+
+  group('reorderQueue', () {
+    setUp(() {
+      for (final id in ['a', 'b', 'c', 'd']) {
+        provider.addToQueue(ep(id));
+      }
+    });
+
+    test('moves item backward: d (3) → before b (1)', () {
+      // oldIndex=3, newIndex=1 → no adjustment (oldIndex > newIndex)
+      // removeAt(3): [a, b, c]  →  insert(1, d): [a, d, b, c]
+      provider.reorderQueue(3, 1);
+
+      expect(provider.queue.map((e) => e.id), ['a', 'd', 'b', 'c']);
+    });
+
+    test('moves item forward: a (0) → before d, widget passes newIndex=3', () {
+      // oldIndex=0, newIndex=3 → adjust: newIndex=2
+      // removeAt(0): [b, c, d]  →  insert(2, a): [b, c, a, d]
+      provider.reorderQueue(0, 3);
+
+      expect(provider.queue.map((e) => e.id), ['b', 'c', 'a', 'd']);
+    });
+
+    test('moves item one step forward: a (0) → widget passes newIndex=2', () {
+      // oldIndex=0, newIndex=2 → adjust: newIndex=1
+      // removeAt(0): [b, c, d]  →  insert(1, a): [b, a, c, d]
+      provider.reorderQueue(0, 2);
+
+      expect(provider.queue.map((e) => e.id), ['b', 'a', 'c', 'd']);
+    });
+
+    test('moves item one step backward: c (2) → before b (1)', () {
+      // oldIndex=2, newIndex=1 → no adjustment
+      // removeAt(2): [a, b, d]  →  insert(1, c): [a, c, b, d]
+      provider.reorderQueue(2, 1);
+
+      expect(provider.queue.map((e) => e.id), ['a', 'c', 'b', 'd']);
+    });
+
+    test('no-op when oldIndex == newIndex', () {
+      // oldIndex=2, newIndex=2 → no adjustment (not < newIndex)
+      // removeAt(2): [a, b, d]  →  insert(2, c): [a, b, c, d]
+      provider.reorderQueue(2, 2);
+
+      expect(provider.queue.map((e) => e.id), ['a', 'b', 'c', 'd']);
+    });
+
+    test('moves item to first position', () {
+      // Move d to front: oldIndex=3, newIndex=0
+      // removeAt(3): [a, b, c]  →  insert(0, d): [d, a, b, c]
+      provider.reorderQueue(3, 0);
+
+      expect(provider.queue.map((e) => e.id), ['d', 'a', 'b', 'c']);
+    });
+
+    test('moves item to last position via widget convention', () {
+      // Move a to after d: widget passes newIndex=4 (length)
+      // oldIndex=0, newIndex=4 → adjust: newIndex=3
+      // removeAt(0): [b, c, d]  →  insert(3, a): [b, c, d, a]
+      provider.reorderQueue(0, 4);
+
+      expect(provider.queue.map((e) => e.id), ['b', 'c', 'd', 'a']);
+    });
+
+    test('notifies listeners after reorder', () {
+      int calls = 0;
+      provider.addListener(() => calls++);
+
+      provider.reorderQueue(0, 2);
+
+      expect(calls, 1);
+    });
+  });
+
+  // ==================== queue getter ====================
+
+  group('queue getter', () {
+    test('returns empty list initially', () {
+      expect(provider.queue, isEmpty);
+    });
+
+    test('returns unmodifiable list — add throws', () {
+      provider.addToQueue(ep('a'));
+
+      expect(
+        () => provider.queue.add(ep('illegal')),
+        throwsUnsupportedError,
+      );
+    });
+
+    test('returned list reflects current state', () {
+      provider.addToQueue(ep('a'));
+      provider.addToQueue(ep('b'));
+
+      expect(provider.queue.length, 2);
+
+      provider.removeFromQueue('a');
+
+      expect(provider.queue.length, 1);
+      expect(provider.queue.first.id, 'b');
+    });
+  });
+
+  // ==================== getNextEpisode ====================
+
+  group('getNextEpisode', () {
+    test('returns null when no current episode', () {
+      provider.addToQueue(ep('a'));
+
+      expect(provider.getNextEpisode(), isNull);
+    });
+
+    test('returns null when queue is empty', () {
+      expect(provider.getNextEpisode(), isNull);
+    });
+
+    test('returns next episode in queue', () async {
+      final a = ep('a');
+      final b = ep('b');
+      final c = ep('c');
+      await provider.playEpisode(a, queue: [a, b, c]);
+
+      expect(provider.getNextEpisode()?.id, 'b');
+    });
+
+    test('returns null when at last episode', () async {
+      final a = ep('a');
+      final b = ep('b');
+      await provider.playEpisode(b, queue: [a, b]);
+
+      expect(provider.getNextEpisode(), isNull);
+    });
+
+    test('returns null when current episode is no longer in queue', () async {
+      final a = ep('a');
+      final b = ep('b');
+      await provider.playEpisode(a, queue: [a, b]);
+      provider.removeFromQueue('a'); // remove current from queue
+
+      expect(provider.getNextEpisode(), isNull);
+    });
+
+    test('returns correct next after queue is reordered', () async {
+      final a = ep('a');
+      final b = ep('b');
+      final c = ep('c');
+      await provider.playEpisode(a, queue: [a, b, c]);
+      // Move c before b: reorderQueue(2, 1) → [a, c, b]
+      provider.reorderQueue(2, 1);
+
+      expect(provider.getNextEpisode()?.id, 'c');
+    });
+  });
+
+  // ==================== getPreviousEpisode ====================
+
+  group('getPreviousEpisode', () {
+    test('returns null when no current episode', () {
+      provider.addToQueue(ep('a'));
+
+      expect(provider.getPreviousEpisode(), isNull);
+    });
+
+    test('returns null when at first episode', () async {
+      final a = ep('a');
+      final b = ep('b');
+      await provider.playEpisode(a, queue: [a, b]);
+
+      expect(provider.getPreviousEpisode(), isNull);
+    });
+
+    test('returns previous episode', () async {
+      final a = ep('a');
+      final b = ep('b');
+      final c = ep('c');
+      await provider.playEpisode(b, queue: [a, b, c]);
+
+      expect(provider.getPreviousEpisode()?.id, 'a');
+    });
+
+    test('returns second-to-last when at last episode', () async {
+      final a = ep('a');
+      final b = ep('b');
+      final c = ep('c');
+      await provider.playEpisode(c, queue: [a, b, c]);
+
+      expect(provider.getPreviousEpisode()?.id, 'b');
+    });
+
+    test('returns correct previous after queue is reordered', () async {
+      final a = ep('a');
+      final b = ep('b');
+      final c = ep('c');
+      await provider.playEpisode(c, queue: [a, b, c]);
+      // Move a to end: reorderQueue(0, 3) → [b, c, a]
+      provider.reorderQueue(0, 3);
+
+      expect(provider.getPreviousEpisode()?.id, 'b');
+    });
+  });
+
+  // ==================== playEpisode — queue behaviour ====================
+
+  group('playEpisode — queue behaviour', () {
+    test('with queue param: replaces queue with provided list', () async {
+      provider.addToQueue(ep('old'));
+      final a = ep('a');
+      final b = ep('b');
+
+      await provider.playEpisode(a, queue: [a, b]);
+
+      expect(provider.queue.map((e) => e.id), ['a', 'b']);
+    });
+
+    test('without queue param: prepends episode when not already in queue',
+        () async {
+      provider.addToQueue(ep('b'));
+      provider.addToQueue(ep('c'));
+
+      await provider.playEpisode(ep('a'));
+
+      expect(provider.queue.first.id, 'a');
+      expect(provider.queue.length, 3);
+    });
+
+    test('without queue param: does not prepend if already in queue', () async {
+      final a = ep('a');
+      provider.addToQueue(a);
+
+      await provider.playEpisode(a);
+
+      expect(provider.queue.length, 1);
+    });
+
+    test('sets currentEpisode to the played episode', () async {
+      final a = ep('a');
+      await provider.playEpisode(a, queue: [a]);
+
+      expect(provider.currentEpisode?.id, 'a');
+    });
+
+    test('notifies listeners after playEpisode', () async {
+      int calls = 0;
+      provider.addListener(() => calls++);
+
+      await provider.playEpisode(ep('a'), queue: [ep('a')]);
+
+      expect(calls, greaterThan(0));
+    });
+  });
+
+  // ==================== combined: remove while navigating ====================
+
+  group('remove + navigation', () {
+    test('removing non-current episode shifts next correctly', () async {
+      final a = ep('a');
+      final b = ep('b');
+      final c = ep('c');
+      await provider.playEpisode(a, queue: [a, b, c]);
+
+      provider.removeFromQueue('b'); // remove the one after current
+
+      expect(provider.getNextEpisode()?.id, 'c');
+    });
+
+    test('removing current does not affect previous lookup', () async {
+      final a = ep('a');
+      final b = ep('b');
+      final c = ep('c');
+      await provider.playEpisode(b, queue: [a, b, c]);
+
+      provider.removeFromQueue('b'); // remove current
+
+      // b is gone from queue, indexWhere returns -1 → null
+      expect(provider.getPreviousEpisode(), isNull);
+      expect(provider.getNextEpisode(), isNull);
+    });
+  });
+}
+```
+
+### Inhalt von `klubradio_archivum/test/providers/episode_provider_queue_test.mocks.dart`
+```dart
+// Mocks generated by Mockito 5.4.6 from annotations
+// in klubradio_archivum/test/providers/episode_provider_queue_test.dart.
+// Do not manually edit this file.
+
+// ignore_for_file: no_leading_underscores_for_library_prefixes
+import 'dart:async' as _i6;
+
+import 'package:drift/drift.dart' as _i3;
+import 'package:drift/src/runtime/executor/stream_queries.dart' as _i5;
+import 'package:http/http.dart' as _i14;
+import 'package:just_audio/just_audio.dart' as _i8;
+import 'package:klubradio_archivum/db/app_database.dart' as _i4;
+import 'package:klubradio_archivum/models/episode.dart' as _i9;
+import 'package:klubradio_archivum/models/podcast.dart' as _i12;
+import 'package:klubradio_archivum/models/show_data.dart' as _i13;
+import 'package:klubradio_archivum/models/user_profile.dart' as _i2;
+import 'package:klubradio_archivum/services/api_service.dart' as _i10;
+import 'package:klubradio_archivum/services/audio_player_service.dart' as _i7;
+import 'package:mockito/mockito.dart' as _i1;
+import 'package:mockito/src/dummies.dart' as _i11;
+
+// ignore_for_file: type=lint
+// ignore_for_file: avoid_redundant_argument_values
+// ignore_for_file: avoid_setters_without_getters
+// ignore_for_file: comment_references
+// ignore_for_file: deprecated_member_use
+// ignore_for_file: deprecated_member_use_from_same_package
+// ignore_for_file: implementation_imports
+// ignore_for_file: invalid_use_of_visible_for_testing_member
+// ignore_for_file: must_be_immutable
+// ignore_for_file: prefer_const_constructors
+// ignore_for_file: unnecessary_parenthesis
+// ignore_for_file: camel_case_types
+// ignore_for_file: subtype_of_sealed_class
+// ignore_for_file: invalid_use_of_internal_member
+
+class _FakeUserProfile_0 extends _i1.SmartFake implements _i2.UserProfile {
+  _FakeUserProfile_0(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
+}
+
+class _FakeMigrationStrategy_1 extends _i1.SmartFake
+    implements _i3.MigrationStrategy {
+  _FakeMigrationStrategy_1(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
+}
+
+class _Fake$AppDatabaseManager_2 extends _i1.SmartFake
+    implements _i4.$AppDatabaseManager {
+  _Fake$AppDatabaseManager_2(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
+}
+
+class _Fake$SubscriptionsTable_3 extends _i1.SmartFake
+    implements _i4.$SubscriptionsTable {
+  _Fake$SubscriptionsTable_3(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
+}
+
+class _Fake$EpisodesTable_4 extends _i1.SmartFake
+    implements _i4.$EpisodesTable {
+  _Fake$EpisodesTable_4(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
+}
+
+class _Fake$SettingsTable_5 extends _i1.SmartFake
+    implements _i4.$SettingsTable {
+  _Fake$SettingsTable_5(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
+}
+
+class _FakeGeneratedDatabase_6 extends _i1.SmartFake
+    implements _i3.GeneratedDatabase {
+  _FakeGeneratedDatabase_6(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
+}
+
+class _FakeDriftDatabaseOptions_7 extends _i1.SmartFake
+    implements _i3.DriftDatabaseOptions {
+  _FakeDriftDatabaseOptions_7(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
+}
+
+class _FakeStreamQueryUpdateRules_8 extends _i1.SmartFake
+    implements _i3.StreamQueryUpdateRules {
+  _FakeStreamQueryUpdateRules_8(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
+}
+
+class _FakeDatabaseConnection_9 extends _i1.SmartFake
+    implements _i3.DatabaseConnection {
+  _FakeDatabaseConnection_9(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
+}
+
+class _FakeQueryExecutor_10 extends _i1.SmartFake implements _i3.QueryExecutor {
+  _FakeQueryExecutor_10(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
+}
+
+class _FakeStreamQueryStore_11 extends _i1.SmartFake
+    implements _i5.StreamQueryStore {
+  _FakeStreamQueryStore_11(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
+}
+
+class _FakeDatabaseConnectionUser_12 extends _i1.SmartFake
+    implements _i3.DatabaseConnectionUser {
+  _FakeDatabaseConnectionUser_12(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
+}
+
+class _FakeMigrator_13 extends _i1.SmartFake implements _i3.Migrator {
+  _FakeMigrator_13(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
+}
+
+class _FakeFuture_14<T> extends _i1.SmartFake implements _i6.Future<T> {
+  _FakeFuture_14(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
+}
+
+class _FakeInsertStatement_15<T1 extends _i3.Table, D1> extends _i1.SmartFake
+    implements _i3.InsertStatement<T1, D1> {
+  _FakeInsertStatement_15(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
+}
+
+class _FakeUpdateStatement_16<T extends _i3.Table, D> extends _i1.SmartFake
+    implements _i3.UpdateStatement<T, D> {
+  _FakeUpdateStatement_16(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
+}
+
+class _FakeSimpleSelectStatement_17<T1 extends _i3.HasResultSet, D>
+    extends _i1.SmartFake
+    implements _i3.SimpleSelectStatement<T1, D> {
+  _FakeSimpleSelectStatement_17(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
+}
+
+class _FakeJoinedSelectStatement_18<FirstT extends _i3.HasResultSet, FirstD>
+    extends _i1.SmartFake
+    implements _i3.JoinedSelectStatement<FirstT, FirstD> {
+  _FakeJoinedSelectStatement_18(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
+}
+
+class _FakeBaseSelectStatement_19<Row> extends _i1.SmartFake
+    implements _i3.BaseSelectStatement<Row> {
+  _FakeBaseSelectStatement_19(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
+}
+
+class _FakeDeleteStatement_20<T1 extends _i3.Table, D1> extends _i1.SmartFake
+    implements _i3.DeleteStatement<T1, D1> {
+  _FakeDeleteStatement_20(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
+}
+
+class _FakeSelectable_21<T> extends _i1.SmartFake implements _i3.Selectable<T> {
+  _FakeSelectable_21(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
+}
+
+class _FakeGenerationContext_22 extends _i1.SmartFake
+    implements _i3.GenerationContext {
+  _FakeGenerationContext_22(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
+}
+
+/// A class which mocks [AudioPlayerService].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockAudioPlayerService extends _i1.Mock
+    implements _i7.AudioPlayerService {
+  MockAudioPlayerService() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  _i6.Stream<bool> get bufferingStream =>
+      (super.noSuchMethod(
+            Invocation.getter(#bufferingStream),
+            returnValue: _i6.Stream<bool>.empty(),
+          )
+          as _i6.Stream<bool>);
+
+  @override
+  _i6.Stream<Duration> get positionStream =>
+      (super.noSuchMethod(
+            Invocation.getter(#positionStream),
+            returnValue: _i6.Stream<Duration>.empty(),
+          )
+          as _i6.Stream<Duration>);
+
+  @override
+  _i6.Stream<Duration> get bufferedPositionStream =>
+      (super.noSuchMethod(
+            Invocation.getter(#bufferedPositionStream),
+            returnValue: _i6.Stream<Duration>.empty(),
+          )
+          as _i6.Stream<Duration>);
+
+  @override
+  _i6.Stream<_i8.PlayerState> get playerStateStream =>
+      (super.noSuchMethod(
+            Invocation.getter(#playerStateStream),
+            returnValue: _i6.Stream<_i8.PlayerState>.empty(),
+          )
+          as _i6.Stream<_i8.PlayerState>);
+
+  @override
+  bool get isPlaying =>
+      (super.noSuchMethod(Invocation.getter(#isPlaying), returnValue: false)
+          as bool);
+
+  @override
+  _i6.Future<void> loadEpisode(
+    _i9.Episode? episode, {
+    bool? autoplay = false,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(#loadEpisode, [episode], {#autoplay: autoplay}),
+            returnValue: _i6.Future<void>.value(),
+            returnValueForMissingStub: _i6.Future<void>.value(),
+          )
+          as _i6.Future<void>);
+
+  @override
+  _i6.Future<void> togglePlayPause() =>
+      (super.noSuchMethod(
+            Invocation.method(#togglePlayPause, []),
+            returnValue: _i6.Future<void>.value(),
+            returnValueForMissingStub: _i6.Future<void>.value(),
+          )
+          as _i6.Future<void>);
+
+  @override
+  _i6.Future<void> stop() =>
+      (super.noSuchMethod(
+            Invocation.method(#stop, []),
+            returnValue: _i6.Future<void>.value(),
+            returnValueForMissingStub: _i6.Future<void>.value(),
+          )
+          as _i6.Future<void>);
+
+  @override
+  _i6.Future<void> seek(Duration? position) =>
+      (super.noSuchMethod(
+            Invocation.method(#seek, [position]),
+            returnValue: _i6.Future<void>.value(),
+            returnValueForMissingStub: _i6.Future<void>.value(),
+          )
+          as _i6.Future<void>);
+
+  @override
+  _i6.Future<void> setSpeed(double? speed) =>
+      (super.noSuchMethod(
+            Invocation.method(#setSpeed, [speed]),
+            returnValue: _i6.Future<void>.value(),
+            returnValueForMissingStub: _i6.Future<void>.value(),
+          )
+          as _i6.Future<void>);
+
+  @override
+  _i6.Future<void> setVolume(double? volume) =>
+      (super.noSuchMethod(
+            Invocation.method(#setVolume, [volume]),
+            returnValue: _i6.Future<void>.value(),
+            returnValueForMissingStub: _i6.Future<void>.value(),
+          )
+          as _i6.Future<void>);
+
+  @override
+  _i6.Future<void> dispose() =>
+      (super.noSuchMethod(
+            Invocation.method(#dispose, []),
+            returnValue: _i6.Future<void>.value(),
+            returnValueForMissingStub: _i6.Future<void>.value(),
+          )
+          as _i6.Future<void>);
+}
+
+/// A class which mocks [ApiService].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockApiService extends _i1.Mock implements _i10.ApiService {
+  MockApiService() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  String get supabaseUrl =>
+      (super.noSuchMethod(
+            Invocation.getter(#supabaseUrl),
+            returnValue: _i11.dummyValue<String>(
+              this,
+              Invocation.getter(#supabaseUrl),
+            ),
+          )
+          as String);
+
+  @override
+  String get supabaseKey =>
+      (super.noSuchMethod(
+            Invocation.getter(#supabaseKey),
+            returnValue: _i11.dummyValue<String>(
+              this,
+              Invocation.getter(#supabaseKey),
+            ),
+          )
+          as String);
+
+  @override
+  bool get hasValidCredentials =>
+      (super.noSuchMethod(
+            Invocation.getter(#hasValidCredentials),
+            returnValue: false,
+          )
+          as bool);
+
+  @override
+  _i6.Future<List<_i12.Podcast>> fetchLatestPodcasts({int? limit = 10}) =>
+      (super.noSuchMethod(
+            Invocation.method(#fetchLatestPodcasts, [], {#limit: limit}),
+            returnValue: _i6.Future<List<_i12.Podcast>>.value(<_i12.Podcast>[]),
+          )
+          as _i6.Future<List<_i12.Podcast>>);
+
+  @override
+  _i6.Future<List<_i12.Podcast>> fetchTrendingPodcasts({int? limit = 10}) =>
+      (super.noSuchMethod(
+            Invocation.method(#fetchTrendingPodcasts, [], {#limit: limit}),
+            returnValue: _i6.Future<List<_i12.Podcast>>.value(<_i12.Podcast>[]),
+          )
+          as _i6.Future<List<_i12.Podcast>>);
+
+  @override
+  _i6.Future<List<_i12.Podcast>> fetchRecommendedPodcasts({int? limit = 10}) =>
+      (super.noSuchMethod(
+            Invocation.method(#fetchRecommendedPodcasts, [], {#limit: limit}),
+            returnValue: _i6.Future<List<_i12.Podcast>>.value(<_i12.Podcast>[]),
+          )
+          as _i6.Future<List<_i12.Podcast>>);
+
+  @override
+  _i6.Future<List<_i9.Episode>> fetchEpisodesForPodcast(
+    String? podcastId, {
+    int? limit = 500,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(
+              #fetchEpisodesForPodcast,
+              [podcastId],
+              {#limit: limit},
+            ),
+            returnValue: _i6.Future<List<_i9.Episode>>.value(<_i9.Episode>[]),
+          )
+          as _i6.Future<List<_i9.Episode>>);
+
+  @override
+  _i6.Future<List<_i9.Episode>> fetchRecentEpisodes({int? limit = 8}) =>
+      (super.noSuchMethod(
+            Invocation.method(#fetchRecentEpisodes, [], {#limit: limit}),
+            returnValue: _i6.Future<List<_i9.Episode>>.value(<_i9.Episode>[]),
+          )
+          as _i6.Future<List<_i9.Episode>>);
+
+  @override
+  _i6.Future<List<_i12.Podcast>> searchPodcasts(String? query) =>
+      (super.noSuchMethod(
+            Invocation.method(#searchPodcasts, [query]),
+            returnValue: _i6.Future<List<_i12.Podcast>>.value(<_i12.Podcast>[]),
+          )
+          as _i6.Future<List<_i12.Podcast>>);
+
+  @override
+  _i6.Future<List<_i13.ShowData>> fetchTopShowsThisYear() =>
+      (super.noSuchMethod(
+            Invocation.method(#fetchTopShowsThisYear, []),
+            returnValue: _i6.Future<List<_i13.ShowData>>.value(
+              <_i13.ShowData>[],
+            ),
+          )
+          as _i6.Future<List<_i13.ShowData>>);
+
+  @override
+  _i6.Future<_i12.Podcast?> fetchPodcastById(String? podcastId) =>
+      (super.noSuchMethod(
+            Invocation.method(#fetchPodcastById, [podcastId]),
+            returnValue: _i6.Future<_i12.Podcast?>.value(),
+          )
+          as _i6.Future<_i12.Podcast?>);
+
+  @override
+  _i6.Future<_i2.UserProfile> fetchUserProfile(String? userId) =>
+      (super.noSuchMethod(
+            Invocation.method(#fetchUserProfile, [userId]),
+            returnValue: _i6.Future<_i2.UserProfile>.value(
+              _FakeUserProfile_0(
+                this,
+                Invocation.method(#fetchUserProfile, [userId]),
+              ),
+            ),
+          )
+          as _i6.Future<_i2.UserProfile>);
+
+  @override
+  _i6.Future<void> logPlayback({required String? episodeId}) =>
+      (super.noSuchMethod(
+            Invocation.method(#logPlayback, [], {#episodeId: episodeId}),
+            returnValue: _i6.Future<void>.value(),
+            returnValueForMissingStub: _i6.Future<void>.value(),
+          )
+          as _i6.Future<void>);
+
+  @override
+  void dispose() => super.noSuchMethod(
+    Invocation.method(#dispose, []),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  String getServerErrorMessage(_i14.Response? response) =>
+      (super.noSuchMethod(
+            Invocation.method(#getServerErrorMessage, [response]),
+            returnValue: _i11.dummyValue<String>(
+              this,
+              Invocation.method(#getServerErrorMessage, [response]),
+            ),
+          )
+          as String);
+}
+
+/// A class which mocks [AppDatabase].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockAppDatabase extends _i1.Mock implements _i4.AppDatabase {
+  MockAppDatabase() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  int get schemaVersion =>
+      (super.noSuchMethod(Invocation.getter(#schemaVersion), returnValue: 0)
+          as int);
+
+  @override
+  _i3.MigrationStrategy get migration =>
+      (super.noSuchMethod(
+            Invocation.getter(#migration),
+            returnValue: _FakeMigrationStrategy_1(
+              this,
+              Invocation.getter(#migration),
+            ),
+          )
+          as _i3.MigrationStrategy);
+
+  @override
+  _i4.$AppDatabaseManager get managers =>
+      (super.noSuchMethod(
+            Invocation.getter(#managers),
+            returnValue: _Fake$AppDatabaseManager_2(
+              this,
+              Invocation.getter(#managers),
+            ),
+          )
+          as _i4.$AppDatabaseManager);
+
+  @override
+  _i4.$SubscriptionsTable get subscriptions =>
+      (super.noSuchMethod(
+            Invocation.getter(#subscriptions),
+            returnValue: _Fake$SubscriptionsTable_3(
+              this,
+              Invocation.getter(#subscriptions),
+            ),
+          )
+          as _i4.$SubscriptionsTable);
+
+  @override
+  _i4.$EpisodesTable get episodes =>
+      (super.noSuchMethod(
+            Invocation.getter(#episodes),
+            returnValue: _Fake$EpisodesTable_4(
+              this,
+              Invocation.getter(#episodes),
+            ),
+          )
+          as _i4.$EpisodesTable);
+
+  @override
+  _i4.$SettingsTable get settings =>
+      (super.noSuchMethod(
+            Invocation.getter(#settings),
+            returnValue: _Fake$SettingsTable_5(
+              this,
+              Invocation.getter(#settings),
+            ),
+          )
+          as _i4.$SettingsTable);
+
+  @override
+  Iterable<_i3.TableInfo<_i3.Table, Object?>> get allTables =>
+      (super.noSuchMethod(
+            Invocation.getter(#allTables),
+            returnValue: <_i3.TableInfo<_i3.Table, Object?>>[],
+          )
+          as Iterable<_i3.TableInfo<_i3.Table, Object?>>);
+
+  @override
+  List<_i3.DatabaseSchemaEntity> get allSchemaEntities =>
+      (super.noSuchMethod(
+            Invocation.getter(#allSchemaEntities),
+            returnValue: <_i3.DatabaseSchemaEntity>[],
+          )
+          as List<_i3.DatabaseSchemaEntity>);
+
+  @override
+  _i3.GeneratedDatabase get attachedDatabase =>
+      (super.noSuchMethod(
+            Invocation.getter(#attachedDatabase),
+            returnValue: _FakeGeneratedDatabase_6(
+              this,
+              Invocation.getter(#attachedDatabase),
+            ),
+          )
+          as _i3.GeneratedDatabase);
+
+  @override
+  _i3.DriftDatabaseOptions get options =>
+      (super.noSuchMethod(
+            Invocation.getter(#options),
+            returnValue: _FakeDriftDatabaseOptions_7(
+              this,
+              Invocation.getter(#options),
+            ),
+          )
+          as _i3.DriftDatabaseOptions);
+
+  @override
+  _i3.StreamQueryUpdateRules get streamUpdateRules =>
+      (super.noSuchMethod(
+            Invocation.getter(#streamUpdateRules),
+            returnValue: _FakeStreamQueryUpdateRules_8(
+              this,
+              Invocation.getter(#streamUpdateRules),
+            ),
+          )
+          as _i3.StreamQueryUpdateRules);
+
+  @override
+  _i3.DatabaseConnection get connection =>
+      (super.noSuchMethod(
+            Invocation.getter(#connection),
+            returnValue: _FakeDatabaseConnection_9(
+              this,
+              Invocation.getter(#connection),
+            ),
+          )
+          as _i3.DatabaseConnection);
+
+  @override
+  _i3.SqlTypes get typeMapping =>
+      (super.noSuchMethod(
+            Invocation.getter(#typeMapping),
+            returnValue: _i11.dummyValue<_i3.SqlTypes>(
+              this,
+              Invocation.getter(#typeMapping),
+            ),
+          )
+          as _i3.SqlTypes);
+
+  @override
+  _i3.QueryExecutor get executor =>
+      (super.noSuchMethod(
+            Invocation.getter(#executor),
+            returnValue: _FakeQueryExecutor_10(
+              this,
+              Invocation.getter(#executor),
+            ),
+          )
+          as _i3.QueryExecutor);
+
+  @override
+  _i5.StreamQueryStore get streamQueries =>
+      (super.noSuchMethod(
+            Invocation.getter(#streamQueries),
+            returnValue: _FakeStreamQueryStore_11(
+              this,
+              Invocation.getter(#streamQueries),
+            ),
+          )
+          as _i5.StreamQueryStore);
+
+  @override
+  _i3.DatabaseConnectionUser get resolvedEngine =>
+      (super.noSuchMethod(
+            Invocation.getter(#resolvedEngine),
+            returnValue: _FakeDatabaseConnectionUser_12(
+              this,
+              Invocation.getter(#resolvedEngine),
+            ),
+          )
+          as _i3.DatabaseConnectionUser);
+
+  @override
+  _i6.Future<int> touchEpisode(String? id) =>
+      (super.noSuchMethod(
+            Invocation.method(#touchEpisode, [id]),
+            returnValue: _i6.Future<int>.value(0),
+          )
+          as _i6.Future<int>);
+
+  @override
+  _i6.Future<int> touchSubscription(String? podcastId) =>
+      (super.noSuchMethod(
+            Invocation.method(#touchSubscription, [podcastId]),
+            returnValue: _i6.Future<int>.value(0),
+          )
+          as _i6.Future<int>);
+
+  @override
+  _i3.Migrator createMigrator() =>
+      (super.noSuchMethod(
+            Invocation.method(#createMigrator, []),
+            returnValue: _FakeMigrator_13(
+              this,
+              Invocation.method(#createMigrator, []),
+            ),
+          )
+          as _i3.Migrator);
+
+  @override
+  _i6.Future<void> beforeOpen(
+    _i3.QueryExecutor? executor,
+    _i3.OpeningDetails? details,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#beforeOpen, [executor, details]),
+            returnValue: _i6.Future<void>.value(),
+            returnValueForMissingStub: _i6.Future<void>.value(),
+          )
+          as _i6.Future<void>);
+
+  @override
+  _i6.Future<void> close() =>
+      (super.noSuchMethod(
+            Invocation.method(#close, []),
+            returnValue: _i6.Future<void>.value(),
+            returnValueForMissingStub: _i6.Future<void>.value(),
+          )
+          as _i6.Future<void>);
+
+  @override
+  _i6.Future<Ret> computeWithDatabase<Ret, DB extends _i3.GeneratedDatabase>({
+    required _i6.FutureOr<Ret> Function(DB)? computation,
+    required DB Function(_i3.DatabaseConnection)? connect,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(#computeWithDatabase, [], {
+              #computation: computation,
+              #connect: connect,
+            }),
+            returnValue:
+                _i11.ifNotNull(
+                  _i11.dummyValueOrNull<Ret>(
+                    this,
+                    Invocation.method(#computeWithDatabase, [], {
+                      #computation: computation,
+                      #connect: connect,
+                    }),
+                  ),
+                  (Ret v) => _i6.Future<Ret>.value(v),
+                ) ??
+                _FakeFuture_14<Ret>(
+                  this,
+                  Invocation.method(#computeWithDatabase, [], {
+                    #computation: computation,
+                    #connect: connect,
+                  }),
+                ),
+          )
+          as _i6.Future<Ret>);
+
+  @override
+  _i6.Stream<T> createStream<T extends Object>(
+    _i5.QueryStreamFetcher<T>? stmt,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#createStream, [stmt]),
+            returnValue: _i6.Stream<T>.empty(),
+          )
+          as _i6.Stream<T>);
+
+  @override
+  T alias<T, D>(_i3.ResultSetImplementation<T, D>? table, String? alias) =>
+      (super.noSuchMethod(
+            Invocation.method(#alias, [table, alias]),
+            returnValue: _i11.dummyValue<T>(
+              this,
+              Invocation.method(#alias, [table, alias]),
+            ),
+          )
+          as T);
+
+  @override
+  void markTablesUpdated(Iterable<_i3.TableInfo<_i3.Table, dynamic>>? tables) =>
+      super.noSuchMethod(
+        Invocation.method(#markTablesUpdated, [tables]),
+        returnValueForMissingStub: null,
+      );
+
+  @override
+  void notifyUpdates(Set<_i3.TableUpdate>? updates) => super.noSuchMethod(
+    Invocation.method(#notifyUpdates, [updates]),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  _i6.Stream<Set<_i3.TableUpdate>> tableUpdates([
+    _i3.TableUpdateQuery? query = const _i3.TableUpdateQuery.any(),
+  ]) =>
+      (super.noSuchMethod(
+            Invocation.method(#tableUpdates, [query]),
+            returnValue: _i6.Stream<Set<_i3.TableUpdate>>.empty(),
+          )
+          as _i6.Stream<Set<_i3.TableUpdate>>);
+
+  @override
+  _i6.Future<T> doWhenOpened<T>(
+    _i6.FutureOr<T> Function(_i3.QueryExecutor)? fn,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#doWhenOpened, [fn]),
+            returnValue:
+                _i11.ifNotNull(
+                  _i11.dummyValueOrNull<T>(
+                    this,
+                    Invocation.method(#doWhenOpened, [fn]),
+                  ),
+                  (T v) => _i6.Future<T>.value(v),
+                ) ??
+                _FakeFuture_14<T>(this, Invocation.method(#doWhenOpened, [fn])),
+          )
+          as _i6.Future<T>);
+
+  @override
+  _i3.InsertStatement<T, D> into<T extends _i3.Table, D>(
+    _i3.TableInfo<T, D>? table,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#into, [table]),
+            returnValue: _FakeInsertStatement_15<T, D>(
+              this,
+              Invocation.method(#into, [table]),
+            ),
+          )
+          as _i3.InsertStatement<T, D>);
+
+  @override
+  _i3.UpdateStatement<Tbl, R> update<Tbl extends _i3.Table, R>(
+    _i3.TableInfo<Tbl, R>? table,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#update, [table]),
+            returnValue: _FakeUpdateStatement_16<Tbl, R>(
+              this,
+              Invocation.method(#update, [table]),
+            ),
+          )
+          as _i3.UpdateStatement<Tbl, R>);
+
+  @override
+  _i3.SimpleSelectStatement<T, R> select<T extends _i3.HasResultSet, R>(
+    _i3.ResultSetImplementation<T, R>? table, {
+    bool? distinct = false,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(#select, [table], {#distinct: distinct}),
+            returnValue: _FakeSimpleSelectStatement_17<T, R>(
+              this,
+              Invocation.method(#select, [table], {#distinct: distinct}),
+            ),
+          )
+          as _i3.SimpleSelectStatement<T, R>);
+
+  @override
+  _i3.JoinedSelectStatement<T, R> selectOnly<T extends _i3.HasResultSet, R>(
+    _i3.ResultSetImplementation<T, R>? table, {
+    bool? distinct = false,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(#selectOnly, [table], {#distinct: distinct}),
+            returnValue: _FakeJoinedSelectStatement_18<T, R>(
+              this,
+              Invocation.method(#selectOnly, [table], {#distinct: distinct}),
+            ),
+          )
+          as _i3.JoinedSelectStatement<T, R>);
+
+  @override
+  _i3.BaseSelectStatement<_i3.TypedResult> selectExpressions(
+    Iterable<_i3.Expression<Object>>? columns,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#selectExpressions, [columns]),
+            returnValue: _FakeBaseSelectStatement_19<_i3.TypedResult>(
+              this,
+              Invocation.method(#selectExpressions, [columns]),
+            ),
+          )
+          as _i3.BaseSelectStatement<_i3.TypedResult>);
+
+  @override
+  _i3.DeleteStatement<T, D> delete<T extends _i3.Table, D>(
+    _i3.TableInfo<T, D>? table,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#delete, [table]),
+            returnValue: _FakeDeleteStatement_20<T, D>(
+              this,
+              Invocation.method(#delete, [table]),
+            ),
+          )
+          as _i3.DeleteStatement<T, D>);
+
+  @override
+  _i6.Future<int> customUpdate(
+    String? query, {
+    List<_i3.Variable<Object>>? variables = const [],
+    Set<_i3.ResultSetImplementation<dynamic, dynamic>>? updates,
+    _i3.UpdateKind? updateKind,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(
+              #customUpdate,
+              [query],
+              {
+                #variables: variables,
+                #updates: updates,
+                #updateKind: updateKind,
+              },
+            ),
+            returnValue: _i6.Future<int>.value(0),
+          )
+          as _i6.Future<int>);
+
+  @override
+  _i6.Future<int> customInsert(
+    String? query, {
+    List<_i3.Variable<Object>>? variables = const [],
+    Set<_i3.ResultSetImplementation<dynamic, dynamic>>? updates,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(
+              #customInsert,
+              [query],
+              {#variables: variables, #updates: updates},
+            ),
+            returnValue: _i6.Future<int>.value(0),
+          )
+          as _i6.Future<int>);
+
+  @override
+  _i6.Future<List<_i3.QueryRow>> customWriteReturning(
+    String? query, {
+    List<_i3.Variable<Object>>? variables = const [],
+    Set<_i3.ResultSetImplementation<dynamic, dynamic>>? updates,
+    _i3.UpdateKind? updateKind,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(
+              #customWriteReturning,
+              [query],
+              {
+                #variables: variables,
+                #updates: updates,
+                #updateKind: updateKind,
+              },
+            ),
+            returnValue: _i6.Future<List<_i3.QueryRow>>.value(<_i3.QueryRow>[]),
+          )
+          as _i6.Future<List<_i3.QueryRow>>);
+
+  @override
+  _i3.Selectable<_i3.QueryRow> customSelect(
+    String? query, {
+    List<_i3.Variable<Object>>? variables = const [],
+    Set<_i3.ResultSetImplementation<dynamic, dynamic>>? readsFrom = const {},
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(
+              #customSelect,
+              [query],
+              {#variables: variables, #readsFrom: readsFrom},
+            ),
+            returnValue: _FakeSelectable_21<_i3.QueryRow>(
+              this,
+              Invocation.method(
+                #customSelect,
+                [query],
+                {#variables: variables, #readsFrom: readsFrom},
+              ),
+            ),
+          )
+          as _i3.Selectable<_i3.QueryRow>);
+
+  @override
+  _i3.Selectable<_i3.QueryRow> customSelectQuery(
+    String? query, {
+    List<_i3.Variable<Object>>? variables = const [],
+    Set<_i3.ResultSetImplementation<dynamic, dynamic>>? readsFrom = const {},
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(
+              #customSelectQuery,
+              [query],
+              {#variables: variables, #readsFrom: readsFrom},
+            ),
+            returnValue: _FakeSelectable_21<_i3.QueryRow>(
+              this,
+              Invocation.method(
+                #customSelectQuery,
+                [query],
+                {#variables: variables, #readsFrom: readsFrom},
+              ),
+            ),
+          )
+          as _i3.Selectable<_i3.QueryRow>);
+
+  @override
+  _i6.Future<void> customStatement(String? statement, [List<dynamic>? args]) =>
+      (super.noSuchMethod(
+            Invocation.method(#customStatement, [statement, args]),
+            returnValue: _i6.Future<void>.value(),
+            returnValueForMissingStub: _i6.Future<void>.value(),
+          )
+          as _i6.Future<void>);
+
+  @override
+  _i6.Future<T> transaction<T>(
+    _i6.Future<T> Function()? action, {
+    bool? requireNew = false,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(
+              #transaction,
+              [action],
+              {#requireNew: requireNew},
+            ),
+            returnValue:
+                _i11.ifNotNull(
+                  _i11.dummyValueOrNull<T>(
+                    this,
+                    Invocation.method(
+                      #transaction,
+                      [action],
+                      {#requireNew: requireNew},
+                    ),
+                  ),
+                  (T v) => _i6.Future<T>.value(v),
+                ) ??
+                _FakeFuture_14<T>(
+                  this,
+                  Invocation.method(
+                    #transaction,
+                    [action],
+                    {#requireNew: requireNew},
+                  ),
+                ),
+          )
+          as _i6.Future<T>);
+
+  @override
+  _i6.Future<T> exclusively<T>(_i6.Future<T> Function()? action) =>
+      (super.noSuchMethod(
+            Invocation.method(#exclusively, [action]),
+            returnValue:
+                _i11.ifNotNull(
+                  _i11.dummyValueOrNull<T>(
+                    this,
+                    Invocation.method(#exclusively, [action]),
+                  ),
+                  (T v) => _i6.Future<T>.value(v),
+                ) ??
+                _FakeFuture_14<T>(
+                  this,
+                  Invocation.method(#exclusively, [action]),
+                ),
+          )
+          as _i6.Future<T>);
+
+  @override
+  _i6.Future<void> batch(_i6.FutureOr<void> Function(_i3.Batch)? runInBatch) =>
+      (super.noSuchMethod(
+            Invocation.method(#batch, [runInBatch]),
+            returnValue: _i6.Future<void>.value(),
+            returnValueForMissingStub: _i6.Future<void>.value(),
+          )
+          as _i6.Future<void>);
+
+  @override
+  _i6.Future<T> runWithInterceptor<T>(
+    _i6.Future<T> Function()? action, {
+    required _i3.QueryInterceptor? interceptor,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(
+              #runWithInterceptor,
+              [action],
+              {#interceptor: interceptor},
+            ),
+            returnValue:
+                _i11.ifNotNull(
+                  _i11.dummyValueOrNull<T>(
+                    this,
+                    Invocation.method(
+                      #runWithInterceptor,
+                      [action],
+                      {#interceptor: interceptor},
+                    ),
+                  ),
+                  (T v) => _i6.Future<T>.value(v),
+                ) ??
+                _FakeFuture_14<T>(
+                  this,
+                  Invocation.method(
+                    #runWithInterceptor,
+                    [action],
+                    {#interceptor: interceptor},
+                  ),
+                ),
+          )
+          as _i6.Future<T>);
+
+  @override
+  _i3.GenerationContext $write(
+    _i3.Component? component, {
+    bool? hasMultipleTables,
+    int? startIndex,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(
+              #$write,
+              [component],
+              {#hasMultipleTables: hasMultipleTables, #startIndex: startIndex},
+            ),
+            returnValue: _FakeGenerationContext_22(
+              this,
+              Invocation.method(
+                #$write,
+                [component],
+                {
+                  #hasMultipleTables: hasMultipleTables,
+                  #startIndex: startIndex,
+                },
+              ),
+            ),
+          )
+          as _i3.GenerationContext);
+
+  @override
+  _i3.GenerationContext $writeInsertable(
+    _i3.TableInfo<_i3.Table, dynamic>? table,
+    _i3.Insertable<dynamic>? insertable, {
+    int? startIndex,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(
+              #$writeInsertable,
+              [table, insertable],
+              {#startIndex: startIndex},
+            ),
+            returnValue: _FakeGenerationContext_22(
+              this,
+              Invocation.method(
+                #$writeInsertable,
+                [table, insertable],
+                {#startIndex: startIndex},
+              ),
+            ),
+          )
+          as _i3.GenerationContext);
+
+  @override
+  String $expandVar(int? start, int? amount) =>
+      (super.noSuchMethod(
+            Invocation.method(#$expandVar, [start, amount]),
+            returnValue: _i11.dummyValue<String>(
+              this,
+              Invocation.method(#$expandVar, [start, amount]),
+            ),
+          )
+          as String);
+}
+```
+
+### Inhalt von `klubradio_archivum/test/providers/podcast_provider_search_test.dart`
+```dart
+// test/providers/podcast_provider_search_test.dart
+//
+// Tests for PodcastProvider search functionality:
+//   - searchPodcasts: delegates to ApiService, handles errors, adds to recent
+//   - addRecentSearch: dedup, ordering, max limit, empty/whitespace guard
+//   - recentSearches: unmodifiable, initial state
+
+import 'package:flutter_test/flutter_test.dart';
+import 'package:klubradio_archivum/models/episode.dart';
+import 'package:klubradio_archivum/models/podcast.dart';
+import 'package:klubradio_archivum/providers/podcast_provider.dart';
+import 'package:klubradio_archivum/providers/download_provider.dart';
+import 'package:klubradio_archivum/providers/profile_provider.dart';
+import 'package:klubradio_archivum/services/api_service.dart';
+import 'package:klubradio_archivum/services/api_cache_service.dart';
+import 'package:klubradio_archivum/screens/utils/constants.dart' as constants;
+
+// ==================== Minimal stubs ====================
+
+/// Stub ApiService where searchPodcasts can be configured per test.
+class _StubApiService extends ApiService {
+  _StubApiService() : super(cacheService: _StubCacheService());
+
+  Future<List<Podcast>> Function(String)? searchHandler;
+
+  @override
+  bool get hasValidCredentials => false; // avoid real HTTP
+
+  @override
+  Future<List<Podcast>> searchPodcasts(String query) async {
+    if (searchHandler != null) return searchHandler!(query);
+    // Default: return mock data filtered by query (same as offline fallback)
+    return super.searchPodcasts(query);
+  }
+}
+
+class _StubCacheService extends ApiCacheService {
+  @override
+  Future<dynamic> get(String key) async => null;
+  @override
+  Future<void> save(String key, dynamic data, {Duration? expiry}) async {}
+}
+
+/// Stub ProfileProvider that doesn't require ProfileRepository.
+class _StubProfileProvider extends ProfileProvider {
+  _StubProfileProvider() : super();
+}
+
+// ==================== Helpers ====================
+
+Podcast _pod(String id, {String title = ''}) => Podcast(
+      id: id,
+      title: title.isEmpty ? 'Podcast $id' : title,
+      description: '',
+      coverImageUrl: '',
+      episodeCount: 0,
+      hosts: const [],
+    );
+
+// ==================== Tests ====================
+
+void main() {
+  late _StubApiService apiService;
+  late _StubCacheService cacheService;
+  late PodcastProvider provider;
+  // Track notifyListeners calls
+  int notifyCount = 0;
+
+  setUp(() {
+    apiService = _StubApiService();
+    cacheService = _StubCacheService();
+    // PodcastProvider needs a DownloadProvider which requires native plugins.
+    // We can't instantiate it. But PodcastProvider only stores the reference
+    // and search tests never touch it, so we pass a minimal value.
+    // Using a workaround: create PodcastProvider with required deps.
+    // DownloadProvider can't be instantiated without DB, so we use a trick:
+    // PodcastProvider constructor only assigns fields, no init logic.
+
+    // Since we can't create DownloadProvider without native deps,
+    // we test search logic at the unit level by checking ApiService calls
+    // and recentSearches directly. PodcastProvider's search methods only
+    // use _apiService and _recentSearches.
+  });
+
+  group('PodcastProvider.addRecentSearch & recentSearches', () {
+    // We need a real PodcastProvider instance. Since DownloadProvider can't
+    // be created, let's test the search logic via ApiService.searchPodcasts
+    // tests (already covered) and focus on the addRecentSearch logic here.
+    //
+    // For addRecentSearch testing, we test the actual PodcastProvider behavior
+    // using the offline mock path (hasValidCredentials = false).
+
+    late PodcastProvider provider;
+
+    setUp(() {
+      apiService = _StubApiService();
+      cacheService = _StubCacheService();
+      // We need to work around the DownloadProvider dependency.
+      // PodcastProvider stores it but search never uses it.
+      // Use Dart's noSuchMethod to create a stub.
+      provider = PodcastProvider(
+        apiService: apiService,
+        downloadProvider: _FakeDownloadProvider(),
+        profileProvider: _StubProfileProvider(),
+        apiCacheService: cacheService,
+      );
+      notifyCount = 0;
+      provider.addListener(() => notifyCount++);
+    });
+
+    test('recentSearches is initially empty', () {
+      expect(provider.recentSearches, isEmpty);
+    });
+
+    test('recentSearches is unmodifiable', () {
+      expect(
+        () => provider.recentSearches.add('hack'),
+        throwsUnsupportedError,
+      );
+    });
+
+    test('addRecentSearch adds a term and notifies', () {
+      provider.addRecentSearch('Klubrádió');
+      expect(provider.recentSearches, ['Klubrádió']);
+      expect(notifyCount, 1);
+    });
+
+    test('addRecentSearch trims whitespace', () {
+      provider.addRecentSearch('  lényeg  ');
+      // The stored value should be trimmed
+      expect(provider.recentSearches.first, 'lényeg');
+    });
+
+    test('addRecentSearch ignores empty/whitespace-only input', () {
+      provider.addRecentSearch('');
+      provider.addRecentSearch('   ');
+      provider.addRecentSearch('\t');
+      expect(provider.recentSearches, isEmpty);
+      expect(notifyCount, 0);
+    });
+
+    test('addRecentSearch moves duplicate to front (MRU order)', () {
+      provider.addRecentSearch('alpha');
+      provider.addRecentSearch('beta');
+      provider.addRecentSearch('gamma');
+      expect(provider.recentSearches, ['gamma', 'beta', 'alpha']);
+
+      // Re-add 'alpha' — should move to front, not duplicate
+      provider.addRecentSearch('alpha');
+      expect(provider.recentSearches, ['alpha', 'gamma', 'beta']);
+      // No duplicates
+      expect(
+        provider.recentSearches.where((s) => s == 'alpha').length,
+        1,
+      );
+    });
+
+    test('addRecentSearch respects maxRecentSearches limit', () {
+      // Fill to max
+      for (int i = 0; i < constants.maxRecentSearches + 5; i++) {
+        provider.addRecentSearch('search-$i');
+      }
+      expect(provider.recentSearches.length, constants.maxRecentSearches);
+      // Most recent should be first
+      final lastAdded = constants.maxRecentSearches + 5 - 1;
+      expect(provider.recentSearches.first, 'search-$lastAdded');
+    });
+
+    test('addRecentSearch evicts oldest when exceeding limit', () {
+      for (int i = 0; i < constants.maxRecentSearches; i++) {
+        provider.addRecentSearch('term-$i');
+      }
+      // 'term-0' is the oldest
+      expect(provider.recentSearches.last, 'term-0');
+
+      // Add one more — 'term-0' should be evicted
+      provider.addRecentSearch('new-term');
+      expect(provider.recentSearches.first, 'new-term');
+      expect(provider.recentSearches.length, constants.maxRecentSearches);
+      expect(provider.recentSearches.contains('term-0'), isFalse);
+    });
+
+    test('addRecentSearch preserves order for unique terms', () {
+      provider.addRecentSearch('one');
+      provider.addRecentSearch('two');
+      provider.addRecentSearch('three');
+      expect(provider.recentSearches, ['three', 'two', 'one']);
+    });
+  });
+
+  group('PodcastProvider.searchPodcasts', () {
+    late PodcastProvider provider;
+
+    setUp(() {
+      apiService = _StubApiService();
+      cacheService = _StubCacheService();
+      provider = PodcastProvider(
+        apiService: apiService,
+        downloadProvider: _FakeDownloadProvider(),
+        profileProvider: _StubProfileProvider(),
+        apiCacheService: cacheService,
+      );
+    });
+
+    test('delegates to ApiService and returns results', () async {
+      apiService.searchHandler = (query) async => [
+            _pod('3', title: 'A lényeg'),
+            _pod('14', title: 'Esti gyors'),
+          ];
+
+      final results = await provider.searchPodcasts('lényeg');
+      expect(results, hasLength(2));
+      expect(results.first.title, 'A lényeg');
+    });
+
+    test('adds query to recent searches', () async {
+      apiService.searchHandler = (_) async => [];
+
+      await provider.searchPodcasts('test query');
+      expect(provider.recentSearches, contains('test query'));
+    });
+
+    test('returns empty list on API error (does not throw)', () async {
+      apiService.searchHandler = (_) => throw ApiException('Server error');
+
+      final results = await provider.searchPodcasts('failing');
+      expect(results, isEmpty);
+    });
+
+    test('still adds to recent searches even on error', () async {
+      apiService.searchHandler = (_) => throw ApiException('Error');
+
+      await provider.searchPodcasts('error-query');
+      expect(provider.recentSearches, contains('error-query'));
+    });
+
+    test('uses offline mock data when credentials invalid', () async {
+      // _StubApiService has hasValidCredentials = false
+      // ApiService.searchPodcasts will filter _mockPodcasts() by query
+      final results = await provider.searchPodcasts('esti');
+      // 'Esti gyors' is in mock data
+      expect(results, isNotEmpty);
+      expect(results.first.id, 'esti-gyors');
+    });
+
+    test('returns empty for blank query via offline path', () async {
+      final results = await provider.searchPodcasts('   ');
+      expect(results, isEmpty);
+    });
+  });
+}
+
+/// Fake DownloadProvider that extends it with noSuchMethod to avoid
+/// needing real AppDatabase/EpisodeProvider constructors.
+class _FakeDownloadProvider extends Fake implements DownloadProvider {}
+```
+
 ### Inhalt von `klubradio_archivum/test/screens/podcast_detail_screen_test.dart`
 ```dart
 // test/screens/podcast_detail_screen_test.dart
@@ -17097,6 +19129,143 @@ void main() {
       ];
       expect(values.toSet().length, 1,
           reason: 'All platform capabilities should be consistent');
+    });
+  });
+}
+```
+
+### Inhalt von `klubradio_archivum/test/screens/widgets/queue_sheet_test.dart`
+```dart
+// test/screens/widgets/queue_sheet_test.dart
+//
+// Critical widget tests for the QueueSheet delete feature.
+//
+// TDD flow:
+//   1. Run these tests → they FAIL (QueueSheet doesn't exist yet)
+//   2. Extract _QueueSheet → public QueueSheet with a delete button
+//   3. Run again → all green
+//
+// These tests CAN run under `flutter test` because:
+//   - AudioPlayerService is fully mocked (no native just_audio.AudioPlayer created)
+//   - QueueSheet has no background_downloader dependency
+//   - Localization is configured via AppLocalizations.delegate
+
+import 'dart:async';
+
+import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:just_audio/just_audio.dart';
+import 'package:mockito/mockito.dart';
+
+import 'package:klubradio_archivum/l10n/app_localizations.dart';
+import 'package:klubradio_archivum/models/episode.dart';
+import 'package:klubradio_archivum/providers/episode_provider.dart';
+import 'package:klubradio_archivum/screens/widgets/stateful/queue_sheet.dart';
+
+import '../../providers/episode_provider_queue_test.mocks.dart';
+
+void main() {
+  Episode ep(String id) => Episode(
+        id: id,
+        podcastId: 'pod-1',
+        title: 'Episode $id',
+        description: 'Desc',
+        audioUrl: 'https://example.com/$id.mp3',
+        publishedAt: DateTime(2024, 1, 1),
+        showDate: '2024-01-01',
+        duration: const Duration(minutes: 30),
+      );
+
+  late MockAudioPlayerService mockAudio;
+  late MockApiService mockApi;
+  late MockAppDatabase mockDb;
+  late StreamController<Duration> positionCtrl;
+  late StreamController<PlayerState> playerStateCtrl;
+  late StreamController<bool> bufferingCtrl;
+  late EpisodeProvider provider;
+
+  setUp(() {
+    positionCtrl = StreamController<Duration>.broadcast();
+    playerStateCtrl = StreamController<PlayerState>.broadcast();
+    bufferingCtrl = StreamController<bool>.broadcast();
+
+    mockAudio = MockAudioPlayerService();
+    mockApi = MockApiService();
+    mockDb = MockAppDatabase();
+
+    when(mockAudio.positionStream).thenAnswer((_) => positionCtrl.stream);
+    when(mockAudio.playerStateStream)
+        .thenAnswer((_) => playerStateCtrl.stream);
+    when(mockAudio.bufferingStream).thenAnswer((_) => bufferingCtrl.stream);
+    when(mockAudio.isPlaying).thenReturn(false);
+    when(mockAudio.totalDuration).thenReturn(null);
+    when(mockAudio.loadEpisode(any)).thenAnswer((_) async {});
+
+    provider = EpisodeProvider(
+      apiService: mockApi,
+      audioPlayerService: mockAudio,
+      db: mockDb,
+    );
+  });
+
+  tearDown(() async {
+    await positionCtrl.close();
+    await playerStateCtrl.close();
+    await bufferingCtrl.close();
+    await provider.dispose();
+  });
+
+  Widget buildSheet() => MaterialApp(
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Scaffold(body: QueueSheet(provider: provider)),
+      );
+
+  group('QueueSheet — remove button', () {
+    testWidgets('shows one delete button per episode', (tester) async {
+      provider.addToQueue(ep('a'));
+      provider.addToQueue(ep('b'));
+      provider.addToQueue(ep('c'));
+
+      await tester.pumpWidget(buildSheet());
+      await tester.pumpAndSettle();
+
+      expect(find.byIcon(Icons.delete_outline), findsNWidgets(3));
+    });
+
+    testWidgets('tapping delete removes the correct episode from provider',
+        (tester) async {
+      provider.addToQueue(ep('a'));
+      provider.addToQueue(ep('b'));
+      provider.addToQueue(ep('c'));
+
+      await tester.pumpWidget(buildSheet());
+      await tester.pumpAndSettle();
+
+      // Delete the first item ('a')
+      await tester.tap(find.byIcon(Icons.delete_outline).first);
+      await tester.pump();
+
+      expect(provider.queue.map((e) => e.id), ['b', 'c']);
+    });
+
+    testWidgets('delete button is absent for the currently playing episode',
+        (tester) async {
+      final a = ep('a');
+      final b = ep('b');
+      final c = ep('c');
+      await provider.playEpisode(a, queue: [a, b, c]);
+
+      await tester.pumpWidget(buildSheet());
+      await tester.pumpAndSettle();
+
+      // 'a' is playing → no delete; 'b' and 'c' have delete buttons
+      expect(find.byIcon(Icons.delete_outline), findsNWidgets(2));
     });
   });
 }
