@@ -121,7 +121,7 @@ class EpisodeProvider extends ChangeNotifier {
     bool preferLocal = true,
   }) async {
     if (queue != null) {
-      _queue = queue;
+      _queue = List<model.Episode>.of(queue);
     } else if (!_queue.any((model.Episode item) => item.id == episode.id)) {
       _queue.insert(0, episode);
     }
