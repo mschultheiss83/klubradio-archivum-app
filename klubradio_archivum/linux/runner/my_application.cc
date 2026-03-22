@@ -1,5 +1,6 @@
 #include "my_application.h"
 
+#include <locale.h>
 #include <flutter_linux/flutter_linux.h>
 #ifdef GDK_WINDOWING_X11
 #include <gdk/gdkx.h>
@@ -97,11 +98,11 @@ static gboolean my_application_local_command_line(GApplication* application, gch
 
 // Implements GApplication::startup.
 static void my_application_startup(GApplication* application) {
-  //MyApplication* self = MY_APPLICATION(object);
-
-  // Perform any actions required at application startup.
-
+  // GTK's startup calls gtk_init() → setlocale(LC_ALL, "") which resets
+  // LC_NUMERIC to the system locale (e.g. de_DE, hu_HU). MPV requires
+  // LC_NUMERIC=C for correct float parsing, so we restore it afterwards.
   G_APPLICATION_CLASS(my_application_parent_class)->startup(application);
+  setlocale(LC_NUMERIC, "C");
 }
 
 // Implements GApplication::shutdown.
