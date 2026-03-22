@@ -9,6 +9,7 @@ import 'package:klubradio_archivum/screens/widgets/stateless/platform_utils.dart
 class SubscriptionProvider extends ChangeNotifier {
   SubscriptionProvider({
     required this.subscriptionsDao,
+    required this.settingsDao,
     required this.downloadProvider,
   }) {
     _isSubscriptionsSupported = PlatformUtils.supportsSubscriptions;
@@ -17,6 +18,7 @@ class SubscriptionProvider extends ChangeNotifier {
   }
 
   final SubscriptionsDao subscriptionsDao;
+  final SettingsDao settingsDao;
   DownloadProvider downloadProvider; // Make it non-final to allow updating
 
   Subscription? _currentSubscription;
@@ -61,10 +63,16 @@ class SubscriptionProvider extends ChangeNotifier {
     _busy = true;
     notifyListeners();
     try {
+      int? autoDownloadDefault;
+      if (!isSubscribed) {
+        final settings = await settingsDao.getOne();
+        autoDownloadDefault =
+            settings?.keepLatestN ?? constants.defaultAutoDownloadCount;
+      }
       await subscriptionsDao.toggleSubscribe(
         podcastId: podcastId,
         active: !isSubscribed,
-        autoDownloadN: !isSubscribed ? constants.defaultAutoDownloadCount : null,
+        autoDownloadN: autoDownloadDefault,
       );
       _currentSubscription = await subscriptionsDao.getById(podcastId);
       debugPrint(

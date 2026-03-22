@@ -8001,6 +8001,7 @@ class _KlubradioArchivumAppState extends State<KlubradioArchivumApp> {
         ChangeNotifierProxyProvider<DownloadProvider, SubscriptionProvider>(
           create: (ctx) => SubscriptionProvider(
             subscriptionsDao: ctx.read<SubscriptionsDao>(),
+            settingsDao: SettingsDao(ctx.read<AppDatabase>()),
             downloadProvider: ctx.read<DownloadProvider>(),
           ),
           update: (context, downloadProvider, previous) {
@@ -8010,6 +8011,7 @@ class _KlubradioArchivumAppState extends State<KlubradioArchivumApp> {
             }
             return SubscriptionProvider(
               subscriptionsDao: context.read<SubscriptionsDao>(),
+              settingsDao: SettingsDao(context.read<AppDatabase>()),
               downloadProvider: downloadProvider,
             );
           },
@@ -9513,6 +9515,7 @@ import 'package:klubradio_archivum/screens/widgets/stateless/platform_utils.dart
 class SubscriptionProvider extends ChangeNotifier {
   SubscriptionProvider({
     required this.subscriptionsDao,
+    required this.settingsDao,
     required this.downloadProvider,
   }) {
     _isSubscriptionsSupported = PlatformUtils.supportsSubscriptions;
@@ -9521,6 +9524,7 @@ class SubscriptionProvider extends ChangeNotifier {
   }
 
   final SubscriptionsDao subscriptionsDao;
+  final SettingsDao settingsDao;
   DownloadProvider downloadProvider; // Make it non-final to allow updating
 
   Subscription? _currentSubscription;
@@ -9565,10 +9569,16 @@ class SubscriptionProvider extends ChangeNotifier {
     _busy = true;
     notifyListeners();
     try {
+      int? autoDownloadDefault;
+      if (!isSubscribed) {
+        final settings = await settingsDao.getOne();
+        autoDownloadDefault =
+            settings?.keepLatestN ?? constants.defaultAutoDownloadCount;
+      }
       await subscriptionsDao.toggleSubscribe(
         podcastId: podcastId,
         active: !isSubscribed,
-        autoDownloadN: !isSubscribed ? constants.defaultAutoDownloadCount : null,
+        autoDownloadN: autoDownloadDefault,
       );
       _currentSubscription = await subscriptionsDao.getById(podcastId);
       debugPrint(
@@ -9598,9 +9608,14 @@ class SubscriptionProvider extends ChangeNotifier {
 ### Inhalt von `klubradio_archivum/lib/providers/theme_provider.dart`
 ```dart
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ThemeProvider extends ChangeNotifier {
-  ThemeProvider();
+  static const _kThemeMode = 'themeMode';
+
+  ThemeProvider() {
+    _loadThemeMode();
+  }
 
   ThemeMode _themeMode = ThemeMode.system;
 
@@ -9629,13 +9644,32 @@ class ThemeProvider extends ChangeNotifier {
     fontFamily: 'Roboto',
   );
 
+  Future<void> _loadThemeMode() async {
+    final prefs = await SharedPreferences.getInstance();
+    final value = prefs.getString(_kThemeMode);
+    if (value != null) {
+      _themeMode = ThemeMode.values.firstWhere(
+        (m) => m.name == value,
+        orElse: () => ThemeMode.system,
+      );
+      notifyListeners();
+    }
+  }
+
+  Future<void> _saveThemeMode() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_kThemeMode, _themeMode.name);
+  }
+
   void toggleTheme(bool isDarkMode) {
     _themeMode = isDarkMode ? ThemeMode.dark : ThemeMode.light;
+    _saveThemeMode();
     notifyListeners();
   }
 
   void setThemeMode(ThemeMode mode) {
     _themeMode = mode;
+    _saveThemeMode();
     notifyListeners();
   }
 }

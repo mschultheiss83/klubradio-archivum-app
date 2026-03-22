@@ -8,27 +8,6 @@
 
 ### Quick Wins
 
-- [ ] **App Icon unter Linux einbinden**
-  - *Status*: Linux fehlt komplett in `flutter_launcher_icons` Config (pubspec.yaml)
-  - Android/iOS/Web/Windows/macOS sind konfiguriert, Linux nicht
-  - Icon-Asset existiert bereits: `assets/app_icon/app_icon.png`
-  - *Fix*: `linux: generate: true` in pubspec.yaml + `dart run flutter_launcher_icons` + ggf. CMake-Install-Rules
-  - *Aufwand*: ~1h
-
-- [ ] **Download-Limit**: Aktuell immer 2 Downloads – soll aus den Settings übernommen werden
-  - *Status*: Hardcoded in `constants.dart` als `defaultAutoDownloadCount = 2`
-  - DB hat bereits `autoDownloadN` (per Podcast) und `keepLatestN` (global) — beides funktioniert
-  - Nur der **Default bei Abo-Erstellung** ist hardcoded (`subscription_provider.dart:67`)
-  - *Fix*: Default aus Settings-DB lesen statt Konstante
-  - *Aufwand*: ~30min
-
-- [ ] **Theme-Persistierung**: ThemeProvider speichert nicht in SharedPreferences
-  - *Status*: Theme (Light/Dark/System) wird nur im Memory gehalten, nach App-Restart immer System-Default
-  - Playback-Speed und Sprache werden korrekt via SharedPreferences gespeichert
-  - *Fix*: `ThemeProvider` um SharedPreferences-Persistierung erweitern
-  - *Betroffene Dateien*: `lib/providers/theme_provider.dart`, `lib/main.dart`
-  - *Aufwand*: ~30min
-
 - [ ] **Autoplay**: Wiedergabereihenfolge konfigurierbar: neueste zuerst / älteste zuerst
   - *Status*: Überall hardcoded "newest first" — kein Setting existiert
   - Auto-Download sortiert explizit nach `publishedAt` DESC (`download_service.dart:424`)
@@ -155,6 +134,12 @@ download_service.dart:416  →  keepN = sub.autoDownloadN ?? settings.keepLatest
 - [x] **De-Abo Popup** beim Abbestellen: einheitlich auf allen Screens → "Downloads behalten oder löschen?" ✅ 2026-03-22
   - Dialog aus `lib/screens/widgets/unsubscribe_dialog.dart` wird jetzt überall verwendet
 - [x] **Playlist bearbeiten** (Reihenfolge ändern, Einträge entfernen) ✅ 2026-03-22
+- [x] **App Icon unter Linux einbinden** — `linux: generate: true` in pubspec.yaml ergänzt ✅ 2026-03-22
+  - Manuell noch: `dart run flutter_launcher_icons` ausführen
+- [x] **Theme-Persistierung** — ThemeProvider speichert jetzt via SharedPreferences ✅ 2026-03-22
+  - Key `themeMode` in SharedPreferences, async load on startup
+- [x] **Download-Limit aus Settings** — Default wird aus `settings.keepLatestN` gelesen ✅ 2026-03-22
+  - Fallback auf `defaultAutoDownloadCount` wenn DB leer
 
 ---
 

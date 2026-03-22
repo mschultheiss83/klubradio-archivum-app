@@ -82,3 +82,6 @@ flutter_launcher_icons:
   macos:
     generate: true
     image_path: assets/app_icon/app_icon.png
+  linux:
+    generate: true
+    image_path: assets/app_icon/app_icon.png
