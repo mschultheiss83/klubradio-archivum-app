@@ -497,4 +497,47 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get commonDone => 'Fertig';
+
+  @override
+  String get settings_episode_order_label => 'Episoden-Reihenfolge';
+
+  @override
+  String get settings_episode_order_newest => 'Neueste zuerst';
+
+  @override
+  String get settings_episode_order_oldest => 'Älteste zuerst';
+
+  @override
+  String get privacyDialogTitle => 'Datenschutz & Sicherheitshinweis';
+
+  @override
+  String get privacyNoticeHeadline => 'Deine Daten bleiben bei dir.';
+
+  @override
+  String get privacyNoticeBody =>
+      'Diese App ist so konstruiert, dass wir technisch gar nicht in der Lage sind, persönliche Nutzungsdaten zu erfassen oder zu speichern. Es gibt keinen Account, keinen Login und keine Tracking-Infrastruktur. Alles, was du hörst, herunterlädst oder abonnierst, bleibt ausschließlich auf deinem Gerät und wird vom Server von KR direkt geladen — also unterstützt diese Arbeit. Diese App dürft Ihr auch gerne unterstützen — mehr unter \"About\".';
+
+  @override
+  String get disclaimerHeadline => 'Haftungsausschluss';
+
+  @override
+  String get disclaimerBody =>
+      'Für App-Abstürze oder Datenverlust wird nicht gehaftet. Die Nutzung erfolgt auf eigene Gefahr.';
+
+  @override
+  String get privacySettingsRow => 'Datenschutz & Sicherheitshinweis';
+
+  @override
+  String get privacySettingsRowSubtitle =>
+      'Tippen, um die Datenschutz- und Sicherheitshinweise anzuzeigen.';
+
+  @override
+  String get aboutScreenAppIdLabel => 'App-ID';
+
+  @override
+  String get aboutScreenContributionsTitle => 'Unterstützer';
+
+  @override
+  String get aboutScreenContributionsPlaceholder =>
+      'Unterstützer und Spender werden hier in Zukunft aufgeführt.';
 }

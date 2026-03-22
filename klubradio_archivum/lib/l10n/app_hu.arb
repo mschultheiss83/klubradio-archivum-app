@@ -509,5 +509,20 @@
   "commonOk": "OK",
   "commonCancel": "Mégse",
   "commonCount": "Darab",
-  "commonDone": "Kész"
+  "commonDone": "Kész",
+
+  "settings_episode_order_label": "Epizódok sorrendje",
+  "settings_episode_order_newest": "Legújabb elöl",
+  "settings_episode_order_oldest": "Legrégebbi elöl",
+
+  "privacyDialogTitle": "Adatvédelem és biztonsági tájékoztató",
+  "privacyNoticeHeadline": "Az adataid nálad maradnak.",
+  "privacyNoticeBody": "Ez az alkalmazás úgy van felépítve, hogy technikailag nem vagyunk képesek személyes felhasználási adatokat gyűjteni vagy tárolni. Nincs fiók, nincs bejelentkezés és nincs nyomkövetési infrastruktúra. Minden, amit hallgatsz, letöltesz vagy feliratkozol, kizárólag a te eszközödön marad, és közvetlenül a Klubrádió szerveréről töltődik — tehát a használatoddal támogatod a munkájukat. Ezt az alkalmazást is szívesen támogathatod — részletek az \"About\" menüben.",
+  "disclaimerHeadline": "Felelősségkizárás",
+  "disclaimerBody": "Az alkalmazás összeomlásáért vagy adatvesztésért nem vállalunk felelősséget. A használat saját felelősségre történik.",
+  "privacySettingsRow": "Adatvédelem és biztonsági tájékoztató",
+  "privacySettingsRowSubtitle": "Koppints az adatvédelmi és biztonsági információk megtekintéséhez.",
+  "aboutScreenAppIdLabel": "Alkalmazás-azonosító",
+  "aboutScreenContributionsTitle": "Támogatók",
+  "aboutScreenContributionsPlaceholder": "A támogatók és adományozók listája a jövőben itt jelenik meg."
 }

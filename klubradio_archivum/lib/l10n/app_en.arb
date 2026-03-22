@@ -510,6 +510,60 @@
   "commonOk": "OK",
   "commonCancel": "Cancel",
   "commonCount": "Count",
-  "commonDone": "Fertig"
+  "commonDone": "Fertig",
+
+  "settings_episode_order_label": "Episode order",
+  "@settings_episode_order_label": {
+    "description": "Label for the episode sort order setting."
+  },
+  "settings_episode_order_newest": "Newest first",
+  "@settings_episode_order_newest": {
+    "description": "Option to sort episodes with newest first."
+  },
+  "settings_episode_order_oldest": "Oldest first",
+  "@settings_episode_order_oldest": {
+    "description": "Option to sort episodes with oldest first."
+  },
+
+  "privacyDialogTitle": "Privacy & Security Notice",
+  "@privacyDialogTitle": {
+    "description": "Title of the privacy notice popup dialog."
+  },
+  "privacyNoticeHeadline": "Your data stays with you.",
+  "@privacyNoticeHeadline": {
+    "description": "Headline of the privacy notice text."
+  },
+  "privacyNoticeBody": "This app is designed so that we are technically unable to collect or store personal usage data. There is no account, no login, and no tracking infrastructure. Everything you listen to, download, or subscribe to stays exclusively on your device and is loaded directly from the Klubradio server — so your usage supports their work. You are also welcome to support this app — more under \"About\".",
+  "@privacyNoticeBody": {
+    "description": "Body text of the privacy notice."
+  },
+  "disclaimerHeadline": "Disclaimer",
+  "@disclaimerHeadline": {
+    "description": "Headline for the disclaimer section."
+  },
+  "disclaimerBody": "No liability is accepted for app crashes or data loss. Use this app at your own risk.",
+  "@disclaimerBody": {
+    "description": "Body text of the disclaimer."
+  },
+  "privacySettingsRow": "Privacy & Security Notice",
+  "@privacySettingsRow": {
+    "description": "Row title in Settings/About for opening the privacy notice."
+  },
+  "privacySettingsRowSubtitle": "Tap to view the privacy and security information.",
+  "@privacySettingsRowSubtitle": {
+    "description": "Subtitle for the privacy settings row."
+  },
+  "aboutScreenAppIdLabel": "App-ID",
+  "@aboutScreenAppIdLabel": {
+    "description": "Label for the App-ID card on the About screen."
+  },
+  "aboutScreenContributionsTitle": "Contributions",
+  "@aboutScreenContributionsTitle": {
+    "description": "Title for the contributions/donors section on the About screen."
+  },
+  "aboutScreenContributionsPlaceholder": "Supporters and donors will be listed here in the future.",
+  "@aboutScreenContributionsPlaceholder": {
+    "description": "Placeholder text for the contributions section."
+  }
 
 }

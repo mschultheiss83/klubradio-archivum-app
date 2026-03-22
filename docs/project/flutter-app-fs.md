@@ -71,6 +71,7 @@
 ├── klubradio_archivum/lib/screens/settings_screen/theme_settings.dart
 ├── klubradio_archivum/lib/screens/utils/constants.dart
 ├── klubradio_archivum/lib/screens/utils/helpers.dart
+├── klubradio_archivum/lib/screens/widgets/privacy_dialog.dart
 ├── klubradio_archivum/lib/screens/widgets/stateful/episode_list.dart
 ├── klubradio_archivum/lib/screens/widgets/stateful/now_playing_bar.dart
 ├── klubradio_archivum/lib/screens/widgets/stateful/queue_sheet.dart
@@ -86,6 +87,7 @@
 ├── klubradio_archivum/lib/services/cache_store.dart
 ├── klubradio_archivum/lib/services/download_service.dart
 ├── klubradio_archivum/lib/services/http_requester.dart
+├── klubradio_archivum/lib/services/privacy_notice_service.dart
 ├── klubradio_archivum/lib/services/static_data_service.dart
 ├── klubradio_archivum/lib/utils/device_id.dart
 ├── klubradio_archivum/lib/utils/episode_cache_reader.dart
@@ -1116,6 +1118,10 @@ class Settings extends Table {
   BoolColumn get autodownloadSubscribed =>
       boolean().withDefault(const Constant(false))();
 
+  /// Episode sort order: 'newest' (default) or 'oldest'
+  TextColumn get playOrder =>
+      text().withDefault(const Constant('newest'))();
+
   @override
   Set<Column> get primaryKey => {id};
 }
@@ -1131,7 +1137,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -1142,6 +1148,10 @@ class AppDatabase extends _$AppDatabase {
         await m.addColumn(episodes, episodes.description);
         await m.addColumn(episodes, episodes.showDate);
         await m.addColumn(episodes, episodes.imageUrl);
+      }
+      if (from < 3) {
+        // v3: add playOrder column to settings (default 'newest')
+        await m.addColumn(settings, settings.playOrder);
       }
     },
   );
@@ -2992,6 +3002,18 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, Setting> {
         ),
         defaultValue: const Constant(false),
       );
+  static const VerificationMeta _playOrderMeta = const VerificationMeta(
+    'playOrder',
+  );
+  @override
+  late final GeneratedColumn<String> playOrder = GeneratedColumn<String>(
+    'play_order',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('newest'),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -3000,6 +3022,7 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, Setting> {
     deleteAfterHours,
     keepLatestN,
     autodownloadSubscribed,
+    playOrder,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -3058,6 +3081,12 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, Setting> {
         ),
       );
     }
+    if (data.containsKey('play_order')) {
+      context.handle(
+        _playOrderMeta,
+        playOrder.isAcceptableOrUnknown(data['play_order']!, _playOrderMeta),
+      );
+    }
     return context;
   }
 
@@ -3091,6 +3120,10 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, Setting> {
         DriftSqlType.bool,
         data['${effectivePrefix}autodownload_subscribed'],
       )!,
+      playOrder: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}play_order'],
+      )!,
     );
   }
 
@@ -3107,6 +3140,9 @@ class Setting extends DataClass implements Insertable<Setting> {
   final int? deleteAfterHours;
   final int? keepLatestN;
   final bool autodownloadSubscribed;
+
+  /// Episode sort order: 'newest' (default) or 'oldest'
+  final String playOrder;
   const Setting({
     required this.id,
     required this.wifiOnly,
@@ -3114,6 +3150,7 @@ class Setting extends DataClass implements Insertable<Setting> {
     this.deleteAfterHours,
     this.keepLatestN,
     required this.autodownloadSubscribed,
+    required this.playOrder,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -3128,6 +3165,7 @@ class Setting extends DataClass implements Insertable<Setting> {
       map['keep_latest_n'] = Variable<int>(keepLatestN);
     }
     map['autodownload_subscribed'] = Variable<bool>(autodownloadSubscribed);
+    map['play_order'] = Variable<String>(playOrder);
     return map;
   }
 
@@ -3143,6 +3181,7 @@ class Setting extends DataClass implements Insertable<Setting> {
           ? const Value.absent()
           : Value(keepLatestN),
       autodownloadSubscribed: Value(autodownloadSubscribed),
+      playOrder: Value(playOrder),
     );
   }
 
@@ -3160,6 +3199,7 @@ class Setting extends DataClass implements Insertable<Setting> {
       autodownloadSubscribed: serializer.fromJson<bool>(
         json['autodownloadSubscribed'],
       ),
+      playOrder: serializer.fromJson<String>(json['playOrder']),
     );
   }
   @override
@@ -3172,6 +3212,7 @@ class Setting extends DataClass implements Insertable<Setting> {
       'deleteAfterHours': serializer.toJson<int?>(deleteAfterHours),
       'keepLatestN': serializer.toJson<int?>(keepLatestN),
       'autodownloadSubscribed': serializer.toJson<bool>(autodownloadSubscribed),
+      'playOrder': serializer.toJson<String>(playOrder),
     };
   }
 
@@ -3182,6 +3223,7 @@ class Setting extends DataClass implements Insertable<Setting> {
     Value<int?> deleteAfterHours = const Value.absent(),
     Value<int?> keepLatestN = const Value.absent(),
     bool? autodownloadSubscribed,
+    String? playOrder,
   }) => Setting(
     id: id ?? this.id,
     wifiOnly: wifiOnly ?? this.wifiOnly,
@@ -3192,6 +3234,7 @@ class Setting extends DataClass implements Insertable<Setting> {
     keepLatestN: keepLatestN.present ? keepLatestN.value : this.keepLatestN,
     autodownloadSubscribed:
         autodownloadSubscribed ?? this.autodownloadSubscribed,
+    playOrder: playOrder ?? this.playOrder,
   );
   Setting copyWithCompanion(SettingsCompanion data) {
     return Setting(
@@ -3209,6 +3252,7 @@ class Setting extends DataClass implements Insertable<Setting> {
       autodownloadSubscribed: data.autodownloadSubscribed.present
           ? data.autodownloadSubscribed.value
           : this.autodownloadSubscribed,
+      playOrder: data.playOrder.present ? data.playOrder.value : this.playOrder,
     );
   }
 
@@ -3220,7 +3264,8 @@ class Setting extends DataClass implements Insertable<Setting> {
           ..write('maxParallel: $maxParallel, ')
           ..write('deleteAfterHours: $deleteAfterHours, ')
           ..write('keepLatestN: $keepLatestN, ')
-          ..write('autodownloadSubscribed: $autodownloadSubscribed')
+          ..write('autodownloadSubscribed: $autodownloadSubscribed, ')
+          ..write('playOrder: $playOrder')
           ..write(')'))
         .toString();
   }
@@ -3233,6 +3278,7 @@ class Setting extends DataClass implements Insertable<Setting> {
     deleteAfterHours,
     keepLatestN,
     autodownloadSubscribed,
+    playOrder,
   );
   @override
   bool operator ==(Object other) =>
@@ -3243,7 +3289,8 @@ class Setting extends DataClass implements Insertable<Setting> {
           other.maxParallel == this.maxParallel &&
           other.deleteAfterHours == this.deleteAfterHours &&
           other.keepLatestN == this.keepLatestN &&
-          other.autodownloadSubscribed == this.autodownloadSubscribed);
+          other.autodownloadSubscribed == this.autodownloadSubscribed &&
+          other.playOrder == this.playOrder);
 }
 
 class SettingsCompanion extends UpdateCompanion<Setting> {
@@ -3253,6 +3300,7 @@ class SettingsCompanion extends UpdateCompanion<Setting> {
   final Value<int?> deleteAfterHours;
   final Value<int?> keepLatestN;
   final Value<bool> autodownloadSubscribed;
+  final Value<String> playOrder;
   const SettingsCompanion({
     this.id = const Value.absent(),
     this.wifiOnly = const Value.absent(),
@@ -3260,6 +3308,7 @@ class SettingsCompanion extends UpdateCompanion<Setting> {
     this.deleteAfterHours = const Value.absent(),
     this.keepLatestN = const Value.absent(),
     this.autodownloadSubscribed = const Value.absent(),
+    this.playOrder = const Value.absent(),
   });
   SettingsCompanion.insert({
     this.id = const Value.absent(),
@@ -3268,6 +3317,7 @@ class SettingsCompanion extends UpdateCompanion<Setting> {
     this.deleteAfterHours = const Value.absent(),
     this.keepLatestN = const Value.absent(),
     this.autodownloadSubscribed = const Value.absent(),
+    this.playOrder = const Value.absent(),
   });
   static Insertable<Setting> custom({
     Expression<int>? id,
@@ -3276,6 +3326,7 @@ class SettingsCompanion extends UpdateCompanion<Setting> {
     Expression<int>? deleteAfterHours,
     Expression<int>? keepLatestN,
     Expression<bool>? autodownloadSubscribed,
+    Expression<String>? playOrder,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -3285,6 +3336,7 @@ class SettingsCompanion extends UpdateCompanion<Setting> {
       if (keepLatestN != null) 'keep_latest_n': keepLatestN,
       if (autodownloadSubscribed != null)
         'autodownload_subscribed': autodownloadSubscribed,
+      if (playOrder != null) 'play_order': playOrder,
     });
   }
 
@@ -3295,6 +3347,7 @@ class SettingsCompanion extends UpdateCompanion<Setting> {
     Value<int?>? deleteAfterHours,
     Value<int?>? keepLatestN,
     Value<bool>? autodownloadSubscribed,
+    Value<String>? playOrder,
   }) {
     return SettingsCompanion(
       id: id ?? this.id,
@@ -3304,6 +3357,7 @@ class SettingsCompanion extends UpdateCompanion<Setting> {
       keepLatestN: keepLatestN ?? this.keepLatestN,
       autodownloadSubscribed:
           autodownloadSubscribed ?? this.autodownloadSubscribed,
+      playOrder: playOrder ?? this.playOrder,
     );
   }
 
@@ -3330,6 +3384,9 @@ class SettingsCompanion extends UpdateCompanion<Setting> {
         autodownloadSubscribed.value,
       );
     }
+    if (playOrder.present) {
+      map['play_order'] = Variable<String>(playOrder.value);
+    }
     return map;
   }
 
@@ -3341,7 +3398,8 @@ class SettingsCompanion extends UpdateCompanion<Setting> {
           ..write('maxParallel: $maxParallel, ')
           ..write('deleteAfterHours: $deleteAfterHours, ')
           ..write('keepLatestN: $keepLatestN, ')
-          ..write('autodownloadSubscribed: $autodownloadSubscribed')
+          ..write('autodownloadSubscribed: $autodownloadSubscribed, ')
+          ..write('playOrder: $playOrder')
           ..write(')'))
         .toString();
   }
@@ -4153,6 +4211,7 @@ typedef $$SettingsTableCreateCompanionBuilder =
       Value<int?> deleteAfterHours,
       Value<int?> keepLatestN,
       Value<bool> autodownloadSubscribed,
+      Value<String> playOrder,
     });
 typedef $$SettingsTableUpdateCompanionBuilder =
     SettingsCompanion Function({
@@ -4162,6 +4221,7 @@ typedef $$SettingsTableUpdateCompanionBuilder =
       Value<int?> deleteAfterHours,
       Value<int?> keepLatestN,
       Value<bool> autodownloadSubscribed,
+      Value<String> playOrder,
     });
 
 class $$SettingsTableFilterComposer
@@ -4200,6 +4260,11 @@ class $$SettingsTableFilterComposer
 
   ColumnFilters<bool> get autodownloadSubscribed => $composableBuilder(
     column: $table.autodownloadSubscribed,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get playOrder => $composableBuilder(
+    column: $table.playOrder,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -4242,6 +4307,11 @@ class $$SettingsTableOrderingComposer
     column: $table.autodownloadSubscribed,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get playOrder => $composableBuilder(
+    column: $table.playOrder,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$SettingsTableAnnotationComposer
@@ -4278,6 +4348,9 @@ class $$SettingsTableAnnotationComposer
     column: $table.autodownloadSubscribed,
     builder: (column) => column,
   );
+
+  GeneratedColumn<String> get playOrder =>
+      $composableBuilder(column: $table.playOrder, builder: (column) => column);
 }
 
 class $$SettingsTableTableManager
@@ -4314,6 +4387,7 @@ class $$SettingsTableTableManager
                 Value<int?> deleteAfterHours = const Value.absent(),
                 Value<int?> keepLatestN = const Value.absent(),
                 Value<bool> autodownloadSubscribed = const Value.absent(),
+                Value<String> playOrder = const Value.absent(),
               }) => SettingsCompanion(
                 id: id,
                 wifiOnly: wifiOnly,
@@ -4321,6 +4395,7 @@ class $$SettingsTableTableManager
                 deleteAfterHours: deleteAfterHours,
                 keepLatestN: keepLatestN,
                 autodownloadSubscribed: autodownloadSubscribed,
+                playOrder: playOrder,
               ),
           createCompanionCallback:
               ({
@@ -4330,6 +4405,7 @@ class $$SettingsTableTableManager
                 Value<int?> deleteAfterHours = const Value.absent(),
                 Value<int?> keepLatestN = const Value.absent(),
                 Value<bool> autodownloadSubscribed = const Value.absent(),
+                Value<String> playOrder = const Value.absent(),
               }) => SettingsCompanion.insert(
                 id: id,
                 wifiOnly: wifiOnly,
@@ -4337,6 +4413,7 @@ class $$SettingsTableTableManager
                 deleteAfterHours: deleteAfterHours,
                 keepLatestN: keepLatestN,
                 autodownloadSubscribed: autodownloadSubscribed,
+                playOrder: playOrder,
               ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
@@ -4647,8 +4724,20 @@ class EpisodesDao extends DatabaseAccessor<AppDatabase>
       );
 
   // Streams für UI
-  Stream<List<Episode>> watchByPodcast(String podcastId) =>
-      (select(episodes)..where((e) => e.podcastId.equals(podcastId))).watch();
+  /// Watch episodes for a podcast, ordered by publishedAt.
+  /// [ascending] = false (default) means newest first; true means oldest first.
+  Stream<List<Episode>> watchByPodcast(
+    String podcastId, {
+    bool ascending = false,
+  }) =>
+      (select(episodes)
+            ..where((e) => e.podcastId.equals(podcastId))
+            ..orderBy([
+              (e) => ascending
+                  ? OrderingTerm.asc(e.publishedAt)
+                  : OrderingTerm.desc(e.publishedAt),
+            ]))
+          .watch();
 
   Stream<List<Episode>> watchActiveDownloads() =>
       (select(episodes)
@@ -4736,6 +4825,7 @@ class SettingsDao extends DatabaseAccessor<AppDatabase>
         deleteAfterHours: const Value(null), // AUS
         keepLatestN: const Value(null), // AUS
         autodownloadSubscribed: const Value(false),
+        playOrder: const Value('newest'),
       ),
     );
   }
@@ -4762,6 +4852,11 @@ class SettingsDao extends DatabaseAccessor<AppDatabase>
   Future<int> setAutodownloadSubscribed(bool v) =>
       (update(settings)..where((s) => s.id.equals(1))).write(
         SettingsCompanion(autodownloadSubscribed: Value(v)),
+      );
+
+  Future<int> setPlayOrder(String order) =>
+      (update(settings)..where((s) => s.id.equals(1))).write(
+        SettingsCompanion(playOrder: Value(order)),
       );
 }
 
@@ -5842,6 +5937,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Fertig'**
   String get commonDone;
+
+  /// Label for the episode sort order setting.
+  ///
+  /// In en, this message translates to:
+  /// **'Episode order'**
+  String get settings_episode_order_label;
+
+  /// Option to sort episodes with newest first.
+  ///
+  /// In en, this message translates to:
+  /// **'Newest first'**
+  String get settings_episode_order_newest;
+
+  /// Option to sort episodes with oldest first.
+  ///
+  /// In en, this message translates to:
+  /// **'Oldest first'**
+  String get settings_episode_order_oldest;
+
+  /// Title of the privacy notice popup dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy & Security Notice'**
+  String get privacyDialogTitle;
+
+  /// Headline of the privacy notice text.
+  ///
+  /// In en, this message translates to:
+  /// **'Your data stays with you.'**
+  String get privacyNoticeHeadline;
+
+  /// Body text of the privacy notice.
+  ///
+  /// In en, this message translates to:
+  /// **'This app is designed so that we are technically unable to collect or store personal usage data. There is no account, no login, and no tracking infrastructure. Everything you listen to, download, or subscribe to stays exclusively on your device and is loaded directly from the Klubradio server — so your usage supports their work. You are also welcome to support this app — more under \"About\".'**
+  String get privacyNoticeBody;
+
+  /// Headline for the disclaimer section.
+  ///
+  /// In en, this message translates to:
+  /// **'Disclaimer'**
+  String get disclaimerHeadline;
+
+  /// Body text of the disclaimer.
+  ///
+  /// In en, this message translates to:
+  /// **'No liability is accepted for app crashes or data loss. Use this app at your own risk.'**
+  String get disclaimerBody;
+
+  /// Row title in Settings/About for opening the privacy notice.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy & Security Notice'**
+  String get privacySettingsRow;
+
+  /// Subtitle for the privacy settings row.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to view the privacy and security information.'**
+  String get privacySettingsRowSubtitle;
+
+  /// Label for the App-ID card on the About screen.
+  ///
+  /// In en, this message translates to:
+  /// **'App-ID'**
+  String get aboutScreenAppIdLabel;
+
+  /// Title for the contributions/donors section on the About screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Contributions'**
+  String get aboutScreenContributionsTitle;
+
+  /// Placeholder text for the contributions section.
+  ///
+  /// In en, this message translates to:
+  /// **'Supporters and donors will be listed here in the future.'**
+  String get aboutScreenContributionsPlaceholder;
 }
 
 class _AppLocalizationsDelegate
@@ -6384,6 +6557,49 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get commonDone => 'Fertig';
+
+  @override
+  String get settings_episode_order_label => 'Episoden-Reihenfolge';
+
+  @override
+  String get settings_episode_order_newest => 'Neueste zuerst';
+
+  @override
+  String get settings_episode_order_oldest => 'Älteste zuerst';
+
+  @override
+  String get privacyDialogTitle => 'Datenschutz & Sicherheitshinweis';
+
+  @override
+  String get privacyNoticeHeadline => 'Deine Daten bleiben bei dir.';
+
+  @override
+  String get privacyNoticeBody =>
+      'Diese App ist so konstruiert, dass wir technisch gar nicht in der Lage sind, persönliche Nutzungsdaten zu erfassen oder zu speichern. Es gibt keinen Account, keinen Login und keine Tracking-Infrastruktur. Alles, was du hörst, herunterlädst oder abonnierst, bleibt ausschließlich auf deinem Gerät und wird vom Server von KR direkt geladen — also unterstützt diese Arbeit. Diese App dürft Ihr auch gerne unterstützen — mehr unter \"About\".';
+
+  @override
+  String get disclaimerHeadline => 'Haftungsausschluss';
+
+  @override
+  String get disclaimerBody =>
+      'Für App-Abstürze oder Datenverlust wird nicht gehaftet. Die Nutzung erfolgt auf eigene Gefahr.';
+
+  @override
+  String get privacySettingsRow => 'Datenschutz & Sicherheitshinweis';
+
+  @override
+  String get privacySettingsRowSubtitle =>
+      'Tippen, um die Datenschutz- und Sicherheitshinweise anzuzeigen.';
+
+  @override
+  String get aboutScreenAppIdLabel => 'App-ID';
+
+  @override
+  String get aboutScreenContributionsTitle => 'Unterstützer';
+
+  @override
+  String get aboutScreenContributionsPlaceholder =>
+      'Unterstützer und Spender werden hier in Zukunft aufgeführt.';
 }
 ```
 
@@ -6882,6 +7098,49 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get commonDone => 'Fertig';
+
+  @override
+  String get settings_episode_order_label => 'Episode order';
+
+  @override
+  String get settings_episode_order_newest => 'Newest first';
+
+  @override
+  String get settings_episode_order_oldest => 'Oldest first';
+
+  @override
+  String get privacyDialogTitle => 'Privacy & Security Notice';
+
+  @override
+  String get privacyNoticeHeadline => 'Your data stays with you.';
+
+  @override
+  String get privacyNoticeBody =>
+      'This app is designed so that we are technically unable to collect or store personal usage data. There is no account, no login, and no tracking infrastructure. Everything you listen to, download, or subscribe to stays exclusively on your device and is loaded directly from the Klubradio server — so your usage supports their work. You are also welcome to support this app — more under \"About\".';
+
+  @override
+  String get disclaimerHeadline => 'Disclaimer';
+
+  @override
+  String get disclaimerBody =>
+      'No liability is accepted for app crashes or data loss. Use this app at your own risk.';
+
+  @override
+  String get privacySettingsRow => 'Privacy & Security Notice';
+
+  @override
+  String get privacySettingsRowSubtitle =>
+      'Tap to view the privacy and security information.';
+
+  @override
+  String get aboutScreenAppIdLabel => 'App-ID';
+
+  @override
+  String get aboutScreenContributionsTitle => 'Contributions';
+
+  @override
+  String get aboutScreenContributionsPlaceholder =>
+      'Supporters and donors will be listed here in the future.';
 }
 ```
 
@@ -7382,6 +7641,49 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get commonDone => 'Kész';
+
+  @override
+  String get settings_episode_order_label => 'Epizódok sorrendje';
+
+  @override
+  String get settings_episode_order_newest => 'Legújabb elöl';
+
+  @override
+  String get settings_episode_order_oldest => 'Legrégebbi elöl';
+
+  @override
+  String get privacyDialogTitle => 'Adatvédelem és biztonsági tájékoztató';
+
+  @override
+  String get privacyNoticeHeadline => 'Az adataid nálad maradnak.';
+
+  @override
+  String get privacyNoticeBody =>
+      'Ez az alkalmazás úgy van felépítve, hogy technikailag nem vagyunk képesek személyes felhasználási adatokat gyűjteni vagy tárolni. Nincs fiók, nincs bejelentkezés és nincs nyomkövetési infrastruktúra. Minden, amit hallgatsz, letöltesz vagy feliratkozol, kizárólag a te eszközödön marad, és közvetlenül a Klubrádió szerveréről töltődik — tehát a használatoddal támogatod a munkájukat. Ezt az alkalmazást is szívesen támogathatod — részletek az \"About\" menüben.';
+
+  @override
+  String get disclaimerHeadline => 'Felelősségkizárás';
+
+  @override
+  String get disclaimerBody =>
+      'Az alkalmazás összeomlásáért vagy adatvesztésért nem vállalunk felelősséget. A használat saját felelősségre történik.';
+
+  @override
+  String get privacySettingsRow => 'Adatvédelem és biztonsági tájékoztató';
+
+  @override
+  String get privacySettingsRowSubtitle =>
+      'Koppints az adatvédelmi és biztonsági információk megtekintéséhez.';
+
+  @override
+  String get aboutScreenAppIdLabel => 'Alkalmazás-azonosító';
+
+  @override
+  String get aboutScreenContributionsTitle => 'Támogatók';
+
+  @override
+  String get aboutScreenContributionsPlaceholder =>
+      'A támogatók és adományozók listája a jövőben itt jelenik meg.';
 }
 ```
 
@@ -7884,6 +8186,51 @@ class AppLocalizationsRo extends AppLocalizations {
 
   @override
   String get commonDone => 'Finalizat';
+
+  @override
+  String get settings_episode_order_label => 'Ordinea episoadelor';
+
+  @override
+  String get settings_episode_order_newest => 'Cele mai noi primele';
+
+  @override
+  String get settings_episode_order_oldest => 'Cele mai vechi primele';
+
+  @override
+  String get privacyDialogTitle =>
+      'Notificare de confidențialitate și securitate';
+
+  @override
+  String get privacyNoticeHeadline => 'Datele tale rămân la tine.';
+
+  @override
+  String get privacyNoticeBody =>
+      'Această aplicație este concepută astfel încât nu suntem capabili din punct de vedere tehnic să colectăm sau să stocăm date personale de utilizare. Nu există cont, nu există autentificare și nu există infrastructură de urmărire. Tot ceea ce asculți, descarci sau te abonezi rămâne exclusiv pe dispozitivul tău și se încarcă direct de pe serverul Klubradio — astfel utilizarea ta le susține munca. Sunteți bineveniți să susțineți și această aplicație — mai multe în \"About\".';
+
+  @override
+  String get disclaimerHeadline => 'Declinarea responsabilității';
+
+  @override
+  String get disclaimerBody =>
+      'Nu se acceptă nicio responsabilitate pentru blocări ale aplicației sau pierderi de date. Utilizați această aplicație pe propria răspundere.';
+
+  @override
+  String get privacySettingsRow =>
+      'Notificare de confidențialitate și securitate';
+
+  @override
+  String get privacySettingsRowSubtitle =>
+      'Atingeți pentru a vizualiza informațiile de confidențialitate și securitate.';
+
+  @override
+  String get aboutScreenAppIdLabel => 'ID aplicație';
+
+  @override
+  String get aboutScreenContributionsTitle => 'Contribuții';
+
+  @override
+  String get aboutScreenContributionsPlaceholder =>
+      'Susținătorii și donatorii vor fi listați aici în viitor.';
 }
 ```
 
@@ -9833,6 +10180,7 @@ import 'package:flutter/material.dart';
 import 'package:klubradio_archivum/l10n/app_localizations.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:klubradio_archivum/screens/about_screen/legal_screen.dart';
+import 'package:klubradio_archivum/screens/widgets/privacy_dialog.dart';
 
 class AboutScreen extends StatefulWidget {
   const AboutScreen({super.key});
@@ -9915,6 +10263,19 @@ class _AboutScreenState extends State<AboutScreen> {
 
             const SizedBox(height: 16),
 
+            // Privacy & Security Notice Card
+            Card(
+              clipBehavior: Clip.antiAlias,
+              child: ListTile(
+                leading: const Icon(Icons.shield_outlined),
+                title: Text(l10n.privacySettingsRow),
+                subtitle: Text(l10n.privacySettingsRowSubtitle),
+                onTap: () => showPrivacyDialog(context),
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
             // License Card
             Card(
               clipBehavior: Clip.antiAlias,
@@ -9926,7 +10287,6 @@ class _AboutScreenState extends State<AboutScreen> {
                   Navigator.of(context).push(
                     MaterialPageRoute(builder: (_) => const LegalScreen()),
                   );
-                  // open LEGAL.md or a dedicated License screen
                 },
               ),
             ),
@@ -9939,7 +10299,31 @@ class _AboutScreenState extends State<AboutScreen> {
               child: ListTile(
                 leading: const Icon(Icons.code_outlined),
                 title: Text(l10n.aboutScreenVersionTitle),
-                subtitle: Text(versionText ?? '…'),
+                subtitle: Text(versionText ?? '...'),
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            // App-ID Card
+            Card(
+              clipBehavior: Clip.antiAlias,
+              child: ListTile(
+                leading: const Icon(Icons.fingerprint),
+                title: Text(l10n.aboutScreenAppIdLabel),
+                subtitle: const SelectableText('hu.klubradio.archivum'),
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            // Contributions Placeholder Card
+            Card(
+              clipBehavior: Clip.antiAlias,
+              child: ListTile(
+                leading: const Icon(Icons.volunteer_activism_outlined),
+                title: Text(l10n.aboutScreenContributionsTitle),
+                subtitle: Text(l10n.aboutScreenContributionsPlaceholder),
               ),
             ),
           ],
@@ -10025,6 +10409,9 @@ import 'package:klubradio_archivum/screens/search_screen/search_screen.dart';
 import 'package:klubradio_archivum/screens/download_manager_screen/download_manager_screen.dart';
 import 'package:klubradio_archivum/screens/profile_screen/profile_screen.dart';
 import 'package:klubradio_archivum/screens/settings_screen/settings_screen.dart';
+import 'package:klubradio_archivum/screens/about_screen/about_screen.dart';
+import 'package:klubradio_archivum/screens/widgets/privacy_dialog.dart';
+import 'package:klubradio_archivum/services/privacy_notice_service.dart';
 
 import 'package:klubradio_archivum/screens/widgets/stateful/now_playing_bar.dart';
 import 'package:klubradio_archivum/screens/widgets/stateless/bottom_navigation_bar.dart';
@@ -10041,6 +10428,7 @@ class _AppShellState extends State<AppShell> {
   List<GlobalKey<NavigatorState>> _navKeys = [];
   List<Widget> _screens = [];
   bool _initialized = false;
+  bool _privacyCheckDone = false;
 
   @override
   void didChangeDependencies() {
@@ -10048,6 +10436,18 @@ class _AppShellState extends State<AppShell> {
     if (!_initialized) {
       _initializeNavigation();
       _initialized = true;
+    }
+    if (!_privacyCheckDone) {
+      _privacyCheckDone = true;
+      _checkFirstStartPrivacy();
+    }
+  }
+
+  Future<void> _checkFirstStartPrivacy() async {
+    final shouldShow = await PrivacyNoticeService.shouldShowNotice();
+    if (shouldShow && mounted) {
+      await showPrivacyDialog(context);
+      await PrivacyNoticeService.markNoticeShown();
     }
   }
 
@@ -10153,7 +10553,20 @@ class _AppShellState extends State<AppShell> {
       canPop: false, // We handle popping manually
       onPopInvokedWithResult: onPopInvokedWithResult,
       child: Scaffold(
-        appBar: AppBar(title: Text(l10n.appName)),
+        appBar: AppBar(
+          title: Text(l10n.appName),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.info_outline),
+              tooltip: l10n.aboutScreenAppBarTitle,
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const AboutScreen()),
+                );
+              },
+            ),
+          ],
+        ),
         body: IndexedStack(
           index: _index,
           children: _screens, // Use filtered screens
@@ -11820,8 +12233,17 @@ class _PodcastDetailScreenState extends State<PodcastDetailScreen> {
         children: <Widget>[
           PodcastInfoCard(podcast: widget.podcast),
           const SizedBox(height: 12),
-          StreamBuilder<List<db.Episode>>( // Specify db.Episode here
-            stream: context.read<EpisodesDao>().watchByPodcast(widget.podcast.id),
+          StreamBuilder<db.Setting?>(
+            stream: (context.read<db.AppDatabase>().select(
+              context.read<db.AppDatabase>().settings,
+            )..where((s) => s.id.equals(1))).watchSingleOrNull(),
+            builder: (context, settingsSnap) {
+              final ascending = settingsSnap.data?.playOrder == 'oldest';
+              return StreamBuilder<List<db.Episode>>(
+            stream: context.read<EpisodesDao>().watchByPodcast(
+              widget.podcast.id,
+              ascending: ascending,
+            ),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(
@@ -11851,6 +12273,8 @@ class _PodcastDetailScreenState extends State<PodcastDetailScreen> {
               final List<model.Episode> episodeList =
                   snapshot.data?.map((e) => model.Episode.fromDb(e)).toList() ?? const <model.Episode>[];
               return EpisodeList(episodes: episodeList);
+            },
+          );
             },
           ),
         ],
@@ -12942,6 +13366,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:klubradio_archivum/l10n/app_localizations.dart';
 
+import 'package:klubradio_archivum/db/app_database.dart';
+import 'package:klubradio_archivum/db/daos.dart';
 import 'package:klubradio_archivum/providers/episode_provider.dart';
 import 'package:klubradio_archivum/providers/profile_provider.dart';
 import 'package:klubradio_archivum/screens/utils/constants.dart' as constants;
@@ -13009,8 +13435,75 @@ class PlaybackSettings extends StatelessWidget {
                 );
               }).toList(),
             ),
+            const SizedBox(height: 16),
+
+            // --- Episode Order ---
+            Text(l10n.settings_episode_order_label, style: textTheme.titleSmall),
+            const SizedBox(height: 8),
+            _EpisodeOrderChips(cs: cs),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _EpisodeOrderChips extends StatelessWidget {
+  const _EpisodeOrderChips({required this.cs});
+  final ColorScheme cs;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final db = context.watch<AppDatabase>();
+    final settingsStream = (db.select(db.settings)
+          ..where((s) => s.id.equals(1)))
+        .watchSingleOrNull();
+
+    return StreamBuilder<Setting?>(
+      stream: settingsStream,
+      builder: (context, snap) {
+        final current = snap.data?.playOrder ?? 'newest';
+        final dao = SettingsDao(db);
+
+        return Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            _orderChip(
+              label: l10n.settings_episode_order_newest,
+              selected: current == 'newest',
+              onSelected: () => dao.setPlayOrder('newest'),
+            ),
+            _orderChip(
+              label: l10n.settings_episode_order_oldest,
+              selected: current == 'oldest',
+              onSelected: () => dao.setPlayOrder('oldest'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _orderChip({
+    required String label,
+    required bool selected,
+    required VoidCallback onSelected,
+  }) {
+    return ChoiceChip(
+      label: Text(label),
+      selected: selected,
+      onSelected: (_) => onSelected(),
+      selectedColor: cs.primary.withAlpha((255 * 0.16).round()),
+      labelStyle: TextStyle(
+        color: selected ? cs.onPrimaryContainer : cs.onSurface,
+        fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+      ),
+      side: BorderSide(
+        color: selected
+            ? cs.primary
+            : cs.outlineVariant.withAlpha((255 * 0.7).round()),
       ),
     );
   }
@@ -13026,6 +13519,7 @@ import 'package:klubradio_archivum/l10n/app_localizations.dart';
 import 'package:klubradio_archivum/screens/settings_screen/playback_settings.dart';
 import 'package:klubradio_archivum/screens/settings_screen/theme_settings.dart';
 import 'package:klubradio_archivum/screens/settings_screen/download_settings_panel.dart';
+import 'package:klubradio_archivum/screens/widgets/privacy_dialog.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -13070,6 +13564,17 @@ class SettingsScreen extends StatelessWidget {
                 mode: LaunchMode.externalApplication,
               );
             },
+          ),
+        ),
+        const SizedBox(height: 16),
+        // About section
+        Card(
+          clipBehavior: Clip.antiAlias,
+          child: ListTile(
+            leading: const Icon(Icons.shield_outlined),
+            title: Text(l10n.privacySettingsRow),
+            subtitle: Text(l10n.privacySettingsRowSubtitle),
+            onTap: () => showPrivacyDialog(context),
           ),
         ),
       ],
@@ -13248,6 +13753,61 @@ String formatProgress(double progress) {
 // Hilfsfunktion (kannst du in einen Utils-Helper auslagern)
 String displayTitleFor(Episode e) =>
     (e.cachedTitle?.isNotEmpty ?? false) ? e.cachedTitle! : e.title;
+```
+
+### Inhalt von `klubradio_archivum/lib/screens/widgets/privacy_dialog.dart`
+```dart
+import 'package:flutter/material.dart';
+import 'package:klubradio_archivum/l10n/app_localizations.dart';
+
+/// Shows a dialog with privacy notice and disclaimer text.
+///
+/// Used in three places:
+/// 1. First app start (after install or update) — one-time per version
+/// 2. Settings → About → "Datenschutz & Sicherheitshinweis" row
+/// 3. About button in AppBar on every tab
+Future<void> showPrivacyDialog(BuildContext context) async {
+  final l10n = AppLocalizations.of(context)!;
+  final textTheme = Theme.of(context).textTheme;
+
+  await showDialog<void>(
+    context: context,
+    builder: (BuildContext context) => AlertDialog(
+      title: Text(l10n.privacyDialogTitle),
+      content: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              l10n.privacyNoticeHeadline,
+              style: textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(l10n.privacyNoticeBody, style: textTheme.bodyMedium),
+            const SizedBox(height: 20),
+            Text(
+              l10n.disclaimerHeadline,
+              style: textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(l10n.disclaimerBody, style: textTheme.bodyMedium),
+          ],
+        ),
+      ),
+      actions: <Widget>[
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(l10n.commonOk),
+        ),
+      ],
+    ),
+  );
+}
 ```
 
 ### Inhalt von `klubradio_archivum/lib/screens/widgets/stateful/episode_list.dart`
@@ -15494,6 +16054,36 @@ class HttpRequester {
   void _log(Object o) {
     // ignore: avoid_print
     print('[HttpRequester] $o');
+  }
+}
+```
+
+### Inhalt von `klubradio_archivum/lib/services/privacy_notice_service.dart`
+```dart
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+
+/// Manages the one-time-per-version privacy notice popup.
+///
+/// Checks SharedPreferences for a versioned flag. If the stored version
+/// does not match the current app version, the notice should be shown.
+class PrivacyNoticeService {
+  static const _kPrivacyShownVersion = 'privacyShownVersion';
+
+  /// Returns `true` if the privacy notice should be shown for this version.
+  static Future<bool> shouldShowNotice() async {
+    final prefs = await SharedPreferences.getInstance();
+    final info = await PackageInfo.fromPlatform();
+    final currentVersion = info.version;
+    final shownVersion = prefs.getString(_kPrivacyShownVersion);
+    return shownVersion != currentVersion;
+  }
+
+  /// Marks the privacy notice as shown for the current app version.
+  static Future<void> markNoticeShown() async {
+    final prefs = await SharedPreferences.getInstance();
+    final info = await PackageInfo.fromPlatform();
+    await prefs.setString(_kPrivacyShownVersion, info.version);
   }
 }
 ```
@@ -17798,6 +18388,14 @@ class MockApiService extends _i1.Mock implements _i10.ApiService {
             returnValue: _i6.Future<List<_i12.Podcast>>.value(<_i12.Podcast>[]),
           )
           as _i6.Future<List<_i12.Podcast>>);
+
+  @override
+  _i6.Future<List<_i9.Episode>> searchEpisodes(String? query) =>
+      (super.noSuchMethod(
+            Invocation.method(#searchEpisodes, [query]),
+            returnValue: _i6.Future<List<_i9.Episode>>.value(<_i9.Episode>[]),
+          )
+          as _i6.Future<List<_i9.Episode>>);
 
   @override
   _i6.Future<List<_i13.ShowData>> fetchTopShowsThisYear() =>

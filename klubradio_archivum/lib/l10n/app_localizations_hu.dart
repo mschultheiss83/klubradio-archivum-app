@@ -493,4 +493,47 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get commonDone => 'Kész';
+
+  @override
+  String get settings_episode_order_label => 'Epizódok sorrendje';
+
+  @override
+  String get settings_episode_order_newest => 'Legújabb elöl';
+
+  @override
+  String get settings_episode_order_oldest => 'Legrégebbi elöl';
+
+  @override
+  String get privacyDialogTitle => 'Adatvédelem és biztonsági tájékoztató';
+
+  @override
+  String get privacyNoticeHeadline => 'Az adataid nálad maradnak.';
+
+  @override
+  String get privacyNoticeBody =>
+      'Ez az alkalmazás úgy van felépítve, hogy technikailag nem vagyunk képesek személyes felhasználási adatokat gyűjteni vagy tárolni. Nincs fiók, nincs bejelentkezés és nincs nyomkövetési infrastruktúra. Minden, amit hallgatsz, letöltesz vagy feliratkozol, kizárólag a te eszközödön marad, és közvetlenül a Klubrádió szerveréről töltődik — tehát a használatoddal támogatod a munkájukat. Ezt az alkalmazást is szívesen támogathatod — részletek az \"About\" menüben.';
+
+  @override
+  String get disclaimerHeadline => 'Felelősségkizárás';
+
+  @override
+  String get disclaimerBody =>
+      'Az alkalmazás összeomlásáért vagy adatvesztésért nem vállalunk felelősséget. A használat saját felelősségre történik.';
+
+  @override
+  String get privacySettingsRow => 'Adatvédelem és biztonsági tájékoztató';
+
+  @override
+  String get privacySettingsRowSubtitle =>
+      'Koppints az adatvédelmi és biztonsági információk megtekintéséhez.';
+
+  @override
+  String get aboutScreenAppIdLabel => 'Alkalmazás-azonosító';
+
+  @override
+  String get aboutScreenContributionsTitle => 'Támogatók';
+
+  @override
+  String get aboutScreenContributionsPlaceholder =>
+      'A támogatók és adományozók listája a jövőben itt jelenik meg.';
 }

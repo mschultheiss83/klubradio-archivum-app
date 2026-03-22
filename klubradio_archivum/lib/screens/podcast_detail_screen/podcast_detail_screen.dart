@@ -125,8 +125,17 @@ class _PodcastDetailScreenState extends State<PodcastDetailScreen> {
         children: <Widget>[
           PodcastInfoCard(podcast: widget.podcast),
           const SizedBox(height: 12),
-          StreamBuilder<List<db.Episode>>( // Specify db.Episode here
-            stream: context.read<EpisodesDao>().watchByPodcast(widget.podcast.id),
+          StreamBuilder<db.Setting?>(
+            stream: (context.read<db.AppDatabase>().select(
+              context.read<db.AppDatabase>().settings,
+            )..where((s) => s.id.equals(1))).watchSingleOrNull(),
+            builder: (context, settingsSnap) {
+              final ascending = settingsSnap.data?.playOrder == 'oldest';
+              return StreamBuilder<List<db.Episode>>(
+            stream: context.read<EpisodesDao>().watchByPodcast(
+              widget.podcast.id,
+              ascending: ascending,
+            ),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(
@@ -156,6 +165,8 @@ class _PodcastDetailScreenState extends State<PodcastDetailScreen> {
               final List<model.Episode> episodeList =
                   snapshot.data?.map((e) => model.Episode.fromDb(e)).toList() ?? const <model.Episode>[];
               return EpisodeList(episodes: episodeList);
+            },
+          );
             },
           ),
         ],

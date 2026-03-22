@@ -5,6 +5,7 @@ import 'package:klubradio_archivum/l10n/app_localizations.dart';
 import 'package:klubradio_archivum/screens/settings_screen/playback_settings.dart';
 import 'package:klubradio_archivum/screens/settings_screen/theme_settings.dart';
 import 'package:klubradio_archivum/screens/settings_screen/download_settings_panel.dart';
+import 'package:klubradio_archivum/screens/widgets/privacy_dialog.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -49,6 +50,17 @@ class SettingsScreen extends StatelessWidget {
                 mode: LaunchMode.externalApplication,
               );
             },
+          ),
+        ),
+        const SizedBox(height: 16),
+        // About section
+        Card(
+          clipBehavior: Clip.antiAlias,
+          child: ListTile(
+            leading: const Icon(Icons.shield_outlined),
+            title: Text(l10n.privacySettingsRow),
+            subtitle: Text(l10n.privacySettingsRowSubtitle),
+            onTap: () => showPrivacyDialog(context),
           ),
         ),
       ],

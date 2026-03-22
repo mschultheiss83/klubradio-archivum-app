@@ -6,16 +6,6 @@
 
 ## 1. Offene Aufgaben (sortiert: Quick Wins → Aufwändig)
 
-### Quick Wins
-
-- [ ] **Autoplay**: Wiedergabereihenfolge konfigurierbar: neueste zuerst / älteste zuerst
-  - *Status*: Überall hardcoded "newest first" — kein Setting existiert
-  - Auto-Download sortiert explizit nach `publishedAt` DESC (`download_service.dart:424`)
-  - `watchByPodcast()` in DAOs hat **kein** `orderBy` (undefinierte Reihenfolge!)
-  - *Fix*: Neues DB-Feld `playOrder` in Settings + `orderBy` in `watchByPodcast()` + UI-Toggle
-  - *Betroffene Dateien*: `app_database.dart`, `daos.dart`, `download_service.dart`, `api_service.dart`, Settings-UI
-  - *Aufwand*: ~2-3h (DB-Migration + UI + alle Sortierungen anpassen)
-
 ### Mittlerer Aufwand
 
 - [ ] **Lazy Loading**: Alle Listen mit **mehr als 15 Einträgen** (Schwellwert → Settings) als Lazy Loader implementieren. Prüfen welche Listen betroffen sind und ob `ListView.builder` bereits verwendet wird.
@@ -32,12 +22,7 @@
   - Anzahl der Downloads (Keep N)
   - Ungehörte Episoden löschen: ja / nein
   - Episode als gehört markieren
-- [ ] **About-Screen** (neu):
-  - App-ID + Build-Nummer
-  - Rechtliche Infos (Impressum, Lizenz)
-  - Privacy Features (s. Abschnitt 2)
-  - Contributions (Spender ab 200 €)
-- [ ] **Datenschutz-Hinweis / Privacy Feature** (s. Abschnitt 2)
+- [ ] **Podcast-spezifische Settings UI** — eigener Screen pro Podcast (Basis: globales playOrder Setting existiert jetzt)
 
 ---
 
@@ -140,6 +125,15 @@ download_service.dart:416  →  keepN = sub.autoDownloadN ?? settings.keepLatest
   - Key `themeMode` in SharedPreferences, async load on startup
 - [x] **Download-Limit aus Settings** — Default wird aus `settings.keepLatestN` gelesen ✅ 2026-03-22
   - Fallback auf `defaultAutoDownloadCount` wenn DB leer
+- [x] **Autoplay-Reihenfolge** — DB-Feld `playOrder`, UI-Toggle, `watchByPodcast()` Bug gefixt ✅ 2026-03-22
+  - Schema v2→v3 Migration, ChoiceChips in Playback Settings
+  - Auto-Download bleibt bewusst "newest first" (korrekt: neueste N laden)
+- [x] **About-Screen + Datenschutz-Hinweis** ✅ 2026-03-22
+  - Neuer About-Screen mit App-ID, Privacy-Text, Disclaimer, Contributions-Placeholder
+  - Privacy-Popup beim ersten Start (pro Version, SharedPreferences)
+  - Info-Button in AppBar auf allen Tabs
+  - Datenschutz-Zeile in Settings
+  - Texte in 4 Sprachen (hu, de, en, ro) — Entwürfe, werden noch verfeinert
 
 ---
 

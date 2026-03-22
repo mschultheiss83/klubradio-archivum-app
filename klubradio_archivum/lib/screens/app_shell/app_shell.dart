@@ -13,6 +13,9 @@ import 'package:klubradio_archivum/screens/search_screen/search_screen.dart';
 import 'package:klubradio_archivum/screens/download_manager_screen/download_manager_screen.dart';
 import 'package:klubradio_archivum/screens/profile_screen/profile_screen.dart';
 import 'package:klubradio_archivum/screens/settings_screen/settings_screen.dart';
+import 'package:klubradio_archivum/screens/about_screen/about_screen.dart';
+import 'package:klubradio_archivum/screens/widgets/privacy_dialog.dart';
+import 'package:klubradio_archivum/services/privacy_notice_service.dart';
 
 import 'package:klubradio_archivum/screens/widgets/stateful/now_playing_bar.dart';
 import 'package:klubradio_archivum/screens/widgets/stateless/bottom_navigation_bar.dart';
@@ -29,6 +32,7 @@ class _AppShellState extends State<AppShell> {
   List<GlobalKey<NavigatorState>> _navKeys = [];
   List<Widget> _screens = [];
   bool _initialized = false;
+  bool _privacyCheckDone = false;
 
   @override
   void didChangeDependencies() {
@@ -36,6 +40,18 @@ class _AppShellState extends State<AppShell> {
     if (!_initialized) {
       _initializeNavigation();
       _initialized = true;
+    }
+    if (!_privacyCheckDone) {
+      _privacyCheckDone = true;
+      _checkFirstStartPrivacy();
+    }
+  }
+
+  Future<void> _checkFirstStartPrivacy() async {
+    final shouldShow = await PrivacyNoticeService.shouldShowNotice();
+    if (shouldShow && mounted) {
+      await showPrivacyDialog(context);
+      await PrivacyNoticeService.markNoticeShown();
     }
   }
 
@@ -141,7 +157,20 @@ class _AppShellState extends State<AppShell> {
       canPop: false, // We handle popping manually
       onPopInvokedWithResult: onPopInvokedWithResult,
       child: Scaffold(
-        appBar: AppBar(title: Text(l10n.appName)),
+        appBar: AppBar(
+          title: Text(l10n.appName),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.info_outline),
+              tooltip: l10n.aboutScreenAppBarTitle,
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const AboutScreen()),
+                );
+              },
+            ),
+          ],
+        ),
         body: IndexedStack(
           index: _index,
           children: _screens, // Use filtered screens

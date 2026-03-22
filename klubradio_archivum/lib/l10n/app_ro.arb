@@ -511,5 +511,20 @@
   "commonOk": "OK",
   "commonCancel": "Anulați",
   "commonCount": "Număr",
-  "commonDone": "Finalizat"
+  "commonDone": "Finalizat",
+
+  "settings_episode_order_label": "Ordinea episoadelor",
+  "settings_episode_order_newest": "Cele mai noi primele",
+  "settings_episode_order_oldest": "Cele mai vechi primele",
+
+  "privacyDialogTitle": "Notificare de confidențialitate și securitate",
+  "privacyNoticeHeadline": "Datele tale rămân la tine.",
+  "privacyNoticeBody": "Această aplicație este concepută astfel încât nu suntem capabili din punct de vedere tehnic să colectăm sau să stocăm date personale de utilizare. Nu există cont, nu există autentificare și nu există infrastructură de urmărire. Tot ceea ce asculți, descarci sau te abonezi rămâne exclusiv pe dispozitivul tău și se încarcă direct de pe serverul Klubradio — astfel utilizarea ta le susține munca. Sunteți bineveniți să susțineți și această aplicație — mai multe în \"About\".",
+  "disclaimerHeadline": "Declinarea responsabilității",
+  "disclaimerBody": "Nu se acceptă nicio responsabilitate pentru blocări ale aplicației sau pierderi de date. Utilizați această aplicație pe propria răspundere.",
+  "privacySettingsRow": "Notificare de confidențialitate și securitate",
+  "privacySettingsRowSubtitle": "Atingeți pentru a vizualiza informațiile de confidențialitate și securitate.",
+  "aboutScreenAppIdLabel": "ID aplicație",
+  "aboutScreenContributionsTitle": "Contribuții",
+  "aboutScreenContributionsPlaceholder": "Susținătorii și donatorii vor fi listați aici în viitor."
 }

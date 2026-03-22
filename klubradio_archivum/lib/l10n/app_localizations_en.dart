@@ -491,4 +491,47 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get commonDone => 'Fertig';
+
+  @override
+  String get settings_episode_order_label => 'Episode order';
+
+  @override
+  String get settings_episode_order_newest => 'Newest first';
+
+  @override
+  String get settings_episode_order_oldest => 'Oldest first';
+
+  @override
+  String get privacyDialogTitle => 'Privacy & Security Notice';
+
+  @override
+  String get privacyNoticeHeadline => 'Your data stays with you.';
+
+  @override
+  String get privacyNoticeBody =>
+      'This app is designed so that we are technically unable to collect or store personal usage data. There is no account, no login, and no tracking infrastructure. Everything you listen to, download, or subscribe to stays exclusively on your device and is loaded directly from the Klubradio server — so your usage supports their work. You are also welcome to support this app — more under \"About\".';
+
+  @override
+  String get disclaimerHeadline => 'Disclaimer';
+
+  @override
+  String get disclaimerBody =>
+      'No liability is accepted for app crashes or data loss. Use this app at your own risk.';
+
+  @override
+  String get privacySettingsRow => 'Privacy & Security Notice';
+
+  @override
+  String get privacySettingsRowSubtitle =>
+      'Tap to view the privacy and security information.';
+
+  @override
+  String get aboutScreenAppIdLabel => 'App-ID';
+
+  @override
+  String get aboutScreenContributionsTitle => 'Contributions';
+
+  @override
+  String get aboutScreenContributionsPlaceholder =>
+      'Supporters and donors will be listed here in the future.';
 }

@@ -221,8 +221,20 @@ class EpisodesDao extends DatabaseAccessor<AppDatabase>
       );
 
   // Streams für UI
-  Stream<List<Episode>> watchByPodcast(String podcastId) =>
-      (select(episodes)..where((e) => e.podcastId.equals(podcastId))).watch();
+  /// Watch episodes for a podcast, ordered by publishedAt.
+  /// [ascending] = false (default) means newest first; true means oldest first.
+  Stream<List<Episode>> watchByPodcast(
+    String podcastId, {
+    bool ascending = false,
+  }) =>
+      (select(episodes)
+            ..where((e) => e.podcastId.equals(podcastId))
+            ..orderBy([
+              (e) => ascending
+                  ? OrderingTerm.asc(e.publishedAt)
+                  : OrderingTerm.desc(e.publishedAt),
+            ]))
+          .watch();
 
   Stream<List<Episode>> watchActiveDownloads() =>
       (select(episodes)
@@ -310,6 +322,7 @@ class SettingsDao extends DatabaseAccessor<AppDatabase>
         deleteAfterHours: const Value(null), // AUS
         keepLatestN: const Value(null), // AUS
         autodownloadSubscribed: const Value(false),
+        playOrder: const Value('newest'),
       ),
     );
   }
@@ -336,6 +349,11 @@ class SettingsDao extends DatabaseAccessor<AppDatabase>
   Future<int> setAutodownloadSubscribed(bool v) =>
       (update(settings)..where((s) => s.id.equals(1))).write(
         SettingsCompanion(autodownloadSubscribed: Value(v)),
+      );
+
+  Future<int> setPlayOrder(String order) =>
+      (update(settings)..where((s) => s.id.equals(1))).write(
+        SettingsCompanion(playOrder: Value(order)),
       );
 }
 

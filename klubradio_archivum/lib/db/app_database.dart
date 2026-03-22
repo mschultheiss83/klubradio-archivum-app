@@ -74,6 +74,10 @@ class Settings extends Table {
   BoolColumn get autodownloadSubscribed =>
       boolean().withDefault(const Constant(false))();
 
+  /// Episode sort order: 'newest' (default) or 'oldest'
+  TextColumn get playOrder =>
+      text().withDefault(const Constant('newest'))();
+
   @override
   Set<Column> get primaryKey => {id};
 }
@@ -89,7 +93,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -100,6 +104,10 @@ class AppDatabase extends _$AppDatabase {
         await m.addColumn(episodes, episodes.description);
         await m.addColumn(episodes, episodes.showDate);
         await m.addColumn(episodes, episodes.imageUrl);
+      }
+      if (from < 3) {
+        // v3: add playOrder column to settings (default 'newest')
+        await m.addColumn(settings, settings.playOrder);
       }
     },
   );

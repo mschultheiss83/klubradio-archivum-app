@@ -965,6 +965,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Fertig'**
   String get commonDone;
+
+  /// Label for the episode sort order setting.
+  ///
+  /// In en, this message translates to:
+  /// **'Episode order'**
+  String get settings_episode_order_label;
+
+  /// Option to sort episodes with newest first.
+  ///
+  /// In en, this message translates to:
+  /// **'Newest first'**
+  String get settings_episode_order_newest;
+
+  /// Option to sort episodes with oldest first.
+  ///
+  /// In en, this message translates to:
+  /// **'Oldest first'**
+  String get settings_episode_order_oldest;
+
+  /// Title of the privacy notice popup dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy & Security Notice'**
+  String get privacyDialogTitle;
+
+  /// Headline of the privacy notice text.
+  ///
+  /// In en, this message translates to:
+  /// **'Your data stays with you.'**
+  String get privacyNoticeHeadline;
+
+  /// Body text of the privacy notice.
+  ///
+  /// In en, this message translates to:
+  /// **'This app is designed so that we are technically unable to collect or store personal usage data. There is no account, no login, and no tracking infrastructure. Everything you listen to, download, or subscribe to stays exclusively on your device and is loaded directly from the Klubradio server — so your usage supports their work. You are also welcome to support this app — more under \"About\".'**
+  String get privacyNoticeBody;
+
+  /// Headline for the disclaimer section.
+  ///
+  /// In en, this message translates to:
+  /// **'Disclaimer'**
+  String get disclaimerHeadline;
+
+  /// Body text of the disclaimer.
+  ///
+  /// In en, this message translates to:
+  /// **'No liability is accepted for app crashes or data loss. Use this app at your own risk.'**
+  String get disclaimerBody;
+
+  /// Row title in Settings/About for opening the privacy notice.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy & Security Notice'**
+  String get privacySettingsRow;
+
+  /// Subtitle for the privacy settings row.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to view the privacy and security information.'**
+  String get privacySettingsRowSubtitle;
+
+  /// Label for the App-ID card on the About screen.
+  ///
+  /// In en, this message translates to:
+  /// **'App-ID'**
+  String get aboutScreenAppIdLabel;
+
+  /// Title for the contributions/donors section on the About screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Contributions'**
+  String get aboutScreenContributionsTitle;
+
+  /// Placeholder text for the contributions section.
+  ///
+  /// In en, this message translates to:
+  /// **'Supporters and donors will be listed here in the future.'**
+  String get aboutScreenContributionsPlaceholder;
 }
 
 class _AppLocalizationsDelegate

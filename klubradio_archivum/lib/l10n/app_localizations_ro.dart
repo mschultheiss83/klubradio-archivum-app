@@ -495,4 +495,49 @@ class AppLocalizationsRo extends AppLocalizations {
 
   @override
   String get commonDone => 'Finalizat';
+
+  @override
+  String get settings_episode_order_label => 'Ordinea episoadelor';
+
+  @override
+  String get settings_episode_order_newest => 'Cele mai noi primele';
+
+  @override
+  String get settings_episode_order_oldest => 'Cele mai vechi primele';
+
+  @override
+  String get privacyDialogTitle =>
+      'Notificare de confidențialitate și securitate';
+
+  @override
+  String get privacyNoticeHeadline => 'Datele tale rămân la tine.';
+
+  @override
+  String get privacyNoticeBody =>
+      'Această aplicație este concepută astfel încât nu suntem capabili din punct de vedere tehnic să colectăm sau să stocăm date personale de utilizare. Nu există cont, nu există autentificare și nu există infrastructură de urmărire. Tot ceea ce asculți, descarci sau te abonezi rămâne exclusiv pe dispozitivul tău și se încarcă direct de pe serverul Klubradio — astfel utilizarea ta le susține munca. Sunteți bineveniți să susțineți și această aplicație — mai multe în \"About\".';
+
+  @override
+  String get disclaimerHeadline => 'Declinarea responsabilității';
+
+  @override
+  String get disclaimerBody =>
+      'Nu se acceptă nicio responsabilitate pentru blocări ale aplicației sau pierderi de date. Utilizați această aplicație pe propria răspundere.';
+
+  @override
+  String get privacySettingsRow =>
+      'Notificare de confidențialitate și securitate';
+
+  @override
+  String get privacySettingsRowSubtitle =>
+      'Atingeți pentru a vizualiza informațiile de confidențialitate și securitate.';
+
+  @override
+  String get aboutScreenAppIdLabel => 'ID aplicație';
+
+  @override
+  String get aboutScreenContributionsTitle => 'Contribuții';
+
+  @override
+  String get aboutScreenContributionsPlaceholder =>
+      'Susținătorii și donatorii vor fi listați aici în viitor.';
 }

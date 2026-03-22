@@ -1830,6 +1830,18 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, Setting> {
         ),
         defaultValue: const Constant(false),
       );
+  static const VerificationMeta _playOrderMeta = const VerificationMeta(
+    'playOrder',
+  );
+  @override
+  late final GeneratedColumn<String> playOrder = GeneratedColumn<String>(
+    'play_order',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('newest'),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -1838,6 +1850,7 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, Setting> {
     deleteAfterHours,
     keepLatestN,
     autodownloadSubscribed,
+    playOrder,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1896,6 +1909,12 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, Setting> {
         ),
       );
     }
+    if (data.containsKey('play_order')) {
+      context.handle(
+        _playOrderMeta,
+        playOrder.isAcceptableOrUnknown(data['play_order']!, _playOrderMeta),
+      );
+    }
     return context;
   }
 
@@ -1929,6 +1948,10 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, Setting> {
         DriftSqlType.bool,
         data['${effectivePrefix}autodownload_subscribed'],
       )!,
+      playOrder: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}play_order'],
+      )!,
     );
   }
 
@@ -1945,6 +1968,9 @@ class Setting extends DataClass implements Insertable<Setting> {
   final int? deleteAfterHours;
   final int? keepLatestN;
   final bool autodownloadSubscribed;
+
+  /// Episode sort order: 'newest' (default) or 'oldest'
+  final String playOrder;
   const Setting({
     required this.id,
     required this.wifiOnly,
@@ -1952,6 +1978,7 @@ class Setting extends DataClass implements Insertable<Setting> {
     this.deleteAfterHours,
     this.keepLatestN,
     required this.autodownloadSubscribed,
+    required this.playOrder,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1966,6 +1993,7 @@ class Setting extends DataClass implements Insertable<Setting> {
       map['keep_latest_n'] = Variable<int>(keepLatestN);
     }
     map['autodownload_subscribed'] = Variable<bool>(autodownloadSubscribed);
+    map['play_order'] = Variable<String>(playOrder);
     return map;
   }
 
@@ -1981,6 +2009,7 @@ class Setting extends DataClass implements Insertable<Setting> {
           ? const Value.absent()
           : Value(keepLatestN),
       autodownloadSubscribed: Value(autodownloadSubscribed),
+      playOrder: Value(playOrder),
     );
   }
 
@@ -1998,6 +2027,7 @@ class Setting extends DataClass implements Insertable<Setting> {
       autodownloadSubscribed: serializer.fromJson<bool>(
         json['autodownloadSubscribed'],
       ),
+      playOrder: serializer.fromJson<String>(json['playOrder']),
     );
   }
   @override
@@ -2010,6 +2040,7 @@ class Setting extends DataClass implements Insertable<Setting> {
       'deleteAfterHours': serializer.toJson<int?>(deleteAfterHours),
       'keepLatestN': serializer.toJson<int?>(keepLatestN),
       'autodownloadSubscribed': serializer.toJson<bool>(autodownloadSubscribed),
+      'playOrder': serializer.toJson<String>(playOrder),
     };
   }
 
@@ -2020,6 +2051,7 @@ class Setting extends DataClass implements Insertable<Setting> {
     Value<int?> deleteAfterHours = const Value.absent(),
     Value<int?> keepLatestN = const Value.absent(),
     bool? autodownloadSubscribed,
+    String? playOrder,
   }) => Setting(
     id: id ?? this.id,
     wifiOnly: wifiOnly ?? this.wifiOnly,
@@ -2030,6 +2062,7 @@ class Setting extends DataClass implements Insertable<Setting> {
     keepLatestN: keepLatestN.present ? keepLatestN.value : this.keepLatestN,
     autodownloadSubscribed:
         autodownloadSubscribed ?? this.autodownloadSubscribed,
+    playOrder: playOrder ?? this.playOrder,
   );
   Setting copyWithCompanion(SettingsCompanion data) {
     return Setting(
@@ -2047,6 +2080,7 @@ class Setting extends DataClass implements Insertable<Setting> {
       autodownloadSubscribed: data.autodownloadSubscribed.present
           ? data.autodownloadSubscribed.value
           : this.autodownloadSubscribed,
+      playOrder: data.playOrder.present ? data.playOrder.value : this.playOrder,
     );
   }
 
@@ -2058,7 +2092,8 @@ class Setting extends DataClass implements Insertable<Setting> {
           ..write('maxParallel: $maxParallel, ')
           ..write('deleteAfterHours: $deleteAfterHours, ')
           ..write('keepLatestN: $keepLatestN, ')
-          ..write('autodownloadSubscribed: $autodownloadSubscribed')
+          ..write('autodownloadSubscribed: $autodownloadSubscribed, ')
+          ..write('playOrder: $playOrder')
           ..write(')'))
         .toString();
   }
@@ -2071,6 +2106,7 @@ class Setting extends DataClass implements Insertable<Setting> {
     deleteAfterHours,
     keepLatestN,
     autodownloadSubscribed,
+    playOrder,
   );
   @override
   bool operator ==(Object other) =>
@@ -2081,7 +2117,8 @@ class Setting extends DataClass implements Insertable<Setting> {
           other.maxParallel == this.maxParallel &&
           other.deleteAfterHours == this.deleteAfterHours &&
           other.keepLatestN == this.keepLatestN &&
-          other.autodownloadSubscribed == this.autodownloadSubscribed);
+          other.autodownloadSubscribed == this.autodownloadSubscribed &&
+          other.playOrder == this.playOrder);
 }
 
 class SettingsCompanion extends UpdateCompanion<Setting> {
@@ -2091,6 +2128,7 @@ class SettingsCompanion extends UpdateCompanion<Setting> {
   final Value<int?> deleteAfterHours;
   final Value<int?> keepLatestN;
   final Value<bool> autodownloadSubscribed;
+  final Value<String> playOrder;
   const SettingsCompanion({
     this.id = const Value.absent(),
     this.wifiOnly = const Value.absent(),
@@ -2098,6 +2136,7 @@ class SettingsCompanion extends UpdateCompanion<Setting> {
     this.deleteAfterHours = const Value.absent(),
     this.keepLatestN = const Value.absent(),
     this.autodownloadSubscribed = const Value.absent(),
+    this.playOrder = const Value.absent(),
   });
   SettingsCompanion.insert({
     this.id = const Value.absent(),
@@ -2106,6 +2145,7 @@ class SettingsCompanion extends UpdateCompanion<Setting> {
     this.deleteAfterHours = const Value.absent(),
     this.keepLatestN = const Value.absent(),
     this.autodownloadSubscribed = const Value.absent(),
+    this.playOrder = const Value.absent(),
   });
   static Insertable<Setting> custom({
     Expression<int>? id,
@@ -2114,6 +2154,7 @@ class SettingsCompanion extends UpdateCompanion<Setting> {
     Expression<int>? deleteAfterHours,
     Expression<int>? keepLatestN,
     Expression<bool>? autodownloadSubscribed,
+    Expression<String>? playOrder,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -2123,6 +2164,7 @@ class SettingsCompanion extends UpdateCompanion<Setting> {
       if (keepLatestN != null) 'keep_latest_n': keepLatestN,
       if (autodownloadSubscribed != null)
         'autodownload_subscribed': autodownloadSubscribed,
+      if (playOrder != null) 'play_order': playOrder,
     });
   }
 
@@ -2133,6 +2175,7 @@ class SettingsCompanion extends UpdateCompanion<Setting> {
     Value<int?>? deleteAfterHours,
     Value<int?>? keepLatestN,
     Value<bool>? autodownloadSubscribed,
+    Value<String>? playOrder,
   }) {
     return SettingsCompanion(
       id: id ?? this.id,
@@ -2142,6 +2185,7 @@ class SettingsCompanion extends UpdateCompanion<Setting> {
       keepLatestN: keepLatestN ?? this.keepLatestN,
       autodownloadSubscribed:
           autodownloadSubscribed ?? this.autodownloadSubscribed,
+      playOrder: playOrder ?? this.playOrder,
     );
   }
 
@@ -2168,6 +2212,9 @@ class SettingsCompanion extends UpdateCompanion<Setting> {
         autodownloadSubscribed.value,
       );
     }
+    if (playOrder.present) {
+      map['play_order'] = Variable<String>(playOrder.value);
+    }
     return map;
   }
 
@@ -2179,7 +2226,8 @@ class SettingsCompanion extends UpdateCompanion<Setting> {
           ..write('maxParallel: $maxParallel, ')
           ..write('deleteAfterHours: $deleteAfterHours, ')
           ..write('keepLatestN: $keepLatestN, ')
-          ..write('autodownloadSubscribed: $autodownloadSubscribed')
+          ..write('autodownloadSubscribed: $autodownloadSubscribed, ')
+          ..write('playOrder: $playOrder')
           ..write(')'))
         .toString();
   }
@@ -2991,6 +3039,7 @@ typedef $$SettingsTableCreateCompanionBuilder =
       Value<int?> deleteAfterHours,
       Value<int?> keepLatestN,
       Value<bool> autodownloadSubscribed,
+      Value<String> playOrder,
     });
 typedef $$SettingsTableUpdateCompanionBuilder =
     SettingsCompanion Function({
@@ -3000,6 +3049,7 @@ typedef $$SettingsTableUpdateCompanionBuilder =
       Value<int?> deleteAfterHours,
       Value<int?> keepLatestN,
       Value<bool> autodownloadSubscribed,
+      Value<String> playOrder,
     });
 
 class $$SettingsTableFilterComposer
@@ -3038,6 +3088,11 @@ class $$SettingsTableFilterComposer
 
   ColumnFilters<bool> get autodownloadSubscribed => $composableBuilder(
     column: $table.autodownloadSubscribed,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get playOrder => $composableBuilder(
+    column: $table.playOrder,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -3080,6 +3135,11 @@ class $$SettingsTableOrderingComposer
     column: $table.autodownloadSubscribed,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get playOrder => $composableBuilder(
+    column: $table.playOrder,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$SettingsTableAnnotationComposer
@@ -3116,6 +3176,9 @@ class $$SettingsTableAnnotationComposer
     column: $table.autodownloadSubscribed,
     builder: (column) => column,
   );
+
+  GeneratedColumn<String> get playOrder =>
+      $composableBuilder(column: $table.playOrder, builder: (column) => column);
 }
 
 class $$SettingsTableTableManager
@@ -3152,6 +3215,7 @@ class $$SettingsTableTableManager
                 Value<int?> deleteAfterHours = const Value.absent(),
                 Value<int?> keepLatestN = const Value.absent(),
                 Value<bool> autodownloadSubscribed = const Value.absent(),
+                Value<String> playOrder = const Value.absent(),
               }) => SettingsCompanion(
                 id: id,
                 wifiOnly: wifiOnly,
@@ -3159,6 +3223,7 @@ class $$SettingsTableTableManager
                 deleteAfterHours: deleteAfterHours,
                 keepLatestN: keepLatestN,
                 autodownloadSubscribed: autodownloadSubscribed,
+                playOrder: playOrder,
               ),
           createCompanionCallback:
               ({
@@ -3168,6 +3233,7 @@ class $$SettingsTableTableManager
                 Value<int?> deleteAfterHours = const Value.absent(),
                 Value<int?> keepLatestN = const Value.absent(),
                 Value<bool> autodownloadSubscribed = const Value.absent(),
+                Value<String> playOrder = const Value.absent(),
               }) => SettingsCompanion.insert(
                 id: id,
                 wifiOnly: wifiOnly,
@@ -3175,6 +3241,7 @@ class $$SettingsTableTableManager
                 deleteAfterHours: deleteAfterHours,
                 keepLatestN: keepLatestN,
                 autodownloadSubscribed: autodownloadSubscribed,
+                playOrder: playOrder,
               ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))

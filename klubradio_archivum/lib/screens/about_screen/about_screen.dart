@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:klubradio_archivum/l10n/app_localizations.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:klubradio_archivum/screens/about_screen/legal_screen.dart';
+import 'package:klubradio_archivum/screens/widgets/privacy_dialog.dart';
 
 class AboutScreen extends StatefulWidget {
   const AboutScreen({super.key});
@@ -84,6 +85,19 @@ class _AboutScreenState extends State<AboutScreen> {
 
             const SizedBox(height: 16),
 
+            // Privacy & Security Notice Card
+            Card(
+              clipBehavior: Clip.antiAlias,
+              child: ListTile(
+                leading: const Icon(Icons.shield_outlined),
+                title: Text(l10n.privacySettingsRow),
+                subtitle: Text(l10n.privacySettingsRowSubtitle),
+                onTap: () => showPrivacyDialog(context),
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
             // License Card
             Card(
               clipBehavior: Clip.antiAlias,
@@ -95,7 +109,6 @@ class _AboutScreenState extends State<AboutScreen> {
                   Navigator.of(context).push(
                     MaterialPageRoute(builder: (_) => const LegalScreen()),
                   );
-                  // open LEGAL.md or a dedicated License screen
                 },
               ),
             ),
@@ -108,7 +121,31 @@ class _AboutScreenState extends State<AboutScreen> {
               child: ListTile(
                 leading: const Icon(Icons.code_outlined),
                 title: Text(l10n.aboutScreenVersionTitle),
-                subtitle: Text(versionText ?? '…'),
+                subtitle: Text(versionText ?? '...'),
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            // App-ID Card
+            Card(
+              clipBehavior: Clip.antiAlias,
+              child: ListTile(
+                leading: const Icon(Icons.fingerprint),
+                title: Text(l10n.aboutScreenAppIdLabel),
+                subtitle: const SelectableText('hu.klubradio.archivum'),
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            // Contributions Placeholder Card
+            Card(
+              clipBehavior: Clip.antiAlias,
+              child: ListTile(
+                leading: const Icon(Icons.volunteer_activism_outlined),
+                title: Text(l10n.aboutScreenContributionsTitle),
+                subtitle: Text(l10n.aboutScreenContributionsPlaceholder),
               ),
             ),
           ],
