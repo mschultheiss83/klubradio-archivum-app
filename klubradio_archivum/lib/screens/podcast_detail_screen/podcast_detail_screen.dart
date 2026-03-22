@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import 'package:klubradio_archivum/l10n/app_localizations.dart';
 import 'package:klubradio_archivum/services/api_service.dart';
 import 'package:klubradio_archivum/providers/episode_provider.dart';
-import 'package:klubradio_archivum/providers/download_provider.dart';
 import 'package:klubradio_archivum/models/episode.dart' as model; // Alias for model.Episode
 import 'package:klubradio_archivum/models/podcast.dart';
 import 'package:klubradio_archivum/screens/widgets/stateful/episode_list.dart';
@@ -13,6 +12,7 @@ import 'package:klubradio_archivum/providers/subscription_provider.dart';
 import 'package:klubradio_archivum/db/daos.dart';
 import 'package:klubradio_archivum/db/app_database.dart' as db; // Alias for db.Episode
 import 'package:klubradio_archivum/screens/widgets/stateless/platform_utils.dart'; // Import PlatformUtils
+import 'package:klubradio_archivum/screens/widgets/unsubscribe_dialog.dart';
 
 class PodcastDetailScreen extends StatefulWidget {
   const PodcastDetailScreen({super.key, required this.podcast});
@@ -29,41 +29,6 @@ class _PodcastDetailScreenState extends State<PodcastDetailScreen> {
     super.initState();
     context.read<SubscriptionProvider>().loadSubscription(widget.podcast.id);
     context.read<EpisodeProvider>().loadEpisodesIntoDb(widget.podcast.id);
-  }
-
-  Future<void> _showUnsubscribeDialog(
-      BuildContext context,
-      String podcastId,
-      ) async {
-    final l10n = AppLocalizations.of(context)!;
-    final subscriptionProvider =
-    context.read<SubscriptionProvider>();
-    final downloadProvider = context.read<DownloadProvider>();
-
-    final result = await showDialog<bool>(
-      context: context,
-      builder: (BuildContext context) => AlertDialog(
-        title: Text(l10n.unsubscribeDialogTitle),
-        content: Text(l10n.unsubscribeDialogContent),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text(l10n.unsubscribeDialogKeepButton),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: Text(l10n.unsubscribeDialogDeleteButton),
-          ),
-        ],
-      ),
-    );
-
-    if (result != null) {
-      if (result) {
-        await downloadProvider.deleteEpisodesForPodcast(podcastId);
-      }
-      await subscriptionProvider.toggleSubscription(podcastId, true);
-    }
   }
 
   @override
@@ -99,7 +64,7 @@ class _PodcastDetailScreenState extends State<PodcastDetailScreen> {
                     final snack = ScaffoldMessenger.of(context);
                     try {
                       if (isSubscribed) {
-                        await _showUnsubscribeDialog(
+                        await showUnsubscribeDialog(
                             context, widget.podcast.id);
                       } else {
                         await subscriptionProvider.toggleSubscription(

@@ -10,6 +10,8 @@ const String defaultEpisodeImageUrl = 'assets/app_icon/app_icon.png';
 
 const int defaultAutoDownloadCount = 2;
 const int maxRecentSearches = 10;
+const int minSearchLength = 3;
+const Duration searchDebounce = Duration(milliseconds: 400);
 const int maxRecentlyPlayed = 20;
 
 const String demoUserId = 'guest-user';

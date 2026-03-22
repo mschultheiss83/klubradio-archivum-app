@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:klubradio_archivum/db/daos.dart';
 import 'package:klubradio_archivum/models/podcast.dart';
 import 'package:klubradio_archivum/l10n/app_localizations.dart';
 import 'package:klubradio_archivum/screens/podcast_detail_screen/podcast_detail_screen.dart';
 import 'package:klubradio_archivum/screens/widgets/stateless/image_url.dart';
+import 'package:klubradio_archivum/screens/widgets/unsubscribe_dialog.dart';
 
 class SubscriptionsPanel extends StatelessWidget {
   const SubscriptionsPanel({super.key, required this.podcasts});
@@ -78,14 +77,13 @@ class _PodcastTile extends StatelessWidget {
         icon: const Icon(Icons.notifications_off, size: 18),
         label: Text(l10n.podcastListItem_unsubscribe),
         onPressed: () async {
-          await context.read<SubscriptionsDao>().toggleSubscribe(
-            podcastId: podcast.id,
-            active: false,
-          );
+          final confirmed = await showUnsubscribeDialog(context, podcast.id);
           if (!context.mounted) return;
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(l10n.commonDone)));
+          if (confirmed) {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(l10n.commonDone)));
+          }
         },
       ),
 

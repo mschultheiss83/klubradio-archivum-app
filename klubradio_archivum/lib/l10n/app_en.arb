@@ -286,6 +286,8 @@
   "@searchResultsNoResults": {
     "description": "Message shown when a search yields no results."
   },
+  "searchTabShows": "Shows",
+  "searchTabEpisodes": "Episodes",
 
   "searchScreenInitialPrompt": "Find your favorite shows or hosts.",
   "@searchScreenInitialPrompt": {

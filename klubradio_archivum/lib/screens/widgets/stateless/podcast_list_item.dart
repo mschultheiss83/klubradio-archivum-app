@@ -8,6 +8,7 @@ import 'package:klubradio_archivum/models/podcast.dart';
 import 'package:klubradio_archivum/providers/subscription_provider.dart';
 import 'package:klubradio_archivum/screens/podcast_detail_screen/podcast_detail_screen.dart';
 import 'package:klubradio_archivum/screens/widgets/stateless/image_url.dart';
+import 'package:klubradio_archivum/screens/widgets/unsubscribe_dialog.dart';
 
 class PodcastListItem extends StatelessWidget {
   const PodcastListItem({
@@ -83,7 +84,11 @@ class PodcastListItem extends StatelessWidget {
                                       : l10n.podcastListItem_subscribe,
                                 ),
                                 onPressed: () {
-                                  context.read<SubscriptionProvider>().toggleSubscription(podcast.id, currentIsSubscribed);
+                                  if (currentIsSubscribed) {
+                                    showUnsubscribeDialog(context, podcast.id);
+                                  } else {
+                                    context.read<SubscriptionProvider>().toggleSubscription(podcast.id, currentIsSubscribed);
+                                  }
                                 },
                               );
                             },

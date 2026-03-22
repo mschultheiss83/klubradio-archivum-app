@@ -6,7 +6,6 @@
 //   - recentSearches: unmodifiable, initial state
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:klubradio_archivum/models/episode.dart';
 import 'package:klubradio_archivum/models/podcast.dart';
 import 'package:klubradio_archivum/providers/podcast_provider.dart';
 import 'package:klubradio_archivum/providers/download_provider.dart';
@@ -62,7 +61,6 @@ Podcast _pod(String id, {String title = ''}) => Podcast(
 void main() {
   late _StubApiService apiService;
   late _StubCacheService cacheService;
-  late PodcastProvider provider;
   // Track notifyListeners calls
   int notifyCount = 0;
 

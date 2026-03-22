@@ -468,6 +468,18 @@ abstract class AppLocalizations {
   /// **'No results found for your search.'**
   String get searchResultsNoResults;
 
+  /// No description provided for @searchTabShows.
+  ///
+  /// In en, this message translates to:
+  /// **'Shows'**
+  String get searchTabShows;
+
+  /// No description provided for @searchTabEpisodes.
+  ///
+  /// In en, this message translates to:
+  /// **'Episodes'**
+  String get searchTabEpisodes;
+
   /// Initial prompt message on the search screen before any search is performed.
   ///
   /// In en, this message translates to:

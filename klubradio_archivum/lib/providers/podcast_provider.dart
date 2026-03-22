@@ -238,6 +238,16 @@ class PodcastProvider extends ChangeNotifier {
     }
   }
 
+  Future<List<Episode>> searchEpisodes(String query) async {
+    try {
+      return await _apiService.searchEpisodes(query);
+    } catch (error) {
+      _errorMessage = error.toString();
+      notifyListeners();
+      return const <Episode>[];
+    }
+  }
+
   Future<void> addRecentlyPlayed(Episode episode) async {
     await _profileProvider.addRecentlyPlayed(episode);
     notifyListeners(); // Notify listeners in PodcastProvider as well, if needed for UI updates

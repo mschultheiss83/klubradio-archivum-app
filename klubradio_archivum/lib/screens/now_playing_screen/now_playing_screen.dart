@@ -4,51 +4,16 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'package:klubradio_archivum/l10n/app_localizations.dart';
-import 'package:klubradio_archivum/providers/download_provider.dart';
 import 'package:klubradio_archivum/providers/episode_provider.dart';
 import 'package:klubradio_archivum/providers/subscription_provider.dart';
 import 'package:klubradio_archivum/db/app_database.dart';
 import 'package:klubradio_archivum/screens/widgets/stateless/image_url.dart';
+import 'package:klubradio_archivum/screens/widgets/unsubscribe_dialog.dart';
 import 'audio_player_controls.dart';
 import 'progress_slider.dart';
 
 class NowPlayingScreen extends StatelessWidget {
   const NowPlayingScreen({super.key});
-
-  Future<void> _showUnsubscribeDialog(
-    BuildContext context,
-    String podcastId,
-  ) async {
-    final l10n = AppLocalizations.of(context)!;
-    final subscriptionProvider =
-        context.read<SubscriptionProvider>();
-    final downloadProvider = context.read<DownloadProvider>();
-
-    final result = await showDialog<bool>(
-      context: context,
-      builder: (BuildContext context) => AlertDialog(
-        title: Text(l10n.unsubscribeDialogTitle),
-        content: Text(l10n.unsubscribeDialogContent),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text(l10n.unsubscribeDialogKeepButton),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: Text(l10n.unsubscribeDialogDeleteButton),
-          ),
-        ],
-      ),
-    );
-
-    if (result != null) {
-      if (result) {
-        await downloadProvider.deleteEpisodesForPodcast(podcastId);
-      }
-      await subscriptionProvider.toggleSubscription(podcastId, true);
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -137,7 +102,7 @@ class NowPlayingScreen extends StatelessWidget {
                                               ? null
                                               : () {
                                                   if (isSubscribed) {
-                                                    _showUnsubscribeDialog(
+                                                    showUnsubscribeDialog(
                                                         context, episode.podcastId);
                                                   } else {
                                                     subscriptionProvider

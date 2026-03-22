@@ -220,6 +220,12 @@ class AppLocalizationsRo extends AppLocalizations {
       'Nu s-au găsit rezultate pentru căutarea dvs.';
 
   @override
+  String get searchTabShows => 'Emisiuni';
+
+  @override
+  String get searchTabEpisodes => 'Episoade';
+
+  @override
   String get searchScreenInitialPrompt =>
       'Găsiți emisiunile sau gazdele preferate.';
 

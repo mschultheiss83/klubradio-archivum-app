@@ -263,7 +263,11 @@ class ApiService {
     final encoded = query.replaceAll("'", "''");
     final uri = Uri.parse('$_supabaseUrl/rest/v1/${constants.podcastsTable}')
         .replace(
-          queryParameters: {'select': '*', 'title': 'ilike.%25$encoded%25'},
+          queryParameters: {
+            'select': '*',
+            'title': 'ilike.%$encoded%',
+            'order': 'id.desc',
+          },
         );
     final res = await _httpClient.get(uri, headers: _headers).timeout(_timeout);
 
@@ -275,6 +279,37 @@ class ApiService {
           .toList();
     }
     throw ApiException('Unable to search podcasts');
+  }
+
+  Future<List<Episode>> searchEpisodes(String query) async {
+    if (query.trim().isEmpty) return const <Episode>[];
+
+    if (!hasValidCredentials) {
+      return _mockPodcasts()
+          .expand((p) => _mockEpisodes(p.id))
+          .where((e) => e.title.toLowerCase().contains(query.toLowerCase()))
+          .toList();
+    }
+
+    final encoded = query.replaceAll("'", "''");
+    final uri = Uri.parse('$_supabaseUrl/rest/v1/${constants.episodesTable}')
+        .replace(
+          queryParameters: {
+            'select': '*',
+            'title': 'ilike.%$encoded%',
+            'order': 'id.desc',
+          },
+        );
+    final res = await _httpClient.get(uri, headers: _headers).timeout(_timeout);
+
+    if (res.statusCode >= 200 && res.statusCode < 300) {
+      final data = jsonDecode(res.body) as List<dynamic>;
+      return data
+          .whereType<Map<String, dynamic>>()
+          .map(Episode.fromJson)
+          .toList();
+    }
+    throw ApiException('Unable to search episodes');
   }
 
   Future<List<ShowData>> fetchTopShowsThisYear() async {

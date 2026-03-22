@@ -79,6 +79,7 @@
 ├── klubradio_archivum/lib/screens/widgets/stateless/image_url.dart
 ├── klubradio_archivum/lib/screens/widgets/stateless/platform_utils.dart
 ├── klubradio_archivum/lib/screens/widgets/stateless/podcast_list_item.dart
+├── klubradio_archivum/lib/screens/widgets/unsubscribe_dialog.dart
 ├── klubradio_archivum/lib/services/api_cache_service.dart
 ├── klubradio_archivum/lib/services/api_service.dart
 ├── klubradio_archivum/lib/services/audio_player_service.dart
@@ -5344,6 +5345,18 @@ abstract class AppLocalizations {
   /// **'No results found for your search.'**
   String get searchResultsNoResults;
 
+  /// No description provided for @searchTabShows.
+  ///
+  /// In en, this message translates to:
+  /// **'Shows'**
+  String get searchTabShows;
+
+  /// No description provided for @searchTabEpisodes.
+  ///
+  /// In en, this message translates to:
+  /// **'Episodes'**
+  String get searchTabEpisodes;
+
   /// Initial prompt message on the search screen before any search is performed.
   ///
   /// In en, this message translates to:
@@ -6096,6 +6109,12 @@ class AppLocalizationsDe extends AppLocalizations {
       'Keine Ergebnisse für Ihre Suche gefunden.';
 
   @override
+  String get searchTabShows => 'Sendungen';
+
+  @override
+  String get searchTabEpisodes => 'Episoden';
+
+  @override
   String get searchScreenInitialPrompt =>
       'Finde deine Lieblingssendungen oder Moderatoren.';
 
@@ -6588,6 +6607,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get searchResultsNoResults => 'No results found for your search.';
+
+  @override
+  String get searchTabShows => 'Shows';
+
+  @override
+  String get searchTabEpisodes => 'Episodes';
 
   @override
   String get searchScreenInitialPrompt => 'Find your favorite shows or hosts.';
@@ -7083,6 +7108,12 @@ class AppLocalizationsHu extends AppLocalizations {
   String get searchResultsNoResults => 'Nincs találat a megadott keresésre.';
 
   @override
+  String get searchTabShows => 'Műsorok';
+
+  @override
+  String get searchTabEpisodes => 'Epizódok';
+
+  @override
   String get searchScreenInitialPrompt =>
       'Keresd meg kedvenc műsoraidat vagy műsorvezetőidet.';
 
@@ -7576,6 +7607,12 @@ class AppLocalizationsRo extends AppLocalizations {
   @override
   String get searchResultsNoResults =>
       'Nu s-au găsit rezultate pentru căutarea dvs.';
+
+  @override
+  String get searchTabShows => 'Emisiuni';
+
+  @override
+  String get searchTabEpisodes => 'Episoade';
 
   @override
   String get searchScreenInitialPrompt =>
@@ -9273,6 +9310,16 @@ class PodcastProvider extends ChangeNotifier {
       _errorMessage = error.toString();
       notifyListeners();
       return const <Podcast>[];
+    }
+  }
+
+  Future<List<Episode>> searchEpisodes(String query) async {
+    try {
+      return await _apiService.searchEpisodes(query);
+    } catch (error) {
+      _errorMessage = error.toString();
+      notifyListeners();
+      return const <Episode>[];
     }
   }
 
@@ -11410,51 +11457,16 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'package:klubradio_archivum/l10n/app_localizations.dart';
-import 'package:klubradio_archivum/providers/download_provider.dart';
 import 'package:klubradio_archivum/providers/episode_provider.dart';
 import 'package:klubradio_archivum/providers/subscription_provider.dart';
 import 'package:klubradio_archivum/db/app_database.dart';
 import 'package:klubradio_archivum/screens/widgets/stateless/image_url.dart';
+import 'package:klubradio_archivum/screens/widgets/unsubscribe_dialog.dart';
 import 'audio_player_controls.dart';
 import 'progress_slider.dart';
 
 class NowPlayingScreen extends StatelessWidget {
   const NowPlayingScreen({super.key});
-
-  Future<void> _showUnsubscribeDialog(
-    BuildContext context,
-    String podcastId,
-  ) async {
-    final l10n = AppLocalizations.of(context)!;
-    final subscriptionProvider =
-        context.read<SubscriptionProvider>();
-    final downloadProvider = context.read<DownloadProvider>();
-
-    final result = await showDialog<bool>(
-      context: context,
-      builder: (BuildContext context) => AlertDialog(
-        title: Text(l10n.unsubscribeDialogTitle),
-        content: Text(l10n.unsubscribeDialogContent),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text(l10n.unsubscribeDialogKeepButton),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: Text(l10n.unsubscribeDialogDeleteButton),
-          ),
-        ],
-      ),
-    );
-
-    if (result != null) {
-      if (result) {
-        await downloadProvider.deleteEpisodesForPodcast(podcastId);
-      }
-      await subscriptionProvider.toggleSubscription(podcastId, true);
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -11543,7 +11555,7 @@ class NowPlayingScreen extends StatelessWidget {
                                               ? null
                                               : () {
                                                   if (isSubscribed) {
-                                                    _showUnsubscribeDialog(
+                                                    showUnsubscribeDialog(
                                                         context, episode.podcastId);
                                                   } else {
                                                     subscriptionProvider
@@ -11653,7 +11665,6 @@ import 'package:provider/provider.dart';
 import 'package:klubradio_archivum/l10n/app_localizations.dart';
 import 'package:klubradio_archivum/services/api_service.dart';
 import 'package:klubradio_archivum/providers/episode_provider.dart';
-import 'package:klubradio_archivum/providers/download_provider.dart';
 import 'package:klubradio_archivum/models/episode.dart' as model; // Alias for model.Episode
 import 'package:klubradio_archivum/models/podcast.dart';
 import 'package:klubradio_archivum/screens/widgets/stateful/episode_list.dart';
@@ -11662,6 +11673,7 @@ import 'package:klubradio_archivum/providers/subscription_provider.dart';
 import 'package:klubradio_archivum/db/daos.dart';
 import 'package:klubradio_archivum/db/app_database.dart' as db; // Alias for db.Episode
 import 'package:klubradio_archivum/screens/widgets/stateless/platform_utils.dart'; // Import PlatformUtils
+import 'package:klubradio_archivum/screens/widgets/unsubscribe_dialog.dart';
 
 class PodcastDetailScreen extends StatefulWidget {
   const PodcastDetailScreen({super.key, required this.podcast});
@@ -11678,41 +11690,6 @@ class _PodcastDetailScreenState extends State<PodcastDetailScreen> {
     super.initState();
     context.read<SubscriptionProvider>().loadSubscription(widget.podcast.id);
     context.read<EpisodeProvider>().loadEpisodesIntoDb(widget.podcast.id);
-  }
-
-  Future<void> _showUnsubscribeDialog(
-      BuildContext context,
-      String podcastId,
-      ) async {
-    final l10n = AppLocalizations.of(context)!;
-    final subscriptionProvider =
-    context.read<SubscriptionProvider>();
-    final downloadProvider = context.read<DownloadProvider>();
-
-    final result = await showDialog<bool>(
-      context: context,
-      builder: (BuildContext context) => AlertDialog(
-        title: Text(l10n.unsubscribeDialogTitle),
-        content: Text(l10n.unsubscribeDialogContent),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text(l10n.unsubscribeDialogKeepButton),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: Text(l10n.unsubscribeDialogDeleteButton),
-          ),
-        ],
-      ),
-    );
-
-    if (result != null) {
-      if (result) {
-        await downloadProvider.deleteEpisodesForPodcast(podcastId);
-      }
-      await subscriptionProvider.toggleSubscription(podcastId, true);
-    }
   }
 
   @override
@@ -11748,7 +11725,7 @@ class _PodcastDetailScreenState extends State<PodcastDetailScreen> {
                     final snack = ScaffoldMessenger.of(context);
                     try {
                       if (isSubscribed) {
-                        await _showUnsubscribeDialog(
+                        await showUnsubscribeDialog(
                             context, widget.podcast.id);
                       } else {
                         await subscriptionProvider.toggleSubscription(
@@ -12158,12 +12135,11 @@ Future<double?> _pickSpeed(BuildContext context, double current) async {
 ### Inhalt von `klubradio_archivum/lib/screens/profile_screen/subscriptions_panel.dart`
 ```dart
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:klubradio_archivum/db/daos.dart';
 import 'package:klubradio_archivum/models/podcast.dart';
 import 'package:klubradio_archivum/l10n/app_localizations.dart';
 import 'package:klubradio_archivum/screens/podcast_detail_screen/podcast_detail_screen.dart';
 import 'package:klubradio_archivum/screens/widgets/stateless/image_url.dart';
+import 'package:klubradio_archivum/screens/widgets/unsubscribe_dialog.dart';
 
 class SubscriptionsPanel extends StatelessWidget {
   const SubscriptionsPanel({super.key, required this.podcasts});
@@ -12237,14 +12213,13 @@ class _PodcastTile extends StatelessWidget {
         icon: const Icon(Icons.notifications_off, size: 18),
         label: Text(l10n.podcastListItem_unsubscribe),
         onPressed: () async {
-          await context.read<SubscriptionsDao>().toggleSubscribe(
-            podcastId: podcast.id,
-            active: false,
-          );
+          final confirmed = await showUnsubscribeDialog(context, podcast.id);
           if (!context.mounted) return;
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(l10n.commonDone)));
+          if (confirmed) {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(l10n.commonDone)));
+          }
         },
       ),
 
@@ -12311,9 +12286,14 @@ import 'package:flutter/material.dart';
 import 'package:klubradio_archivum/l10n/app_localizations.dart';
 
 class SearchBarWidget extends StatefulWidget {
-  const SearchBarWidget({super.key, required this.onSubmitted});
+  const SearchBarWidget({
+    super.key,
+    required this.onSubmitted,
+    this.onChanged,
+  });
 
   final ValueChanged<String> onSubmitted;
+  final ValueChanged<String>? onChanged;
 
   @override
   State<SearchBarWidget> createState() => _SearchBarWidgetState();
@@ -12342,22 +12322,22 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
             ? null
             : IconButton(
                 icon: const Icon(Icons.clear),
-                // Tooltip for the clear button (accessibility and discoverability)
                 tooltip: MaterialLocalizations.of(
                   context,
-                ).deleteButtonTooltip, // Using built-in Material localization
+                ).deleteButtonTooltip,
                 onPressed: () {
                   _controller.clear();
-                  widget.onSubmitted(
-                    '',
-                  ); // Optionally submit an empty string to clear results
+                  widget.onChanged?.call('');
+                  widget.onSubmitted('');
                   setState(() {});
                 },
               ),
       ),
       textInputAction: TextInputAction.search,
-      onChanged: (_) =>
-          setState(() {}), // To rebuild and show/hide the clear icon
+      onChanged: (value) {
+        setState(() {}); // rebuild clear icon
+        widget.onChanged?.call(value);
+      },
       onSubmitted: widget.onSubmitted,
     );
   }
@@ -12405,12 +12385,16 @@ class SearchResultsList extends StatelessWidget {
 
 ### Inhalt von `klubradio_archivum/lib/screens/search_screen/search_screen.dart`
 ```dart
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:klubradio_archivum/l10n/app_localizations.dart';
 
+import 'package:klubradio_archivum/models/episode.dart' as model;
 import 'package:klubradio_archivum/models/podcast.dart';
 import 'package:klubradio_archivum/providers/podcast_provider.dart';
+import 'package:klubradio_archivum/screens/utils/constants.dart' as constants;
 import 'package:klubradio_archivum/services/api_service.dart';
 
 import 'recent_searches.dart';
@@ -12424,101 +12408,216 @@ class SearchScreen extends StatefulWidget {
   State<SearchScreen> createState() => _SearchScreenState();
 }
 
-class _SearchScreenState extends State<SearchScreen> {
-  Future<List<Podcast>>? _searchFuture;
+class _SearchScreenState extends State<SearchScreen>
+    with SingleTickerProviderStateMixin {
+  Future<List<Podcast>>? _podcastFuture;
+  Future<List<model.Episode>>? _episodeFuture;
+  Timer? _debounce;
+  String _lastQuery = '';
+  late TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _debounce?.cancel();
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  bool get _hasSearch => _podcastFuture != null || _episodeFuture != null;
 
   void _onSearch(String query) {
+    _debounce?.cancel();
+    _lastQuery = query;
     final PodcastProvider provider = context.read<PodcastProvider>();
     setState(() {
-      // Clear previous search future immediately for better UX if query is empty
       if (query.trim().isEmpty) {
-        _searchFuture = null;
-        // Optionally, also clear recent searches if that's the desired behavior for empty submit
-        // provider.clearLastSearch(); // You'd need to implement this in provider
+        _podcastFuture = null;
+        _episodeFuture = null;
         return;
       }
-      _searchFuture = provider.searchPodcasts(query);
+      _podcastFuture = provider.searchPodcasts(query);
+      _episodeFuture = provider.searchEpisodes(query);
+    });
+  }
+
+  void _onChanged(String query) {
+    _debounce?.cancel();
+    if (query.trim().isEmpty) {
+      if (_hasSearch) {
+        setState(() {
+          _podcastFuture = null;
+          _episodeFuture = null;
+          _lastQuery = '';
+        });
+      }
+      return;
+    }
+    if (query.trim().length < constants.minSearchLength) return;
+    if (query.trim() == _lastQuery.trim()) return;
+
+    _debounce = Timer(constants.searchDebounce, () {
+      _onSearch(query);
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    // Get l10n instance
     final l10n = AppLocalizations.of(context)!;
     final PodcastProvider provider = context.watch<PodcastProvider>();
 
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          SearchBarWidget(onSubmitted: _onSearch),
-          const SizedBox(height: 16),
-          // Conditionally show RecentSearches only if no search is active
-          if (_searchFuture == null) ...[
-            // You might want a title for recent searches too, e.g., l10n.recentSearchesTitle
-            // Text(l10n.recentSearchesTitle, style: Theme.of(context).textTheme.titleMedium),
-            // const SizedBox(height: 8),
-            RecentSearches(
+    return Column(
+      children: <Widget>[
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+          child: SearchBarWidget(
+            onSubmitted: _onSearch,
+            onChanged: _onChanged,
+          ),
+        ),
+        if (!_hasSearch) ...[
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: RecentSearches(
               searches: provider.recentSearches,
               onSelected: _onSearch,
             ),
-            const SizedBox(height: 16),
-          ],
+          ),
           Expanded(
-            child: _searchFuture == null
-                ? Center(
-                    child: Text(
-                      l10n.searchScreenInitialPrompt, // Use localized string
-                      style: Theme.of(context).textTheme.bodyMedium,
-                      textAlign: TextAlign.center,
-                    ),
-                  )
-                : FutureBuilder<List<Podcast>>(
-                    future: _searchFuture,
-                    builder: (BuildContext context, AsyncSnapshot<List<Podcast>> snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const Center(child: CircularProgressIndicator());
-                      }
-                      if (snapshot.hasError) {
-                        // Extracting a user-friendly part of the error
-                        // For API errors, you might have a custom error class with a localized message
-                        String errorDetails = snapshot.error.toString();
-                        if (snapshot.error is ApiException) {
-                          // Assuming ApiException from your ApiService
-                          // TODO: Map ApiException type to a localized string (as discussed for ApiService)
-                          // For now, just using the raw message, but ideally, this would be more structured.
-                          errorDetails =
-                              (snapshot.error as ApiException).message;
-                        } else if (snapshot.error is FormatException) {
-                          errorDetails = l10n
-                              .errorParsingData; // Example: Create a specific l10n key
-                        }
-                        // else if ... other common error types
-
-                        return Center(
-                          child: Text(
-                            l10n.searchScreenErrorMessage(
-                              errorDetails,
-                            ), // Use localized string
-                            textAlign: TextAlign.center,
-                            style: Theme.of(context).textTheme.bodyMedium
-                                ?.copyWith(
-                                  color: Theme.of(context).colorScheme.error,
-                                ),
-                          ),
-                        );
-                      }
-                      final List<Podcast> results =
-                          snapshot.data ?? const <Podcast>[];
-                      // SearchResultsList already handles its own "no results" message
-                      return SearchResultsList(results: results);
-                    },
-                  ),
+            child: Center(
+              child: Text(
+                l10n.searchScreenInitialPrompt,
+                style: Theme.of(context).textTheme.bodyMedium,
+                textAlign: TextAlign.center,
+              ),
+            ),
           ),
         ],
+        if (_hasSearch) ...[
+          TabBar(
+            controller: _tabController,
+            tabs: [
+              Tab(text: l10n.searchTabShows),
+              Tab(text: l10n.searchTabEpisodes),
+            ],
+          ),
+          Expanded(
+            child: TabBarView(
+              controller: _tabController,
+              children: [
+                _buildPodcastResults(l10n),
+                _buildEpisodeResults(l10n),
+              ],
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildPodcastResults(AppLocalizations l10n) {
+    return FutureBuilder<List<Podcast>>(
+      future: _podcastFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasError) {
+          return _buildError(l10n, snapshot.error!);
+        }
+        final results = snapshot.data ?? const <Podcast>[];
+        return SearchResultsList(results: results);
+      },
+    );
+  }
+
+  Widget _buildEpisodeResults(AppLocalizations l10n) {
+    return FutureBuilder<List<model.Episode>>(
+      future: _episodeFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasError) {
+          return _buildError(l10n, snapshot.error!);
+        }
+        final results = snapshot.data ?? const <model.Episode>[];
+        if (results.isEmpty) {
+          return Center(
+            child: Text(
+              l10n.searchResultsNoResults,
+              style: Theme.of(context).textTheme.bodyMedium,
+              textAlign: TextAlign.center,
+            ),
+          );
+        }
+        return _EpisodeResultsList(episodes: results);
+      },
+    );
+  }
+
+  Widget _buildError(AppLocalizations l10n, Object error) {
+    String errorDetails = error.toString();
+    if (error is ApiException) {
+      errorDetails = error.message;
+    } else if (error is FormatException) {
+      errorDetails = l10n.errorParsingData;
+    }
+    return Center(
+      child: Text(
+        l10n.searchScreenErrorMessage(errorDetails),
+        textAlign: TextAlign.center,
+        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Theme.of(context).colorScheme.error,
+            ),
       ),
     );
+  }
+}
+
+class _EpisodeResultsList extends StatelessWidget {
+  const _EpisodeResultsList({required this.episodes});
+
+  final List<model.Episode> episodes;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.separated(
+      padding: const EdgeInsets.all(16),
+      itemCount: episodes.length,
+      separatorBuilder: (_, _) => const SizedBox(height: 4),
+      itemBuilder: (context, index) {
+        final episode = episodes[index];
+        return Card(
+          margin: EdgeInsets.zero,
+          child: ListTile(
+            leading: const Icon(Icons.audiotrack),
+            title: Text(
+              episode.displayTitle,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+            subtitle: Text(episode.showDate),
+            trailing: Text(
+              _formatDuration(episode.duration),
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  String _formatDuration(Duration d) {
+    final hours = d.inHours;
+    final minutes = d.inMinutes.remainder(60);
+    if (hours > 0) return '${hours}h ${minutes}m';
+    return '${minutes}m';
   }
 }
 ```
@@ -13041,6 +13140,8 @@ const String defaultEpisodeImageUrl = 'assets/app_icon/app_icon.png';
 
 const int defaultAutoDownloadCount = 2;
 const int maxRecentSearches = 10;
+const int minSearchLength = 3;
+const Duration searchDebounce = Duration(milliseconds: 400);
 const int maxRecentlyPlayed = 20;
 
 const String demoUserId = 'guest-user';
@@ -13866,6 +13967,7 @@ import 'package:klubradio_archivum/models/podcast.dart';
 import 'package:klubradio_archivum/providers/subscription_provider.dart';
 import 'package:klubradio_archivum/screens/podcast_detail_screen/podcast_detail_screen.dart';
 import 'package:klubradio_archivum/screens/widgets/stateless/image_url.dart';
+import 'package:klubradio_archivum/screens/widgets/unsubscribe_dialog.dart';
 
 class PodcastListItem extends StatelessWidget {
   const PodcastListItem({
@@ -13941,7 +14043,11 @@ class PodcastListItem extends StatelessWidget {
                                       : l10n.podcastListItem_subscribe,
                                 ),
                                 onPressed: () {
-                                  context.read<SubscriptionProvider>().toggleSubscription(podcast.id, currentIsSubscribed);
+                                  if (currentIsSubscribed) {
+                                    showUnsubscribeDialog(context, podcast.id);
+                                  } else {
+                                    context.read<SubscriptionProvider>().toggleSubscription(podcast.id, currentIsSubscribed);
+                                  }
                                 },
                               );
                             },
@@ -13957,6 +14063,56 @@ class PodcastListItem extends StatelessWidget {
       ),
     );
   }
+}
+```
+
+### Inhalt von `klubradio_archivum/lib/screens/widgets/unsubscribe_dialog.dart`
+```dart
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import 'package:klubradio_archivum/l10n/app_localizations.dart';
+import 'package:klubradio_archivum/providers/download_provider.dart';
+import 'package:klubradio_archivum/providers/subscription_provider.dart';
+
+/// Shows a confirmation dialog when unsubscribing from a podcast.
+///
+/// Asks the user whether to keep or delete downloaded episodes.
+/// Returns `true` if the user confirmed unsubscription, `false` otherwise.
+Future<bool> showUnsubscribeDialog(
+  BuildContext context,
+  String podcastId,
+) async {
+  final l10n = AppLocalizations.of(context)!;
+  final subscriptionProvider = context.read<SubscriptionProvider>();
+  final downloadProvider = context.read<DownloadProvider>();
+
+  final result = await showDialog<bool>(
+    context: context,
+    builder: (BuildContext context) => AlertDialog(
+      title: Text(l10n.unsubscribeDialogTitle),
+      content: Text(l10n.unsubscribeDialogContent),
+      actions: <Widget>[
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(false),
+          child: Text(l10n.unsubscribeDialogKeepButton),
+        ),
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(true),
+          child: Text(l10n.unsubscribeDialogDeleteButton),
+        ),
+      ],
+    ),
+  );
+
+  if (result != null) {
+    if (result) {
+      await downloadProvider.deleteEpisodesForPodcast(podcastId);
+    }
+    await subscriptionProvider.toggleSubscription(podcastId, true);
+    return true;
+  }
+  return false;
 }
 ```
 
@@ -14300,7 +14456,11 @@ class ApiService {
     final encoded = query.replaceAll("'", "''");
     final uri = Uri.parse('$_supabaseUrl/rest/v1/${constants.podcastsTable}')
         .replace(
-          queryParameters: {'select': '*', 'title': 'ilike.%25$encoded%25'},
+          queryParameters: {
+            'select': '*',
+            'title': 'ilike.%$encoded%',
+            'order': 'id.desc',
+          },
         );
     final res = await _httpClient.get(uri, headers: _headers).timeout(_timeout);
 
@@ -14312,6 +14472,37 @@ class ApiService {
           .toList();
     }
     throw ApiException('Unable to search podcasts');
+  }
+
+  Future<List<Episode>> searchEpisodes(String query) async {
+    if (query.trim().isEmpty) return const <Episode>[];
+
+    if (!hasValidCredentials) {
+      return _mockPodcasts()
+          .expand((p) => _mockEpisodes(p.id))
+          .where((e) => e.title.toLowerCase().contains(query.toLowerCase()))
+          .toList();
+    }
+
+    final encoded = query.replaceAll("'", "''");
+    final uri = Uri.parse('$_supabaseUrl/rest/v1/${constants.episodesTable}')
+        .replace(
+          queryParameters: {
+            'select': '*',
+            'title': 'ilike.%$encoded%',
+            'order': 'id.desc',
+          },
+        );
+    final res = await _httpClient.get(uri, headers: _headers).timeout(_timeout);
+
+    if (res.statusCode >= 200 && res.statusCode < 300) {
+      final data = jsonDecode(res.body) as List<dynamic>;
+      return data
+          .whereType<Map<String, dynamic>>()
+          .map(Episode.fromJson)
+          .toList();
+    }
+    throw ApiException('Unable to search episodes');
   }
 
   Future<List<ShowData>> fetchTopShowsThisYear() async {
@@ -18306,7 +18497,6 @@ class MockAppDatabase extends _i1.Mock implements _i4.AppDatabase {
 //   - recentSearches: unmodifiable, initial state
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:klubradio_archivum/models/episode.dart';
 import 'package:klubradio_archivum/models/podcast.dart';
 import 'package:klubradio_archivum/providers/podcast_provider.dart';
 import 'package:klubradio_archivum/providers/download_provider.dart';
@@ -18362,7 +18552,6 @@ Podcast _pod(String id, {String title = ''}) => Podcast(
 void main() {
   late _StubApiService apiService;
   late _StubCacheService cacheService;
-  late PodcastProvider provider;
   // Track notifyListeners calls
   int notifyCount = 0;
 

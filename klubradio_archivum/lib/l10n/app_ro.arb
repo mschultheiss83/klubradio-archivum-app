@@ -287,6 +287,8 @@
   "@searchResultsNoResults": {
     "description": "Mesaj afișat când o căutare nu produce rezultate."
   },
+  "searchTabShows": "Emisiuni",
+  "searchTabEpisodes": "Episoade",
 
   "searchScreenInitialPrompt": "Găsiți emisiunile sau gazdele preferate.",
   "@searchScreenInitialPrompt": {

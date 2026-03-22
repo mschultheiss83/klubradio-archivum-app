@@ -218,6 +218,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get searchResultsNoResults => 'No results found for your search.';
 
   @override
+  String get searchTabShows => 'Shows';
+
+  @override
+  String get searchTabEpisodes => 'Episodes';
+
+  @override
   String get searchScreenInitialPrompt => 'Find your favorite shows or hosts.';
 
   @override

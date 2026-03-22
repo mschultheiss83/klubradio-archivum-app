@@ -287,6 +287,8 @@
   "@searchResultsNoResults": {
     "description": "Nachricht, die angezeigt wird, wenn eine Suche keine Ergebnisse liefert."
   },
+  "searchTabShows": "Sendungen",
+  "searchTabEpisodes": "Episoden",
 
   "searchScreenInitialPrompt": "Finde deine Lieblingssendungen oder Moderatoren.",
   "@searchScreenInitialPrompt": {

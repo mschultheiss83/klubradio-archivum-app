@@ -286,6 +286,8 @@
   "@searchResultsNoResults": {
     "description": "Üzenet, ami akkor jelenik meg, ha a keresés nem hozott eredményt."
   },
+  "searchTabShows": "Műsorok",
+  "searchTabEpisodes": "Epizódok",
 
   "searchScreenInitialPrompt": "Keresd meg kedvenc műsoraidat vagy műsorvezetőidet.",
   "@searchScreenInitialPrompt": {

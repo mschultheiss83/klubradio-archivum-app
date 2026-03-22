@@ -52,8 +52,8 @@
   - Episode als gehört markieren
 
 #### De-Abo
-- [ ] **Popup beim Abbestellen**: einheitlich auf Profile- und Entdecken-Screen → "Downloads behalten oder löschen?"
-  - Derzeit unterschiedliches Verhalten auf den beiden Screens → **vereinheitlichen**
+- [x] **Popup beim Abbestellen**: einheitlich auf Profile- und Entdecken-Screen → "Downloads behalten oder löschen?" ✅ 2026-03-22
+  - Dialog aus `lib/screens/widgets/unsubscribe_dialog.dart` wird jetzt überall verwendet
 
 #### Suche
 - [x] Suche vollständig testen (Funktionalität & Edge Cases) tests schreiben ✅ 2026-03-22

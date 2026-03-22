@@ -222,6 +222,12 @@ class AppLocalizationsDe extends AppLocalizations {
       'Keine Ergebnisse für Ihre Suche gefunden.';
 
   @override
+  String get searchTabShows => 'Sendungen';
+
+  @override
+  String get searchTabEpisodes => 'Episoden';
+
+  @override
   String get searchScreenInitialPrompt =>
       'Finde deine Lieblingssendungen oder Moderatoren.';
 

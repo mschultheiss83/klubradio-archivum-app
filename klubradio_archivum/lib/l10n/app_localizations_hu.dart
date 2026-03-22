@@ -219,6 +219,12 @@ class AppLocalizationsHu extends AppLocalizations {
   String get searchResultsNoResults => 'Nincs találat a megadott keresésre.';
 
   @override
+  String get searchTabShows => 'Műsorok';
+
+  @override
+  String get searchTabEpisodes => 'Epizódok';
+
+  @override
   String get searchScreenInitialPrompt =>
       'Keresd meg kedvenc műsoraidat vagy műsorvezetőidet.';
 
