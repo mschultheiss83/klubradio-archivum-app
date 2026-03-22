@@ -264,19 +264,22 @@ lib/
 - **Main branch**: `main` (for releases)
 - **Development branch**: `dev`
 - **Feature branches**: Create from `dev` with naming `feature/your-feature-name`
+- **Commit & Push**: **ALWAYS use the `/cap` skill** (runs as background subagent). Never do manual git add/commit/push.
+  - Usage: `/cap your commit message here`
+  - The skill handles: pre-flight checks (git status, flutter analyze, flutter test), staging, committing with `-c` marker, and pushing.
 - **Commit messages**:
-  - Use `git commit --quiet` to reduce output verbosity (project convention)
   - **ALWAYS append agent marker**: `-g` (Gemini), `-c` (Claude), `-a` (Codex)
   - **Do NOT include** "Generated with Claude Code" or "Co-Authored-By: Claude" signatures
   - Keep commit messages clean and focused on the actual changes
-  - Example: `git commit -m "Fix download resume logic -g"`
+  - Example: `/cap fix: resolve download resume logic`
 
 ```bash
 git checkout dev
 git pull origin dev
 git checkout -b feature/your-feature-name
 # ... make changes ...
-git commit -m "Your commit message -g"  # Agent marker!
+# Use /cap to commit and push:
+/cap "Your commit message"  # Agent marker -c is appended automatically!
 ```
 
 ### Task Management
