@@ -282,6 +282,13 @@ git checkout -b feature/your-feature-name
 /cap "Your commit message"  # Agent marker -c is appended automatically!
 ```
 
+### Changelog Workflow
+- **`CHANGELOG.md`** follows [Keep a Changelog](https://keepachangelog.com/) format
+- After each `/cap`, update `CHANGELOG.md` under `## [Unreleased]` with the changes
+- Categories: `Added`, `Changed`, `Fixed`, `Removed`
+- On release: rename `[Unreleased]` → `[x.y.z] - YYYY-MM-DD`, bump version in `pubspec.yaml`
+- Changelog is used for App Store release notes and GitHub Releases
+
 ### Task Management
 - Major tasks are tracked in `docs/project/` and `klubradio_archivum/docs/issues/`
 - Check `git status` and `flutter analyze` before resuming work
