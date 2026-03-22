@@ -42,7 +42,7 @@ void main() {
           await binding.takeScreenshot('discover_screen');
         } else {
           // Log a warning if no discover tab found
-          print('Warning: Discover tab (icon/text) not found.');
+          debugPrint('Warning: Discover tab (icon/text) not found.');
         }
       }
 
@@ -59,7 +59,7 @@ void main() {
           await tester.pumpAndSettle();
           await binding.takeScreenshot('my_shows_screen');
         } else {
-          print('Warning: My Shows tab (icon/text) not found.');
+          debugPrint('Warning: My Shows tab (icon/text) not found.');
         }
       }
       
@@ -76,7 +76,7 @@ void main() {
           await tester.pumpAndSettle();
           await binding.takeScreenshot('downloads_screen');
         } else {
-          print('Warning: Downloads tab (icon/text) not found.');
+          debugPrint('Warning: Downloads tab (icon/text) not found.');
         }
       }
 
@@ -93,7 +93,7 @@ void main() {
           await tester.pumpAndSettle();
           await binding.takeScreenshot('settings_screen');
         } else {
-          print('Warning: Settings tab (icon/text) not found.');
+          debugPrint('Warning: Settings tab (icon/text) not found.');
         }
       }
 
@@ -128,12 +128,12 @@ void main() {
           await tester.pumpAndSettle(const Duration(seconds: 2)); // Wait for a moment to let playback start
           await binding.takeScreenshot('player_playing');
         } else {
-          print('Warning: Play/Pause button not found on player screen.');
+          debugPrint('Warning: Play/Pause button not found on player screen.');
         }
 
         // You can add more player interactions here, like seeking, changing speed, etc.
       } else {
-        print('Warning: No list item found on Discover screen to play.');
+        debugPrint('Warning: No list item found on Discover screen to play.');
       }
     });
   });

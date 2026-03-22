@@ -133,12 +133,10 @@ void main() {
       expect(true, isTrue, reason: 'Documented: screen only reads local DB, never fetches from API');
     });
 
-    test('Episode.fromJson round-trip bug: downloadStatus type mismatch', () {
-      // BUG: toJson() writes downloadStatus as String (enum.name),
-      // but fromJson() calls _downloadStatusFromJson() which expects int?.
-      //
-      // This crashes when loading episodes from the offline JSON cache
-      // (cachedMetaPath), because that JSON was written by toJson().
+    test('Episode.fromJson round-trip: downloadStatus String handled correctly', () {
+      // FIXED: _downloadStatusFromJson now accepts both String and int.
+      // toJson() writes downloadStatus as String (enum.name),
+      // fromJson() now parses it back correctly.
       final episode = _testEpisode().copyWith(
         downloadStatus: model.DownloadStatus.downloaded,
       );
@@ -148,12 +146,9 @@ void main() {
       expect(json['downloadStatus'], isA<String>());
       expect(json['downloadStatus'], 'downloaded');
 
-      // fromJson expects int? → throws "type 'String' is not a subtype of type 'int?'"
-      expect(
-        () => model.Episode.fromJson(json),
-        throwsA(isA<TypeError>()),
-        reason: 'Known bug: downloadStatus String/int mismatch in round-trip',
-      );
+      // fromJson now handles both String and int
+      final restored = model.Episode.fromJson(json);
+      expect(restored.downloadStatus, model.DownloadStatus.downloaded);
     });
   });
 

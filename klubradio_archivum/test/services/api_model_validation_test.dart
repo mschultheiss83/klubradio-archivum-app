@@ -4,27 +4,32 @@
 // Run with: flutter test --dart-define API_SERVICE_LIVE_TESTS=true test/services/api_model_validation_test.dart
 //
 import 'dart:convert';
+import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:klubradio_archivum/models/episode.dart';
 import 'package:klubradio_archivum/models/podcast.dart';
-import 'package:klubradio_archivum/models/show_data.dart';
 import 'package:klubradio_archivum/services/api_service.dart';
 import 'package:klubradio_archivum/screens/utils/constants.dart' as constants;
 
 void main() {
   const bool runLive = bool.fromEnvironment('API_SERVICE_LIVE_TESTS');
 
+  // Initialize binding for SharedPreferences (used by ApiCacheService)
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  setUpAll(() {
-    SharedPreferences.setMockInitialValues({});
-  });
-
   group('API + Model validation (live)', () {
+    setUp(() {
+      // Reset HttpOverrides so real HTTP requests go through
+      // (flutter test binding intercepts all HTTP with status 400)
+      HttpOverrides.global = null;
+      // Re-initialize SharedPreferences mock (needed by ApiCacheService)
+      SharedPreferences.setMockInitialValues({});
+    });
     late ApiService service;
 
     setUp(() {
@@ -62,9 +67,9 @@ void main() {
       expect(data, isNotEmpty, reason: 'Should have at least one episode');
 
       final firstEpisode = data.first as Map<String, dynamic>;
-      print('\n=== RAW EPISODE FIELDS ===');
+      debugPrint('\n=== RAW EPISODE FIELDS ===');
       for (final key in firstEpisode.keys) {
-        print('  $key: ${firstEpisode[key]} (${firstEpisode[key]?.runtimeType})');
+        debugPrint('  $key: ${firstEpisode[key]} (${firstEpisode[key]?.runtimeType})');
       }
 
       // Check which fields Episode.fromJson expects vs what API returns
@@ -73,26 +78,26 @@ void main() {
         'publishedAt', 'showDate', 'duration', 'imageUrl', 'hosts',
       ];
 
-      print('\n=== FIELD MAPPING CHECK ===');
+      debugPrint('\n=== FIELD MAPPING CHECK ===');
       for (final field in expectedFields) {
         final hasField = firstEpisode.containsKey(field);
-        print('  $field: ${hasField ? "PRESENT" : "MISSING"} ${hasField ? "(${firstEpisode[field]})" : ""}');
+        debugPrint('  $field: ${hasField ? "PRESENT" : "MISSING"} ${hasField ? "(${firstEpisode[field]})" : ""}');
       }
 
       // Try to parse and see what happens
-      print('\n=== Episode.fromJson ATTEMPT ===');
+      debugPrint('\n=== Episode.fromJson ATTEMPT ===');
       try {
         final episode = Episode.fromJson(firstEpisode);
-        print('  id: ${episode.id}');
-        print('  podcastId: ${episode.podcastId}');
-        print('  title: "${episode.title}"');
-        print('  description: "${episode.description}"');
-        print('  audioUrl: "${episode.audioUrl}"');
-        print('  publishedAt: ${episode.publishedAt}');
-        print('  showDate: "${episode.showDate}"');
-        print('  duration: ${episode.duration}');
-        print('  imageUrl: ${episode.imageUrl}');
-        print('  hosts: ${episode.hosts}');
+        debugPrint('  id: ${episode.id}');
+        debugPrint('  podcastId: ${episode.podcastId}');
+        debugPrint('  title: "${episode.title}"');
+        debugPrint('  description: "${episode.description}"');
+        debugPrint('  audioUrl: "${episode.audioUrl}"');
+        debugPrint('  publishedAt: ${episode.publishedAt}');
+        debugPrint('  showDate: "${episode.showDate}"');
+        debugPrint('  duration: ${episode.duration}');
+        debugPrint('  imageUrl: ${episode.imageUrl}');
+        debugPrint('  hosts: ${episode.hosts}');
 
         // Validate critical fields are not empty/default
         expect(episode.id, isNotEmpty, reason: 'Episode id should not be empty');
@@ -100,7 +105,7 @@ void main() {
         expect(episode.title, isNotEmpty, reason: 'Episode title should not be empty');
         expect(episode.audioUrl, isNotEmpty, reason: 'Episode audioUrl should not be empty');
       } catch (e) {
-        print('  ERROR: $e');
+        debugPrint('  ERROR: $e');
         fail('Episode.fromJson failed: $e');
       }
     });
@@ -130,9 +135,9 @@ void main() {
       expect(data, isNotEmpty, reason: 'Should have at least one podcast');
 
       final firstPodcast = data.first as Map<String, dynamic>;
-      print('\n=== RAW PODCAST FIELDS ===');
+      debugPrint('\n=== RAW PODCAST FIELDS ===');
       for (final key in firstPodcast.keys) {
-        print('  $key: ${firstPodcast[key]} (${firstPodcast[key]?.runtimeType})');
+        debugPrint('  $key: ${firstPodcast[key]} (${firstPodcast[key]?.runtimeType})');
       }
 
       // Check which fields Podcast.fromJson expects
@@ -141,27 +146,27 @@ void main() {
         'episode_count', 'hosts', 'latest_episode', 'last_updated',
       ];
 
-      print('\n=== FIELD MAPPING CHECK ===');
+      debugPrint('\n=== FIELD MAPPING CHECK ===');
       for (final field in expectedFields) {
         final hasField = firstPodcast.containsKey(field);
-        print('  $field: ${hasField ? "PRESENT" : "MISSING"} ${hasField ? "" : ""}');
+        debugPrint('  $field: ${hasField ? "PRESENT" : "MISSING"} ${hasField ? "" : ""}');
       }
 
-      print('\n=== Podcast.fromJson ATTEMPT ===');
+      debugPrint('\n=== Podcast.fromJson ATTEMPT ===');
       try {
         final podcast = Podcast.fromJson(firstPodcast);
-        print('  id: ${podcast.id}');
-        print('  title: "${podcast.title}"');
-        print('  description: "${podcast.description}"');
-        print('  coverImageUrl: "${podcast.coverImageUrl}"');
-        print('  episodeCount: ${podcast.episodeCount}');
-        print('  hosts: ${podcast.hosts}');
-        print('  lastUpdated: ${podcast.lastUpdated}');
+        debugPrint('  id: ${podcast.id}');
+        debugPrint('  title: "${podcast.title}"');
+        debugPrint('  description: "${podcast.description}"');
+        debugPrint('  coverImageUrl: "${podcast.coverImageUrl}"');
+        debugPrint('  episodeCount: ${podcast.episodeCount}');
+        debugPrint('  hosts: ${podcast.hosts}');
+        debugPrint('  lastUpdated: ${podcast.lastUpdated}');
 
         expect(podcast.id, isNotEmpty, reason: 'Podcast id should not be empty');
         expect(podcast.title, isNotEmpty, reason: 'Podcast title should not be empty');
       } catch (e) {
-        print('  ERROR: $e');
+        debugPrint('  ERROR: $e');
         fail('Podcast.fromJson failed: $e');
       }
     });
@@ -177,30 +182,30 @@ void main() {
       expect(podcasts, isNotEmpty, reason: 'Should have at least one podcast');
 
       final podcastId = podcasts.first.id;
-      print('\n=== Fetching episodes for podcast "$podcastId" (${podcasts.first.title}) ===');
+      debugPrint('\n=== Fetching episodes for podcast "$podcastId" (${podcasts.first.title}) ===');
 
       final episodes = await service.fetchEpisodesForPodcast(podcastId, limit: 5);
-      print('  Returned ${episodes.length} episodes');
+      debugPrint('  Returned ${episodes.length} episodes');
 
       if (episodes.isEmpty) {
-        print('  WARNING: No episodes returned for podcast $podcastId');
-        print('  This could be a filtering/query issue');
+        debugPrint('  WARNING: No episodes returned for podcast $podcastId');
+        debugPrint('  This could be a filtering/query issue');
 
         // Try without filter to see if episodes table has data at all
         final recentEpisodes = await service.fetchRecentEpisodes(limit: 5);
-        print('  fetchRecentEpisodes returned ${recentEpisodes.length} episodes');
+        debugPrint('  fetchRecentEpisodes returned ${recentEpisodes.length} episodes');
         if (recentEpisodes.isNotEmpty) {
-          print('  First recent episode podcastId: ${recentEpisodes.first.podcastId}');
-          print('  Trying with that podcastId...');
+          debugPrint('  First recent episode podcastId: ${recentEpisodes.first.podcastId}');
+          debugPrint('  Trying with that podcastId...');
           final retryEpisodes = await service.fetchEpisodesForPodcast(
             recentEpisodes.first.podcastId, limit: 3,
           );
-          print('  Retry returned ${retryEpisodes.length} episodes');
+          debugPrint('  Retry returned ${retryEpisodes.length} episodes');
         }
       }
 
       for (final ep in episodes.take(3)) {
-        print('  - [${ep.id}] "${ep.title}" (${ep.publishedAt}) audio=${ep.audioUrl.isNotEmpty ? "OK" : "EMPTY"}');
+        debugPrint('  - [${ep.id}] "${ep.title}" (${ep.publishedAt}) audio=${ep.audioUrl.isNotEmpty ? "OK" : "EMPTY"}');
       }
     });
 
@@ -230,22 +235,22 @@ void main() {
       if (data.isNotEmpty) {
         final row = data.first as Map<String, dynamic>;
         final columns = row.keys.toList();
-        print('\n=== Episodes table columns ===');
-        print('  $columns');
+        debugPrint('\n=== Episodes table columns ===');
+        debugPrint('  $columns');
 
         // Check if the filter column name matches
         final hasPodcastId = columns.contains('podcastId');
-        final hasPodcast_id = columns.contains('podcast_id');
-        print('  "podcastId" (camelCase): $hasPodcastId');
-        print('  "podcast_id" (snake_case): $hasPodcast_id');
+        final hasPodcastIdSnake = columns.contains('podcast_id');
+        debugPrint('  "podcastId" (camelCase): $hasPodcastId');
+        debugPrint('  "podcast_id" (snake_case): $hasPodcastIdSnake');
 
-        if (!hasPodcastId && hasPodcast_id) {
-          print('  *** MISMATCH: API query uses "podcastId" but column is "podcast_id" ***');
+        if (!hasPodcastId && hasPodcastIdSnake) {
+          debugPrint('  *** MISMATCH: API query uses "podcastId" but column is "podcast_id" ***');
         }
 
         // Also verify the actual podcastId value format
         final podcastIdValue = row['podcastId'] ?? row['podcast_id'];
-        print('  podcastId value: $podcastIdValue (type: ${podcastIdValue.runtimeType})');
+        debugPrint('  podcastId value: $podcastIdValue (type: ${podcastIdValue.runtimeType})');
       }
     });
 
@@ -256,10 +261,10 @@ void main() {
       }
 
       final topShows = await service.fetchTopShowsThisYear();
-      print('\n=== Top Shows ===');
-      print('  Returned ${topShows.length} shows');
+      debugPrint('\n=== Top Shows ===');
+      debugPrint('  Returned ${topShows.length} shows');
       for (final show in topShows.take(5)) {
-        print('  - [${show.id}] "${show.title}" count=${show.count}');
+        debugPrint('  - [${show.id}] "${show.title}" count=${show.count}');
       }
       expect(topShows, isNotEmpty);
     });
@@ -296,7 +301,7 @@ void main() {
         expect(roundTrip.podcastId, episode.podcastId);
         expect(roundTrip.title, episode.title);
         expect(roundTrip.audioUrl, episode.audioUrl);
-        print('  Round-trip OK: [${episode.id}] "${episode.title}"');
+        debugPrint('  Round-trip OK: [${episode.id}] "${episode.title}"');
       }
     });
   });

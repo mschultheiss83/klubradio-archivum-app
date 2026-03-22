@@ -197,18 +197,28 @@ class Episode {
     return Duration(seconds: int.tryParse(value) ?? 0);
   }
 
-  static DownloadStatus _downloadStatusFromJson(int? value) {
+  static DownloadStatus _downloadStatusFromJson(dynamic value) {
     if (value == null) return DownloadStatus.notDownloaded;
-    // Map integer status from DB to enum
-    switch (value) {
-      case 0: return DownloadStatus.notDownloaded;
-      case 1: return DownloadStatus.queued;
-      case 2: return DownloadStatus.downloading;
-      case 3: return DownloadStatus.downloaded; // Corrected mapping
-      case 4: return DownloadStatus.failed;
-      case 5: return DownloadStatus.canceled;
-      default: return DownloadStatus.notDownloaded;
+    // Handle String (from toJson / offline JSON cache)
+    if (value is String) {
+      return DownloadStatus.values.firstWhere(
+        (s) => s.name == value,
+        orElse: () => DownloadStatus.notDownloaded,
+      );
     }
+    // Handle int (from DB / Drift)
+    if (value is int) {
+      switch (value) {
+        case 0: return DownloadStatus.notDownloaded;
+        case 1: return DownloadStatus.queued;
+        case 2: return DownloadStatus.downloading;
+        case 3: return DownloadStatus.downloaded;
+        case 4: return DownloadStatus.failed;
+        case 5: return DownloadStatus.canceled;
+        default: return DownloadStatus.notDownloaded;
+      }
+    }
+    return DownloadStatus.notDownloaded;
   }
 
   @override

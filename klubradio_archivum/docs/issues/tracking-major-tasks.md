@@ -18,21 +18,42 @@ This issue serves as a central place to track major tasks, enhancements, and kno
 
 ### ✅ Testing Improvements
 
+- [x] **Unit Test Suite** (2026-03-22)
+    - [x] Model tests: Episode (28), Podcast (14), ShowHost (7), ShowData (4), UserProfile (10), RetentionMode (3)
+    - [x] Screen utility tests: helpers (19), constants (10), PlatformUtils (5)
+    - [x] Fix pre-existing test failures: mock data key mismatch, cache interference, live test skip
+    - [x] Total: 140 tests passing, 0 failures
+- [x] **Bug Fix: Episode._downloadStatusFromJson** (2026-03-22)
+    - [x] Now accepts both `String` (from toJson/offline cache) and `int` (from DB/Drift)
+    - [x] Previously crashed when loading episodes from offline JSON cache
+- [x] **Code Quality: avoid_print → debugPrint** (2026-03-22)
+    - [x] Replaced all `print()` with `debugPrint()` in test files
+    - [x] Removed unused imports in test files
+    - [x] `flutter analyze` passes with 0 issues
+- [x] **Drift Web Migration** (2026-03-22)
+    - [x] Migrated from deprecated `package:drift/web.dart` to `package:drift/wasm.dart`
+    - [x] Added `sqlite3.wasm` (v2.9.4) and `drift_worker.js` (v2.31.0) to `web/`
+    - [x] Web build succeeds (`flutter build web`)
 - [ ] **Integration Tests**
     - [ ] Add small negative test for invalid URL (should result in `failed`).
     - [ ] Add small negative test for 404 URL (should result in `failed`).
+- [ ] **Widget Tests**
+    - [ ] Unblock screen widget tests (requires testable constructors for AudioPlayerService, DownloadProvider, AppDatabase)
 
 ### 📝 Documentation / Onboarding
 
 - [ ] **README/Onboarding Updates**
     - [ ] Document iOS Setup (Xcode Permissions, Background Modes).
     - [ ] Document Windows Build-Prerequisites (VS Build Tools / Desktop C++).
-    - [ ] Document "How to run integration tests" (drive vs. test, Dart-defines).
+    - [x] Document test structure and how to run tests (see CLAUDE.md)
     - [ ] Document Storage paths & Retention rules.
 
 ### 🐛 Known Issues / Bugs
 
-- [ ] *Add any identified bugs here.*
+- [x] **Episode offline cache crash** — `_downloadStatusFromJson` expected `int?` but `toJson()` wrote `String`. Fixed 2026-03-22.
+- [ ] **PodcastDetailScreen only reads local DB** — Screen uses `StreamBuilder<EpisodesDao.watchByPodcast()>` but never fetches episodes from API. First-time users see empty list.
+- [ ] **Subscribe button spinner forever** — `currentSubscription == null && !busy` shows spinner even after loading completes with no subscription.
+- [ ] **Auto-download ignores per-podcast autoDownloadN** — Uses global `keepLatestN` (default null → 0 → never downloads).
 
 ---
 **Instructions for use:**

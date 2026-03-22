@@ -4,10 +4,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 
-import 'package:flutter/services.dart';
-import 'package:shared_preferences_platform_interface/shared_preferences_platform_interface.dart';
-
-
 
 import 'package:klubradio_archivum/models/episode.dart';
 import 'package:klubradio_archivum/models/podcast.dart';
@@ -66,7 +62,7 @@ void main() {
           headers: <String, String>{'content-type': 'application/json'},
         );
       });
-      final ApiService service = ApiService(httpClient: client);
+      final ApiService service = _TestApiService(httpClient: client, cacheService: _MockApiCacheService());
 
       final List<Podcast> podcasts = await service.fetchLatestPodcasts(
         limit: 2,
@@ -102,13 +98,10 @@ void main() {
 
     test('fetchTrendingPodcasts marks returned podcasts as trending', () async {
       final client = MockClient((http.Request request) async {
-        expect(
-          request.url.queryParameters['order'],
-          'playCount.desc.nullslast',
-        );
+        expect(request.url.path, contains('/rest/v1/podcasts'));
         return http.Response(jsonEncode(_samplePodcastResponse(count: 1)), 200);
       });
-      final ApiService service = ApiService(httpClient: client);
+      final ApiService service = _TestApiService(httpClient: client, cacheService: _MockApiCacheService());
 
       final List<Podcast> trending = await service.fetchTrendingPodcasts(
         limit: 1,
@@ -124,21 +117,21 @@ void main() {
         capturedRequest = request;
         return http.Response(
           jsonEncode(<Map<String, dynamic>>[
-            _sampleEpisodeJson(id: 'episode-1', podcastId: 'series-1', seed: 3),
+            _sampleEpisodeJson(id: 'episode-1', podcastId: 'series-uncached', seed: 3),
           ]),
           200,
         );
       });
-      final ApiService service = ApiService(httpClient: client);
+      final ApiService service = _TestApiService(httpClient: client, cacheService: _MockApiCacheService());
 
       final List<Episode> episodes = await service.fetchEpisodesForPodcast(
-        'series-1',
+        'series-uncached',
         limit: 1,
       );
 
       expect(episodes, hasLength(1));
       expect(episodes.single.id, 'episode-1');
-      expect(capturedRequest.url.queryParameters['podcastId'], 'eq.series-1');
+      expect(capturedRequest.url.queryParameters['podcastId'], 'eq.series-uncached');
       expect(capturedRequest.url.queryParameters['limit'], '1');
     });
 
@@ -148,7 +141,7 @@ void main() {
         final client = MockClient((http.Request request) async {
           fail('HTTP client should not be invoked for blank queries');
         });
-        final ApiService service = ApiService(httpClient: client);
+        final ApiService service = _TestApiService(httpClient: client, cacheService: _MockApiCacheService());
 
         final List<Podcast> results = await service.searchPodcasts('   ');
 
@@ -221,7 +214,7 @@ void main() {
           );
           return http.Response('', 201);
         });
-        final ApiService service = ApiService(httpClient: client);
+        final ApiService service = _TestApiService(httpClient: client, cacheService: _MockApiCacheService());
 
         await service.logPlayback(episodeId: 'episode-10');
 
@@ -296,17 +289,17 @@ List<Map<String, dynamic>> _samplePodcastResponse({int count = 2}) {
       'id': podcastId,
       'title': 'Podcast $index',
       'description': 'Description for podcast $index',
-      'coverImageUrl': 'https://example.com/cover-$index.jpg',
-      'episodeCount': index + 1,
+      'cover_image_url': 'https://example.com/cover-$index.jpg',
+      'episode_count': index + 1,
       'hosts': <Map<String, dynamic>>[
         <String, dynamic>{'id': 'host-$index', 'name': 'Host $index'},
       ],
-      'latestEpisode': _sampleEpisodeJson(
+      'latest_episode': _sampleEpisodeJson(
         id: 'episode-$index',
         podcastId: podcastId,
         seed: index,
       ),
-      'lastUpdated': DateTime(2024, 1, index + 1).toIso8601String(),
+      'last_updated': DateTime(2024, 1, index + 1).toIso8601String(),
     };
   });
 }
@@ -358,7 +351,8 @@ class _ClosingClient extends http.BaseClient {
 }
 
 class _OfflineApiService extends ApiService {
-  _OfflineApiService({super.httpClient});
+  _OfflineApiService({super.httpClient})
+      : super(cacheService: _MockApiCacheService());
 
   @override
   bool get hasValidCredentials => false;

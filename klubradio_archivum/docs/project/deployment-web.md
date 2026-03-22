@@ -192,19 +192,29 @@ shared_preferences: ^2.x  # ✓ Supports web (uses localStorage)
 provider: ^6.x  # ✓ Supports web
 ```
 
-**Replace drift with web-compatible storage**:
+**Drift web database (already migrated)**:
 
-Option 1: **Remove database completely** (simplest for web version)
-- Don't persist downloads/subscriptions
-- Use in-memory state management only
+The app uses `package:drift/wasm.dart` (WasmDatabase) for web builds. Required files are already in `web/`:
+- `web/sqlite3.wasm` — SQLite compiled to WASM (from sqlite3 v2.9.4 release)
+- `web/drift_worker.js` — Drift web worker (from drift v2.31.0 release)
 
-Option 2: **Use drift with web backend**:
-```yaml
-dependencies:
-  drift: ^2.14.0
-  # For web, use:
-  # drift/web.dart uses IndexedDB
+Connection setup in `lib/db/connection/connection_web.dart`:
+```dart
+import 'package:drift/wasm.dart';
+
+Future<QueryExecutor> openConnection() async {
+  final db = await WasmDatabase.open(
+    databaseName: 'klubradio_archivum',
+    sqlite3Uri: Uri.parse('sqlite3.wasm'),
+    driftWorkerUri: Uri.parse('drift_worker.js'),
+  );
+  return db.resolvedExecutor;
+}
 ```
+
+**When upgrading drift or sqlite3**: Download matching release assets from:
+- https://github.com/simolus3/drift/releases (drift_worker.js)
+- https://github.com/simolus3/sqlite3.dart/releases (sqlite3.wasm — use 2.x for drift 2.x)
 
 ### 2.5 Update Web-Specific Configuration
 

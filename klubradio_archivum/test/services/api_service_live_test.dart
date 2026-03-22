@@ -2,16 +2,24 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:klubradio_archivum/services/api_service.dart';
 
 void main() {
   const bool runLive = bool.fromEnvironment('API_SERVICE_LIVE_TESTS');
   const String outputPath = 'assets/api/response.json';
 
+  // Initialize binding for SharedPreferences (used by ApiCacheService)
+  TestWidgetsFlutterBinding.ensureInitialized();
+  SharedPreferences.setMockInitialValues({});
+
   group('ApiService live Supabase snapshot', () {
     late ApiService service;
 
     setUp(() {
+      // Reset HttpOverrides so real HTTP requests go through
+      // (flutter test binding intercepts all HTTP with status 400)
+      HttpOverrides.global = null;
       service = ApiService();
     });
 
@@ -23,11 +31,7 @@ void main() {
       'writes Supabase data to assets/api/response.json',
       () async {
         if (!runLive) {
-          expect(
-            runLive,
-            isTrue,
-            reason: 'Enable with --dart-define API_SERVICE_LIVE_TESTS=true',
-          );
+          markTestSkipped('Enable with --dart-define API_SERVICE_LIVE_TESTS=true');
           return;
         }
         expect(

@@ -90,8 +90,17 @@
 ├── klubradio_archivum/lib/utils/web_image_proxy.dart
 ├── klubradio_archivum/test/api/episode_api_test.dart
 ├── klubradio_archivum/test/api/episode_api_test.mocks.dart
+├── klubradio_archivum/test/models/episode_test.dart
+├── klubradio_archivum/test/models/podcast_test.dart
+├── klubradio_archivum/test/models/retention_mode_test.dart
+├── klubradio_archivum/test/models/show_data_test.dart
+├── klubradio_archivum/test/models/show_host_test.dart
+├── klubradio_archivum/test/models/user_profile_test.dart
 ├── klubradio_archivum/test/screens/podcast_detail_screen_test.dart
 ├── klubradio_archivum/test/screens/subscription_download_test.dart
+├── klubradio_archivum/test/screens/utils/constants_test.dart
+├── klubradio_archivum/test/screens/utils/helpers_test.dart
+├── klubradio_archivum/test/screens/utils/platform_utils_test.dart
 ├── klubradio_archivum/test/services/api_live_validation_test.dart
 ├── klubradio_archivum/test/services/api_model_validation_test.dart
 ├── klubradio_archivum/test/services/api_service_live_test.dart
@@ -148,7 +157,7 @@ void main() {
           await binding.takeScreenshot('discover_screen');
         } else {
           // Log a warning if no discover tab found
-          print('Warning: Discover tab (icon/text) not found.');
+          debugPrint('Warning: Discover tab (icon/text) not found.');
         }
       }
 
@@ -165,7 +174,7 @@ void main() {
           await tester.pumpAndSettle();
           await binding.takeScreenshot('my_shows_screen');
         } else {
-          print('Warning: My Shows tab (icon/text) not found.');
+          debugPrint('Warning: My Shows tab (icon/text) not found.');
         }
       }
       
@@ -182,7 +191,7 @@ void main() {
           await tester.pumpAndSettle();
           await binding.takeScreenshot('downloads_screen');
         } else {
-          print('Warning: Downloads tab (icon/text) not found.');
+          debugPrint('Warning: Downloads tab (icon/text) not found.');
         }
       }
 
@@ -199,7 +208,7 @@ void main() {
           await tester.pumpAndSettle();
           await binding.takeScreenshot('settings_screen');
         } else {
-          print('Warning: Settings tab (icon/text) not found.');
+          debugPrint('Warning: Settings tab (icon/text) not found.');
         }
       }
 
@@ -234,12 +243,12 @@ void main() {
           await tester.pumpAndSettle(const Duration(seconds: 2)); // Wait for a moment to let playback start
           await binding.takeScreenshot('player_playing');
         } else {
-          print('Warning: Play/Pause button not found on player screen.');
+          debugPrint('Warning: Play/Pause button not found on player screen.');
         }
 
         // You can add more player interactions here, like seeking, changing speed, etc.
       } else {
-        print('Warning: No list item found on Discover screen to play.');
+        debugPrint('Warning: No list item found on Discover screen to play.');
       }
     });
   });
@@ -4394,10 +4403,15 @@ Future<QueryExecutor> openConnection() async {
 ### Inhalt von `klubradio_archivum/lib/db/connection/connection_web.dart`
 ```dart
 import 'package:drift/drift.dart';
-import 'package:drift/web.dart';
+import 'package:drift/wasm.dart';
 
 Future<QueryExecutor> openConnection() async {
-  return WebDatabase('klubradio_archivum');
+  final db = await WasmDatabase.open(
+    databaseName: 'klubradio_archivum',
+    sqlite3Uri: Uri.parse('sqlite3.wasm'),
+    driftWorkerUri: Uri.parse('drift_worker.js'),
+  );
+  return db.resolvedExecutor;
 }
 ```
 
@@ -8243,18 +8257,28 @@ class Episode {
     return Duration(seconds: int.tryParse(value) ?? 0);
   }
 
-  static DownloadStatus _downloadStatusFromJson(int? value) {
+  static DownloadStatus _downloadStatusFromJson(dynamic value) {
     if (value == null) return DownloadStatus.notDownloaded;
-    // Map integer status from DB to enum
-    switch (value) {
-      case 0: return DownloadStatus.notDownloaded;
-      case 1: return DownloadStatus.queued;
-      case 2: return DownloadStatus.downloading;
-      case 3: return DownloadStatus.downloaded; // Corrected mapping
-      case 4: return DownloadStatus.failed;
-      case 5: return DownloadStatus.canceled;
-      default: return DownloadStatus.notDownloaded;
+    // Handle String (from toJson / offline JSON cache)
+    if (value is String) {
+      return DownloadStatus.values.firstWhere(
+        (s) => s.name == value,
+        orElse: () => DownloadStatus.notDownloaded,
+      );
     }
+    // Handle int (from DB / Drift)
+    if (value is int) {
+      switch (value) {
+        case 0: return DownloadStatus.notDownloaded;
+        case 1: return DownloadStatus.queued;
+        case 2: return DownloadStatus.downloading;
+        case 3: return DownloadStatus.downloaded;
+        case 4: return DownloadStatus.failed;
+        case 5: return DownloadStatus.canceled;
+        default: return DownloadStatus.notDownloaded;
+      }
+    }
+    return DownloadStatus.notDownloaded;
   }
 
   @override
@@ -15706,6 +15730,799 @@ class MockHttpRequester extends _i1.Mock implements _i2.HttpRequester {
 }
 ```
 
+### Inhalt von `klubradio_archivum/test/models/episode_test.dart`
+```dart
+import 'package:flutter_test/flutter_test.dart';
+import 'package:klubradio_archivum/models/episode.dart';
+import 'package:klubradio_archivum/screens/utils/constants.dart' as constants;
+
+void main() {
+  // ===================== Helpers =====================
+  Episode makeEpisode({
+    String id = 'ep-1',
+    String podcastId = 'pod-1',
+    String title = 'Test Episode',
+    String description = 'Desc',
+    String audioUrl = 'https://example.com/ep.mp3',
+    DateTime? publishedAt,
+    String showDate = '2024-06-15',
+    Duration duration = const Duration(minutes: 30),
+    String? imageUrl,
+    List<String> hosts = const [],
+    bool isFavourite = false,
+    DownloadStatus downloadStatus = DownloadStatus.notDownloaded,
+    double downloadProgress = 0,
+    String? localFilePath,
+    String? cachedTitle,
+    String? cachedImagePath,
+    String? cachedMetaPath,
+  }) {
+    return Episode(
+      id: id,
+      podcastId: podcastId,
+      title: title,
+      description: description,
+      audioUrl: audioUrl,
+      publishedAt: publishedAt ?? DateTime(2024, 6, 15),
+      showDate: showDate,
+      duration: duration,
+      imageUrl: imageUrl,
+      hosts: hosts,
+      isFavourite: isFavourite,
+      downloadStatus: downloadStatus,
+      downloadProgress: downloadProgress,
+      localFilePath: localFilePath,
+      cachedTitle: cachedTitle,
+      cachedImagePath: cachedImagePath,
+      cachedMetaPath: cachedMetaPath,
+    );
+  }
+
+  // ===================== fromJson =====================
+  group('Episode.fromJson', () {
+    test('parses minimal required fields', () {
+      final ep = Episode.fromJson({
+        'id': '123',
+        'podcastId': 'p1',
+        'title': 'Hello',
+        'audioUrl': 'https://a.mp3',
+      });
+
+      expect(ep.id, '123');
+      expect(ep.podcastId, 'p1');
+      expect(ep.title, 'Hello');
+      expect(ep.audioUrl, 'https://a.mp3');
+      expect(ep.description, '');
+      expect(ep.showDate, '');
+      expect(ep.duration, Duration.zero);
+      expect(ep.hosts, isEmpty);
+      expect(ep.isFavourite, isFalse);
+      expect(ep.downloadStatus, DownloadStatus.notDownloaded);
+      expect(ep.downloadProgress, 0);
+      expect(ep.imageUrl, isNull);
+      expect(ep.localFilePath, isNull);
+    });
+
+    test('converts numeric id and podcastId to String', () {
+      final ep = Episode.fromJson({
+        'id': 42,
+        'podcastId': 99,
+        'title': 'Numeric',
+        'audioUrl': 'u',
+      });
+      expect(ep.id, '42');
+      expect(ep.podcastId, '99');
+    });
+
+    test('parses duration as int (seconds)', () {
+      final ep = Episode.fromJson({
+        'id': '1', 'podcastId': 'p', 'title': 'T', 'audioUrl': 'u',
+        'duration': 7200,
+      });
+      expect(ep.duration, const Duration(hours: 2));
+    });
+
+    test('parses duration as HH:MM:SS string', () {
+      final ep = Episode.fromJson({
+        'id': '1', 'podcastId': 'p', 'title': 'T', 'audioUrl': 'u',
+        'duration': '01:30:45',
+      });
+      expect(ep.duration, const Duration(hours: 1, minutes: 30, seconds: 45));
+    });
+
+    test('parses duration as MM:SS string', () {
+      final ep = Episode.fromJson({
+        'id': '1', 'podcastId': 'p', 'title': 'T', 'audioUrl': 'u',
+        'duration': '45:30',
+      });
+      expect(ep.duration, const Duration(minutes: 45, seconds: 30));
+    });
+
+    test('parses duration as plain seconds string', () {
+      final ep = Episode.fromJson({
+        'id': '1', 'podcastId': 'p', 'title': 'T', 'audioUrl': 'u',
+        'duration': '120',
+      });
+      expect(ep.duration, const Duration(seconds: 120));
+    });
+
+    test('handles null and missing duration', () {
+      final ep1 = Episode.fromJson({
+        'id': '1', 'podcastId': 'p', 'title': 'T', 'audioUrl': 'u',
+        'duration': null,
+      });
+      final ep2 = Episode.fromJson({
+        'id': '2', 'podcastId': 'p', 'title': 'T', 'audioUrl': 'u',
+      });
+      expect(ep1.duration, Duration.zero);
+      expect(ep2.duration, Duration.zero);
+    });
+
+    test('handles empty duration string', () {
+      final ep = Episode.fromJson({
+        'id': '1', 'podcastId': 'p', 'title': 'T', 'audioUrl': 'u',
+        'duration': '',
+      });
+      expect(ep.duration, Duration.zero);
+    });
+
+    test('parses hosts as list of strings', () {
+      final ep = Episode.fromJson({
+        'id': '1', 'podcastId': 'p', 'title': 'T', 'audioUrl': 'u',
+        'hosts': ['Host A', 'Host B'],
+      });
+      expect(ep.hosts, ['Host A', 'Host B']);
+    });
+
+    test('handles non-list hosts gracefully', () {
+      final ep = Episode.fromJson({
+        'id': '1', 'podcastId': 'p', 'title': 'T', 'audioUrl': 'u',
+        'hosts': 'not a list',
+      });
+      expect(ep.hosts, isEmpty);
+    });
+
+    test('replaces problematic imageUrl with podcast cover', () {
+      final ep = Episode.fromJson({
+        'id': '1', 'podcastId': 'p', 'title': 'T', 'audioUrl': 'u',
+        'imageUrl': constants.problematicEpisodeImageUrl,
+      }, podcastCoverImageUrl: 'https://cover.jpg');
+      expect(ep.imageUrl, 'https://cover.jpg');
+    });
+
+    test('replaces problematic imageUrl with default when no cover provided', () {
+      final ep = Episode.fromJson({
+        'id': '1', 'podcastId': 'p', 'title': 'T', 'audioUrl': 'u',
+        'imageUrl': constants.problematicEpisodeImageUrl,
+      });
+      expect(ep.imageUrl, constants.defaultEpisodeImageUrl);
+    });
+
+    test('parses all optional fields', () {
+      final ep = Episode.fromJson({
+        'id': '1',
+        'podcastId': 'p',
+        'title': 'Full',
+        'audioUrl': 'u',
+        'description': 'desc',
+        'publishedAt': '2024-06-15T10:00:00Z',
+        'showDate': '2024-06-15',
+        'isFavourite': true,
+        'downloadProgress': 0.75,
+        'localFilePath': '/local/file.mp3',
+        'cachedTitle': 'Cached',
+        'cachedImagePath': '/cache/img.jpg',
+        'cachedMetaPath': '/cache/meta.json',
+      });
+      expect(ep.description, 'desc');
+      expect(ep.showDate, '2024-06-15');
+      expect(ep.isFavourite, isTrue);
+      expect(ep.downloadProgress, 0.75);
+      expect(ep.localFilePath, '/local/file.mp3');
+      expect(ep.cachedTitle, 'Cached');
+      expect(ep.cachedImagePath, '/cache/img.jpg');
+      expect(ep.cachedMetaPath, '/cache/meta.json');
+    });
+  });
+
+  // ===================== toJson =====================
+  group('Episode.toJson', () {
+    test('serializes all fields', () {
+      final ep = makeEpisode(
+        id: 'x1',
+        podcastId: 'px',
+        title: 'Title',
+        description: 'Desc',
+        audioUrl: 'https://audio.mp3',
+        publishedAt: DateTime.utc(2024, 6, 15, 10),
+        showDate: '2024-06-15',
+        duration: const Duration(minutes: 45, seconds: 30),
+        imageUrl: 'https://img.jpg',
+        hosts: ['H1'],
+        isFavourite: true,
+        downloadStatus: DownloadStatus.downloaded,
+        downloadProgress: 1.0,
+        localFilePath: '/path.mp3',
+        cachedTitle: 'CT',
+        cachedImagePath: '/ci.jpg',
+        cachedMetaPath: '/cm.json',
+      );
+      final json = ep.toJson();
+
+      expect(json['id'], 'x1');
+      expect(json['podcastId'], 'px');
+      expect(json['title'], 'Title');
+      expect(json['description'], 'Desc');
+      expect(json['audioUrl'], 'https://audio.mp3');
+      expect(json['publishedAt'], '2024-06-15T10:00:00.000Z');
+      expect(json['showDate'], '2024-06-15');
+      expect(json['duration'], 2730); // 45*60 + 30
+      expect(json['imageUrl'], 'https://img.jpg');
+      expect(json['hosts'], ['H1']);
+      expect(json['isFavourite'], isTrue);
+      expect(json['downloadStatus'], 'downloaded');
+      expect(json['downloadProgress'], 1.0);
+      expect(json['localFilePath'], '/path.mp3');
+      expect(json['cachedTitle'], 'CT');
+      expect(json['cachedImagePath'], '/ci.jpg');
+      expect(json['cachedMetaPath'], '/cm.json');
+    });
+
+    test('duration serializes as seconds integer', () {
+      final json = makeEpisode(duration: const Duration(hours: 1, minutes: 5)).toJson();
+      expect(json['duration'], 3900);
+    });
+
+    test('downloadStatus serializes as enum name string', () {
+      for (final status in DownloadStatus.values) {
+        final json = makeEpisode(downloadStatus: status).toJson();
+        expect(json['downloadStatus'], status.name);
+      }
+    });
+  });
+
+  // ===================== copyWith =====================
+  group('Episode.copyWith', () {
+    test('copies with overridden fields', () {
+      final original = makeEpisode(title: 'Original', isFavourite: false);
+      final copied = original.copyWith(title: 'Changed', isFavourite: true);
+
+      expect(copied.title, 'Changed');
+      expect(copied.isFavourite, isTrue);
+      expect(copied.id, original.id); // unchanged
+      expect(copied.podcastId, original.podcastId);
+      expect(copied.audioUrl, original.audioUrl);
+    });
+
+    test('returns new instance with same values when no overrides', () {
+      final original = makeEpisode();
+      final copied = original.copyWith();
+
+      expect(copied.id, original.id);
+      expect(copied.title, original.title);
+      expect(copied.duration, original.duration);
+    });
+  });
+
+  // ===================== Display helpers =====================
+  group('Episode display helpers', () {
+    test('displayTitle prefers cachedTitle when non-empty', () {
+      final ep = makeEpisode(title: 'Remote', cachedTitle: 'Cached');
+      expect(ep.displayTitle, 'Cached');
+    });
+
+    test('displayTitle falls back to title when cachedTitle is null', () {
+      final ep = makeEpisode(title: 'Remote');
+      expect(ep.displayTitle, 'Remote');
+    });
+
+    test('displayTitle falls back to title when cachedTitle is empty', () {
+      final ep = makeEpisode(title: 'Remote', cachedTitle: '');
+      expect(ep.displayTitle, 'Remote');
+    });
+
+    test('displayImagePathOrUrl prefers cachedImagePath', () {
+      final ep = makeEpisode(
+        imageUrl: 'https://remote.jpg',
+        cachedImagePath: '/local/cover.jpg',
+      );
+      expect(ep.displayImagePathOrUrl, '/local/cover.jpg');
+      expect(ep.isDisplayImageLocal, isTrue);
+    });
+
+    test('displayImagePathOrUrl falls back to imageUrl', () {
+      final ep = makeEpisode(imageUrl: 'https://remote.jpg');
+      expect(ep.displayImagePathOrUrl, 'https://remote.jpg');
+      expect(ep.isDisplayImageLocal, isFalse);
+    });
+
+    test('displayImagePathOrUrl returns null when both absent', () {
+      final ep = makeEpisode();
+      expect(ep.displayImagePathOrUrl, isNull);
+      expect(ep.isDisplayImageLocal, isFalse);
+    });
+
+    test('hasCachedImage is true only when cachedImagePath is non-empty', () {
+      expect(makeEpisode(cachedImagePath: '/img.jpg').hasCachedImage, isTrue);
+      expect(makeEpisode(cachedImagePath: '').hasCachedImage, isFalse);
+      expect(makeEpisode().hasCachedImage, isFalse);
+    });
+  });
+
+  // ===================== DownloadStatus =====================
+  group('DownloadStatus', () {
+    test('has 6 values', () {
+      expect(DownloadStatus.values.length, 6);
+    });
+
+    test('index mapping matches DB convention', () {
+      expect(DownloadStatus.notDownloaded.index, 0);
+      expect(DownloadStatus.queued.index, 1);
+      expect(DownloadStatus.downloading.index, 2);
+      expect(DownloadStatus.downloaded.index, 3);
+      expect(DownloadStatus.failed.index, 4);
+      expect(DownloadStatus.canceled.index, 5);
+    });
+  });
+
+  // ===================== toString =====================
+  group('Episode.toString', () {
+    test('returns valid JSON string', () {
+      final ep = makeEpisode();
+      final str = ep.toString();
+      expect(str, isNotEmpty);
+      expect(str, contains('"id"'));
+      expect(str, contains('"title"'));
+    });
+  });
+}
+```
+
+### Inhalt von `klubradio_archivum/test/models/podcast_test.dart`
+```dart
+import 'package:flutter_test/flutter_test.dart';
+import 'package:klubradio_archivum/models/podcast.dart';
+import 'package:klubradio_archivum/models/show_host.dart';
+
+void main() {
+  group('Podcast.fromJson', () {
+    test('parses minimal fields with defaults', () {
+      final p = Podcast.fromJson({'id': '1', 'title': 'Test'});
+
+      expect(p.id, '1');
+      expect(p.title, 'Test');
+      expect(p.description, '');
+      expect(p.coverImageUrl, '');
+      expect(p.episodeCount, 0);
+      expect(p.hosts, isEmpty);
+      expect(p.latestEpisode, isNull);
+      expect(p.lastUpdated, isNull);
+      expect(p.isSubscribed, isFalse);
+      expect(p.isTrending, isFalse);
+      expect(p.isRecommended, isFalse);
+    });
+
+    test('uses default title when missing', () {
+      final p = Podcast.fromJson({'id': '1'});
+      expect(p.title, 'Ismeretlen műsor');
+    });
+
+    test('parses snake_case fields from Supabase', () {
+      final p = Podcast.fromJson({
+        'id': '3',
+        'title': 'A lényeg',
+        'description': 'Napi összefoglaló',
+        'cover_image_url': 'https://img.jpg',
+        'episode_count': 100,
+        'hosts': [{'name': 'Bolgár György'}],
+        'last_updated': '2024-01-15T10:00:00Z',
+      });
+
+      expect(p.id, '3');
+      expect(p.title, 'A lényeg');
+      expect(p.description, 'Napi összefoglaló');
+      expect(p.coverImageUrl, 'https://img.jpg');
+      expect(p.episodeCount, 100);
+      expect(p.hosts.length, 1);
+      expect(p.hosts.first.name, 'Bolgár György');
+      expect(p.lastUpdated, isNotNull);
+    });
+
+    test('handles episode_count as string', () {
+      final p = Podcast.fromJson({
+        'id': '1', 'title': 'T', 'episode_count': '42',
+      });
+      expect(p.episodeCount, 42);
+    });
+
+    test('handles numeric id', () {
+      final p = Podcast.fromJson({'id': 7, 'title': 'T'});
+      expect(p.id, '7');
+    });
+
+    test('handles null id', () {
+      final p = Podcast.fromJson({'title': 'T'});
+      expect(p.id, '');
+    });
+
+    test('parses boolean flags', () {
+      final p = Podcast.fromJson({
+        'id': '1', 'title': 'T',
+        'is_subscribed': true,
+        'is_trending': true,
+        'is_recommended': true,
+      });
+      expect(p.isSubscribed, isTrue);
+      expect(p.isTrending, isTrue);
+      expect(p.isRecommended, isTrue);
+    });
+
+    test('parses latest_episode when present', () {
+      final p = Podcast.fromJson({
+        'id': '1', 'title': 'T',
+        'latest_episode': {
+          'id': 'ep1', 'podcastId': '1', 'title': 'Latest', 'audioUrl': 'u',
+        },
+      });
+      expect(p.latestEpisode, isNotNull);
+      expect(p.latestEpisode!.title, 'Latest');
+    });
+
+    test('skips invalid hosts gracefully', () {
+      final p = Podcast.fromJson({
+        'id': '1', 'title': 'T',
+        'hosts': ['not a map', 42, {'name': 'Valid'}],
+      });
+      expect(p.hosts.length, 1);
+      expect(p.hosts.first.name, 'Valid');
+    });
+  });
+
+  group('Podcast.toJson', () {
+    test('serializes all fields', () {
+      final p = Podcast(
+        id: '5',
+        title: 'Podcast Title',
+        description: 'Desc',
+        coverImageUrl: 'https://cover.jpg',
+        episodeCount: 50,
+        hosts: [const ShowHost(name: 'Host')],
+        lastUpdated: DateTime.utc(2024, 6, 15),
+        isSubscribed: true,
+        isTrending: false,
+        isRecommended: true,
+      );
+      final json = p.toJson();
+
+      expect(json['id'], '5');
+      expect(json['title'], 'Podcast Title');
+      expect(json['description'], 'Desc');
+      expect(json['coverImageUrl'], 'https://cover.jpg');
+      expect(json['episodeCount'], 50);
+      expect(json['hosts'], isA<List>());
+      expect((json['hosts'] as List).first, {'name': 'Host'});
+      expect(json['lastUpdated'], '2024-06-15T00:00:00.000Z');
+      expect(json['isSubscribed'], isTrue);
+      expect(json['isTrending'], isFalse);
+      expect(json['isRecommended'], isTrue);
+    });
+
+    test('handles null optional fields', () {
+      final p = Podcast(
+        id: '1', title: 'T', description: '', coverImageUrl: '',
+        episodeCount: 0, hosts: [],
+      );
+      final json = p.toJson();
+      expect(json['latestEpisode'], isNull);
+      expect(json['lastUpdated'], isNull);
+    });
+  });
+
+  group('Podcast.copyWith', () {
+    test('overrides specified fields only', () {
+      final original = Podcast(
+        id: '1', title: 'Original', description: 'D',
+        coverImageUrl: '', episodeCount: 10, hosts: [],
+      );
+      final copy = original.copyWith(title: 'Changed', episodeCount: 20);
+
+      expect(copy.title, 'Changed');
+      expect(copy.episodeCount, 20);
+      expect(copy.id, '1');
+      expect(copy.description, 'D');
+    });
+
+    test('preserves all fields when no overrides given', () {
+      final original = Podcast(
+        id: '1', title: 'T', description: 'D', coverImageUrl: 'c',
+        episodeCount: 5, hosts: [const ShowHost(name: 'H')],
+        isSubscribed: true,
+      );
+      final copy = original.copyWith();
+
+      expect(copy.id, original.id);
+      expect(copy.title, original.title);
+      expect(copy.hosts.length, original.hosts.length);
+      expect(copy.isSubscribed, original.isSubscribed);
+    });
+  });
+
+  group('Podcast.toString', () {
+    test('returns valid JSON', () {
+      final p = Podcast(
+        id: '1', title: 'T', description: '', coverImageUrl: '',
+        episodeCount: 0, hosts: [],
+      );
+      expect(p.toString(), contains('"id"'));
+    });
+  });
+}
+```
+
+### Inhalt von `klubradio_archivum/test/models/retention_mode_test.dart`
+```dart
+import 'package:flutter_test/flutter_test.dart';
+import 'package:klubradio_archivum/models/retention_mode.dart';
+
+void main() {
+  group('RetentionMode', () {
+    test('has 3 values', () {
+      expect(RetentionMode.values.length, 3);
+    });
+
+    test('values are in expected order', () {
+      expect(RetentionMode.values[0], RetentionMode.keepAll);
+      expect(RetentionMode.values[1], RetentionMode.keepLatestN);
+      expect(RetentionMode.values[2], RetentionMode.deleteAfterHeard);
+    });
+
+    test('name returns expected strings', () {
+      expect(RetentionMode.keepAll.name, 'keepAll');
+      expect(RetentionMode.keepLatestN.name, 'keepLatestN');
+      expect(RetentionMode.deleteAfterHeard.name, 'deleteAfterHeard');
+    });
+  });
+}
+```
+
+### Inhalt von `klubradio_archivum/test/models/show_data_test.dart`
+```dart
+import 'package:flutter_test/flutter_test.dart';
+import 'package:klubradio_archivum/models/show_data.dart';
+
+void main() {
+  group('ShowData', () {
+    test('fromJson parses all fields', () {
+      final sd = ShowData.fromJson({
+        'id': 42,
+        'title': 'Megbeszéljük',
+        'count': 1500,
+      });
+
+      expect(sd.id, '42');
+      expect(sd.title, 'Megbeszéljük');
+      expect(sd.count, 1500);
+    });
+
+    test('fromJson handles string id', () {
+      final sd = ShowData.fromJson({
+        'id': 'abc',
+        'title': 'Test',
+        'count': 0,
+      });
+      expect(sd.id, 'abc');
+    });
+
+    test('toJson round-trip', () {
+      final original = ShowData(id: '10', title: 'Show', count: 99);
+      final json = original.toJson();
+      final restored = ShowData.fromJson(json);
+
+      expect(restored.id, original.id);
+      expect(restored.title, original.title);
+      expect(restored.count, original.count);
+    });
+
+    test('toJson produces expected map', () {
+      final sd = ShowData(id: '1', title: 'T', count: 5);
+      expect(sd.toJson(), {'id': '1', 'title': 'T', 'count': 5});
+    });
+  });
+}
+```
+
+### Inhalt von `klubradio_archivum/test/models/show_host_test.dart`
+```dart
+import 'package:flutter_test/flutter_test.dart';
+import 'package:klubradio_archivum/models/show_host.dart';
+
+void main() {
+  group('ShowHost', () {
+    test('fromJson parses name', () {
+      final h = ShowHost.fromJson({'name': 'Bolgár György'});
+      expect(h.name, 'Bolgár György');
+    });
+
+    test('fromJson uses default name when missing', () {
+      final h = ShowHost.fromJson({});
+      expect(h.name, 'Ismeretlen műsorvezető');
+    });
+
+    test('fromJson uses default name when null', () {
+      final h = ShowHost.fromJson({'name': null});
+      expect(h.name, 'Ismeretlen műsorvezető');
+    });
+
+    test('toJson serializes name', () {
+      const h = ShowHost(name: 'Test Host');
+      expect(h.toJson(), {'name': 'Test Host'});
+    });
+
+    test('copyWith overrides name', () {
+      const h = ShowHost(name: 'Original');
+      final copy = h.copyWith(name: 'Changed');
+      expect(copy.name, 'Changed');
+    });
+
+    test('copyWith preserves name when not given', () {
+      const h = ShowHost(name: 'Keep');
+      final copy = h.copyWith();
+      expect(copy.name, 'Keep');
+    });
+
+    test('toString returns JSON', () {
+      const h = ShowHost(name: 'Test');
+      expect(h.toString(), contains('"name"'));
+      expect(h.toString(), contains('Test'));
+    });
+  });
+}
+```
+
+### Inhalt von `klubradio_archivum/test/models/user_profile_test.dart`
+```dart
+import 'package:flutter_test/flutter_test.dart';
+import 'package:klubradio_archivum/models/user_profile.dart';
+
+void main() {
+  group('UserProfile.initial', () {
+    test('creates profile with default values', () {
+      final p = UserProfile.initial('user-1');
+
+      expect(p.id, 'user-1');
+      expect(p.languageCode, 'de');
+      expect(p.playbackSpeed, 1.0);
+      expect(p.maxAutoDownload, 10);
+      expect(p.subscribedPodcastIds, isEmpty);
+      expect(p.favouriteEpisodeIds, isEmpty);
+      expect(p.recentlyPlayed, isEmpty);
+    });
+
+    test('accepts custom languageCode', () {
+      final p = UserProfile.initial('u', languageCode: 'hu');
+      expect(p.languageCode, 'hu');
+    });
+  });
+
+  group('UserProfile.fromJson', () {
+    test('parses all fields', () {
+      final p = UserProfile.fromJson({
+        'id': 'u1',
+        'languageCode': 'en',
+        'playbackSpeed': 1.5,
+        'maxAutoDownload': 5,
+        'subscribedPodcastIds': ['p1', 'p2'],
+        'favouriteEpisodeIds': ['e1'],
+        'recentlyPlayed': [
+          {
+            'id': 'ep1', 'podcastId': 'p1', 'title': 'T',
+            'audioUrl': 'u', 'description': '', 'showDate': '',
+          },
+        ],
+      });
+
+      expect(p.id, 'u1');
+      expect(p.languageCode, 'en');
+      expect(p.playbackSpeed, 1.5);
+      expect(p.maxAutoDownload, 5);
+      expect(p.subscribedPodcastIds, {'p1', 'p2'});
+      expect(p.favouriteEpisodeIds, {'e1'});
+      expect(p.recentlyPlayed.length, 1);
+    });
+
+    test('uses defaults for missing optional fields', () {
+      final p = UserProfile.fromJson({'id': 'u1'});
+
+      expect(p.languageCode, 'de');
+      expect(p.playbackSpeed, 1.0);
+      expect(p.maxAutoDownload, 10);
+      expect(p.subscribedPodcastIds, isEmpty);
+      expect(p.favouriteEpisodeIds, isEmpty);
+      expect(p.recentlyPlayed, isEmpty);
+    });
+
+    test('handles numeric playbackSpeed', () {
+      final p = UserProfile.fromJson({'id': 'u', 'playbackSpeed': 2});
+      expect(p.playbackSpeed, 2.0);
+    });
+  });
+
+  group('UserProfile.toJson', () {
+    test('serializes and deserializes round-trip', () {
+      final original = UserProfile(
+        id: 'u1',
+        languageCode: 'hu',
+        playbackSpeed: 1.25,
+        maxAutoDownload: 3,
+        subscribedPodcastIds: {'p1', 'p2'},
+        favouriteEpisodeIds: {'e1', 'e2'},
+        recentlyPlayed: const [],
+      );
+
+      final json = original.toJson();
+      final restored = UserProfile.fromJson(json);
+
+      expect(restored.id, original.id);
+      expect(restored.languageCode, original.languageCode);
+      expect(restored.playbackSpeed, original.playbackSpeed);
+      expect(restored.maxAutoDownload, original.maxAutoDownload);
+      expect(restored.subscribedPodcastIds, original.subscribedPodcastIds);
+      expect(restored.favouriteEpisodeIds, original.favouriteEpisodeIds);
+    });
+
+    test('subscribedPodcastIds serializes as list', () {
+      final p = UserProfile.initial('u');
+      final json = p.toJson();
+      expect(json['subscribedPodcastIds'], isA<List>());
+    });
+  });
+
+  group('UserProfile.copyWith', () {
+    test('overrides specified fields', () {
+      final original = UserProfile.initial('u');
+      final copy = original.copyWith(
+        languageCode: 'en',
+        playbackSpeed: 2.0,
+      );
+
+      expect(copy.languageCode, 'en');
+      expect(copy.playbackSpeed, 2.0);
+      expect(copy.id, 'u');
+      expect(copy.maxAutoDownload, 10);
+    });
+
+    test('preserves all fields when no overrides', () {
+      final original = UserProfile(
+        id: 'u',
+        languageCode: 'hu',
+        playbackSpeed: 1.5,
+        maxAutoDownload: 7,
+        subscribedPodcastIds: {'p1'},
+        favouriteEpisodeIds: {'e1'},
+        recentlyPlayed: const [],
+      );
+      final copy = original.copyWith();
+
+      expect(copy.id, original.id);
+      expect(copy.languageCode, original.languageCode);
+      expect(copy.playbackSpeed, original.playbackSpeed);
+      expect(copy.maxAutoDownload, original.maxAutoDownload);
+      expect(copy.subscribedPodcastIds, original.subscribedPodcastIds);
+      expect(copy.favouriteEpisodeIds, original.favouriteEpisodeIds);
+    });
+  });
+
+  group('UserProfile.toString', () {
+    test('returns valid JSON string', () {
+      final p = UserProfile.initial('u');
+      final str = p.toString();
+      expect(str, contains('"id"'));
+      expect(str, contains('"languageCode"'));
+    });
+  });
+}
+```
+
 ### Inhalt von `klubradio_archivum/test/screens/podcast_detail_screen_test.dart`
 ```dart
 // test/screens/podcast_detail_screen_test.dart
@@ -15843,12 +16660,10 @@ void main() {
       expect(true, isTrue, reason: 'Documented: screen only reads local DB, never fetches from API');
     });
 
-    test('Episode.fromJson round-trip bug: downloadStatus type mismatch', () {
-      // BUG: toJson() writes downloadStatus as String (enum.name),
-      // but fromJson() calls _downloadStatusFromJson() which expects int?.
-      //
-      // This crashes when loading episodes from the offline JSON cache
-      // (cachedMetaPath), because that JSON was written by toJson().
+    test('Episode.fromJson round-trip: downloadStatus String handled correctly', () {
+      // FIXED: _downloadStatusFromJson now accepts both String and int.
+      // toJson() writes downloadStatus as String (enum.name),
+      // fromJson() now parses it back correctly.
       final episode = _testEpisode().copyWith(
         downloadStatus: model.DownloadStatus.downloaded,
       );
@@ -15858,12 +16673,9 @@ void main() {
       expect(json['downloadStatus'], isA<String>());
       expect(json['downloadStatus'], 'downloaded');
 
-      // fromJson expects int? → throws "type 'String' is not a subtype of type 'int?'"
-      expect(
-        () => model.Episode.fromJson(json),
-        throwsA(isA<TypeError>()),
-        reason: 'Known bug: downloadStatus String/int mismatch in round-trip',
-      );
+      // fromJson now handles both String and int
+      final restored = model.Episode.fromJson(json);
+      expect(restored.downloadStatus, model.DownloadStatus.downloaded);
     });
   });
 
@@ -16054,6 +16866,239 @@ void main() {
 class Subscription {
   final bool active;
   Subscription({this.active = false});
+}
+```
+
+### Inhalt von `klubradio_archivum/test/screens/utils/constants_test.dart`
+```dart
+import 'package:flutter_test/flutter_test.dart';
+import 'package:klubradio_archivum/screens/utils/constants.dart';
+
+void main() {
+  group('Constants', () {
+    test('table names are non-empty', () {
+      expect(podcastsTable, isNotEmpty);
+      expect(episodesTable, isNotEmpty);
+      expect(userProfilesTable, isNotEmpty);
+      expect(playbackEventsTable, isNotEmpty);
+      expect(topShowsTable, isNotEmpty);
+    });
+
+    test('problematicEpisodeImageUrl is a valid URL', () {
+      expect(problematicEpisodeImageUrl, startsWith('https://'));
+    });
+
+    test('defaultEpisodeImageUrl is an asset path', () {
+      expect(defaultEpisodeImageUrl, startsWith('assets/'));
+    });
+
+    test('playbackSpeeds are within valid range', () {
+      for (final speed in playbackSpeeds) {
+        expect(speed, greaterThanOrEqualTo(0.5));
+        expect(speed, lessThanOrEqualTo(3.0));
+      }
+    });
+
+    test('playbackSpeeds includes 1.0 (normal speed)', () {
+      expect(playbackSpeeds, contains(1.0));
+    });
+
+    test('playbackSpeeds are sorted ascending', () {
+      for (int i = 1; i < playbackSpeeds.length; i++) {
+        expect(playbackSpeeds[i], greaterThan(playbackSpeeds[i - 1]));
+      }
+    });
+
+    test('defaultAutoDownloadCount is positive', () {
+      expect(defaultAutoDownloadCount, greaterThan(0));
+    });
+
+    test('maxRecentSearches is positive', () {
+      expect(maxRecentSearches, greaterThan(0));
+    });
+
+    test('maxRecentlyPlayed is positive', () {
+      expect(maxRecentlyPlayed, greaterThan(0));
+    });
+
+    test('demoUserId is non-empty', () {
+      expect(demoUserId, isNotEmpty);
+    });
+  });
+}
+```
+
+### Inhalt von `klubradio_archivum/test/screens/utils/helpers_test.dart`
+```dart
+import 'package:flutter_test/flutter_test.dart';
+import 'package:intl/date_symbol_data_local.dart';
+import 'package:klubradio_archivum/models/episode.dart';
+import 'package:klubradio_archivum/screens/utils/helpers.dart';
+
+void main() {
+  setUpAll(() async {
+    await initializeDateFormatting();
+  });
+
+  // ===================== formatDurationPrecise =====================
+  group('formatDurationPrecise', () {
+    test('formats zero duration', () {
+      expect(formatDurationPrecise(Duration.zero), '00:00');
+    });
+
+    test('formats seconds only', () {
+      expect(formatDurationPrecise(const Duration(seconds: 5)), '00:05');
+    });
+
+    test('formats minutes and seconds', () {
+      expect(formatDurationPrecise(const Duration(minutes: 3, seconds: 45)), '03:45');
+    });
+
+    test('formats hours, minutes, seconds with HH:MM:SS', () {
+      expect(
+        formatDurationPrecise(const Duration(hours: 1, minutes: 5, seconds: 30)),
+        '01:05:30',
+      );
+    });
+
+    test('formats large hours', () {
+      expect(
+        formatDurationPrecise(const Duration(hours: 12, minutes: 0, seconds: 0)),
+        '12:00:00',
+      );
+    });
+
+    test('pads single digits', () {
+      expect(formatDurationPrecise(const Duration(minutes: 1, seconds: 2)), '01:02');
+    });
+
+    test('handles 59:59 correctly', () {
+      expect(
+        formatDurationPrecise(const Duration(minutes: 59, seconds: 59)),
+        '59:59',
+      );
+    });
+
+    test('handles exactly one hour', () {
+      expect(
+        formatDurationPrecise(const Duration(hours: 1)),
+        '01:00:00',
+      );
+    });
+  });
+
+  // ===================== formatProgress =====================
+  group('formatProgress', () {
+    test('formats zero progress', () {
+      expect(formatProgress(0), '0%');
+    });
+
+    test('formats full progress', () {
+      expect(formatProgress(1.0), '100%');
+    });
+
+    test('formats half progress', () {
+      expect(formatProgress(0.5), '50%');
+    });
+
+    test('rounds fractional percentage', () {
+      expect(formatProgress(0.333), '33%');
+    });
+
+    test('clamps values above 1.0', () {
+      expect(formatProgress(1.5), '100%');
+    });
+
+    test('clamps negative values to 0', () {
+      expect(formatProgress(-0.5), '0%');
+    });
+
+    test('formats typical download progress', () {
+      expect(formatProgress(0.75), '75%');
+    });
+  });
+
+  // ===================== displayTitleFor =====================
+  group('displayTitleFor', () {
+    Episode makeEp({String title = 'Title', String? cachedTitle}) {
+      return Episode(
+        id: '1', podcastId: 'p', title: title,
+        description: '', audioUrl: 'u',
+        publishedAt: DateTime(2024), showDate: '',
+        duration: Duration.zero, cachedTitle: cachedTitle,
+      );
+    }
+
+    test('returns cachedTitle when non-empty', () {
+      expect(displayTitleFor(makeEp(cachedTitle: 'Cached')), 'Cached');
+    });
+
+    test('returns title when cachedTitle is null', () {
+      expect(displayTitleFor(makeEp(title: 'Fallback')), 'Fallback');
+    });
+
+    test('returns title when cachedTitle is empty', () {
+      expect(displayTitleFor(makeEp(title: 'Fallback', cachedTitle: '')), 'Fallback');
+    });
+  });
+
+  // ===================== formatDate =====================
+  group('formatDate', () {
+    test('returns non-empty string for valid date', () {
+      final result = formatDate(DateTime(2024, 6, 15, 14, 30));
+      expect(result, isNotEmpty);
+    });
+
+    test('formats with Hungarian locale by default', () {
+      final result = formatDate(DateTime(2024, 6, 15, 14, 30));
+      // Should contain some date components
+      expect(result, contains('2024'));
+    });
+
+    test('supports custom locale', () {
+      final result = formatDate(DateTime(2024, 6, 15, 14, 30), locale: 'en');
+      expect(result, isNotEmpty);
+    });
+  });
+}
+```
+
+### Inhalt von `klubradio_archivum/test/screens/utils/platform_utils_test.dart`
+```dart
+import 'package:flutter_test/flutter_test.dart';
+import 'package:klubradio_archivum/screens/widgets/stateless/platform_utils.dart';
+
+void main() {
+  // Note: In flutter test environment, kIsWeb == false
+  group('PlatformUtils (non-web test environment)', () {
+    test('supportsDownloads is true on non-web', () {
+      expect(PlatformUtils.supportsDownloads, isTrue);
+    });
+
+    test('supportsOfflinePlayback is true on non-web', () {
+      expect(PlatformUtils.supportsOfflinePlayback, isTrue);
+    });
+
+    test('supportsBackgroundAudio is true on non-web', () {
+      expect(PlatformUtils.supportsBackgroundAudio, isTrue);
+    });
+
+    test('supportsSubscriptions is true on non-web', () {
+      expect(PlatformUtils.supportsSubscriptions, isTrue);
+    });
+
+    test('all capabilities are consistent (all true or all false)', () {
+      // All capabilities depend on !kIsWeb, so they should all be the same
+      final values = [
+        PlatformUtils.supportsDownloads,
+        PlatformUtils.supportsOfflinePlayback,
+        PlatformUtils.supportsBackgroundAudio,
+        PlatformUtils.supportsSubscriptions,
+      ];
+      expect(values.toSet().length, 1,
+          reason: 'All platform capabilities should be consistent');
+    });
+  });
 }
 ```
 
@@ -16255,27 +17300,32 @@ void main() {
 // Run with: flutter test --dart-define API_SERVICE_LIVE_TESTS=true test/services/api_model_validation_test.dart
 //
 import 'dart:convert';
+import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:klubradio_archivum/models/episode.dart';
 import 'package:klubradio_archivum/models/podcast.dart';
-import 'package:klubradio_archivum/models/show_data.dart';
 import 'package:klubradio_archivum/services/api_service.dart';
 import 'package:klubradio_archivum/screens/utils/constants.dart' as constants;
 
 void main() {
   const bool runLive = bool.fromEnvironment('API_SERVICE_LIVE_TESTS');
 
+  // Initialize binding for SharedPreferences (used by ApiCacheService)
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  setUpAll(() {
-    SharedPreferences.setMockInitialValues({});
-  });
-
   group('API + Model validation (live)', () {
+    setUp(() {
+      // Reset HttpOverrides so real HTTP requests go through
+      // (flutter test binding intercepts all HTTP with status 400)
+      HttpOverrides.global = null;
+      // Re-initialize SharedPreferences mock (needed by ApiCacheService)
+      SharedPreferences.setMockInitialValues({});
+    });
     late ApiService service;
 
     setUp(() {
@@ -16313,9 +17363,9 @@ void main() {
       expect(data, isNotEmpty, reason: 'Should have at least one episode');
 
       final firstEpisode = data.first as Map<String, dynamic>;
-      print('\n=== RAW EPISODE FIELDS ===');
+      debugPrint('\n=== RAW EPISODE FIELDS ===');
       for (final key in firstEpisode.keys) {
-        print('  $key: ${firstEpisode[key]} (${firstEpisode[key]?.runtimeType})');
+        debugPrint('  $key: ${firstEpisode[key]} (${firstEpisode[key]?.runtimeType})');
       }
 
       // Check which fields Episode.fromJson expects vs what API returns
@@ -16324,26 +17374,26 @@ void main() {
         'publishedAt', 'showDate', 'duration', 'imageUrl', 'hosts',
       ];
 
-      print('\n=== FIELD MAPPING CHECK ===');
+      debugPrint('\n=== FIELD MAPPING CHECK ===');
       for (final field in expectedFields) {
         final hasField = firstEpisode.containsKey(field);
-        print('  $field: ${hasField ? "PRESENT" : "MISSING"} ${hasField ? "(${firstEpisode[field]})" : ""}');
+        debugPrint('  $field: ${hasField ? "PRESENT" : "MISSING"} ${hasField ? "(${firstEpisode[field]})" : ""}');
       }
 
       // Try to parse and see what happens
-      print('\n=== Episode.fromJson ATTEMPT ===');
+      debugPrint('\n=== Episode.fromJson ATTEMPT ===');
       try {
         final episode = Episode.fromJson(firstEpisode);
-        print('  id: ${episode.id}');
-        print('  podcastId: ${episode.podcastId}');
-        print('  title: "${episode.title}"');
-        print('  description: "${episode.description}"');
-        print('  audioUrl: "${episode.audioUrl}"');
-        print('  publishedAt: ${episode.publishedAt}');
-        print('  showDate: "${episode.showDate}"');
-        print('  duration: ${episode.duration}');
-        print('  imageUrl: ${episode.imageUrl}');
-        print('  hosts: ${episode.hosts}');
+        debugPrint('  id: ${episode.id}');
+        debugPrint('  podcastId: ${episode.podcastId}');
+        debugPrint('  title: "${episode.title}"');
+        debugPrint('  description: "${episode.description}"');
+        debugPrint('  audioUrl: "${episode.audioUrl}"');
+        debugPrint('  publishedAt: ${episode.publishedAt}');
+        debugPrint('  showDate: "${episode.showDate}"');
+        debugPrint('  duration: ${episode.duration}');
+        debugPrint('  imageUrl: ${episode.imageUrl}');
+        debugPrint('  hosts: ${episode.hosts}');
 
         // Validate critical fields are not empty/default
         expect(episode.id, isNotEmpty, reason: 'Episode id should not be empty');
@@ -16351,7 +17401,7 @@ void main() {
         expect(episode.title, isNotEmpty, reason: 'Episode title should not be empty');
         expect(episode.audioUrl, isNotEmpty, reason: 'Episode audioUrl should not be empty');
       } catch (e) {
-        print('  ERROR: $e');
+        debugPrint('  ERROR: $e');
         fail('Episode.fromJson failed: $e');
       }
     });
@@ -16381,9 +17431,9 @@ void main() {
       expect(data, isNotEmpty, reason: 'Should have at least one podcast');
 
       final firstPodcast = data.first as Map<String, dynamic>;
-      print('\n=== RAW PODCAST FIELDS ===');
+      debugPrint('\n=== RAW PODCAST FIELDS ===');
       for (final key in firstPodcast.keys) {
-        print('  $key: ${firstPodcast[key]} (${firstPodcast[key]?.runtimeType})');
+        debugPrint('  $key: ${firstPodcast[key]} (${firstPodcast[key]?.runtimeType})');
       }
 
       // Check which fields Podcast.fromJson expects
@@ -16392,27 +17442,27 @@ void main() {
         'episode_count', 'hosts', 'latest_episode', 'last_updated',
       ];
 
-      print('\n=== FIELD MAPPING CHECK ===');
+      debugPrint('\n=== FIELD MAPPING CHECK ===');
       for (final field in expectedFields) {
         final hasField = firstPodcast.containsKey(field);
-        print('  $field: ${hasField ? "PRESENT" : "MISSING"} ${hasField ? "" : ""}');
+        debugPrint('  $field: ${hasField ? "PRESENT" : "MISSING"} ${hasField ? "" : ""}');
       }
 
-      print('\n=== Podcast.fromJson ATTEMPT ===');
+      debugPrint('\n=== Podcast.fromJson ATTEMPT ===');
       try {
         final podcast = Podcast.fromJson(firstPodcast);
-        print('  id: ${podcast.id}');
-        print('  title: "${podcast.title}"');
-        print('  description: "${podcast.description}"');
-        print('  coverImageUrl: "${podcast.coverImageUrl}"');
-        print('  episodeCount: ${podcast.episodeCount}');
-        print('  hosts: ${podcast.hosts}');
-        print('  lastUpdated: ${podcast.lastUpdated}');
+        debugPrint('  id: ${podcast.id}');
+        debugPrint('  title: "${podcast.title}"');
+        debugPrint('  description: "${podcast.description}"');
+        debugPrint('  coverImageUrl: "${podcast.coverImageUrl}"');
+        debugPrint('  episodeCount: ${podcast.episodeCount}');
+        debugPrint('  hosts: ${podcast.hosts}');
+        debugPrint('  lastUpdated: ${podcast.lastUpdated}');
 
         expect(podcast.id, isNotEmpty, reason: 'Podcast id should not be empty');
         expect(podcast.title, isNotEmpty, reason: 'Podcast title should not be empty');
       } catch (e) {
-        print('  ERROR: $e');
+        debugPrint('  ERROR: $e');
         fail('Podcast.fromJson failed: $e');
       }
     });
@@ -16428,30 +17478,30 @@ void main() {
       expect(podcasts, isNotEmpty, reason: 'Should have at least one podcast');
 
       final podcastId = podcasts.first.id;
-      print('\n=== Fetching episodes for podcast "$podcastId" (${podcasts.first.title}) ===');
+      debugPrint('\n=== Fetching episodes for podcast "$podcastId" (${podcasts.first.title}) ===');
 
       final episodes = await service.fetchEpisodesForPodcast(podcastId, limit: 5);
-      print('  Returned ${episodes.length} episodes');
+      debugPrint('  Returned ${episodes.length} episodes');
 
       if (episodes.isEmpty) {
-        print('  WARNING: No episodes returned for podcast $podcastId');
-        print('  This could be a filtering/query issue');
+        debugPrint('  WARNING: No episodes returned for podcast $podcastId');
+        debugPrint('  This could be a filtering/query issue');
 
         // Try without filter to see if episodes table has data at all
         final recentEpisodes = await service.fetchRecentEpisodes(limit: 5);
-        print('  fetchRecentEpisodes returned ${recentEpisodes.length} episodes');
+        debugPrint('  fetchRecentEpisodes returned ${recentEpisodes.length} episodes');
         if (recentEpisodes.isNotEmpty) {
-          print('  First recent episode podcastId: ${recentEpisodes.first.podcastId}');
-          print('  Trying with that podcastId...');
+          debugPrint('  First recent episode podcastId: ${recentEpisodes.first.podcastId}');
+          debugPrint('  Trying with that podcastId...');
           final retryEpisodes = await service.fetchEpisodesForPodcast(
             recentEpisodes.first.podcastId, limit: 3,
           );
-          print('  Retry returned ${retryEpisodes.length} episodes');
+          debugPrint('  Retry returned ${retryEpisodes.length} episodes');
         }
       }
 
       for (final ep in episodes.take(3)) {
-        print('  - [${ep.id}] "${ep.title}" (${ep.publishedAt}) audio=${ep.audioUrl.isNotEmpty ? "OK" : "EMPTY"}');
+        debugPrint('  - [${ep.id}] "${ep.title}" (${ep.publishedAt}) audio=${ep.audioUrl.isNotEmpty ? "OK" : "EMPTY"}');
       }
     });
 
@@ -16481,22 +17531,22 @@ void main() {
       if (data.isNotEmpty) {
         final row = data.first as Map<String, dynamic>;
         final columns = row.keys.toList();
-        print('\n=== Episodes table columns ===');
-        print('  $columns');
+        debugPrint('\n=== Episodes table columns ===');
+        debugPrint('  $columns');
 
         // Check if the filter column name matches
         final hasPodcastId = columns.contains('podcastId');
-        final hasPodcast_id = columns.contains('podcast_id');
-        print('  "podcastId" (camelCase): $hasPodcastId');
-        print('  "podcast_id" (snake_case): $hasPodcast_id');
+        final hasPodcastIdSnake = columns.contains('podcast_id');
+        debugPrint('  "podcastId" (camelCase): $hasPodcastId');
+        debugPrint('  "podcast_id" (snake_case): $hasPodcastIdSnake');
 
-        if (!hasPodcastId && hasPodcast_id) {
-          print('  *** MISMATCH: API query uses "podcastId" but column is "podcast_id" ***');
+        if (!hasPodcastId && hasPodcastIdSnake) {
+          debugPrint('  *** MISMATCH: API query uses "podcastId" but column is "podcast_id" ***');
         }
 
         // Also verify the actual podcastId value format
         final podcastIdValue = row['podcastId'] ?? row['podcast_id'];
-        print('  podcastId value: $podcastIdValue (type: ${podcastIdValue.runtimeType})');
+        debugPrint('  podcastId value: $podcastIdValue (type: ${podcastIdValue.runtimeType})');
       }
     });
 
@@ -16507,10 +17557,10 @@ void main() {
       }
 
       final topShows = await service.fetchTopShowsThisYear();
-      print('\n=== Top Shows ===');
-      print('  Returned ${topShows.length} shows');
+      debugPrint('\n=== Top Shows ===');
+      debugPrint('  Returned ${topShows.length} shows');
       for (final show in topShows.take(5)) {
-        print('  - [${show.id}] "${show.title}" count=${show.count}');
+        debugPrint('  - [${show.id}] "${show.title}" count=${show.count}');
       }
       expect(topShows, isNotEmpty);
     });
@@ -16547,7 +17597,7 @@ void main() {
         expect(roundTrip.podcastId, episode.podcastId);
         expect(roundTrip.title, episode.title);
         expect(roundTrip.audioUrl, episode.audioUrl);
-        print('  Round-trip OK: [${episode.id}] "${episode.title}"');
+        debugPrint('  Round-trip OK: [${episode.id}] "${episode.title}"');
       }
     });
   });
@@ -16736,16 +17786,24 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:klubradio_archivum/services/api_service.dart';
 
 void main() {
   const bool runLive = bool.fromEnvironment('API_SERVICE_LIVE_TESTS');
   const String outputPath = 'assets/api/response.json';
 
+  // Initialize binding for SharedPreferences (used by ApiCacheService)
+  TestWidgetsFlutterBinding.ensureInitialized();
+  SharedPreferences.setMockInitialValues({});
+
   group('ApiService live Supabase snapshot', () {
     late ApiService service;
 
     setUp(() {
+      // Reset HttpOverrides so real HTTP requests go through
+      // (flutter test binding intercepts all HTTP with status 400)
+      HttpOverrides.global = null;
       service = ApiService();
     });
 
@@ -16757,11 +17815,7 @@ void main() {
       'writes Supabase data to assets/api/response.json',
       () async {
         if (!runLive) {
-          expect(
-            runLive,
-            isTrue,
-            reason: 'Enable with --dart-define API_SERVICE_LIVE_TESTS=true',
-          );
+          markTestSkipped('Enable with --dart-define API_SERVICE_LIVE_TESTS=true');
           return;
         }
         expect(
@@ -16828,10 +17882,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 
-import 'package:flutter/services.dart';
-import 'package:shared_preferences_platform_interface/shared_preferences_platform_interface.dart';
-
-
 
 import 'package:klubradio_archivum/models/episode.dart';
 import 'package:klubradio_archivum/models/podcast.dart';
@@ -16890,7 +17940,7 @@ void main() {
           headers: <String, String>{'content-type': 'application/json'},
         );
       });
-      final ApiService service = ApiService(httpClient: client);
+      final ApiService service = _TestApiService(httpClient: client, cacheService: _MockApiCacheService());
 
       final List<Podcast> podcasts = await service.fetchLatestPodcasts(
         limit: 2,
@@ -16926,13 +17976,10 @@ void main() {
 
     test('fetchTrendingPodcasts marks returned podcasts as trending', () async {
       final client = MockClient((http.Request request) async {
-        expect(
-          request.url.queryParameters['order'],
-          'playCount.desc.nullslast',
-        );
+        expect(request.url.path, contains('/rest/v1/podcasts'));
         return http.Response(jsonEncode(_samplePodcastResponse(count: 1)), 200);
       });
-      final ApiService service = ApiService(httpClient: client);
+      final ApiService service = _TestApiService(httpClient: client, cacheService: _MockApiCacheService());
 
       final List<Podcast> trending = await service.fetchTrendingPodcasts(
         limit: 1,
@@ -16948,21 +17995,21 @@ void main() {
         capturedRequest = request;
         return http.Response(
           jsonEncode(<Map<String, dynamic>>[
-            _sampleEpisodeJson(id: 'episode-1', podcastId: 'series-1', seed: 3),
+            _sampleEpisodeJson(id: 'episode-1', podcastId: 'series-uncached', seed: 3),
           ]),
           200,
         );
       });
-      final ApiService service = ApiService(httpClient: client);
+      final ApiService service = _TestApiService(httpClient: client, cacheService: _MockApiCacheService());
 
       final List<Episode> episodes = await service.fetchEpisodesForPodcast(
-        'series-1',
+        'series-uncached',
         limit: 1,
       );
 
       expect(episodes, hasLength(1));
       expect(episodes.single.id, 'episode-1');
-      expect(capturedRequest.url.queryParameters['podcastId'], 'eq.series-1');
+      expect(capturedRequest.url.queryParameters['podcastId'], 'eq.series-uncached');
       expect(capturedRequest.url.queryParameters['limit'], '1');
     });
 
@@ -16972,7 +18019,7 @@ void main() {
         final client = MockClient((http.Request request) async {
           fail('HTTP client should not be invoked for blank queries');
         });
-        final ApiService service = ApiService(httpClient: client);
+        final ApiService service = _TestApiService(httpClient: client, cacheService: _MockApiCacheService());
 
         final List<Podcast> results = await service.searchPodcasts('   ');
 
@@ -17045,7 +18092,7 @@ void main() {
           );
           return http.Response('', 201);
         });
-        final ApiService service = ApiService(httpClient: client);
+        final ApiService service = _TestApiService(httpClient: client, cacheService: _MockApiCacheService());
 
         await service.logPlayback(episodeId: 'episode-10');
 
@@ -17120,17 +18167,17 @@ List<Map<String, dynamic>> _samplePodcastResponse({int count = 2}) {
       'id': podcastId,
       'title': 'Podcast $index',
       'description': 'Description for podcast $index',
-      'coverImageUrl': 'https://example.com/cover-$index.jpg',
-      'episodeCount': index + 1,
+      'cover_image_url': 'https://example.com/cover-$index.jpg',
+      'episode_count': index + 1,
       'hosts': <Map<String, dynamic>>[
         <String, dynamic>{'id': 'host-$index', 'name': 'Host $index'},
       ],
-      'latestEpisode': _sampleEpisodeJson(
+      'latest_episode': _sampleEpisodeJson(
         id: 'episode-$index',
         podcastId: podcastId,
         seed: index,
       ),
-      'lastUpdated': DateTime(2024, 1, index + 1).toIso8601String(),
+      'last_updated': DateTime(2024, 1, index + 1).toIso8601String(),
     };
   });
 }
@@ -17182,7 +18229,8 @@ class _ClosingClient extends http.BaseClient {
 }
 
 class _OfflineApiService extends ApiService {
-  _OfflineApiService({super.httpClient});
+  _OfflineApiService({super.httpClient})
+      : super(cacheService: _MockApiCacheService());
 
   @override
   bool get hasValidCredentials => false;

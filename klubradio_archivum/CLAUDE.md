@@ -48,14 +48,25 @@ dart run flutter_launcher_icons
 
 ### Testing
 
-**All tests:**
+**All tests (140 tests, ~21 skipped):**
 ```bash
 flutter test
 ```
 
-**API Live Tests:**
+**Model unit tests only:**
+```bash
+flutter test test/models/
+```
+
+**Screen utility tests only:**
+```bash
+flutter test test/screens/utils/
+```
+
+**API Live Tests (requires network):**
 ```bash
 flutter test --dart-define API_SERVICE_LIVE_TESTS=true .\test\services\api_service_live_test.dart
+flutter test --dart-define API_SERVICE_LIVE_TESTS=true .\test\services\api_model_validation_test.dart
 ```
 
 **Download Integration Tests:**
@@ -66,6 +77,29 @@ flutter test --dart-define DOWNLOAD_LIVE_TESTS=true .\test\integration_test\down
 # Integration test with driver
 flutter drive -d windows --driver=test_driver/integration_test.dart --target=integration_test/download_manager_live_test.dart --dart-define DOWNLOAD_LIVE_TESTS=true --dart-define DOWNLOAD_TEST_TIMEOUT_SEC=720 -v
 ```
+
+### Test Structure
+```
+test/
+├── api/                    # API client tests (mocked HTTP)
+├── models/                 # Unit tests for all data models
+│   ├── episode_test.dart        (28 tests: fromJson, toJson, copyWith, display helpers)
+│   ├── podcast_test.dart        (14 tests: fromJson snake_case, toJson, copyWith)
+│   ├── show_host_test.dart      (7 tests)
+│   ├── show_data_test.dart      (4 tests)
+│   ├── user_profile_test.dart   (10 tests)
+│   └── retention_mode_test.dart (3 tests)
+├── screens/
+│   ├── podcast_detail_screen_test.dart   # Model/logic + documented data flow issues
+│   ├── subscription_download_test.dart   # Subscription/download flow logic
+│   └── utils/
+│       ├── helpers_test.dart        (19 tests: formatDuration, formatProgress, formatDate)
+│       ├── constants_test.dart      (10 tests: config validation)
+│       └── platform_utils_test.dart (5 tests)
+└── services/               # API service tests (mocked + live)
+```
+
+**Note:** Widget tests for screens with native plugin dependencies (AudioPlayer, background_downloader) are skipped. See `test/screens/podcast_detail_screen_test.dart` for details.
 
 ### Linting
 ```bash
