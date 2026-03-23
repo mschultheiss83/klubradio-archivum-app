@@ -95,6 +95,7 @@
 ├── klubradio_archivum/test/api/episode_api_test.dart
 ├── klubradio_archivum/test/api/episode_api_test.mocks.dart
 ├── klubradio_archivum/test/api/search_api_test.dart
+├── klubradio_archivum/test/db/settings_dao_test.dart
 ├── klubradio_archivum/test/models/episode_test.dart
 ├── klubradio_archivum/test/models/podcast_test.dart
 ├── klubradio_archivum/test/models/retention_mode_test.dart
@@ -1077,7 +1078,8 @@ class Episodes extends Table {
   DateTimeColumn get publishedAt => dateTime().nullable()();
 
   // Metadata from API (v2)
-  IntColumn get durationSeconds => integer().nullable()(); // Duration in seconds
+  IntColumn get durationSeconds =>
+      integer().nullable()(); // Duration in seconds
   TextColumn get description => text().nullable()();
   TextColumn get showDate => text().nullable()();
   TextColumn get imageUrl => text().nullable()();
@@ -1123,8 +1125,7 @@ class Settings extends Table {
       boolean().withDefault(const Constant(false))();
 
   /// Episode sort order: 'newest' (default) or 'oldest'
-  TextColumn get playOrder =>
-      text().withDefault(const Constant('newest'))();
+  TextColumn get playOrder => text().withDefault(const Constant('newest'))();
 
   @override
   Set<Column> get primaryKey => {id};
@@ -1139,6 +1140,7 @@ LazyDatabase _openConnection() {
 @DriftDatabase(tables: [Subscriptions, Episodes, Settings])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
+  AppDatabase.forTesting(QueryExecutor executor) : super(executor);
 
   @override
   int get schemaVersion => 3;
@@ -4632,7 +4634,9 @@ class EpisodesDao extends DatabaseAccessor<AppDatabase>
   }
 
   Future<List<Episode>> getEpisodesByPodcastId(String podcastId) {
-    return (select(episodes)..where((e) => e.podcastId.equals(podcastId))).get();
+    return (select(
+      episodes,
+    )..where((e) => e.podcastId.equals(podcastId))).get();
   }
 
   // Status-/Progress-Updates (Download-Lifecycle)
@@ -4858,10 +4862,12 @@ class SettingsDao extends DatabaseAccessor<AppDatabase>
         SettingsCompanion(autodownloadSubscribed: Value(v)),
       );
 
-  Future<int> setPlayOrder(String order) =>
-      (update(settings)..where((s) => s.id.equals(1))).write(
-        SettingsCompanion(playOrder: Value(order)),
-      );
+  Future<int> setPlayOrder(String order) async {
+    await ensureDefaults();
+    return (update(settings)..where((s) => s.id.equals(1))).write(
+      SettingsCompanion(playOrder: Value(order)),
+    );
+  }
 }
 
 /// ---------------- Retention Helper (DB-seitig) ----------------
@@ -8394,6 +8400,7 @@ class _KlubradioArchivumAppState extends State<KlubradioArchivumApp> {
   void initState() {
     super.initState();
     db = AppDatabase();
+    SettingsDao(db).ensureDefaults();
   }
 
   @override
@@ -16942,6 +16949,42 @@ void main() {
       });
     });
   });
+}
+```
+
+### Inhalt von `klubradio_archivum/test/db/settings_dao_test.dart`
+```dart
+import 'package:drift/native.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:klubradio_archivum/db/app_database.dart';
+import 'package:klubradio_archivum/db/daos.dart';
+
+void main() {
+  late AppDatabase db;
+  late SettingsDao dao;
+
+  setUp(() {
+    db = AppDatabase.forTesting(NativeDatabase.memory());
+    dao = SettingsDao(db);
+  });
+
+  tearDown(() async {
+    await db.close();
+  });
+
+  test(
+    'setPlayOrder creates defaults when settings row does not exist',
+    () async {
+      expect(await dao.getOne(), isNull);
+
+      await dao.setPlayOrder('oldest');
+
+      final settings = await dao.getOne();
+      expect(settings, isNotNull);
+      expect(settings!.id, 1);
+      expect(settings.playOrder, 'oldest');
+    },
+  );
 }
 ```
 

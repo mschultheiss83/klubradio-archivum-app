@@ -25,6 +25,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **Episode sort order bug**: `watchByPodcast()` had no `orderBy` clause (undefined sort order)
 - **Database schema**: migrated v2 → v3 for `playOrder` column
 
+- **Settings initialization**: default `settings` row is now created centrally so `playOrder` updates work even before opening download settings
+
 ## [1.0.4]
 
 ### Added

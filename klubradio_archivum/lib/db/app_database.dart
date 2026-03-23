@@ -29,7 +29,8 @@ class Episodes extends Table {
   DateTimeColumn get publishedAt => dateTime().nullable()();
 
   // Metadata from API (v2)
-  IntColumn get durationSeconds => integer().nullable()(); // Duration in seconds
+  IntColumn get durationSeconds =>
+      integer().nullable()(); // Duration in seconds
   TextColumn get description => text().nullable()();
   TextColumn get showDate => text().nullable()();
   TextColumn get imageUrl => text().nullable()();
@@ -75,8 +76,7 @@ class Settings extends Table {
       boolean().withDefault(const Constant(false))();
 
   /// Episode sort order: 'newest' (default) or 'oldest'
-  TextColumn get playOrder =>
-      text().withDefault(const Constant('newest'))();
+  TextColumn get playOrder => text().withDefault(const Constant('newest'))();
 
   @override
   Set<Column> get primaryKey => {id};
@@ -91,6 +91,7 @@ LazyDatabase _openConnection() {
 @DriftDatabase(tables: [Subscriptions, Episodes, Settings])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
+  AppDatabase.forTesting(QueryExecutor executor) : super(executor);
 
   @override
   int get schemaVersion => 3;

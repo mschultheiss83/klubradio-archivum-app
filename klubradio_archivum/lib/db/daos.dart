@@ -125,7 +125,9 @@ class EpisodesDao extends DatabaseAccessor<AppDatabase>
   }
 
   Future<List<Episode>> getEpisodesByPodcastId(String podcastId) {
-    return (select(episodes)..where((e) => e.podcastId.equals(podcastId))).get();
+    return (select(
+      episodes,
+    )..where((e) => e.podcastId.equals(podcastId))).get();
   }
 
   // Status-/Progress-Updates (Download-Lifecycle)
@@ -351,10 +353,12 @@ class SettingsDao extends DatabaseAccessor<AppDatabase>
         SettingsCompanion(autodownloadSubscribed: Value(v)),
       );
 
-  Future<int> setPlayOrder(String order) =>
-      (update(settings)..where((s) => s.id.equals(1))).write(
-        SettingsCompanion(playOrder: Value(order)),
-      );
+  Future<int> setPlayOrder(String order) async {
+    await ensureDefaults();
+    return (update(settings)..where((s) => s.id.equals(1))).write(
+      SettingsCompanion(playOrder: Value(order)),
+    );
+  }
 }
 
 /// ---------------- Retention Helper (DB-seitig) ----------------

@@ -48,6 +48,7 @@ class _KlubradioArchivumAppState extends State<KlubradioArchivumApp> {
   void initState() {
     super.initState();
     db = AppDatabase();
+    SettingsDao(db).ensureDefaults();
   }
 
   @override
