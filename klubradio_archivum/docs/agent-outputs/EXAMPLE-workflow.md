@@ -318,7 +318,7 @@ After implementation:
 To use this workflow in your project:
 
 1. Read `agent.md` for full protocol details
-2. Customize templates in `docs/agent-outputs/TEMPLATE-*.md` as needed
+2. Customize the shared template in `docs/agent-outputs/TEMPLATE-task.md` as needed
 3. Set up external Gemini and OpenAI agents with their respective context files
 4. Use Claude Code CLI slash commands to generate your analysis
 5. Iterate based on agent feedback

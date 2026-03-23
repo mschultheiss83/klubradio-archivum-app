@@ -349,13 +349,16 @@ Before release, test builds on all supported platforms:
 ## Related Files
 - `GEMINI.md`: Context file for Gemini AI assistant (similar purpose to this file)
 - `agent.md`: Multi-agent coordination protocol for GitHub issue processing
-- `docs/ARCHITECTURE.md`: Brief architecture overview (in German)
+- `docs/README.md`: Documentation hub with category links
+- `docs/project/flutter-file-system.md`: Brief file-system overview
 - `docs/project/release-process.md`: Detailed release instructions
 - `docs/issues/tracking-major-tasks.md`: Current task tracking
 
 ## Multi-Agent Coordination System
 
 This project uses a three-agent coordination system for handling GitHub issues tagged with `apple*`. The system is designed to leverage the strengths of different AI models working together.
+
+See `docs/agents/multi-agent-setup.md` for the current documentation layout and coordination guide.
 
 ### Agent Roles
 

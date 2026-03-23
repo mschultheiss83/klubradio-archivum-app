@@ -2,6 +2,15 @@
 
 The Klubrádió Archive App is a cross-platform mobile application built with Flutter that brings the extensive archive of Klubrádió broadcasts (https://www.klubradio.hu/archivum) to users in a podcast-friendly format.
 
+## Documentation
+
+Use [docs/README.md](docs/README.md) as the main entry point for repository documentation.
+
+- Current status: [docs/project/current.md](docs/project/current.md)
+- Release workflow: [docs/project/release-process.md](docs/project/release-process.md)
+- Task tracker: [docs/issues/tracking-major-tasks.md](docs/issues/tracking-major-tasks.md)
+- Agent workflow: [docs/agents/workflow-summary.md](docs/agents/workflow-summary.md)
+
 ## Features
 
 - **Cross-platform**: Android, iOS, macOS, Windows, Linux, Web

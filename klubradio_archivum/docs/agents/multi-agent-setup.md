@@ -14,23 +14,21 @@ This project uses a three-agent system for coordinated GitHub issue processing:
 
 ```
 klubradio_archivum/
-├── agent.md                           # Multi-agent coordination protocol (master reference)
-├── CLAUDE.md                          # Claude agent context (updated with agent system)
-├── GEMINI.md                          # Gemini agent context
-├── docs/
-│   ├── MULTI-AGENT-SETUP.md          # This file
-│   └── agent-outputs/                 # Agent coordination workspace
-│       ├── README.md                  # Directory purpose and conventions
-│       ├── EXAMPLE-workflow.md        # Complete example of agent coordination
-│       ├── TEMPLATE-claude-risk-analysis.md      # Template for Claude's output
-│       ├── TEMPLATE-gemini-implementation.md     # Template for Gemini's output
-│       └── TEMPLATE-openai-consolidated.md       # Template for OpenAI's output
-└── .claude/
-    └── commands/                      # Claude Code CLI slash commands
-        ├── agent-risk.md              # /agent-risk - Generate risk analysis
-        ├── agent-explore.md           # /agent-explore - Explore codebase architecture
-        ├── agent-read-gemini.md       # /agent-read-gemini - Review Gemini's plan
-        └── agent-handoff.md           # /agent-handoff - Create handoff message
+|-- agent.md                        # Multi-agent coordination protocol
+|-- CLAUDE.md                       # Claude agent context
+|-- GEMINI.md                       # Gemini agent context
+|-- docs/
+|   |-- README.md                   # Documentation hub
+|   |-- agents/
+|   |   |-- README.md
+|   |   |-- multi-agent-setup.md    # This file
+|   |   `-- workflow-summary.md
+|   `-- agent-outputs/
+|       |-- README.md               # Directory purpose and conventions
+|       |-- EXAMPLE-workflow.md     # Complete example of agent coordination
+|       `-- TEMPLATE-task.md        # Shared template for issue/task handoffs
+`-- .claude/
+    `-- commands/                   # Claude Code CLI slash commands
 ```
 
 ## Key Files
@@ -44,9 +42,7 @@ klubradio_archivum/
 
 ### Templates
 Located in `docs/agent-outputs/`:
-- **`TEMPLATE-claude-risk-analysis.md`**: Template for Claude's architectural risk analysis
-- **`TEMPLATE-gemini-implementation.md`**: Template for Gemini's implementation plan
-- **`TEMPLATE-openai-consolidated.md`**: Template for OpenAI's consolidated action plan
+- **`TEMPLATE-task.md`**: Shared template for agent orchestration, implementation notes, validation, and handoff sections
 
 ### Example
 - **`docs/agent-outputs/EXAMPLE-workflow.md`**: Complete walkthrough of a playlist feature implementation showing how all three agents coordinate
@@ -61,7 +57,7 @@ When working in Claude Code CLI, you can use these specialized commands:
 Generates a comprehensive risk analysis for the current task or GitHub issue.
 - Uses Claude Agent Checklist from CLAUDE.md
 - Outputs to `docs/agent-outputs/claude-[issue-id]-risk-analysis.md`
-- Follows the TEMPLATE-claude-risk-analysis.md structure
+- Follows the relevant sections from `docs/agent-outputs/TEMPLATE-task.md`
 
 #### `/agent-explore`
 Uses Claude's built-in Explore agent to understand codebase architecture.
@@ -187,7 +183,7 @@ The `docs/agent-outputs/` directory is configured in `.gitignore`:
 # Agent coordination outputs (ephemeral, not committed)
 docs/agent-outputs/*
 !docs/agent-outputs/README.md
-!docs/agent-outputs/TEMPLATE-*.md
+!docs/agent-outputs/TEMPLATE-task.md
 !docs/agent-outputs/EXAMPLE-*.md
 ```
 
@@ -255,7 +251,7 @@ If you need clarification on:
 - Agent roles and responsibilities → See `agent.md`
 - Claude-specific instructions → See `CLAUDE.md` Multi-Agent section
 - Example coordination → See `docs/agent-outputs/EXAMPLE-workflow.md`
-- Templates → See `docs/agent-outputs/TEMPLATE-*.md`
+- Templates -> See `docs/agent-outputs/TEMPLATE-task.md`
 
 ## Future Enhancements
 

@@ -23,7 +23,7 @@ This project is a cross-platform mobile application built with Flutter that prov
 -   **Navigation**: Standard Flutter Navigator is used, with `AppShell` in `lib/main.dart` serving as the primary entry point for the application's navigation structure.
 -   **Downloads**: The `background_downloader` package is used for managing episode downloads. After download, a rich cache JSON (+ JPG) is stored alongside the MP3.
 
-### Key Features (from `docs/CHECKLIST.md` and `README.md`)
+### Key Features (from `docs/project/KlubradioArchiveAppChecklist-2.markdown` and `README.md`)
 
 -   **Playback**: Play audio files from the archive, preferring local files if available.
 -   **Search**: Search for shows and episodes.
@@ -460,7 +460,7 @@ flutter build macos --debug        # ✓ Success
 - Befehle als Code-Blöcke
 - Offene Fragen explizit markieren
 
-## File Structure Overview (from `docs/project/flutter-app-fs.md` and exploration)
+## File Structure Overview (from `docs/project/flutter-file-system.md` and exploration)
 
 The project is organized into the following main directories:
 

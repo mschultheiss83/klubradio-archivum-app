@@ -95,4 +95,5 @@ git push origin feature/task-name
 - **agent.md** - Full protocol details
 - **CLAUDE.md** - Claude's context
 - **GEMINI.md** - Gemini's context (if exists)
+- **docs/agents/multi-agent-setup.md** - Detailed setup and conventions
 - **docs/agent-outputs/** - Coordination workspace
