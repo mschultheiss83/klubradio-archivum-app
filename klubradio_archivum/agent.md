@@ -163,6 +163,21 @@ Agent markiert "handoff" mit:
 - Build/Test Tools (flutter, dart, etc.)
 - Git (commit, push mit Agent-Kennung)
 
+## Dokumentations-Navigation
+
+**Top-Level MOC:**
+- `docs/README.md` als Einstieg in die Projektdokumentation
+
+**Bereichs-MOCs:**
+- `docs/agents/README.md` für Agent-Workflow und Koordination
+- `docs/project/README.md` für Projektstatus, Releases und Deployment
+- `docs/issues/README.md` für Backlog, Feature-Notizen und Anhänge
+- `docs/web/README.md` für Web-spezifische Notizen
+
+**Agent-Handoffs & Templates:**
+- `docs/agent-outputs/README.md` erklärt Zweck und Konventionen
+- `docs/agent-outputs/TEMPLATE-task.md` ist die gemeinsame Vorlage für Task-Dateien
+- `docs/agent-outputs/EXAMPLE-workflow.md` zeigt einen kompletten Beispielablauf
 ## Output-Formate
 
 **Eine Datei pro Issue/Task:**
