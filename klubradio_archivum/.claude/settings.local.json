@@ -32,7 +32,8 @@
       "Bash(ls:*)",
       "Search(*)",
       "Read(*)",
-      "WebSearch"
+      "WebSearch",
+      "Wait"
     ],
     "deny": [],
     "ask": []
