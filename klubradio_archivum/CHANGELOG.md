@@ -16,6 +16,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Changed
 - **Download Manager**: merged Active/Completed tabs into single scrollable list with section headers
+- **Download Manager**: merged section list now uses `ListView.builder` for lazy item construction
 - **Download Manager**: hardcoded German menu texts replaced with l10n strings (4 languages)
 - **Unsubscribe dialog**: unified across all 4 screens (was inconsistent before)
 - **Download limit default**: now read from Settings DB (`keepLatestN`) instead of hardcoded constant

@@ -1,22 +1,22 @@
 import 'dart:io';
+
+import 'package:drift/drift.dart' as d show OrderingTerm;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:drift/drift.dart' as d show OrderingTerm;
 
-import 'package:klubradio_archivum/l10n/app_localizations.dart';
 import 'package:klubradio_archivum/db/app_database.dart';
-import 'package:klubradio_archivum/providers/download_provider.dart';
+import 'package:klubradio_archivum/l10n/app_localizations.dart';
 import 'package:klubradio_archivum/models/episode.dart' as model;
+import 'package:klubradio_archivum/providers/download_provider.dart';
 import 'package:klubradio_archivum/providers/episode_provider.dart';
 import 'package:klubradio_archivum/providers/podcast_provider.dart';
+import 'package:klubradio_archivum/screens/utils/helpers.dart';
 import 'package:klubradio_archivum/screens/widgets/stateless/episode_list_item.dart';
 import 'package:klubradio_archivum/screens/widgets/stateless/image_url.dart';
-import 'package:klubradio_archivum/screens/utils/helpers.dart';
 import 'package:klubradio_archivum/utils/episode_cache_reader.dart';
 
-/// ---------------------------------------------------------------------------
-/// DownloadList (single scrollable view for Download-Manager-Screen)
-/// ---------------------------------------------------------------------------
+import 'download_list_entries.dart';
+
 class DownloadList extends StatelessWidget {
   const DownloadList({super.key});
 
@@ -27,7 +27,7 @@ class DownloadList extends StatelessWidget {
 
     final activeStream =
         (db.select(db.episodes)
-              ..where((e) => e.status.isIn(const [1, 2])) // queued, downloading
+              ..where((e) => e.status.isIn(const [1, 2]))
               ..orderBy([(e) => d.OrderingTerm.desc(e.updatedAt)]))
             .watch();
 
@@ -44,10 +44,9 @@ class DownloadList extends StatelessWidget {
         return StreamBuilder<List<Episode>>(
           stream: completedStream,
           builder: (context, completedSnap) {
-            final activeItems = activeSnap.data ?? const [];
-            final completedItems = completedSnap.data ?? const [];
+            final activeItems = activeSnap.data ?? const <Episode>[];
+            final completedItems = completedSnap.data ?? const <Episode>[];
 
-            // Show loading only if both streams are still waiting
             final bothWaiting =
                 activeSnap.connectionState == ConnectionState.waiting &&
                 completedSnap.connectionState == ConnectionState.waiting;
@@ -55,34 +54,36 @@ class DownloadList extends StatelessWidget {
               return const Center(child: CircularProgressIndicator());
             }
 
-            // Show empty state if both lists are empty
             if (activeItems.isEmpty && completedItems.isEmpty) {
               return Center(child: Text(l10n.noDownloads));
             }
 
-            return ListView(
-              children: [
-                // ── Active Downloads section ──
-                if (activeItems.isNotEmpty) ...[
-                  _SectionHeader(
-                    icon: Icons.downloading,
-                    title: l10n.downloads_section_active,
-                  ),
-                  ...activeItems.map(
-                    (ep) => _ActiveDownloadTile(episode: ep),
-                  ),
-                ],
-                // ── Completed Downloads section ──
-                if (completedItems.isNotEmpty) ...[
-                  _SectionHeader(
-                    icon: Icons.check_circle_outline,
-                    title: l10n.downloads_section_completed,
-                  ),
-                  ...completedItems.map(
-                    (ep) => _CompletedDownloadTile(episode: ep),
-                  ),
-                ],
-              ],
+            final entries = buildDownloadListEntries(
+              activeItems: activeItems,
+              completedItems: completedItems,
+            );
+
+            return ListView.builder(
+              itemCount: entries.length,
+              itemBuilder: (context, index) {
+                final entry = entries[index];
+                switch (entry.type) {
+                  case DownloadListEntryType.activeHeader:
+                    return _SectionHeader(
+                      icon: Icons.downloading,
+                      title: l10n.downloads_section_active,
+                    );
+                  case DownloadListEntryType.activeItem:
+                    return _ActiveDownloadTile(episode: entry.episode!);
+                  case DownloadListEntryType.completedHeader:
+                    return _SectionHeader(
+                      icon: Icons.check_circle_outline,
+                      title: l10n.downloads_section_completed,
+                    );
+                  case DownloadListEntryType.completedItem:
+                    return _CompletedDownloadTile(episode: entry.episode!);
+                }
+              },
             );
           },
         );
@@ -91,7 +92,6 @@ class DownloadList extends StatelessWidget {
   }
 }
 
-/// Section header widget for visual separation.
 class _SectionHeader extends StatelessWidget {
   const _SectionHeader({required this.icon, required this.title});
 
@@ -157,23 +157,19 @@ class _ActiveDownloadTile extends StatelessWidget {
                   width: 24,
                   height: 24,
                   child: CircularProgressIndicator(
-                    value: (ep.progress),
+                    value: ep.progress,
                     strokeWidth: 3,
                   ),
                 ),
               if (ep.status == 2) const SizedBox(width: 8),
               if (ep.status == 2) Text(percentLabel),
-
-              if (ep.status == 2 &&
-                  (ep.resumable ?? false)) // downloading & resumable
+              if (ep.status == 2 && (ep.resumable ?? false))
                 IconButton(
                   tooltip: l10n.downloads_action_pause,
                   icon: const Icon(Icons.pause),
                   onPressed: () => provider.pause(ep.id),
                 ),
-
-              if (ep.status == 1 &&
-                  (ep.resumable ?? false)) // queued & resumable
+              if (ep.status == 1 && (ep.resumable ?? false))
                 IconButton(
                   tooltip: l10n.downloads_action_resume,
                   icon: const Icon(Icons.play_arrow),
@@ -219,8 +215,7 @@ class _CompletedDownloadTile extends StatelessWidget {
               if (snap.hasError) {
                 return Text('Error: ${snap.error}');
               }
-              final showDate =
-                  snap.data?.showDate ?? ''; // bereits formatiert
+              final showDate = snap.data?.showDate ?? '';
               final base =
                   '${l10n.downloads_status_done} • ${ep.id} - ${ep.localPath}';
               final text = showDate.isNotEmpty ? '$base · $showDate' : base;
@@ -232,7 +227,6 @@ class _CompletedDownloadTile extends StatelessWidget {
               switch (value) {
                 case 'play':
                   final m = model.Episode.fromDb(ep);
-                  // ignore: use_build_context_synchronously
                   context.read<EpisodeProvider>().playEpisode(
                     m,
                     queue: [m],
@@ -241,7 +235,6 @@ class _CompletedDownloadTile extends StatelessWidget {
                   break;
                 case 'queue':
                   final m = model.Episode.fromDb(ep);
-                  // ignore: use_build_context_synchronously
                   context.read<EpisodeProvider>().addToQueue(m);
                   break;
                 case 'open':
@@ -250,7 +243,6 @@ class _CompletedDownloadTile extends StatelessWidget {
                   }
                   break;
                 case 'delete':
-                  // ignore: use_build_context_synchronously
                   context.read<DownloadProvider>().removeLocalFile(ep.id);
                   break;
               }
@@ -349,9 +341,6 @@ Widget _statusIcon(int status) {
   }
 }
 
-/// ---------------------------------------------------------------------------
-/// EpisodeList (lokalisiert, mit Download-Buttons) – weiterhin hier verfügbar
-/// ---------------------------------------------------------------------------
 class EpisodeList extends StatefulWidget {
   const EpisodeList({
     super.key,
@@ -420,9 +409,7 @@ class _DownloadButton extends StatelessWidget {
           );
         }
         final row = snap.data;
-        final status =
-            row?.status ??
-            0; // 0 none, 1 queued, 2 downloading, 3 completed, 4 failed, 5 canceled
+        final status = row?.status ?? 0;
         final progress = row?.progress ?? 0.0;
 
         switch (status) {
@@ -470,17 +457,14 @@ class _DownloadButton extends StatelessWidget {
 void _openInFolder(String filePath) {
   try {
     if (Platform.isWindows) {
-      // zeigt die Datei im Explorer
       Process.run('explorer', ['/select,', filePath]);
     } else if (Platform.isMacOS) {
-      // zeigt die Datei im Finder
       Process.run('open', ['-R', filePath]);
     } else if (Platform.isLinux) {
-      // öffnet den Ordner (Datei wird ggf. nicht ausgewählt)
       final dir = File(filePath).parent.path;
       Process.run('xdg-open', [dir]);
     }
   } catch (_) {
-    // still – Debug-Only
+    // Debug-only no-op.
   }
 }
