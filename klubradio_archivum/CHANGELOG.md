@@ -28,6 +28,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 - **Settings initialization**: default `settings` row is now created centrally so `playOrder` updates work even before opening download settings
 
+- **Database schema cleanup**: reset `schemaVersion` to `1` and removed obsolete incremental migrations for the unreleased app state
+
 ## [1.0.4]
 
 ### Added

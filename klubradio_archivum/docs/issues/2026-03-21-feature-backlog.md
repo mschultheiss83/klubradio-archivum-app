@@ -6,9 +6,9 @@
 
 ## Offene Aufgaben
 
-### Quick Win (beim naechsten Schema-Change)
+### Quick Win
 
-- [ ] **DB-Migration aufraeumen**: Schema-Version auf 1 zuruecksetzen, alle inkrementellen Migrations (v1->v2->v3) entfernen, sauberes `onCreate`. Solange kein Release existiert, braucht kein User migriert zu werden.
+- [x] **DB-Migration aufgeraeumt**: Schema-Version wieder auf `1`, inkrementelle Migrations entfernt, sauberes Basis-Schema im Code. Hinweis: vorhandene lokale Dev-DBs muessen bei Bedarf geloescht/resetet werden.
 
 ### Mittlerer Aufwand
 
