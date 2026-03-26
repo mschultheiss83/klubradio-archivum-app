@@ -15879,6 +15879,9 @@ class DownloadService {
     );
 
     if (!_ready.isCompleted) _ready.complete();
+
+    // Run auto-download check immediately on startup (timer only fires after 1 min).
+    unawaited(checkAutodownloads());
   }
 
   Future<void> dispose() async {
