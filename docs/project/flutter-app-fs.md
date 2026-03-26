@@ -4890,9 +4890,10 @@ class RetentionDao {
     final s = await settingsDao.getOne();
 
     // deleteAfterHours nur wenn > 0
-    if (s?.deleteAfterHours != null && s!.deleteAfterHours! > 0) {
+    final deleteAfterHours = s?.deleteAfterHours;
+    if (deleteAfterHours != null && deleteAfterHours > 0) {
       final threshold = DateTime.now().subtract(
-        Duration(hours: s.deleteAfterHours!),
+        Duration(hours: deleteAfterHours),
       );
       final oldPlayed = await episodesDao.playedBefore(threshold);
       for (final ep in oldPlayed.where((e) => e.podcastId == podcastId)) {
@@ -10289,7 +10290,7 @@ class PodcastRepository {
     return fresh;
   }
 
-  void _refresh<T>(String cacheName, Future<List<T>> Function() fetch) async {
+  Future<void> _refresh<T>(String cacheName, Future<List<T>> Function() fetch) async {
     try {
       final fresh = await fetch();
       if (fresh.isNotEmpty) {
@@ -10301,7 +10302,7 @@ class PodcastRepository {
         await _cache.write(cacheName, serializable);
       }
     } catch (_) {
-      /* silently */
+      // SWR background refresh — failure is non-critical since stale data was already served
     }
   }
 
@@ -12582,7 +12583,7 @@ class PodcastInfoCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       Text(
-                        '${podcast.id} - ${podcast.title}',
+                        podcast.title,
                         style: theme.textTheme.titleLarge,
                       ),
                       const SizedBox(height: 8),
@@ -13928,6 +13929,7 @@ const String defaultEpisodeImageUrl = 'assets/app_icon/app_icon.png';
 const int defaultAutoDownloadCount = 2;
 const int maxRecentSearches = 10;
 const int minSearchLength = 3;
+const int searchResultsLimit = 50;
 const Duration searchDebounce = Duration(milliseconds: 400);
 const int maxRecentlyPlayed = 20;
 
@@ -14993,7 +14995,7 @@ class ApiCacheService {
     }
 
     final Map<String, dynamic> cacheEntry = jsonDecode(rawCacheEntry);
-    final int expiryTime = cacheEntry['expiry'];
+    final int expiryTime = cacheEntry['expiry'] as int? ?? -1;
 
     if (expiryTime != -1 && DateTime.now().millisecondsSinceEpoch > expiryTime) {
       // Cache expired, remove it
@@ -15023,7 +15025,7 @@ class ApiCacheService {
     }
 
     final Map<String, dynamic> cacheEntry = jsonDecode(rawCacheEntry);
-    final int expiryTime = cacheEntry['expiry'];
+    final int expiryTime = cacheEntry['expiry'] as int? ?? -1;
 
     return expiryTime != -1 && DateTime.now().millisecondsSinceEpoch > expiryTime;
   }
@@ -15259,6 +15261,7 @@ class ApiService {
             'select': '*',
             'title': 'ilike.%$encoded%',
             'order': 'id.desc',
+            'limit': '${constants.searchResultsLimit}',
           },
         );
     final res = await _httpClient.get(uri, headers: _headers).timeout(_timeout);
@@ -15290,6 +15293,7 @@ class ApiService {
             'select': '*',
             'title': 'ilike.%$encoded%',
             'order': 'id.desc',
+            'limit': '${constants.searchResultsLimit}',
           },
         );
     final res = await _httpClient.get(uri, headers: _headers).timeout(_timeout);

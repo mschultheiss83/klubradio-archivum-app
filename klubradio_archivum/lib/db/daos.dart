@@ -396,9 +396,10 @@ class RetentionDao {
     final s = await settingsDao.getOne();
 
     // deleteAfterHours nur wenn > 0
-    if (s?.deleteAfterHours != null && s!.deleteAfterHours! > 0) {
+    final deleteAfterHours = s?.deleteAfterHours;
+    if (deleteAfterHours != null && deleteAfterHours > 0) {
       final threshold = DateTime.now().subtract(
-        Duration(hours: s.deleteAfterHours!),
+        Duration(hours: deleteAfterHours),
       );
       final oldPlayed = await episodesDao.playedBefore(threshold);
       for (final ep in oldPlayed.where((e) => e.podcastId == podcastId)) {

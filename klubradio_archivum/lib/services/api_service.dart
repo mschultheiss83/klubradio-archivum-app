@@ -225,6 +225,7 @@ class ApiService {
             'select': '*',
             'title': 'ilike.%$encoded%',
             'order': 'id.desc',
+            'limit': '${constants.searchResultsLimit}',
           },
         );
     final res = await _httpClient.get(uri, headers: _headers).timeout(_timeout);
@@ -256,6 +257,7 @@ class ApiService {
             'select': '*',
             'title': 'ilike.%$encoded%',
             'order': 'id.desc',
+            'limit': '${constants.searchResultsLimit}',
           },
         );
     final res = await _httpClient.get(uri, headers: _headers).timeout(_timeout);

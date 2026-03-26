@@ -78,7 +78,7 @@ class PodcastRepository {
     return fresh;
   }
 
-  void _refresh<T>(String cacheName, Future<List<T>> Function() fetch) async {
+  Future<void> _refresh<T>(String cacheName, Future<List<T>> Function() fetch) async {
     try {
       final fresh = await fetch();
       if (fresh.isNotEmpty) {
@@ -90,7 +90,7 @@ class PodcastRepository {
         await _cache.write(cacheName, serializable);
       }
     } catch (_) {
-      /* silently */
+      // SWR background refresh — failure is non-critical since stale data was already served
     }
   }
 

@@ -32,7 +32,7 @@ class ApiCacheService {
     }
 
     final Map<String, dynamic> cacheEntry = jsonDecode(rawCacheEntry);
-    final int expiryTime = cacheEntry['expiry'];
+    final int expiryTime = cacheEntry['expiry'] as int? ?? -1;
 
     if (expiryTime != -1 && DateTime.now().millisecondsSinceEpoch > expiryTime) {
       // Cache expired, remove it
@@ -62,7 +62,7 @@ class ApiCacheService {
     }
 
     final Map<String, dynamic> cacheEntry = jsonDecode(rawCacheEntry);
-    final int expiryTime = cacheEntry['expiry'];
+    final int expiryTime = cacheEntry['expiry'] as int? ?? -1;
 
     return expiryTime != -1 && DateTime.now().millisecondsSinceEpoch > expiryTime;
   }

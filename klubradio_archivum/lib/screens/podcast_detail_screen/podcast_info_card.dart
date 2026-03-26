@@ -46,7 +46,7 @@ class PodcastInfoCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       Text(
-                        '${podcast.id} - ${podcast.title}',
+                        podcast.title,
                         style: theme.textTheme.titleLarge,
                       ),
                       const SizedBox(height: 8),
