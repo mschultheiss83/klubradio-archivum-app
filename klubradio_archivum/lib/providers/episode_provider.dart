@@ -153,8 +153,9 @@ class EpisodeProvider extends ChangeNotifier {
       await _audioPlayerService.loadEpisode(_currentEpisode!);
       await _audioPlayerService.seek(currentPosition);
       await _audioPlayerService.togglePlayPause();
-      notifyListeners();
     }
+    // Always notify so UI updates download status for all episodes
+    notifyListeners();
   }
 
   /// Jumps the playback position relative to the current position.

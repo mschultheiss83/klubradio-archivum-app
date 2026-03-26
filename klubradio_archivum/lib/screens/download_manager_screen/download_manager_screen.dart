@@ -13,9 +13,6 @@ class DownloadManagerScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer2<AppDatabase, DownloadProvider>(
       builder: (context, db, dlProv, _) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          dlProv.settingsDao.ensureDefaults();
-        });
         final l10n = AppLocalizations.of(context)!; // Get l10n instance
 
         return Padding(

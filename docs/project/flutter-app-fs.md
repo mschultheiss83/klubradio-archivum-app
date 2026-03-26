@@ -9479,8 +9479,9 @@ class EpisodeProvider extends ChangeNotifier {
       await _audioPlayerService.loadEpisode(_currentEpisode!);
       await _audioPlayerService.seek(currentPosition);
       await _audioPlayerService.togglePlayPause();
-      notifyListeners();
     }
+    // Always notify so UI updates download status for all episodes
+    notifyListeners();
   }
 
   /// Jumps the playback position relative to the current position.
@@ -10077,9 +10078,14 @@ class SubscriptionProvider extends ChangeNotifier {
       _loaded = true;
       return;
     }
-    _currentSubscription = await subscriptionsDao.getById(podcastId);
-    _loaded = true;
-    notifyListeners();
+    try {
+      _currentSubscription = await subscriptionsDao.getById(podcastId);
+    } catch (e) {
+      debugPrint('loadSubscription error: $e');
+    } finally {
+      _loaded = true;
+      notifyListeners();
+    }
   }
 
   Stream<Subscription?> watchSubscription(String podcastId) {
@@ -11618,9 +11624,6 @@ class DownloadManagerScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer2<AppDatabase, DownloadProvider>(
       builder: (context, db, dlProv, _) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          dlProv.settingsDao.ensureDefaults();
-        });
         final l10n = AppLocalizations.of(context)!; // Get l10n instance
 
         return Padding(
@@ -15693,6 +15696,7 @@ class CacheStore {
 import 'dart:async';
 import 'dart:io';
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:image/image.dart' as img;
 import 'package:path/path.dart' as p;
@@ -15822,7 +15826,9 @@ class DownloadService {
       progressBar: true,
     );
 
-    _sub = _downloader.updates.listen(_onUpdate, onError: (_) {});
+    _sub = _downloader.updates.listen(_onUpdate, onError: (e) {
+      if (kDebugMode) debugPrint('DownloadService stream error: $e');
+    });
     await _downloader.start();
 
     _autodownloadTimer = Timer.periodic(
@@ -15964,7 +15970,7 @@ class DownloadService {
         episodeId = name.substring(0, name.length - 4);
       }
     }
-    if (episodeId == null) return;
+    if (episodeId == null || episodeId.isEmpty) return;
 
     if (task is DownloadTask) {
       _tasksByEpisodeId[episodeId] = task;
@@ -16027,7 +16033,7 @@ class DownloadService {
               }
             }
             // Notify EpisodeProvider that the episode has been downloaded
-            episodeProvider.onEpisodeDownloaded(episodeId, localPath);
+            await episodeProvider.onEpisodeDownloaded(episodeId, localPath);
             _activeDownloadCount--;
             _processQueue();
             break;

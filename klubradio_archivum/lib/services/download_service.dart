@@ -2,6 +2,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:image/image.dart' as img;
 import 'package:path/path.dart' as p;
@@ -131,7 +132,9 @@ class DownloadService {
       progressBar: true,
     );
 
-    _sub = _downloader.updates.listen(_onUpdate, onError: (_) {});
+    _sub = _downloader.updates.listen(_onUpdate, onError: (e) {
+      if (kDebugMode) debugPrint('DownloadService stream error: $e');
+    });
     await _downloader.start();
 
     _autodownloadTimer = Timer.periodic(
@@ -273,7 +276,7 @@ class DownloadService {
         episodeId = name.substring(0, name.length - 4);
       }
     }
-    if (episodeId == null) return;
+    if (episodeId == null || episodeId.isEmpty) return;
 
     if (task is DownloadTask) {
       _tasksByEpisodeId[episodeId] = task;
@@ -336,7 +339,7 @@ class DownloadService {
               }
             }
             // Notify EpisodeProvider that the episode has been downloaded
-            episodeProvider.onEpisodeDownloaded(episodeId, localPath);
+            await episodeProvider.onEpisodeDownloaded(episodeId, localPath);
             _activeDownloadCount--;
             _processQueue();
             break;

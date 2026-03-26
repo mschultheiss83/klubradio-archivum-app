@@ -45,9 +45,14 @@ class SubscriptionProvider extends ChangeNotifier {
       _loaded = true;
       return;
     }
-    _currentSubscription = await subscriptionsDao.getById(podcastId);
-    _loaded = true;
-    notifyListeners();
+    try {
+      _currentSubscription = await subscriptionsDao.getById(podcastId);
+    } catch (e) {
+      debugPrint('loadSubscription error: $e');
+    } finally {
+      _loaded = true;
+      notifyListeners();
+    }
   }
 
   Stream<Subscription?> watchSubscription(String podcastId) {
