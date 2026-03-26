@@ -16,12 +16,15 @@ class AudioPlayerService {
   final AudioPlayer _player = AudioPlayer();
   final StreamController<bool> _bufferingController =
       StreamController<bool>.broadcast();
+  final StreamController<String?> _errorController =
+      StreamController<String?>.broadcast();
 
   Episode? _currentEpisode;
   StreamSubscription<PlayerState>? _playerStateSubscription;
 
   Episode? get currentEpisode => _currentEpisode;
   Stream<bool> get bufferingStream => _bufferingController.stream;
+  Stream<String?> get errorStream => _errorController.stream;
   Stream<Duration> get positionStream => _player.positionStream;
   Stream<Duration> get bufferedPositionStream => _player.bufferedPositionStream;
   Stream<PlayerState> get playerStateStream => _player.playerStateStream;
@@ -68,23 +71,23 @@ class AudioPlayerService {
         // If neither local nor remote could be loaded, clear current episode and stop
         _currentEpisode = null;
         await _player.stop();
-        // Potentially add an error message to a stream/notifier for UI to display
+        _errorController.add('Failed to load audio for episode: ${episode.id}');
         debugPrint('Failed to load audio for episode: ${episode.id}');
       }
     } on PlayerException catch (error) {
       debugPrint('PlayerException in loadEpisode: $error');
-      _bufferingController.addError(error);
-      _currentEpisode = null; // Clear on player-specific errors too
+      _errorController.add(error.message);
+      _currentEpisode = null;
       await _player.stop();
     } on PlayerInterruptedException catch (error) {
       debugPrint('PlayerInterruptedException in loadEpisode: $error');
-      _bufferingController.addError(error);
-      _currentEpisode = null; // Clear on player-specific errors too
+      _errorController.add(error.message);
+      _currentEpisode = null;
       await _player.stop();
-    } catch (e, st) { // Catch any other unexpected exceptions
+    } catch (e, st) {
       debugPrint('Unexpected error in loadEpisode: $e\n$st');
-      _bufferingController.addError(e);
-      _currentEpisode = null; // Clear on any unexpected errors
+      _errorController.add(e.toString());
+      _currentEpisode = null;
       await _player.stop();
     }
   }
@@ -115,5 +118,6 @@ class AudioPlayerService {
     await _playerStateSubscription?.cancel();
     await _player.dispose();
     await _bufferingController.close();
+    await _errorController.close();
   }
 }

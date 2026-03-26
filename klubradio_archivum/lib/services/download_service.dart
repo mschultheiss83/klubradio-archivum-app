@@ -114,6 +114,8 @@ class DownloadService {
 
   final List<model.Episode> _pendingDownloadQueue = [];
   int _activeDownloadCount = 0;
+  Completer<void>? _queueCompleter;
+  bool _queueRerunNeeded = false;
 
   final Completer<void> _ready = Completer<void>();
   bool _disposed = false;
@@ -173,14 +175,31 @@ class DownloadService {
 
   Future<void> _processQueue() async {
     if (_disposed) return;
-    final settings = await settingsDao.getOne();
-    final maxParallel = settings?.maxParallel ?? 1; // Default to 1 if not set
 
-    while (_activeDownloadCount < maxParallel &&
-        _pendingDownloadQueue.isNotEmpty) {
-      final ep = _pendingDownloadQueue.removeAt(0);
-      _activeDownloadCount++;
-      _startDownload(ep);
+    // If already processing, mark that a re-run is needed and wait
+    if (_queueCompleter != null) {
+      _queueRerunNeeded = true;
+      await _queueCompleter!.future;
+      return;
+    }
+
+    _queueCompleter = Completer<void>();
+    try {
+      do {
+        _queueRerunNeeded = false;
+        final settings = await settingsDao.getOne();
+        final maxParallel = settings?.maxParallel ?? 1;
+
+        while (_activeDownloadCount < maxParallel &&
+            _pendingDownloadQueue.isNotEmpty) {
+          final ep = _pendingDownloadQueue.removeAt(0);
+          _activeDownloadCount++;
+          await _startDownload(ep);
+        }
+      } while (_queueRerunNeeded && !_disposed);
+    } finally {
+      _queueCompleter!.complete();
+      _queueCompleter = null;
     }
   }
 
