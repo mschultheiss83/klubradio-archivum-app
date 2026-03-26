@@ -4809,9 +4809,6 @@ class SettingsDao extends DatabaseAccessor<AppDatabase>
       (select(settings)..where((s) => s.id.equals(1))).getSingleOrNull();
 
   Future<void> ensureDefaults() async {
-    final existing = await getOne();
-    if (existing != null) return; // already initialized, keep user settings
-
     final wifiDefault = Platform.isAndroid || Platform.isIOS ? true : false;
     await into(settings).insert(
       SettingsCompanion(
@@ -4823,6 +4820,7 @@ class SettingsDao extends DatabaseAccessor<AppDatabase>
         autodownloadSubscribed: const Value(false),
         playOrder: const Value('newest'),
       ),
+      mode: InsertMode.insertOrIgnore,
     );
   }
 
@@ -10090,27 +10088,27 @@ class SubscriptionProvider extends ChangeNotifier {
   }
 
   Stream<Subscription?> watchSubscription(String podcastId) {
-    if (!_isSubscriptionsSupported) return Stream.value(null); // No-op for unsupported platforms
+    if (!_isSubscriptionsSupported) return const Stream.empty();
     return subscriptionsDao.watchOne(podcastId);
   }
 
-  Future<void> toggleSubscription(String podcastId, bool isSubscribed) async {
+  Future<void> toggleSubscription(String podcastId, bool currentlySubscribed) async {
     if (!_isSubscriptionsSupported) return; // No-op for unsupported platforms
     debugPrint(
-      'toggleSubscription: podcastId=$podcastId, isSubscribed=$isSubscribed, busy=true',
+      'toggleSubscription: podcastId=$podcastId, currentlySubscribed=$currentlySubscribed, busy=true',
     );
     _busy = true;
     notifyListeners();
     try {
       int? autoDownloadDefault;
-      if (!isSubscribed) {
+      if (!currentlySubscribed) {
         final settings = await settingsDao.getOne();
         autoDownloadDefault =
             settings?.keepLatestN ?? constants.defaultAutoDownloadCount;
       }
       await subscriptionsDao.toggleSubscribe(
         podcastId: podcastId,
-        active: !isSubscribed,
+        active: !currentlySubscribed,
         autoDownloadN: autoDownloadDefault,
       );
       _currentSubscription = await subscriptionsDao.getById(podcastId);
@@ -10118,7 +10116,7 @@ class SubscriptionProvider extends ChangeNotifier {
         'toggleSubscription: subscriptionsDao.toggleSubscribe completed',
       );
 
-      if (!isSubscribed) {
+      if (!currentlySubscribed) {
         final downloadCount = await downloadProvider.autodownloadPodcast(
           podcastId,
         );
@@ -11127,6 +11125,11 @@ class DownloadList extends StatelessWidget {
         return StreamBuilder<List<Episode>>(
           stream: completedStream,
           builder: (context, completedSnap) {
+            if (activeSnap.hasError || completedSnap.hasError) {
+              final err = activeSnap.error ?? completedSnap.error;
+              return Center(child: Text(l10n.downloads_error(err.toString())));
+            }
+
             final activeItems = activeSnap.data ?? const <Episode>[];
             final completedItems = completedSnap.data ?? const <Episode>[];
 
@@ -12334,7 +12337,7 @@ class ProgressSlider extends StatelessWidget {
               value: value,
               max: maxSeconds,
               onChanged: (double newValue) {
-                onSeek(Duration(seconds: newValue.toInt()));
+                onSeek(Duration(milliseconds: (newValue * 1000).toInt()));
               },
             ),
             Row(
@@ -12434,9 +12437,9 @@ class _PodcastDetailScreenState extends State<PodcastDetailScreen> {
                       snack.showSnackBar(
                         SnackBar(
                           content: Text(
-                            !isSubscribed
-                                ? l10n.podcastDetailScreenSubscribeSuccess
-                                : l10n.podcastDetailScreenUnsubscribeSuccess,
+                            isSubscribed
+                                ? l10n.podcastDetailScreenUnsubscribeSuccess
+                                : l10n.podcastDetailScreenSubscribeSuccess,
                           ),
                         ),
                       );
@@ -13079,6 +13082,7 @@ class SearchResultsList extends StatelessWidget {
     }
 
     return ListView.separated(
+      padding: const EdgeInsets.all(16),
       itemCount: results.length,
       separatorBuilder: (_, _) => const SizedBox(height: 12),
       itemBuilder: (BuildContext context, int index) {

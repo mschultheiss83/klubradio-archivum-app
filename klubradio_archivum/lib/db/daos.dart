@@ -315,9 +315,6 @@ class SettingsDao extends DatabaseAccessor<AppDatabase>
       (select(settings)..where((s) => s.id.equals(1))).getSingleOrNull();
 
   Future<void> ensureDefaults() async {
-    final existing = await getOne();
-    if (existing != null) return; // already initialized, keep user settings
-
     final wifiDefault = Platform.isAndroid || Platform.isIOS ? true : false;
     await into(settings).insert(
       SettingsCompanion(
@@ -329,6 +326,7 @@ class SettingsDao extends DatabaseAccessor<AppDatabase>
         autodownloadSubscribed: const Value(false),
         playOrder: const Value('newest'),
       ),
+      mode: InsertMode.insertOrIgnore,
     );
   }
 

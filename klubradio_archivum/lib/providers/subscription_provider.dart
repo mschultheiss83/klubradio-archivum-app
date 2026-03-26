@@ -56,27 +56,27 @@ class SubscriptionProvider extends ChangeNotifier {
   }
 
   Stream<Subscription?> watchSubscription(String podcastId) {
-    if (!_isSubscriptionsSupported) return Stream.value(null); // No-op for unsupported platforms
+    if (!_isSubscriptionsSupported) return const Stream.empty();
     return subscriptionsDao.watchOne(podcastId);
   }
 
-  Future<void> toggleSubscription(String podcastId, bool isSubscribed) async {
+  Future<void> toggleSubscription(String podcastId, bool currentlySubscribed) async {
     if (!_isSubscriptionsSupported) return; // No-op for unsupported platforms
     debugPrint(
-      'toggleSubscription: podcastId=$podcastId, isSubscribed=$isSubscribed, busy=true',
+      'toggleSubscription: podcastId=$podcastId, currentlySubscribed=$currentlySubscribed, busy=true',
     );
     _busy = true;
     notifyListeners();
     try {
       int? autoDownloadDefault;
-      if (!isSubscribed) {
+      if (!currentlySubscribed) {
         final settings = await settingsDao.getOne();
         autoDownloadDefault =
             settings?.keepLatestN ?? constants.defaultAutoDownloadCount;
       }
       await subscriptionsDao.toggleSubscribe(
         podcastId: podcastId,
-        active: !isSubscribed,
+        active: !currentlySubscribed,
         autoDownloadN: autoDownloadDefault,
       );
       _currentSubscription = await subscriptionsDao.getById(podcastId);
@@ -84,7 +84,7 @@ class SubscriptionProvider extends ChangeNotifier {
         'toggleSubscription: subscriptionsDao.toggleSubscribe completed',
       );
 
-      if (!isSubscribed) {
+      if (!currentlySubscribed) {
         final downloadCount = await downloadProvider.autodownloadPodcast(
           podcastId,
         );

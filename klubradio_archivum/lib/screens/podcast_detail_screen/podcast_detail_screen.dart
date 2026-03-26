@@ -77,9 +77,9 @@ class _PodcastDetailScreenState extends State<PodcastDetailScreen> {
                       snack.showSnackBar(
                         SnackBar(
                           content: Text(
-                            !isSubscribed
-                                ? l10n.podcastDetailScreenSubscribeSuccess
-                                : l10n.podcastDetailScreenUnsubscribeSuccess,
+                            isSubscribed
+                                ? l10n.podcastDetailScreenUnsubscribeSuccess
+                                : l10n.podcastDetailScreenSubscribeSuccess,
                           ),
                         ),
                       );

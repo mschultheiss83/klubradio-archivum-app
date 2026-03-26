@@ -24,6 +24,7 @@ class SearchResultsList extends StatelessWidget {
     }
 
     return ListView.separated(
+      padding: const EdgeInsets.all(16),
       itemCount: results.length,
       separatorBuilder: (_, _) => const SizedBox(height: 12),
       itemBuilder: (BuildContext context, int index) {

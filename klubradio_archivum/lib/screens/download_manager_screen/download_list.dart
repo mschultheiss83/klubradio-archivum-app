@@ -44,6 +44,11 @@ class DownloadList extends StatelessWidget {
         return StreamBuilder<List<Episode>>(
           stream: completedStream,
           builder: (context, completedSnap) {
+            if (activeSnap.hasError || completedSnap.hasError) {
+              final err = activeSnap.error ?? completedSnap.error;
+              return Center(child: Text(l10n.downloads_error(err.toString())));
+            }
+
             final activeItems = activeSnap.data ?? const <Episode>[];
             final completedItems = completedSnap.data ?? const <Episode>[];
 

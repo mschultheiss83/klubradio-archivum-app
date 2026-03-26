@@ -33,7 +33,7 @@ class ProgressSlider extends StatelessWidget {
               value: value,
               max: maxSeconds,
               onChanged: (double newValue) {
-                onSeek(Duration(seconds: newValue.toInt()));
+                onSeek(Duration(milliseconds: (newValue * 1000).toInt()));
               },
             ),
             Row(
