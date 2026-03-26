@@ -17,6 +17,10 @@ This folder contains issue-specific notes, backlog items, and supporting screens
 - [feature-contributions.md](feature-contributions.md)
 - [feature-download-overview.md](feature-download-overview.md)
 
+## Known Bugs (Upstream)
+
+- [bug-just-audio-threading.md](bug-just-audio-threading.md)
+
 ## Refactors And Quick Wins
 
 - [api-performance-refactor.md](api-performance-refactor.md)

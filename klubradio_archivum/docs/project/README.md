@@ -26,6 +26,10 @@ This folder contains the product, release, deployment, and workflow notes for th
 - [google-play-action-plan.md](google-play-action-plan.md)
 - [2026-03-22-session-summary.md](2026-03-22-session-summary.md)
 
+## Database
+
+- [database-migrations.md](database-migrations.md)
+
 ## Reference Notes
 
 - [flutter-klubradio-app.md](flutter-klubradio-app.md)

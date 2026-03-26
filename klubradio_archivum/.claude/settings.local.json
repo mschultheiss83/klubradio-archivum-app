@@ -33,7 +33,8 @@
       "Search(*)",
       "Read(*)",
       "WebSearch",
-      "Wait"
+      "Wait",
+      "WebFetch(domain:*)"
     ],
     "deny": [],
     "ask": []
