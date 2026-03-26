@@ -212,9 +212,10 @@ class PodcastProvider extends ChangeNotifier {
   }
 
   Future<List<Podcast>> searchPodcasts(String query) async {
-    addRecentSearch(query);
     try {
-      return await _apiService.searchPodcasts(query);
+      final results = await _apiService.searchPodcasts(query);
+      addRecentSearch(query);
+      return results;
     } catch (error) {
       _errorMessage = error.toString();
       notifyListeners();

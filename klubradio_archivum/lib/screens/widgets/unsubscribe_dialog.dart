@@ -35,12 +35,11 @@ Future<bool> showUnsubscribeDialog(
     ),
   );
 
-  if (result != null) {
-    if (result) {
-      await downloadProvider.deleteEpisodesForPodcast(podcastId);
-    }
-    await subscriptionProvider.toggleSubscription(podcastId, true);
-    return true;
+  if (result == null) return false;
+
+  if (result) {
+    await downloadProvider.deleteEpisodesForPodcast(podcastId);
   }
-  return false;
+  await subscriptionProvider.toggleSubscription(podcastId, true);
+  return true;
 }

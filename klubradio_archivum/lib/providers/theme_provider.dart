@@ -52,15 +52,15 @@ class ThemeProvider extends ChangeNotifier {
     await prefs.setString(_kThemeMode, _themeMode.name);
   }
 
-  void toggleTheme(bool isDarkMode) {
+  Future<void> toggleTheme(bool isDarkMode) async {
     _themeMode = isDarkMode ? ThemeMode.dark : ThemeMode.light;
-    _saveThemeMode();
     notifyListeners();
+    await _saveThemeMode();
   }
 
-  void setThemeMode(ThemeMode mode) {
+  Future<void> setThemeMode(ThemeMode mode) async {
     _themeMode = mode;
-    _saveThemeMode();
     notifyListeners();
+    await _saveThemeMode();
   }
 }

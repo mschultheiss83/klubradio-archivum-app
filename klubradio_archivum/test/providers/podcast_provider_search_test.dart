@@ -225,11 +225,11 @@ void main() {
       expect(results, isEmpty);
     });
 
-    test('still adds to recent searches even on error', () async {
+    test('does NOT add to recent searches on error', () async {
       apiService.searchHandler = (_) => throw ApiException('Error');
 
       await provider.searchPodcasts('error-query');
-      expect(provider.recentSearches, contains('error-query'));
+      expect(provider.recentSearches, isNot(contains('error-query')));
     });
 
     test('uses offline mock data when credentials invalid', () async {

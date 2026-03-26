@@ -337,14 +337,6 @@ class MockApiService extends _i1.Mock implements _i10.ApiService {
           as _i6.Future<List<_i12.Podcast>>);
 
   @override
-  _i6.Future<List<_i12.Podcast>> fetchRecommendedPodcasts({int? limit = 10}) =>
-      (super.noSuchMethod(
-            Invocation.method(#fetchRecommendedPodcasts, [], {#limit: limit}),
-            returnValue: _i6.Future<List<_i12.Podcast>>.value(<_i12.Podcast>[]),
-          )
-          as _i6.Future<List<_i12.Podcast>>);
-
-  @override
   _i6.Future<List<_i9.Episode>> fetchEpisodesForPodcast(
     String? podcastId, {
     int? limit = 500,

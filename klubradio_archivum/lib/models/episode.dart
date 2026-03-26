@@ -30,7 +30,7 @@ class Episode {
       id: dbEpisode.id,
       podcastId: dbEpisode.podcastId,
       title: dbEpisode.title,
-      description: dbEpisode.description ?? dbEpisode.cachedTitle ?? '',
+      description: dbEpisode.description ?? '',
       audioUrl: dbEpisode.audioUrl,
       publishedAt: dbEpisode.publishedAt ?? DateTime.now(),
       showDate: dbEpisode.showDate ?? dbEpisode.publishedAt?.toIso8601String().substring(0, 10) ?? '',

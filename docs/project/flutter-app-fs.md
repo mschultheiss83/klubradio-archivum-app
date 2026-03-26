@@ -8699,7 +8699,7 @@ class Episode {
       id: dbEpisode.id,
       podcastId: dbEpisode.podcastId,
       title: dbEpisode.title,
-      description: dbEpisode.description ?? dbEpisode.cachedTitle ?? '',
+      description: dbEpisode.description ?? '',
       audioUrl: dbEpisode.audioUrl,
       publishedAt: dbEpisode.publishedAt ?? DateTime.now(),
       showDate: dbEpisode.showDate ?? dbEpisode.publishedAt?.toIso8601String().substring(0, 10) ?? '',
@@ -9853,9 +9853,10 @@ class PodcastProvider extends ChangeNotifier {
   }
 
   Future<List<Podcast>> searchPodcasts(String query) async {
-    addRecentSearch(query);
     try {
-      return await _apiService.searchPodcasts(query);
+      final results = await _apiService.searchPodcasts(query);
+      addRecentSearch(query);
+      return results;
     } catch (error) {
       _errorMessage = error.toString();
       notifyListeners();
@@ -9952,7 +9953,6 @@ class ProfileProvider extends ChangeNotifier {
   final ProfileRepository _repo;
 
   UserProfile? _profile;
-  UserProfile get profile => _profile!;
   UserProfile? get profileOrNull => _profile;
 
   bool _loading = false;
@@ -9967,50 +9967,62 @@ class ProfileProvider extends ChangeNotifier {
   }
 
   Future<void> setLanguage(String code) async {
-    _profile = profile.copyWith(languageCode: code);
-    await _repo.save(profile);
+    final p = _profile;
+    if (p == null) return;
+    _profile = p.copyWith(languageCode: code);
+    await _repo.save(_profile!);
     notifyListeners();
   }
 
   Future<void> setPlaybackSpeed(double v) async {
-    _profile = profile.copyWith(playbackSpeed: v);
-    await _repo.save(profile);
+    final p = _profile;
+    if (p == null) return;
+    _profile = p.copyWith(playbackSpeed: v);
+    await _repo.save(_profile!);
     notifyListeners();
   }
 
   Future<void> setMaxAutoDownload(int n) async {
-    _profile = profile.copyWith(maxAutoDownload: n);
-    await _repo.save(profile);
+    final p = _profile;
+    if (p == null) return;
+    _profile = p.copyWith(maxAutoDownload: n);
+    await _repo.save(_profile!);
     notifyListeners();
   }
 
   Future<void> toggleFavouriteEpisode(String episodeId) async {
-    final fav = Set<String>.from(profile.favouriteEpisodeIds);
+    final p = _profile;
+    if (p == null) return;
+    final fav = Set<String>.from(p.favouriteEpisodeIds);
     if (fav.contains(episodeId)) {
       fav.remove(episodeId);
     } else {
       fav.add(episodeId);
     }
-    _profile = profile.copyWith(favouriteEpisodeIds: fav);
-    await _repo.save(profile);
+    _profile = p.copyWith(favouriteEpisodeIds: fav);
+    await _repo.save(_profile!);
     notifyListeners();
   }
 
   Future<void> setSubscriptions(Set<String> ids) async {
-    _profile = profile.copyWith(subscribedPodcastIds: ids);
-    await _repo.save(profile);
+    final p = _profile;
+    if (p == null) return;
+    _profile = p.copyWith(subscribedPodcastIds: ids);
+    await _repo.save(_profile!);
     notifyListeners();
   }
 
   Future<void> addRecentlyPlayed(Episode episode) async {
-    final updated = List<Episode>.from(profile.recentlyPlayed);
+    final p = _profile;
+    if (p == null) return;
+    final updated = List<Episode>.from(p.recentlyPlayed);
     updated.removeWhere((e) => e.id == episode.id);
     updated.insert(0, episode);
-    if (updated.length > 10) { // Assuming a max of 10 recently played episodes
+    if (updated.length > 10) {
       updated.removeLast();
     }
-    _profile = profile.copyWith(recentlyPlayed: updated);
-    await _repo.save(profile);
+    _profile = p.copyWith(recentlyPlayed: updated);
+    await _repo.save(_profile!);
     notifyListeners();
   }
 }
@@ -10175,16 +10187,16 @@ class ThemeProvider extends ChangeNotifier {
     await prefs.setString(_kThemeMode, _themeMode.name);
   }
 
-  void toggleTheme(bool isDarkMode) {
+  Future<void> toggleTheme(bool isDarkMode) async {
     _themeMode = isDarkMode ? ThemeMode.dark : ThemeMode.light;
-    _saveThemeMode();
     notifyListeners();
+    await _saveThemeMode();
   }
 
-  void setThemeMode(ThemeMode mode) {
+  Future<void> setThemeMode(ThemeMode mode) async {
     _themeMode = mode;
-    _saveThemeMode();
     notifyListeners();
+    await _saveThemeMode();
   }
 }
 ```
@@ -14932,14 +14944,13 @@ Future<bool> showUnsubscribeDialog(
     ),
   );
 
-  if (result != null) {
-    if (result) {
-      await downloadProvider.deleteEpisodesForPodcast(podcastId);
-    }
-    await subscriptionProvider.toggleSubscription(podcastId, true);
-    return true;
+  if (result == null) return false;
+
+  if (result) {
+    await downloadProvider.deleteEpisodesForPodcast(podcastId);
   }
-  return false;
+  await subscriptionProvider.toggleSubscription(podcastId, true);
+  return true;
 }
 ```
 
@@ -18864,14 +18875,6 @@ class MockApiService extends _i1.Mock implements _i10.ApiService {
           as _i6.Future<List<_i12.Podcast>>);
 
   @override
-  _i6.Future<List<_i12.Podcast>> fetchRecommendedPodcasts({int? limit = 10}) =>
-      (super.noSuchMethod(
-            Invocation.method(#fetchRecommendedPodcasts, [], {#limit: limit}),
-            returnValue: _i6.Future<List<_i12.Podcast>>.value(<_i12.Podcast>[]),
-          )
-          as _i6.Future<List<_i12.Podcast>>);
-
-  @override
   _i6.Future<List<_i9.Episode>> fetchEpisodesForPodcast(
     String? podcastId, {
     int? limit = 500,
@@ -19861,11 +19864,11 @@ void main() {
       expect(results, isEmpty);
     });
 
-    test('still adds to recent searches even on error', () async {
+    test('does NOT add to recent searches on error', () async {
       apiService.searchHandler = (_) => throw ApiException('Error');
 
       await provider.searchPodcasts('error-query');
-      expect(provider.recentSearches, contains('error-query'));
+      expect(provider.recentSearches, isNot(contains('error-query')));
     });
 
     test('uses offline mock data when credentials invalid', () async {

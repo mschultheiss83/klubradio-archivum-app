@@ -11,7 +11,6 @@ class ProfileProvider extends ChangeNotifier {
   final ProfileRepository _repo;
 
   UserProfile? _profile;
-  UserProfile get profile => _profile!;
   UserProfile? get profileOrNull => _profile;
 
   bool _loading = false;
@@ -26,50 +25,62 @@ class ProfileProvider extends ChangeNotifier {
   }
 
   Future<void> setLanguage(String code) async {
-    _profile = profile.copyWith(languageCode: code);
-    await _repo.save(profile);
+    final p = _profile;
+    if (p == null) return;
+    _profile = p.copyWith(languageCode: code);
+    await _repo.save(_profile!);
     notifyListeners();
   }
 
   Future<void> setPlaybackSpeed(double v) async {
-    _profile = profile.copyWith(playbackSpeed: v);
-    await _repo.save(profile);
+    final p = _profile;
+    if (p == null) return;
+    _profile = p.copyWith(playbackSpeed: v);
+    await _repo.save(_profile!);
     notifyListeners();
   }
 
   Future<void> setMaxAutoDownload(int n) async {
-    _profile = profile.copyWith(maxAutoDownload: n);
-    await _repo.save(profile);
+    final p = _profile;
+    if (p == null) return;
+    _profile = p.copyWith(maxAutoDownload: n);
+    await _repo.save(_profile!);
     notifyListeners();
   }
 
   Future<void> toggleFavouriteEpisode(String episodeId) async {
-    final fav = Set<String>.from(profile.favouriteEpisodeIds);
+    final p = _profile;
+    if (p == null) return;
+    final fav = Set<String>.from(p.favouriteEpisodeIds);
     if (fav.contains(episodeId)) {
       fav.remove(episodeId);
     } else {
       fav.add(episodeId);
     }
-    _profile = profile.copyWith(favouriteEpisodeIds: fav);
-    await _repo.save(profile);
+    _profile = p.copyWith(favouriteEpisodeIds: fav);
+    await _repo.save(_profile!);
     notifyListeners();
   }
 
   Future<void> setSubscriptions(Set<String> ids) async {
-    _profile = profile.copyWith(subscribedPodcastIds: ids);
-    await _repo.save(profile);
+    final p = _profile;
+    if (p == null) return;
+    _profile = p.copyWith(subscribedPodcastIds: ids);
+    await _repo.save(_profile!);
     notifyListeners();
   }
 
   Future<void> addRecentlyPlayed(Episode episode) async {
-    final updated = List<Episode>.from(profile.recentlyPlayed);
+    final p = _profile;
+    if (p == null) return;
+    final updated = List<Episode>.from(p.recentlyPlayed);
     updated.removeWhere((e) => e.id == episode.id);
     updated.insert(0, episode);
-    if (updated.length > 10) { // Assuming a max of 10 recently played episodes
+    if (updated.length > 10) {
       updated.removeLast();
     }
-    _profile = profile.copyWith(recentlyPlayed: updated);
-    await _repo.save(profile);
+    _profile = p.copyWith(recentlyPlayed: updated);
+    await _repo.save(_profile!);
     notifyListeners();
   }
 }
