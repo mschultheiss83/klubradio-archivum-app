@@ -135,7 +135,7 @@ class DownloadService {
     await _downloader.start();
 
     _autodownloadTimer = Timer.periodic(
-      const Duration(minutes: 1),
+      const Duration(seconds: 15),
       (_) => checkAutodownloads(),
     );
 
@@ -432,9 +432,12 @@ class DownloadService {
     // Skip episodes that are already downloaded, queued, or downloading
     final allEpisodes = await episodesDao.getEpisodesByPodcastId(podcastId);
     final skipIds = allEpisodes
-        .where((e) => e.status == EpisodeStatusDB.completed ||
-                      e.status == EpisodeStatusDB.queued ||
-                      e.status == EpisodeStatusDB.downloading)
+        .where(
+          (e) =>
+              e.status == EpisodeStatusDB.completed ||
+              e.status == EpisodeStatusDB.queued ||
+              e.status == EpisodeStatusDB.downloading,
+        )
         .map((e) => e.id)
         .toSet();
 

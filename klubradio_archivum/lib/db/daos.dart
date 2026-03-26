@@ -315,8 +315,11 @@ class SettingsDao extends DatabaseAccessor<AppDatabase>
       (select(settings)..where((s) => s.id.equals(1))).getSingleOrNull();
 
   Future<void> ensureDefaults() async {
+    final existing = await getOne();
+    if (existing != null) return; // already initialized, keep user settings
+
     final wifiDefault = Platform.isAndroid || Platform.isIOS ? true : false;
-    await into(settings).insertOnConflictUpdate(
+    await into(settings).insert(
       SettingsCompanion(
         id: const Value(1),
         wifiOnly: Value(wifiDefault), // mobil: an, desktop: aus
