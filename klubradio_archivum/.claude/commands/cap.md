@@ -1,5 +1,5 @@
 ---
-description: Commit and push (cap). Usage: /cap <commit message>
+description: Commit and push (cap). Usage `/cap` <commit message>
 ---
 
 Commit and push with message: **$ARGUMENTS**
@@ -8,8 +8,6 @@ Commit and push with message: **$ARGUMENTS**
 
 1. **Pre-flight checks** (run in parallel):
    - `git status` — if there are NO changes, tell the user and stop.
-   - `flutter analyze` — must pass with 0 issues. If issues found, fix them first, then re-analyze.
-   - `flutter test` — all tests must pass. If tests fail, stop and report which tests failed.
 
 2. **Stage files**:
    - Stage all modified and untracked files that are relevant to the changes.

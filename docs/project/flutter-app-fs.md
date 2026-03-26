@@ -10880,7 +10880,6 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
     final l10n = AppLocalizations.of(context)!;
 
     final latest = context.watch<LatestProvider>();
-    final rec = context.watch<RecommendedProvider>();
     final topShowsData = context
         .watch<PodcastProvider>()
         .topShows; // bleibt wie gehabt
@@ -10889,7 +10888,6 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
       onRefresh: () async {
         await Future.wait([
           latest.load(useCacheFirst: false),
-          rec.load(useCacheFirst: false),
           context.read<PodcastProvider>().loadTopShows(forceRefresh: true),
         ], eagerError: false);
       },
@@ -10906,17 +10904,6 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
             const Center(child: CircularProgressIndicator())
           else
             TopShowsList(topShows: topShowsData),
-          const SizedBox(height: 24),
-
-          Text(
-            l10n.discoverScreenRecommendedShowsTitle,
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
-          const SizedBox(height: 12),
-          if (rec.loading && rec.items.isEmpty)
-            const Center(child: CircularProgressIndicator())
-          else
-            RecommendedPodcastsList(podcasts: rec.items),
           const SizedBox(height: 24),
 
           Text(
