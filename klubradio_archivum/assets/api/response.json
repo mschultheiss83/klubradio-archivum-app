@@ -1,22 +1,154 @@
 {
-  "generatedAt": "2026-03-22T14:52:18.641351",
+  "generatedAt": "2026-03-26T16:24:49.895612",
   "latestPodcasts": [
+    {
+      "id": "171",
+      "title": "Zsebenciklopédia",
+      "description": "Az adás hívószó: Férfiesküvő",
+      "coverImageUrl": "https://www.klubradio.hu/data/Klubradio_musorok_boritoi/KR-podcast-zsebenciklopedia_focuspoint_340x340.jpeg",
+      "episodeCount": 215,
+      "hosts": [],
+      "latestEpisode": {
+        "id": "56635",
+        "podcastId": "null",
+        "title": "Zsebenciklopédia",
+        "description": "",
+        "audioUrl": "",
+        "publishedAt": "2026-03-26T16:24:49.310155",
+        "showDate": "",
+        "duration": 50,
+        "imageUrl": null,
+        "hosts": [
+          "Műsorvezető:\n\nGaál Ildikó"
+        ],
+        "isFavourite": false,
+        "downloadStatus": "notDownloaded",
+        "downloadProgress": 0.0,
+        "localFilePath": null,
+        "cachedTitle": null,
+        "cachedImagePath": null,
+        "cachedMetaPath": null
+      },
+      "lastUpdated": "2026-03-26T15:05:39.644153Z",
+      "isSubscribed": false,
+      "isTrending": false,
+      "isRecommended": false
+    },
+    {
+      "id": "91",
+      "title": "Ezitta Fórum",
+      "description": "Ossza meg véleményét velünk a minden hétköznap más-más felvetett témáról. Hívjon minket és beszélgessen műsorvezetőnkkel!",
+      "coverImageUrl": "https://www.klubradio.hu/data/sound-speaker-radio-microphone_focuspoint_340x340.jpg",
+      "episodeCount": 1752,
+      "hosts": [],
+      "latestEpisode": {
+        "id": "56634",
+        "podcastId": "null",
+        "title": "Ezitta Fórum",
+        "description": "",
+        "audioUrl": "",
+        "publishedAt": "2026-03-26T16:24:49.316668",
+        "showDate": "",
+        "duration": 34,
+        "imageUrl": null,
+        "hosts": [
+          "Műsorvezetők:\n\nBódy Gergő\nNeuman Gábor\nBacsa Botond"
+        ],
+        "isFavourite": false,
+        "downloadStatus": "notDownloaded",
+        "downloadProgress": 0.0,
+        "localFilePath": null,
+        "cachedTitle": null,
+        "cachedImagePath": null,
+        "cachedMetaPath": null
+      },
+      "lastUpdated": "2026-03-26T13:17:52.345210Z",
+      "isSubscribed": false,
+      "isTrending": false,
+      "isRecommended": false
+    },
+    {
+      "id": "78",
+      "title": "Lattmann Tamás – Reggeli gyors/Reggeli személy",
+      "description": "Para-Kovács Imre vendége Kovách Imre szociológus, a Társadalomtudományi Kutatóközpont kutatóprofesszora, az MTA levelező tagja.",
+      "coverImageUrl": "https://www.klubradio.hu/data/Vladimir_Putin_wiki2_focuspoint_340x340.jpg",
+      "episodeCount": 1800,
+      "hosts": [],
+      "latestEpisode": {
+        "id": "56629",
+        "podcastId": "null",
+        "title": "Lattmann Tamás – Reggeli gyors/Reggeli személy",
+        "description": "",
+        "audioUrl": "",
+        "publishedAt": "2026-03-26T16:24:49.316668",
+        "showDate": "",
+        "duration": 42,
+        "imageUrl": null,
+        "hosts": [
+          "Műsorvezetők:\n\nPanxnotded Miklós\nDési János\nSzénási Sándor\nPara-Kovács Imre"
+        ],
+        "isFavourite": false,
+        "downloadStatus": "notDownloaded",
+        "downloadProgress": 0.0,
+        "localFilePath": null,
+        "cachedTitle": null,
+        "cachedImagePath": null,
+        "cachedMetaPath": null
+      },
+      "lastUpdated": "2026-03-26T13:17:52.345210Z",
+      "isSubscribed": false,
+      "isTrending": false,
+      "isRecommended": false
+    },
+    {
+      "id": "250",
+      "title": "Reggeli sport",
+      "description": "Fókuszban, de nem kizárólagosan az itthon népszerű sportágak: foci, tenisz, F1, amerikai sportok és az úszás. Aktualitások, rekordok, visszaemlékezések.",
+      "coverImageUrl": "https://www.klubradio.hu/data/Klubradio_musorok_boritoi/KR-adasok-borito.036-Reggeli-sport_focuspoint_340x340.jpg?key=YmNmZjVjYmI4NTg0MTQ0ZWU4NjI3MGM1OTlhNWUzNTZiMTA3ZGEwMWExM2Y5ODljYjAxMGYzODYxOGVhMzRhNQ==",
+      "episodeCount": 203,
+      "hosts": [],
+      "latestEpisode": {
+        "id": "56627",
+        "podcastId": "null",
+        "title": "Reggeli sport",
+        "description": "",
+        "audioUrl": "",
+        "publishedAt": "2026-03-26T16:24:49.316668",
+        "showDate": "",
+        "duration": 6,
+        "imageUrl": null,
+        "hosts": [
+          "Műsorvezetők:\n\nM. Dénes Tamás\nTurák Péter\nHorváth Ádám\nNemes Dávid\nBacsa Botond"
+        ],
+        "isFavourite": false,
+        "downloadStatus": "notDownloaded",
+        "downloadProgress": 0.0,
+        "localFilePath": null,
+        "cachedTitle": null,
+        "cachedImagePath": null,
+        "cachedMetaPath": null
+      },
+      "lastUpdated": "2026-03-26T13:17:52.345210Z",
+      "isSubscribed": false,
+      "isTrending": false,
+      "isRecommended": false
+    },
     {
       "id": "3",
       "title": "A lényeg",
       "description": "A Klubrádió hírműsora. Tudósítások, hírek, interjúk, riportok.",
       "coverImageUrl": "https://www.klubradio.hu/data/Orsi_Gergely_reggeli_szemely/Orsi_Gergely_01_focuspoint_340x340.JPG",
-      "episodeCount": 9444,
+      "episodeCount": 9465,
       "hosts": [],
       "latestEpisode": {
-        "id": "56524",
+        "id": "56632",
         "podcastId": "null",
         "title": "A lényeg",
         "description": "",
         "audioUrl": "",
-        "publishedAt": "2026-03-22T14:52:18.166152",
+        "publishedAt": "2026-03-26T16:24:49.316668",
         "showDate": "",
-        "duration": 5,
+        "duration": 21,
         "imageUrl": null,
         "hosts": [
           "Műsorvezetők:\n\nBáder Tamás\nKárpáti Iván\nV. Nagy Gyöngyi"
@@ -29,139 +161,7 @@
         "cachedImagePath": null,
         "cachedMetaPath": null
       },
-      "lastUpdated": "2026-03-22T12:53:49.011399Z",
-      "isSubscribed": false,
-      "isTrending": false,
-      "isRecommended": false
-    },
-    {
-      "id": "27",
-      "title": "Kék Ördögök",
-      "description": "A műsorban elsősorban a blues műfajból, de annak rokon területeiről is hangzanak el felvételek a világ minden tájáról. Elhangozhat még rock, funky, jazz és world music is. Alkalmanként vendégek érkeznek a műsorba, lehetőleg hangszerrel.",
-      "coverImageUrl": "https://www.klubradio.hu/data/Klubradio_musorok_boritoi/KR-adasok-borito.025-kek-ordogok_focuspoint_340x340.jpeg",
-      "episodeCount": 372,
-      "hosts": [],
-      "latestEpisode": {
-        "id": "56520",
-        "podcastId": "null",
-        "title": "Kék Ördögök",
-        "description": "",
-        "audioUrl": "",
-        "publishedAt": "2026-03-22T14:52:18.174222",
-        "showDate": "",
-        "duration": 98,
-        "imageUrl": null,
-        "hosts": [
-          "Műsorvezető:\n\nNemes Nagy Péter"
-        ],
-        "isFavourite": false,
-        "downloadStatus": "notDownloaded",
-        "downloadProgress": 0.0,
-        "localFilePath": null,
-        "cachedTitle": null,
-        "cachedImagePath": null,
-        "cachedMetaPath": null
-      },
-      "lastUpdated": "2026-03-22T06:53:48.177682Z",
-      "isSubscribed": false,
-      "isTrending": false,
-      "isRecommended": false
-    },
-    {
-      "id": "220",
-      "title": "Ember a Földön - Bartus Marcival",
-      "description": "Antal Éva alias a vászonzsákos lány méregzöldként kezdte, de mára sokat szelídült a stílusa, sokkal megengedőbb, saját magával szemben is. A zöldítő, fentarthatósági témakörben működő blogger majd youtube, tiktok, instagram influenszer betekintést enged a hétköznapjaiba, és kiderül az is, hogy hogyan dolgozik egy olyan ember, aki valóban abból él, hogy netes tartalmat készít.",
-      "coverImageUrl": "https://www.klubradio.hu/data/musorkepek/KR-podcast-covers-2024-jav.001_focuspoint_340x340.jpeg",
-      "episodeCount": 104,
-      "hosts": [],
-      "latestEpisode": {
-        "id": "56519",
-        "podcastId": "null",
-        "title": "Ember a Földön - Bartus Marcival",
-        "description": "",
-        "audioUrl": "",
-        "publishedAt": "2026-03-22T14:52:18.174222",
-        "showDate": "",
-        "duration": 52,
-        "imageUrl": null,
-        "hosts": [
-          "Műsorvezető:\n\nBartus Marcell"
-        ],
-        "isFavourite": false,
-        "downloadStatus": "notDownloaded",
-        "downloadProgress": 0.0,
-        "localFilePath": null,
-        "cachedTitle": null,
-        "cachedImagePath": null,
-        "cachedMetaPath": null
-      },
-      "lastUpdated": "2026-03-21T20:29:20.021067Z",
-      "isSubscribed": false,
-      "isTrending": false,
-      "isRecommended": false
-    },
-    {
-      "id": "45",
-      "title": "Utcafront",
-      "description": "Építészetről közérthetően. Ház, utca, tér, kerület, városnegyed, Budapest, Magyarország, Európa és az egész világ bárhol, ahol értő és értetlen kezek valamit építettek/építenek. A természeti környezetbe épített világ a mi második természetünk, a mesterséges természet. Jó, rossz, élhető és kevésbé élhetetlen, de a miénk. A felelősség is a miénk, hogy mivé válik a világunk az építés/rombolás által. Ja, és ez fontos; szóljon hozzá!",
-      "coverImageUrl": "https://www.klubradio.hu/data/vigado_focuspoint_340x340.jpg",
-      "episodeCount": 343,
-      "hosts": [],
-      "latestEpisode": {
-        "id": "56516",
-        "podcastId": "null",
-        "title": "Utcafront",
-        "description": "",
-        "audioUrl": "",
-        "publishedAt": "2026-03-22T14:52:18.174222",
-        "showDate": "",
-        "duration": 51,
-        "imageUrl": null,
-        "hosts": [
-          "Műsorvezető:\n\nRózsa Péter"
-        ],
-        "isFavourite": false,
-        "downloadStatus": "notDownloaded",
-        "downloadProgress": 0.0,
-        "localFilePath": null,
-        "cachedTitle": null,
-        "cachedImagePath": null,
-        "cachedMetaPath": null
-      },
-      "lastUpdated": "2026-03-21T18:38:13.446361Z",
-      "isSubscribed": false,
-      "isTrending": false,
-      "isRecommended": false
-    },
-    {
-      "id": "22",
-      "title": "Hetes Stúdió",
-      "description": "Hosszú idő után generációs szakadék nyílt a magyar politikában. A Tisza-jelenséget részben lefedve, részben azon kívül, sőt túl, a fiatalok lázadása az alkalmatlanul működő hatalom, a dohos szagot árasztó központi szövegek ellen nyilvánvaló. A tízezres koncerteken protesthangulat, a kormányfő meg talált egy Dopemant. Hammer Ferenc szociológust, egyetemi tanárt kérdeztük.",
-      "coverImageUrl": "https://www.klubradio.hu/data/unnamed_1__focuspoint_340x340.jpg",
-      "episodeCount": 392,
-      "hosts": [],
-      "latestEpisode": {
-        "id": "56513",
-        "podcastId": "null",
-        "title": "Hetes Stúdió",
-        "description": "",
-        "audioUrl": "",
-        "publishedAt": "2026-03-22T14:52:18.174743",
-        "showDate": "",
-        "duration": 55,
-        "imageUrl": null,
-        "hosts": [
-          "Műsorvezetők:\n\nKárpáti Iván\nHardy Mihály\nDési János\nSzénási Sándor\nNeuman Gábor\nRózsa Péter"
-        ],
-        "isFavourite": false,
-        "downloadStatus": "notDownloaded",
-        "downloadProgress": 0.0,
-        "localFilePath": null,
-        "cachedTitle": null,
-        "cachedImagePath": null,
-        "cachedMetaPath": null
-      },
-      "lastUpdated": "2026-03-21T18:38:13.446361Z",
+      "lastUpdated": "2026-03-26T13:17:52.345210Z",
       "isSubscribed": false,
       "isTrending": false,
       "isRecommended": false
@@ -169,21 +169,54 @@
   ],
   "trendingPodcasts": [
     {
+      "id": "171",
+      "title": "Zsebenciklopédia",
+      "description": "Az adás hívószó: Férfiesküvő",
+      "coverImageUrl": "https://www.klubradio.hu/data/Klubradio_musorok_boritoi/KR-podcast-zsebenciklopedia_focuspoint_340x340.jpeg",
+      "episodeCount": 215,
+      "hosts": [],
+      "latestEpisode": {
+        "id": "56635",
+        "podcastId": "null",
+        "title": "Zsebenciklopédia",
+        "description": "",
+        "audioUrl": "",
+        "publishedAt": "2026-03-26T16:24:49.432245",
+        "showDate": "",
+        "duration": 50,
+        "imageUrl": null,
+        "hosts": [
+          "Műsorvezető:\n\nGaál Ildikó"
+        ],
+        "isFavourite": false,
+        "downloadStatus": "notDownloaded",
+        "downloadProgress": 0.0,
+        "localFilePath": null,
+        "cachedTitle": null,
+        "cachedImagePath": null,
+        "cachedMetaPath": null
+      },
+      "lastUpdated": "2026-03-26T15:05:39.644153Z",
+      "isSubscribed": false,
+      "isTrending": true,
+      "isRecommended": false
+    },
+    {
       "id": "3",
       "title": "A lényeg",
       "description": "A Klubrádió hírműsora. Tudósítások, hírek, interjúk, riportok.",
       "coverImageUrl": "https://www.klubradio.hu/data/Orsi_Gergely_reggeli_szemely/Orsi_Gergely_01_focuspoint_340x340.JPG",
-      "episodeCount": 9444,
+      "episodeCount": 9465,
       "hosts": [],
       "latestEpisode": {
-        "id": "56524",
+        "id": "56632",
         "podcastId": "null",
         "title": "A lényeg",
         "description": "",
         "audioUrl": "",
-        "publishedAt": "2026-03-22T14:52:18.286907",
+        "publishedAt": "2026-03-26T16:24:49.432245",
         "showDate": "",
-        "duration": 5,
+        "duration": 21,
         "imageUrl": null,
         "hosts": [
           "Műsorvezetők:\n\nBáder Tamás\nKárpáti Iván\nV. Nagy Gyöngyi"
@@ -196,30 +229,30 @@
         "cachedImagePath": null,
         "cachedMetaPath": null
       },
-      "lastUpdated": "2026-03-22T12:53:49.011399Z",
+      "lastUpdated": "2026-03-26T13:17:52.345210Z",
       "isSubscribed": false,
       "isTrending": true,
       "isRecommended": false
     },
     {
-      "id": "27",
-      "title": "Kék Ördögök",
-      "description": "A műsorban elsősorban a blues műfajból, de annak rokon területeiről is hangzanak el felvételek a világ minden tájáról. Elhangozhat még rock, funky, jazz és world music is. Alkalmanként vendégek érkeznek a műsorba, lehetőleg hangszerrel.",
-      "coverImageUrl": "https://www.klubradio.hu/data/Klubradio_musorok_boritoi/KR-adasok-borito.025-kek-ordogok_focuspoint_340x340.jpeg",
-      "episodeCount": 372,
+      "id": "91",
+      "title": "Ezitta Fórum",
+      "description": "Ossza meg véleményét velünk a minden hétköznap más-más felvetett témáról. Hívjon minket és beszélgessen műsorvezetőnkkel!",
+      "coverImageUrl": "https://www.klubradio.hu/data/sound-speaker-radio-microphone_focuspoint_340x340.jpg",
+      "episodeCount": 1752,
       "hosts": [],
       "latestEpisode": {
-        "id": "56520",
+        "id": "56634",
         "podcastId": "null",
-        "title": "Kék Ördögök",
+        "title": "Ezitta Fórum",
         "description": "",
         "audioUrl": "",
-        "publishedAt": "2026-03-22T14:52:18.287898",
+        "publishedAt": "2026-03-26T16:24:49.432245",
         "showDate": "",
-        "duration": 98,
+        "duration": 34,
         "imageUrl": null,
         "hosts": [
-          "Műsorvezető:\n\nNemes Nagy Péter"
+          "Műsorvezetők:\n\nBódy Gergő\nNeuman Gábor\nBacsa Botond"
         ],
         "isFavourite": false,
         "downloadStatus": "notDownloaded",
@@ -229,30 +262,30 @@
         "cachedImagePath": null,
         "cachedMetaPath": null
       },
-      "lastUpdated": "2026-03-22T06:53:48.177682Z",
+      "lastUpdated": "2026-03-26T13:17:52.345210Z",
       "isSubscribed": false,
       "isTrending": true,
       "isRecommended": false
     },
     {
-      "id": "220",
-      "title": "Ember a Földön - Bartus Marcival",
-      "description": "Antal Éva alias a vászonzsákos lány méregzöldként kezdte, de mára sokat szelídült a stílusa, sokkal megengedőbb, saját magával szemben is. A zöldítő, fentarthatósági témakörben működő blogger majd youtube, tiktok, instagram influenszer betekintést enged a hétköznapjaiba, és kiderül az is, hogy hogyan dolgozik egy olyan ember, aki valóban abból él, hogy netes tartalmat készít.",
-      "coverImageUrl": "https://www.klubradio.hu/data/musorkepek/KR-podcast-covers-2024-jav.001_focuspoint_340x340.jpeg",
-      "episodeCount": 104,
+      "id": "78",
+      "title": "Lattmann Tamás – Reggeli gyors/Reggeli személy",
+      "description": "Para-Kovács Imre vendége Kovách Imre szociológus, a Társadalomtudományi Kutatóközpont kutatóprofesszora, az MTA levelező tagja.",
+      "coverImageUrl": "https://www.klubradio.hu/data/Vladimir_Putin_wiki2_focuspoint_340x340.jpg",
+      "episodeCount": 1800,
       "hosts": [],
       "latestEpisode": {
-        "id": "56519",
+        "id": "56629",
         "podcastId": "null",
-        "title": "Ember a Földön - Bartus Marcival",
+        "title": "Lattmann Tamás – Reggeli gyors/Reggeli személy",
         "description": "",
         "audioUrl": "",
-        "publishedAt": "2026-03-22T14:52:18.287898",
+        "publishedAt": "2026-03-26T16:24:49.432245",
         "showDate": "",
-        "duration": 52,
+        "duration": 42,
         "imageUrl": null,
         "hosts": [
-          "Műsorvezető:\n\nBartus Marcell"
+          "Műsorvezetők:\n\nPanxnotded Miklós\nDési János\nSzénási Sándor\nPara-Kovács Imre"
         ],
         "isFavourite": false,
         "downloadStatus": "notDownloaded",
@@ -262,30 +295,30 @@
         "cachedImagePath": null,
         "cachedMetaPath": null
       },
-      "lastUpdated": "2026-03-21T20:29:20.021067Z",
+      "lastUpdated": "2026-03-26T13:17:52.345210Z",
       "isSubscribed": false,
       "isTrending": true,
       "isRecommended": false
     },
     {
-      "id": "22",
-      "title": "Hetes Stúdió",
-      "description": "Hosszú idő után generációs szakadék nyílt a magyar politikában. A Tisza-jelenséget részben lefedve, részben azon kívül, sőt túl, a fiatalok lázadása az alkalmatlanul működő hatalom, a dohos szagot árasztó központi szövegek ellen nyilvánvaló. A tízezres koncerteken protesthangulat, a kormányfő meg talált egy Dopemant. Hammer Ferenc szociológust, egyetemi tanárt kérdeztük.",
-      "coverImageUrl": "https://www.klubradio.hu/data/unnamed_1__focuspoint_340x340.jpg",
-      "episodeCount": 392,
+      "id": "250",
+      "title": "Reggeli sport",
+      "description": "Fókuszban, de nem kizárólagosan az itthon népszerű sportágak: foci, tenisz, F1, amerikai sportok és az úszás. Aktualitások, rekordok, visszaemlékezések.",
+      "coverImageUrl": "https://www.klubradio.hu/data/Klubradio_musorok_boritoi/KR-adasok-borito.036-Reggeli-sport_focuspoint_340x340.jpg?key=YmNmZjVjYmI4NTg0MTQ0ZWU4NjI3MGM1OTlhNWUzNTZiMTA3ZGEwMWExM2Y5ODljYjAxMGYzODYxOGVhMzRhNQ==",
+      "episodeCount": 203,
       "hosts": [],
       "latestEpisode": {
-        "id": "56513",
+        "id": "56627",
         "podcastId": "null",
-        "title": "Hetes Stúdió",
+        "title": "Reggeli sport",
         "description": "",
         "audioUrl": "",
-        "publishedAt": "2026-03-22T14:52:18.287898",
+        "publishedAt": "2026-03-26T16:24:49.433245",
         "showDate": "",
-        "duration": 55,
+        "duration": 6,
         "imageUrl": null,
         "hosts": [
-          "Műsorvezetők:\n\nKárpáti Iván\nHardy Mihály\nDési János\nSzénási Sándor\nNeuman Gábor\nRózsa Péter"
+          "Műsorvezetők:\n\nM. Dénes Tamás\nTurák Péter\nHorváth Ádám\nNemes Dávid\nBacsa Botond"
         ],
         "isFavourite": false,
         "downloadStatus": "notDownloaded",
@@ -295,30 +328,30 @@
         "cachedImagePath": null,
         "cachedMetaPath": null
       },
-      "lastUpdated": "2026-03-21T18:38:13.446361Z",
+      "lastUpdated": "2026-03-26T13:17:52.345210Z",
       "isSubscribed": false,
       "isTrending": true,
       "isRecommended": false
     },
     {
-      "id": "45",
-      "title": "Utcafront",
-      "description": "Építészetről közérthetően. Ház, utca, tér, kerület, városnegyed, Budapest, Magyarország, Európa és az egész világ bárhol, ahol értő és értetlen kezek valamit építettek/építenek. A természeti környezetbe épített világ a mi második természetünk, a mesterséges természet. Jó, rossz, élhető és kevésbé élhetetlen, de a miénk. A felelősség is a miénk, hogy mivé válik a világunk az építés/rombolás által. Ja, és ez fontos; szóljon hozzá!",
-      "coverImageUrl": "https://www.klubradio.hu/data/vigado_focuspoint_340x340.jpg",
-      "episodeCount": 343,
+      "id": "38",
+      "title": "Reggeli gyors",
+      "description": "Tájékozatlanság ellen...\nBelpolitika, külpolitika, gazdaság, időjárás jelentés, friss közlekedési információk, közéleti hírek, riportok, interjúk, gazdasági-jelentések, programajánlók, sport-hírösszefoglaló...",
+      "coverImageUrl": "https://www.klubradio.hu/data/VargaZoltanDK_fb1_339_534_1647854795_focuspoint_340x340.jpg",
+      "episodeCount": 1886,
       "hosts": [],
       "latestEpisode": {
-        "id": "56516",
+        "id": "56626",
         "podcastId": "null",
-        "title": "Utcafront",
+        "title": "Reggeli gyors",
         "description": "",
         "audioUrl": "",
-        "publishedAt": "2026-03-22T14:52:18.287898",
+        "publishedAt": "2026-03-26T16:24:49.433245",
         "showDate": "",
-        "duration": 51,
+        "duration": 125,
         "imageUrl": null,
         "hosts": [
-          "Műsorvezető:\n\nRózsa Péter"
+          "Műsorvezetők:\n\nPanxnotded Miklós\nSelmeci János\nHerskovits Eszter\nDési János\nSzénási Sándor\nPara-Kovács Imre"
         ],
         "isFavourite": false,
         "downloadStatus": "notDownloaded",
@@ -328,30 +361,30 @@
         "cachedImagePath": null,
         "cachedMetaPath": null
       },
-      "lastUpdated": "2026-03-21T18:38:13.446361Z",
+      "lastUpdated": "2026-03-26T13:17:52.345210Z",
       "isSubscribed": false,
       "isTrending": true,
       "isRecommended": false
     },
     {
-      "id": "164",
-      "title": "Hetes Stúdió: Megbeszéljük a hetet",
-      "description": "Élőben hallhatták a Hetes Stúdió második óráját, amelyben Orbán Viktor tusványosi és Magyar Péter székesfehérvári beszédét szedtük szét és raktuk össze Szentpéteri Nagy Richard politológussal, jogásszal és Lengyel Lászlóval, a Pénzügykutató Zrt elnök-vezérigazgatójával, valamint természetesen Bolgár Györggyel. A műsorvezető Hardy Mihály, a szerkesztő Csernyánszky Judit volt.",
-      "coverImageUrl": "https://www.klubradio.hu/data/Hetes_2_1_focuspoint_340x340.jpg?key=ODI1YjNjNTliM2FiOGZjMmIwZGY1ODg5OTIzNGE0MjYyMzNkZmUzYTc1ZjYzNWQ3ODE0ZTU4NWU4ZmFjNzI1NQ==",
-      "episodeCount": 232,
+      "id": "128",
+      "title": "Ötös – Kultúrcsütörtök",
+      "description": "Kulturális magazinműsorunk Warholik Zoltánnal és vendégeivel.",
+      "coverImageUrl": "https://www.klubradio.hu/data/Klubradio_musorok_boritoi/KR-adasok-borito.038-otos-warholik_focuspoint_340x340.jpeg",
+      "episodeCount": 326,
       "hosts": [],
       "latestEpisode": {
-        "id": "56515",
+        "id": "56633",
         "podcastId": "null",
-        "title": "Hetes Stúdió: Megbeszéljük a hetet",
+        "title": "Ötös – Kultúrcsütörtök",
         "description": "",
         "audioUrl": "",
-        "publishedAt": "2026-03-22T14:52:18.287898",
+        "publishedAt": "2026-03-26T16:24:49.433245",
         "showDate": "",
-        "duration": 52,
+        "duration": 94,
         "imageUrl": null,
         "hosts": [
-          "Műsorvezetők:\n\nHardy Mihály\nDési János\nSzénási Sándor\nNeuman Gábor"
+          "Műsorvezető:\n\nWarholik Zoltán"
         ],
         "isFavourite": false,
         "downloadStatus": "notDownloaded",
@@ -361,30 +394,30 @@
         "cachedImagePath": null,
         "cachedMetaPath": null
       },
-      "lastUpdated": "2026-03-21T18:38:13.446361Z",
+      "lastUpdated": "2026-03-26T13:17:52.345210Z",
       "isSubscribed": false,
       "isTrending": true,
       "isRecommended": false
     },
     {
-      "id": "41",
-      "title": "Szerepvállalás",
-      "description": "Az 2025. augusztus 16-ai adás ismétlése:",
-      "coverImageUrl": "https://www.klubradio.hu/data/Klubradio_musorok_boritoi/KR-adasok-borito.045-szerepvallalas_focuspoint_340x340.jpeg",
-      "episodeCount": 361,
+      "id": "184",
+      "title": "Klassz",
+      "description": "Múlt héten elhunyt Vásáry Tamás. Összeállításunkban a kiváló zongoraművészre, karmesterre emlékezünk.",
+      "coverImageUrl": "https://www.klubradio.hu/data/Klubradio_musorok_boritoi/klassz-kicsi_focuspoint_340x340.jpeg?key=ZWJjODE1MTIyYzE1MTU3ODAyOTc3MDg4NTFmMzIyMjMyZmY4MjliNmMzNTkwMTlkM2I3OGFmOWJjNGYzMDkxZg==",
+      "episodeCount": 182,
       "hosts": [],
       "latestEpisode": {
-        "id": "56510",
+        "id": "56621",
         "podcastId": "null",
-        "title": "Szerepvállalás",
+        "title": "Klassz",
         "description": "",
         "audioUrl": "",
-        "publishedAt": "2026-03-22T14:52:18.287898",
+        "publishedAt": "2026-03-26T16:24:49.433245",
         "showDate": "",
-        "duration": 25,
+        "duration": 54,
         "imageUrl": null,
         "hosts": [
-          "Műsorvezető:\n\nBíró Bori"
+          "Műsorvezetők:\n\nSzőke Cecília\nVarga Péter"
         ],
         "isFavourite": false,
         "downloadStatus": "notDownloaded",
@@ -394,30 +427,30 @@
         "cachedImagePath": null,
         "cachedMetaPath": null
       },
-      "lastUpdated": "2026-03-21T16:32:09.492922Z",
+      "lastUpdated": "2026-03-26T10:53:53.083508Z",
       "isSubscribed": false,
       "isTrending": true,
       "isRecommended": false
     },
     {
-      "id": "259",
-      "title": "Mesterséges értelem",
-      "description": "A műsor vendége Badinszky Áron jogász, az ELTE mesterséges intelligenciáért felelősrektori biztosa, aki szerint a következő évek meghatározó kérdése az lesz, hogy a jog, az etikai elvárások és a társadalmi tudatosság képes-e együtt olyan kereteket kialakítani, amelyek mellett a mesterséges intelligencia nem veszélyt, hanem valódi értéket jelent.",
-      "coverImageUrl": "https://www.klubradio.hu/data/musorkepek/KR-podcast-covers-2025nov.005_focuspoint_340x340.jpeg",
-      "episodeCount": 18,
+      "id": "165",
+      "title": "Ki merem mondani",
+      "description": "Vajon olyan politikusokat kapunk, amilyeneket megérdemlünk? Mennyiben tükrei egymásnak a nép és a vezetők? Beszélgetünk a nem alulról szerveződő politikai kultúra kialakulásáról és ismérveiről, a meg nem tanult demokráciáról, és arról, hogy miképpen lehetne mégis megerősíteni azt a lakosság aktív közreműködésével.",
+      "coverImageUrl": "https://www.klubradio.hu/data/Sugar_Agnes_focuspoint_340x340.jpg",
+      "episodeCount": 186,
       "hosts": [],
       "latestEpisode": {
-        "id": "56511",
+        "id": "56623",
         "podcastId": "null",
-        "title": "Mesterséges értelem",
+        "title": "Ki merem mondani",
         "description": "",
         "audioUrl": "",
-        "publishedAt": "2026-03-22T14:52:18.287898",
+        "publishedAt": "2026-03-26T16:24:49.433245",
         "showDate": "",
-        "duration": 25,
+        "duration": 50,
         "imageUrl": null,
         "hosts": [
-          "Műsorvezető:\n\nKárpáti Iván"
+          "Műsorvezető:\n\nSugár Ágnes"
         ],
         "isFavourite": false,
         "downloadStatus": "notDownloaded",
@@ -427,30 +460,30 @@
         "cachedImagePath": null,
         "cachedMetaPath": null
       },
-      "lastUpdated": "2026-03-21T16:32:09.492922Z",
+      "lastUpdated": "2026-03-26T10:53:53.083508Z",
       "isSubscribed": false,
       "isTrending": true,
       "isRecommended": false
     },
     {
-      "id": "72",
-      "title": "Filmklubrádió",
-      "description": "2022 szeptemberétől ismét működik a FILMKLUBRÁDIÓ! Az őszi időszakban új helyszínen és új időpontban találkozhat a közönség a műsorra tűzött filmek alkotóival illetve a témák szakértőivel.",
-      "coverImageUrl": "https://www.klubradio.hu/data/musorkepek/filmklubradio_focuspoint_340x340.jpeg",
-      "episodeCount": 81,
+      "id": "10",
+      "title": "Radnóti Sándor a Dobszerdában",
+      "description": "Többet tett és tesz a magyar irodalomért, mint számos magyar kollégája, szakmai társa. Több, mint három évtizede él Magyarországon, s bár a német akcentusa nem sokat változott, a magyar irodalomról, a magyar nyelvről és főleg a budapesti értelmiségről többet tud sok hozzáértőnél. Nemcsak a németre fordított műveivel, vagy saját irodalmi folyóiratával, de a kávéházi kultúra újrateremtésével is elévülhetetlen érdemeket szerzett és szerez napjainkban is. Ő alapította a mára rendkívül népszerűvé vált Három Holló Kávéházat. Szóval nagyon megérdemelte a Pro Cultura Urbis díjat, amelyet a napokban vehetett át. Wilhelm Droste a Dobszerda vendége.",
+      "coverImageUrl": "https://www.klubradio.hu/data/zoltangabor_focuspoint_340x340.jpg",
+      "episodeCount": 374,
       "hosts": [],
       "latestEpisode": {
-        "id": "56512",
+        "id": "56622",
         "podcastId": "null",
-        "title": "Filmklubrádió",
+        "title": "Radnóti Sándor a Dobszerdában",
         "description": "",
         "audioUrl": "",
-        "publishedAt": "2026-03-22T14:52:18.287898",
+        "publishedAt": "2026-03-26T16:24:49.433245",
         "showDate": "",
-        "duration": 47,
+        "duration": 49,
         "imageUrl": null,
         "hosts": [
-          "Műsorvezető:\n\nRózsa Péter"
+          "Műsorvezető:\n\nVáradi Júlia"
         ],
         "isFavourite": false,
         "downloadStatus": "notDownloaded",
@@ -460,40 +493,7 @@
         "cachedImagePath": null,
         "cachedMetaPath": null
       },
-      "lastUpdated": "2026-03-21T16:32:09.492922Z",
-      "isSubscribed": false,
-      "isTrending": true,
-      "isRecommended": false
-    },
-    {
-      "id": "29",
-      "title": "Klubdélelőtt",
-      "description": "Dr. Majtényi László alkotmányjogász, jogtudós, a Magyar Tudományos Akadémia doktora rendszeres vendége a Klubrádiónak, de amit a hallgatók nem hallhattak tőle, az a 25. Radnóti Miklós Antirasszista és az Egyesült Európáért Civil Díj átadó ünnepségén elhangzott rövid megemlékezése. Az irdodalmat, Örkény Istvánt, Vajda Jánost, Vörösmarty Mihályt idézve osztotta meg gondolatait a mai magyar drámai közéletről.",
-      "coverImageUrl": "https://www.klubradio.hu/data/TZIHZ20150826012_2000_1330_1557511214_focuspoint_340x340.JPG",
-      "episodeCount": 378,
-      "hosts": [],
-      "latestEpisode": {
-        "id": "56507",
-        "podcastId": "null",
-        "title": "Klubdélelőtt",
-        "description": "",
-        "audioUrl": "",
-        "publishedAt": "2026-03-22T14:52:18.287898",
-        "showDate": "",
-        "duration": 159,
-        "imageUrl": null,
-        "hosts": [
-          "Műsorvezető:\n\nKun Zsuzsa"
-        ],
-        "isFavourite": false,
-        "downloadStatus": "notDownloaded",
-        "downloadProgress": 0.0,
-        "localFilePath": null,
-        "cachedTitle": null,
-        "cachedImagePath": null,
-        "cachedMetaPath": null
-      },
-      "lastUpdated": "2026-03-21T12:51:37.241176Z",
+      "lastUpdated": "2026-03-26T10:53:53.083508Z",
       "isSubscribed": false,
       "isTrending": true,
       "isRecommended": false
@@ -501,21 +501,87 @@
   ],
   "recommendedPodcasts": [
     {
+      "id": "171",
+      "title": "Zsebenciklopédia",
+      "description": "Az adás hívószó: Férfiesküvő",
+      "coverImageUrl": "https://www.klubradio.hu/data/Klubradio_musorok_boritoi/KR-podcast-zsebenciklopedia_focuspoint_340x340.jpeg",
+      "episodeCount": 215,
+      "hosts": [],
+      "latestEpisode": {
+        "id": "56635",
+        "podcastId": "null",
+        "title": "Zsebenciklopédia",
+        "description": "",
+        "audioUrl": "",
+        "publishedAt": "2026-03-26T16:24:49.552119",
+        "showDate": "",
+        "duration": 50,
+        "imageUrl": null,
+        "hosts": [
+          "Műsorvezető:\n\nGaál Ildikó"
+        ],
+        "isFavourite": false,
+        "downloadStatus": "notDownloaded",
+        "downloadProgress": 0.0,
+        "localFilePath": null,
+        "cachedTitle": null,
+        "cachedImagePath": null,
+        "cachedMetaPath": null
+      },
+      "lastUpdated": "2026-03-26T15:05:39.644153Z",
+      "isSubscribed": false,
+      "isTrending": false,
+      "isRecommended": true
+    },
+    {
+      "id": "91",
+      "title": "Ezitta Fórum",
+      "description": "Ossza meg véleményét velünk a minden hétköznap más-más felvetett témáról. Hívjon minket és beszélgessen műsorvezetőnkkel!",
+      "coverImageUrl": "https://www.klubradio.hu/data/sound-speaker-radio-microphone_focuspoint_340x340.jpg",
+      "episodeCount": 1752,
+      "hosts": [],
+      "latestEpisode": {
+        "id": "56634",
+        "podcastId": "null",
+        "title": "Ezitta Fórum",
+        "description": "",
+        "audioUrl": "",
+        "publishedAt": "2026-03-26T16:24:49.552119",
+        "showDate": "",
+        "duration": 34,
+        "imageUrl": null,
+        "hosts": [
+          "Műsorvezetők:\n\nBódy Gergő\nNeuman Gábor\nBacsa Botond"
+        ],
+        "isFavourite": false,
+        "downloadStatus": "notDownloaded",
+        "downloadProgress": 0.0,
+        "localFilePath": null,
+        "cachedTitle": null,
+        "cachedImagePath": null,
+        "cachedMetaPath": null
+      },
+      "lastUpdated": "2026-03-26T13:17:52.345210Z",
+      "isSubscribed": false,
+      "isTrending": false,
+      "isRecommended": true
+    },
+    {
       "id": "3",
       "title": "A lényeg",
       "description": "A Klubrádió hírműsora. Tudósítások, hírek, interjúk, riportok.",
       "coverImageUrl": "https://www.klubradio.hu/data/Orsi_Gergely_reggeli_szemely/Orsi_Gergely_01_focuspoint_340x340.JPG",
-      "episodeCount": 9444,
+      "episodeCount": 9465,
       "hosts": [],
       "latestEpisode": {
-        "id": "56524",
+        "id": "56632",
         "podcastId": "null",
         "title": "A lényeg",
         "description": "",
         "audioUrl": "",
-        "publishedAt": "2026-03-22T14:52:18.398759",
+        "publishedAt": "2026-03-26T16:24:49.552119",
         "showDate": "",
-        "duration": 5,
+        "duration": 21,
         "imageUrl": null,
         "hosts": [
           "Műsorvezetők:\n\nBáder Tamás\nKárpáti Iván\nV. Nagy Gyöngyi"
@@ -528,30 +594,30 @@
         "cachedImagePath": null,
         "cachedMetaPath": null
       },
-      "lastUpdated": "2026-03-22T12:53:49.011399Z",
+      "lastUpdated": "2026-03-26T13:17:52.345210Z",
       "isSubscribed": false,
       "isTrending": false,
       "isRecommended": true
     },
     {
-      "id": "27",
-      "title": "Kék Ördögök",
-      "description": "A műsorban elsősorban a blues műfajból, de annak rokon területeiről is hangzanak el felvételek a világ minden tájáról. Elhangozhat még rock, funky, jazz és world music is. Alkalmanként vendégek érkeznek a műsorba, lehetőleg hangszerrel.",
-      "coverImageUrl": "https://www.klubradio.hu/data/Klubradio_musorok_boritoi/KR-adasok-borito.025-kek-ordogok_focuspoint_340x340.jpeg",
-      "episodeCount": 372,
+      "id": "250",
+      "title": "Reggeli sport",
+      "description": "Fókuszban, de nem kizárólagosan az itthon népszerű sportágak: foci, tenisz, F1, amerikai sportok és az úszás. Aktualitások, rekordok, visszaemlékezések.",
+      "coverImageUrl": "https://www.klubradio.hu/data/Klubradio_musorok_boritoi/KR-adasok-borito.036-Reggeli-sport_focuspoint_340x340.jpg?key=YmNmZjVjYmI4NTg0MTQ0ZWU4NjI3MGM1OTlhNWUzNTZiMTA3ZGEwMWExM2Y5ODljYjAxMGYzODYxOGVhMzRhNQ==",
+      "episodeCount": 203,
       "hosts": [],
       "latestEpisode": {
-        "id": "56520",
+        "id": "56627",
         "podcastId": "null",
-        "title": "Kék Ördögök",
+        "title": "Reggeli sport",
         "description": "",
         "audioUrl": "",
-        "publishedAt": "2026-03-22T14:52:18.398759",
+        "publishedAt": "2026-03-26T16:24:49.552119",
         "showDate": "",
-        "duration": 98,
+        "duration": 6,
         "imageUrl": null,
         "hosts": [
-          "Műsorvezető:\n\nNemes Nagy Péter"
+          "Műsorvezetők:\n\nM. Dénes Tamás\nTurák Péter\nHorváth Ádám\nNemes Dávid\nBacsa Botond"
         ],
         "isFavourite": false,
         "downloadStatus": "notDownloaded",
@@ -561,30 +627,30 @@
         "cachedImagePath": null,
         "cachedMetaPath": null
       },
-      "lastUpdated": "2026-03-22T06:53:48.177682Z",
+      "lastUpdated": "2026-03-26T13:17:52.345210Z",
       "isSubscribed": false,
       "isTrending": false,
       "isRecommended": true
     },
     {
-      "id": "220",
-      "title": "Ember a Földön - Bartus Marcival",
-      "description": "Antal Éva alias a vászonzsákos lány méregzöldként kezdte, de mára sokat szelídült a stílusa, sokkal megengedőbb, saját magával szemben is. A zöldítő, fentarthatósági témakörben működő blogger majd youtube, tiktok, instagram influenszer betekintést enged a hétköznapjaiba, és kiderül az is, hogy hogyan dolgozik egy olyan ember, aki valóban abból él, hogy netes tartalmat készít.",
-      "coverImageUrl": "https://www.klubradio.hu/data/musorkepek/KR-podcast-covers-2024-jav.001_focuspoint_340x340.jpeg",
-      "episodeCount": 104,
+      "id": "38",
+      "title": "Reggeli gyors",
+      "description": "Tájékozatlanság ellen...\nBelpolitika, külpolitika, gazdaság, időjárás jelentés, friss közlekedési információk, közéleti hírek, riportok, interjúk, gazdasági-jelentések, programajánlók, sport-hírösszefoglaló...",
+      "coverImageUrl": "https://www.klubradio.hu/data/VargaZoltanDK_fb1_339_534_1647854795_focuspoint_340x340.jpg",
+      "episodeCount": 1886,
       "hosts": [],
       "latestEpisode": {
-        "id": "56519",
+        "id": "56626",
         "podcastId": "null",
-        "title": "Ember a Földön - Bartus Marcival",
+        "title": "Reggeli gyors",
         "description": "",
         "audioUrl": "",
-        "publishedAt": "2026-03-22T14:52:18.398759",
+        "publishedAt": "2026-03-26T16:24:49.552119",
         "showDate": "",
-        "duration": 52,
+        "duration": 125,
         "imageUrl": null,
         "hosts": [
-          "Műsorvezető:\n\nBartus Marcell"
+          "Műsorvezetők:\n\nPanxnotded Miklós\nSelmeci János\nHerskovits Eszter\nDési János\nSzénási Sándor\nPara-Kovács Imre"
         ],
         "isFavourite": false,
         "downloadStatus": "notDownloaded",
@@ -594,30 +660,30 @@
         "cachedImagePath": null,
         "cachedMetaPath": null
       },
-      "lastUpdated": "2026-03-21T20:29:20.021067Z",
+      "lastUpdated": "2026-03-26T13:17:52.345210Z",
       "isSubscribed": false,
       "isTrending": false,
       "isRecommended": true
     },
     {
-      "id": "22",
-      "title": "Hetes Stúdió",
-      "description": "Hosszú idő után generációs szakadék nyílt a magyar politikában. A Tisza-jelenséget részben lefedve, részben azon kívül, sőt túl, a fiatalok lázadása az alkalmatlanul működő hatalom, a dohos szagot árasztó központi szövegek ellen nyilvánvaló. A tízezres koncerteken protesthangulat, a kormányfő meg talált egy Dopemant. Hammer Ferenc szociológust, egyetemi tanárt kérdeztük.",
-      "coverImageUrl": "https://www.klubradio.hu/data/unnamed_1__focuspoint_340x340.jpg",
-      "episodeCount": 392,
+      "id": "128",
+      "title": "Ötös – Kultúrcsütörtök",
+      "description": "Kulturális magazinműsorunk Warholik Zoltánnal és vendégeivel.",
+      "coverImageUrl": "https://www.klubradio.hu/data/Klubradio_musorok_boritoi/KR-adasok-borito.038-otos-warholik_focuspoint_340x340.jpeg",
+      "episodeCount": 326,
       "hosts": [],
       "latestEpisode": {
-        "id": "56513",
+        "id": "56633",
         "podcastId": "null",
-        "title": "Hetes Stúdió",
+        "title": "Ötös – Kultúrcsütörtök",
         "description": "",
         "audioUrl": "",
-        "publishedAt": "2026-03-22T14:52:18.398759",
+        "publishedAt": "2026-03-26T16:24:49.552119",
         "showDate": "",
-        "duration": 55,
+        "duration": 94,
         "imageUrl": null,
         "hosts": [
-          "Műsorvezetők:\n\nKárpáti Iván\nHardy Mihály\nDési János\nSzénási Sándor\nNeuman Gábor\nRózsa Péter"
+          "Műsorvezető:\n\nWarholik Zoltán"
         ],
         "isFavourite": false,
         "downloadStatus": "notDownloaded",
@@ -627,30 +693,30 @@
         "cachedImagePath": null,
         "cachedMetaPath": null
       },
-      "lastUpdated": "2026-03-21T18:38:13.446361Z",
+      "lastUpdated": "2026-03-26T13:17:52.345210Z",
       "isSubscribed": false,
       "isTrending": false,
       "isRecommended": true
     },
     {
-      "id": "45",
-      "title": "Utcafront",
-      "description": "Építészetről közérthetően. Ház, utca, tér, kerület, városnegyed, Budapest, Magyarország, Európa és az egész világ bárhol, ahol értő és értetlen kezek valamit építettek/építenek. A természeti környezetbe épített világ a mi második természetünk, a mesterséges természet. Jó, rossz, élhető és kevésbé élhetetlen, de a miénk. A felelősség is a miénk, hogy mivé válik a világunk az építés/rombolás által. Ja, és ez fontos; szóljon hozzá!",
-      "coverImageUrl": "https://www.klubradio.hu/data/vigado_focuspoint_340x340.jpg",
-      "episodeCount": 343,
+      "id": "78",
+      "title": "Lattmann Tamás – Reggeli gyors/Reggeli személy",
+      "description": "Para-Kovács Imre vendége Kovách Imre szociológus, a Társadalomtudományi Kutatóközpont kutatóprofesszora, az MTA levelező tagja.",
+      "coverImageUrl": "https://www.klubradio.hu/data/Vladimir_Putin_wiki2_focuspoint_340x340.jpg",
+      "episodeCount": 1800,
       "hosts": [],
       "latestEpisode": {
-        "id": "56516",
+        "id": "56629",
         "podcastId": "null",
-        "title": "Utcafront",
+        "title": "Lattmann Tamás – Reggeli gyors/Reggeli személy",
         "description": "",
         "audioUrl": "",
-        "publishedAt": "2026-03-22T14:52:18.398759",
+        "publishedAt": "2026-03-26T16:24:49.552119",
         "showDate": "",
-        "duration": 51,
+        "duration": 42,
         "imageUrl": null,
         "hosts": [
-          "Műsorvezető:\n\nRózsa Péter"
+          "Műsorvezetők:\n\nPanxnotded Miklós\nDési János\nSzénási Sándor\nPara-Kovács Imre"
         ],
         "isFavourite": false,
         "downloadStatus": "notDownloaded",
@@ -660,30 +726,30 @@
         "cachedImagePath": null,
         "cachedMetaPath": null
       },
-      "lastUpdated": "2026-03-21T18:38:13.446361Z",
+      "lastUpdated": "2026-03-26T13:17:52.345210Z",
       "isSubscribed": false,
       "isTrending": false,
       "isRecommended": true
     },
     {
-      "id": "164",
-      "title": "Hetes Stúdió: Megbeszéljük a hetet",
-      "description": "Élőben hallhatták a Hetes Stúdió második óráját, amelyben Orbán Viktor tusványosi és Magyar Péter székesfehérvári beszédét szedtük szét és raktuk össze Szentpéteri Nagy Richard politológussal, jogásszal és Lengyel Lászlóval, a Pénzügykutató Zrt elnök-vezérigazgatójával, valamint természetesen Bolgár Györggyel. A műsorvezető Hardy Mihály, a szerkesztő Csernyánszky Judit volt.",
-      "coverImageUrl": "https://www.klubradio.hu/data/Hetes_2_1_focuspoint_340x340.jpg?key=ODI1YjNjNTliM2FiOGZjMmIwZGY1ODg5OTIzNGE0MjYyMzNkZmUzYTc1ZjYzNWQ3ODE0ZTU4NWU4ZmFjNzI1NQ==",
-      "episodeCount": 232,
+      "id": "10",
+      "title": "Radnóti Sándor a Dobszerdában",
+      "description": "Többet tett és tesz a magyar irodalomért, mint számos magyar kollégája, szakmai társa. Több, mint három évtizede él Magyarországon, s bár a német akcentusa nem sokat változott, a magyar irodalomról, a magyar nyelvről és főleg a budapesti értelmiségről többet tud sok hozzáértőnél. Nemcsak a németre fordított műveivel, vagy saját irodalmi folyóiratával, de a kávéházi kultúra újrateremtésével is elévülhetetlen érdemeket szerzett és szerez napjainkban is. Ő alapította a mára rendkívül népszerűvé vált Három Holló Kávéházat. Szóval nagyon megérdemelte a Pro Cultura Urbis díjat, amelyet a napokban vehetett át. Wilhelm Droste a Dobszerda vendége.",
+      "coverImageUrl": "https://www.klubradio.hu/data/zoltangabor_focuspoint_340x340.jpg",
+      "episodeCount": 374,
       "hosts": [],
       "latestEpisode": {
-        "id": "56515",
+        "id": "56622",
         "podcastId": "null",
-        "title": "Hetes Stúdió: Megbeszéljük a hetet",
+        "title": "Radnóti Sándor a Dobszerdában",
         "description": "",
         "audioUrl": "",
-        "publishedAt": "2026-03-22T14:52:18.398759",
+        "publishedAt": "2026-03-26T16:24:49.552119",
         "showDate": "",
-        "duration": 52,
+        "duration": 49,
         "imageUrl": null,
         "hosts": [
-          "Műsorvezetők:\n\nHardy Mihály\nDési János\nSzénási Sándor\nNeuman Gábor"
+          "Műsorvezető:\n\nVáradi Júlia"
         ],
         "isFavourite": false,
         "downloadStatus": "notDownloaded",
@@ -693,30 +759,30 @@
         "cachedImagePath": null,
         "cachedMetaPath": null
       },
-      "lastUpdated": "2026-03-21T18:38:13.446361Z",
+      "lastUpdated": "2026-03-26T10:53:53.083508Z",
       "isSubscribed": false,
       "isTrending": false,
       "isRecommended": true
     },
     {
-      "id": "259",
-      "title": "Mesterséges értelem",
-      "description": "A műsor vendége Badinszky Áron jogász, az ELTE mesterséges intelligenciáért felelősrektori biztosa, aki szerint a következő évek meghatározó kérdése az lesz, hogy a jog, az etikai elvárások és a társadalmi tudatosság képes-e együtt olyan kereteket kialakítani, amelyek mellett a mesterséges intelligencia nem veszélyt, hanem valódi értéket jelent.",
-      "coverImageUrl": "https://www.klubradio.hu/data/musorkepek/KR-podcast-covers-2025nov.005_focuspoint_340x340.jpeg",
-      "episodeCount": 18,
+      "id": "165",
+      "title": "Ki merem mondani",
+      "description": "Vajon olyan politikusokat kapunk, amilyeneket megérdemlünk? Mennyiben tükrei egymásnak a nép és a vezetők? Beszélgetünk a nem alulról szerveződő politikai kultúra kialakulásáról és ismérveiről, a meg nem tanult demokráciáról, és arról, hogy miképpen lehetne mégis megerősíteni azt a lakosság aktív közreműködésével.",
+      "coverImageUrl": "https://www.klubradio.hu/data/Sugar_Agnes_focuspoint_340x340.jpg",
+      "episodeCount": 186,
       "hosts": [],
       "latestEpisode": {
-        "id": "56511",
+        "id": "56623",
         "podcastId": "null",
-        "title": "Mesterséges értelem",
+        "title": "Ki merem mondani",
         "description": "",
         "audioUrl": "",
-        "publishedAt": "2026-03-22T14:52:18.398759",
+        "publishedAt": "2026-03-26T16:24:49.552119",
         "showDate": "",
-        "duration": 25,
+        "duration": 50,
         "imageUrl": null,
         "hosts": [
-          "Műsorvezető:\n\nKárpáti Iván"
+          "Műsorvezető:\n\nSugár Ágnes"
         ],
         "isFavourite": false,
         "downloadStatus": "notDownloaded",
@@ -726,30 +792,30 @@
         "cachedImagePath": null,
         "cachedMetaPath": null
       },
-      "lastUpdated": "2026-03-21T16:32:09.492922Z",
+      "lastUpdated": "2026-03-26T10:53:53.083508Z",
       "isSubscribed": false,
       "isTrending": false,
       "isRecommended": true
     },
     {
-      "id": "72",
-      "title": "Filmklubrádió",
-      "description": "2022 szeptemberétől ismét működik a FILMKLUBRÁDIÓ! Az őszi időszakban új helyszínen és új időpontban találkozhat a közönség a műsorra tűzött filmek alkotóival illetve a témák szakértőivel.",
-      "coverImageUrl": "https://www.klubradio.hu/data/musorkepek/filmklubradio_focuspoint_340x340.jpeg",
-      "episodeCount": 81,
+      "id": "184",
+      "title": "Klassz",
+      "description": "Múlt héten elhunyt Vásáry Tamás. Összeállításunkban a kiváló zongoraművészre, karmesterre emlékezünk.",
+      "coverImageUrl": "https://www.klubradio.hu/data/Klubradio_musorok_boritoi/klassz-kicsi_focuspoint_340x340.jpeg?key=ZWJjODE1MTIyYzE1MTU3ODAyOTc3MDg4NTFmMzIyMjMyZmY4MjliNmMzNTkwMTlkM2I3OGFmOWJjNGYzMDkxZg==",
+      "episodeCount": 182,
       "hosts": [],
       "latestEpisode": {
-        "id": "56512",
+        "id": "56621",
         "podcastId": "null",
-        "title": "Filmklubrádió",
+        "title": "Klassz",
         "description": "",
         "audioUrl": "",
-        "publishedAt": "2026-03-22T14:52:18.398759",
+        "publishedAt": "2026-03-26T16:24:49.552119",
         "showDate": "",
-        "duration": 47,
+        "duration": 54,
         "imageUrl": null,
         "hosts": [
-          "Műsorvezető:\n\nRózsa Péter"
+          "Műsorvezetők:\n\nSzőke Cecília\nVarga Péter"
         ],
         "isFavourite": false,
         "downloadStatus": "notDownloaded",
@@ -759,73 +825,7 @@
         "cachedImagePath": null,
         "cachedMetaPath": null
       },
-      "lastUpdated": "2026-03-21T16:32:09.492922Z",
-      "isSubscribed": false,
-      "isTrending": false,
-      "isRecommended": true
-    },
-    {
-      "id": "41",
-      "title": "Szerepvállalás",
-      "description": "Az 2025. augusztus 16-ai adás ismétlése:",
-      "coverImageUrl": "https://www.klubradio.hu/data/Klubradio_musorok_boritoi/KR-adasok-borito.045-szerepvallalas_focuspoint_340x340.jpeg",
-      "episodeCount": 361,
-      "hosts": [],
-      "latestEpisode": {
-        "id": "56510",
-        "podcastId": "null",
-        "title": "Szerepvállalás",
-        "description": "",
-        "audioUrl": "",
-        "publishedAt": "2026-03-22T14:52:18.398759",
-        "showDate": "",
-        "duration": 25,
-        "imageUrl": null,
-        "hosts": [
-          "Műsorvezető:\n\nBíró Bori"
-        ],
-        "isFavourite": false,
-        "downloadStatus": "notDownloaded",
-        "downloadProgress": 0.0,
-        "localFilePath": null,
-        "cachedTitle": null,
-        "cachedImagePath": null,
-        "cachedMetaPath": null
-      },
-      "lastUpdated": "2026-03-21T16:32:09.492922Z",
-      "isSubscribed": false,
-      "isTrending": false,
-      "isRecommended": true
-    },
-    {
-      "id": "29",
-      "title": "Klubdélelőtt",
-      "description": "Dr. Majtényi László alkotmányjogász, jogtudós, a Magyar Tudományos Akadémia doktora rendszeres vendége a Klubrádiónak, de amit a hallgatók nem hallhattak tőle, az a 25. Radnóti Miklós Antirasszista és az Egyesült Európáért Civil Díj átadó ünnepségén elhangzott rövid megemlékezése. Az irdodalmat, Örkény Istvánt, Vajda Jánost, Vörösmarty Mihályt idézve osztotta meg gondolatait a mai magyar drámai közéletről.",
-      "coverImageUrl": "https://www.klubradio.hu/data/TZIHZ20150826012_2000_1330_1557511214_focuspoint_340x340.JPG",
-      "episodeCount": 378,
-      "hosts": [],
-      "latestEpisode": {
-        "id": "56507",
-        "podcastId": "null",
-        "title": "Klubdélelőtt",
-        "description": "",
-        "audioUrl": "",
-        "publishedAt": "2026-03-22T14:52:18.399761",
-        "showDate": "",
-        "duration": 159,
-        "imageUrl": null,
-        "hosts": [
-          "Műsorvezető:\n\nKun Zsuzsa"
-        ],
-        "isFavourite": false,
-        "downloadStatus": "notDownloaded",
-        "downloadProgress": 0.0,
-        "localFilePath": null,
-        "cachedTitle": null,
-        "cachedImagePath": null,
-        "cachedMetaPath": null
-      },
-      "lastUpdated": "2026-03-21T12:51:37.241176Z",
+      "lastUpdated": "2026-03-26T10:53:53.083508Z",
       "isSubscribed": false,
       "isTrending": false,
       "isRecommended": true
@@ -833,17 +833,17 @@
   ],
   "latestEpisodes": [
     {
-      "id": "56524",
-      "podcastId": "3",
-      "title": "A lényeg",
-      "description": "A Klubrádió hírműsora. Tudósítások, hírek, interjúk, riportok.",
-      "audioUrl": "https://www.klubradio.hu/data/hanganyagok/2026/3/22/archivum_alenyeg12_260322.mp3",
-      "publishedAt": "2026-03-22T12:53:49.011399Z",
-      "showDate": "2026. március 22., vasárnap 12:00",
-      "duration": 300,
-      "imageUrl": "https://www.klubradio.hu/data/Klubradio_musorok_boritoi/KR-adasok-borito.001-a-lenyeg_focuspoint_340x340.jpeg",
+      "id": "56635",
+      "podcastId": "171",
+      "title": "Zsebenciklopédia",
+      "description": "Zsebenciklopédia – leltározás miatt nyitva. Vagyis akár, ha egy kislexikont nyitnánk ki, minden adásban előbukkan egy szó, amely annak az adásnak a központi témája, amit a műsorban körbejárunk a saját kifejezési lehetőségeinkkel, véleményünkkel, eszköztárunkkal.",
+      "audioUrl": "https://www.klubradio.hu/data/hanganyagok/2026/3/26/archivum_zsebenciklopedia_260326.mp3",
+      "publishedAt": "2026-03-26T15:05:39.644153Z",
+      "showDate": "2026. március 26., csütörtök 13:00",
+      "duration": 3000,
+      "imageUrl": "https://www.klubradio.hu/data/Klubradio_musorok_boritoi/KR-podcast-zsebenciklopedia_focuspoint_340x340.jpeg",
       "hosts": [
-        "Műsorvezetők:\n\nBáder Tamás\nKárpáti Iván\nV. Nagy Gyöngyi"
+        "Műsorvezető:\n\nGaál Ildikó"
       ],
       "isFavourite": false,
       "downloadStatus": "notDownloaded",
@@ -854,17 +854,17 @@
       "cachedMetaPath": null
     },
     {
-      "id": "56523",
-      "podcastId": "3",
-      "title": "A lényeg",
-      "description": "A Klubrádió hírműsora. Tudósítások, hírek, interjúk, riportok.",
-      "audioUrl": "https://www.klubradio.hu/data/hanganyagok/2026/3/22/archivum_alenyeg10_260322.mp3",
-      "publishedAt": "2026-03-22T12:53:49.011399Z",
-      "showDate": "2026. március 22., vasárnap 10:00",
-      "duration": 300,
-      "imageUrl": "https://www.klubradio.hu/data/Klubradio_musorok_boritoi/KR-adasok-borito.001-a-lenyeg_focuspoint_340x340.jpeg",
+      "id": "56466",
+      "podcastId": "171",
+      "title": "Zsebenciklopédia",
+      "description": "Az adás hívómondata: Hol jó gyereknek lenni?",
+      "audioUrl": "https://www.klubradio.hu/data/hanganyagok/2026/3/19/archivum_zsebenciklopedia_260319.mp3",
+      "publishedAt": "2026-03-19T14:49:06.197649Z",
+      "showDate": "2026. március 19., csütörtök 13:00",
+      "duration": 3060,
+      "imageUrl": "https://www.klubradio.hu/data/Klubradio_musorok_boritoi/KR-podcast-zsebenciklopedia_focuspoint_340x340.jpeg",
       "hosts": [
-        "Műsorvezetők:\n\nBáder Tamás\nKárpáti Iván\nV. Nagy Gyöngyi"
+        "Műsorvezető:\n\nGaál Ildikó"
       ],
       "isFavourite": false,
       "downloadStatus": "notDownloaded",
@@ -875,17 +875,17 @@
       "cachedMetaPath": null
     },
     {
-      "id": "56522",
-      "podcastId": "3",
-      "title": "A lényeg",
-      "description": "A Klubrádió hírműsora. Tudósítások, hírek, interjúk, riportok.",
-      "audioUrl": "https://www.klubradio.hu/data/hanganyagok/2026/3/22/archivum_alenyeg07_260322.mp3",
-      "publishedAt": "2026-03-22T12:53:49.011399Z",
-      "showDate": "2026. március 22., vasárnap 07:00",
-      "duration": 240,
-      "imageUrl": "https://www.klubradio.hu/data/Klubradio_musorok_boritoi/KR-adasok-borito.001-a-lenyeg_focuspoint_340x340.jpeg",
+      "id": "56309",
+      "podcastId": "171",
+      "title": "Zsebenciklopédia",
+      "description": "Az adás hívószava: Március 15.",
+      "audioUrl": "https://www.klubradio.hu/data/hanganyagok/2026/3/12/archivum_zsebenciklopedia_260312.mp3",
+      "publishedAt": "2026-03-12T14:51:19.833104Z",
+      "showDate": "2026. március 12., csütörtök 13:00",
+      "duration": 3000,
+      "imageUrl": "https://www.klubradio.hu/data/Klubradio_musorok_boritoi/KR-podcast-zsebenciklopedia_focuspoint_340x340.jpeg",
       "hosts": [
-        "Műsorvezetők:\n\nBáder Tamás\nKárpáti Iván\nV. Nagy Gyöngyi"
+        "Műsorvezető:\n\nGaál Ildikó"
       ],
       "isFavourite": false,
       "downloadStatus": "notDownloaded",
@@ -896,17 +896,17 @@
       "cachedMetaPath": null
     },
     {
-      "id": "56517",
-      "podcastId": "3",
-      "title": "A lényeg",
-      "description": "A Klubrádió hírműsora. Tudósítások, hírek, interjúk, riportok.",
-      "audioUrl": "https://www.klubradio.hu/data/hanganyagok/2026/3/21/archivum_alenyeg18_260321.mp3",
-      "publishedAt": "2026-03-21T18:38:13.446361Z",
-      "showDate": "2026. március 21., szombat 18:00",
-      "duration": 360,
-      "imageUrl": "https://www.klubradio.hu/data/Klubradio_musorok_boritoi/KR-adasok-borito.001-a-lenyeg_focuspoint_340x340.jpeg",
+      "id": "56140",
+      "podcastId": "171",
+      "title": "Zsebenciklopédia",
+      "description": "Az adás hívószava: Mediáció",
+      "audioUrl": "https://www.klubradio.hu/data/hanganyagok/2026/3/5/archivum_zsebenciklopedia_260305.mp3",
+      "publishedAt": "2026-03-05T14:45:00.498923Z",
+      "showDate": "2026. március 05., csütörtök 13:00",
+      "duration": 2880,
+      "imageUrl": "https://www.klubradio.hu/data/Klubradio_musorok_boritoi/KR-podcast-zsebenciklopedia_focuspoint_340x340.jpeg",
       "hosts": [
-        "Műsorvezetők:\n\nBáder Tamás\nKárpáti Iván\nV. Nagy Gyöngyi"
+        "Műsorvezető:\n\nGaál Ildikó"
       ],
       "isFavourite": false,
       "downloadStatus": "notDownloaded",
@@ -917,17 +917,17 @@
       "cachedMetaPath": null
     },
     {
-      "id": "56514",
-      "podcastId": "3",
-      "title": "A lényeg",
-      "description": "A Klubrádió hírműsora. Tudósítások, hírek, interjúk, riportok.",
-      "audioUrl": "https://www.klubradio.hu/data/hanganyagok/2026/3/21/archivum_alenyeg16_260321.mp3",
-      "publishedAt": "2026-03-21T18:38:13.446361Z",
-      "showDate": "2026. március 21., szombat 16:00",
-      "duration": 360,
-      "imageUrl": "https://www.klubradio.hu/data/Klubradio_musorok_boritoi/KR-adasok-borito.001-a-lenyeg_focuspoint_340x340.jpeg",
+      "id": "55964",
+      "podcastId": "171",
+      "title": "Zsebenciklopédia",
+      "description": "Az adás hívószava: Zseni/csodagyerek",
+      "audioUrl": "https://www.klubradio.hu/data/hanganyagok/2026/2/26/archivum_zsebenciklopedia_260226.mp3",
+      "publishedAt": "2026-02-26T14:48:48.314661Z",
+      "showDate": "2026. február 26., csütörtök 13:00",
+      "duration": 3000,
+      "imageUrl": "https://www.klubradio.hu/data/Klubradio_musorok_boritoi/KR-podcast-zsebenciklopedia_focuspoint_340x340.jpeg",
       "hosts": [
-        "Műsorvezetők:\n\nBáder Tamás\nKárpáti Iván\nV. Nagy Gyöngyi"
+        "Műsorvezető:\n\nGaál Ildikó"
       ],
       "isFavourite": false,
       "downloadStatus": "notDownloaded",
@@ -938,17 +938,17 @@
       "cachedMetaPath": null
     },
     {
-      "id": "56508",
-      "podcastId": "3",
-      "title": "A lényeg",
-      "description": "A Klubrádió hírműsora. Tudósítások, hírek, interjúk, riportok.",
-      "audioUrl": "https://www.klubradio.hu/data/hanganyagok/2026/3/21/archivum_alenyeg12_260321.mp3",
-      "publishedAt": "2026-03-21T12:51:37.241176Z",
-      "showDate": "2026. március 21., szombat 12:00",
-      "duration": 240,
-      "imageUrl": "https://www.klubradio.hu/data/Klubradio_musorok_boritoi/KR-adasok-borito.001-a-lenyeg_focuspoint_340x340.jpeg",
+      "id": "55796",
+      "podcastId": "171",
+      "title": "Zsebenciklopédia",
+      "description": "A 2025. december 11-ei adás ismétlése:",
+      "audioUrl": "https://www.klubradio.hu/data/hanganyagok/2026/2/19/archivum_zsebenciklopedia_260219.mp3",
+      "publishedAt": "2026-02-19T14:47:55.780418Z",
+      "showDate": "2026. február 19., csütörtök 13:00",
+      "duration": 2940,
+      "imageUrl": "https://www.klubradio.hu/data/Klubradio_musorok_boritoi/KR-podcast-zsebenciklopedia_focuspoint_340x340.jpeg",
       "hosts": [
-        "Műsorvezetők:\n\nBáder Tamás\nKárpáti Iván\nV. Nagy Gyöngyi"
+        "Műsorvezető:\n\nGaál Ildikó"
       ],
       "isFavourite": false,
       "downloadStatus": "notDownloaded",
@@ -959,17 +959,17 @@
       "cachedMetaPath": null
     },
     {
-      "id": "56506",
-      "podcastId": "3",
-      "title": "A lényeg",
-      "description": "A Klubrádió hírműsora. Tudósítások, hírek, interjúk, riportok.",
-      "audioUrl": "https://www.klubradio.hu/data/hanganyagok/2026/3/21/archivum_alenyeg10_260321.mp3",
-      "publishedAt": "2026-03-21T12:51:37.241176Z",
-      "showDate": "2026. március 21., szombat 10:00",
-      "duration": 300,
-      "imageUrl": "https://www.klubradio.hu/data/Klubradio_musorok_boritoi/KR-adasok-borito.001-a-lenyeg_focuspoint_340x340.jpeg",
+      "id": "55641",
+      "podcastId": "171",
+      "title": "Zsebenciklopédia",
+      "description": "Az adás hívószava: Pszichoszínház",
+      "audioUrl": "https://www.klubradio.hu/data/hanganyagok/2026/2/12/archivum_zsebenciklopedia_260212.mp3",
+      "publishedAt": "2026-02-12T14:49:01.981865Z",
+      "showDate": "2026. február 12., csütörtök 13:00",
+      "duration": 3060,
+      "imageUrl": "https://www.klubradio.hu/data/Klubradio_musorok_boritoi/KR-podcast-zsebenciklopedia_focuspoint_340x340.jpeg",
       "hosts": [
-        "Műsorvezetők:\n\nBáder Tamás\nKárpáti Iván\nV. Nagy Gyöngyi"
+        "Műsorvezető:\n\nGaál Ildikó"
       ],
       "isFavourite": false,
       "downloadStatus": "notDownloaded",
@@ -980,17 +980,17 @@
       "cachedMetaPath": null
     },
     {
-      "id": "56505",
-      "podcastId": "3",
-      "title": "A lényeg",
-      "description": "A Klubrádió hírműsora. Tudósítások, hírek, interjúk, riportok.",
-      "audioUrl": "https://www.klubradio.hu/data/hanganyagok/2026/3/21/archivum_alenyeg07_260321.mp3",
-      "publishedAt": "2026-03-21T08:35:43.001328Z",
-      "showDate": "2026. március 21., szombat 07:00",
-      "duration": 240,
-      "imageUrl": "https://www.klubradio.hu/data/Klubradio_musorok_boritoi/KR-adasok-borito.001-a-lenyeg_focuspoint_340x340.jpeg",
+      "id": "55469",
+      "podcastId": "171",
+      "title": "Zsebenciklopédia",
+      "description": "Az adás hívószava: Elengedés",
+      "audioUrl": "https://www.klubradio.hu/data/hanganyagok/2026/2/5/archivum_zsebenciklopedia_260205.mp3",
+      "publishedAt": "2026-02-05T14:43:55.397745Z",
+      "showDate": "2026. február 05., csütörtök 13:00",
+      "duration": 2880,
+      "imageUrl": "https://www.klubradio.hu/data/Klubradio_musorok_boritoi/KR-podcast-zsebenciklopedia_focuspoint_340x340.jpeg",
       "hosts": [
-        "Műsorvezetők:\n\nBáder Tamás\nKárpáti Iván\nV. Nagy Gyöngyi"
+        "Műsorvezető:\n\nGaál Ildikó"
       ],
       "isFavourite": false,
       "downloadStatus": "notDownloaded",
@@ -1001,17 +1001,17 @@
       "cachedMetaPath": null
     },
     {
-      "id": "56498",
-      "podcastId": "3",
-      "title": "A lényeg",
-      "description": "A Klubrádió hírműsora. Tudósítások, hírek, interjúk, riportok.",
-      "audioUrl": "https://www.klubradio.hu/data/hanganyagok/2026/3/20/archivum_alenyeg18_260320.mp3",
-      "publishedAt": "2026-03-20T18:52:34.056045Z",
-      "showDate": "2026. március 20., péntek 18:00",
-      "duration": 480,
-      "imageUrl": "https://www.klubradio.hu/data/Klubradio_musorok_boritoi/KR-adasok-borito.001-a-lenyeg_focuspoint_340x340.jpeg",
+      "id": "55310",
+      "podcastId": "171",
+      "title": "Zsebenciklopédia",
+      "description": "A 2026. január 15-ei adás ismétlése:",
+      "audioUrl": "https://www.klubradio.hu/data/hanganyagok/2026/1/29/archivum_zsebenciklopedia_260129.mp3",
+      "publishedAt": "2026-01-29T16:45:08.428686Z",
+      "showDate": "2026. január 29., csütörtök 13:00",
+      "duration": 3060,
+      "imageUrl": "https://www.klubradio.hu/data/Klubradio_musorok_boritoi/KR-podcast-zsebenciklopedia_focuspoint_340x340.jpeg",
       "hosts": [
-        "Műsorvezetők:\n\nBáder Tamás\nKárpáti Iván\nV. Nagy Gyöngyi"
+        "Műsorvezető:\n\nGaál Ildikó"
       ],
       "isFavourite": false,
       "downloadStatus": "notDownloaded",
@@ -1022,17 +1022,17 @@
       "cachedMetaPath": null
     },
     {
-      "id": "56494",
-      "podcastId": "3",
-      "title": "A lényeg",
-      "description": "A Klubrádió hírműsora. Tudósítások, hírek, interjúk, riportok.",
-      "audioUrl": "https://www.klubradio.hu/data/hanganyagok/2026/3/20/archivum_alenyeg16_260320.mp3",
-      "publishedAt": "2026-03-20T16:44:36.716472Z",
-      "showDate": "2026. március 20., péntek 16:00",
-      "duration": 480,
-      "imageUrl": "https://www.klubradio.hu/data/Klubradio_musorok_boritoi/KR-adasok-borito.001-a-lenyeg_focuspoint_340x340.jpeg",
+      "id": "55149",
+      "podcastId": "171",
+      "title": "Zsebenciklopédia",
+      "description": "Az adás hívószava: Másság",
+      "audioUrl": "https://www.klubradio.hu/data/hanganyagok/2026/1/22/archivum_zsebenciklopedia_260122.mp3",
+      "publishedAt": "2026-01-22T18:33:51.296452Z",
+      "showDate": "2026. január 22., csütörtök 13:00",
+      "duration": 3000,
+      "imageUrl": "https://www.klubradio.hu/data/Klubradio_musorok_boritoi/KR-podcast-zsebenciklopedia_focuspoint_340x340.jpeg",
       "hosts": [
-        "Műsorvezetők:\n\nBáder Tamás\nKárpáti Iván\nV. Nagy Gyöngyi"
+        "Műsorvezető:\n\nGaál Ildikó"
       ],
       "isFavourite": false,
       "downloadStatus": "notDownloaded",
@@ -1047,42 +1047,42 @@
     {
       "id": "3",
       "title": "A lényeg",
-      "count": 392
-    },
-    {
-      "id": "14",
-      "title": "Esti gyors",
-      "count": 58
-    },
-    {
-      "id": "38",
-      "title": "Reggeli gyors",
-      "count": 56
+      "count": 413
     },
     {
       "id": "250",
       "title": "Reggeli sport",
-      "count": 56
+      "count": 61
+    },
+    {
+      "id": "14",
+      "title": "Esti gyors",
+      "count": 61
+    },
+    {
+      "id": "38",
+      "title": "Reggeli gyors",
+      "count": 60
     },
     {
       "id": "34",
       "title": "Megbeszéljük...",
-      "count": 56
+      "count": 59
     },
     {
       "id": "91",
       "title": "Ezitta Fórum",
-      "count": 55
+      "count": 59
+    },
+    {
+      "id": "128",
+      "title": "Ötös – Kultúrcsütörtök",
+      "count": 14
     },
     {
       "id": "27",
       "title": "Kék Ördögök",
       "count": 14
-    },
-    {
-      "id": "9",
-      "title": "Café Péntek",
-      "count": 13
     }
   ],
   "podcastById": {
@@ -1090,17 +1090,17 @@
     "title": "A lényeg",
     "description": "A Klubrádió hírműsora. Tudósítások, hírek, interjúk, riportok.",
     "coverImageUrl": "https://www.klubradio.hu/data/Orsi_Gergely_reggeli_szemely/Orsi_Gergely_01_focuspoint_340x340.JPG",
-    "episodeCount": 9444,
+    "episodeCount": 9465,
     "hosts": [],
     "latestEpisode": {
-      "id": "56524",
+      "id": "56632",
       "podcastId": "null",
       "title": "A lényeg",
       "description": "",
       "audioUrl": "",
-      "publishedAt": "2026-03-22T14:52:18.641351",
+      "publishedAt": "2026-03-26T16:24:49.895612",
       "showDate": "",
-      "duration": 5,
+      "duration": 21,
       "imageUrl": null,
       "hosts": [
         "Műsorvezetők:\n\nBáder Tamás\nKárpáti Iván\nV. Nagy Gyöngyi"
@@ -1113,7 +1113,7 @@
       "cachedImagePath": null,
       "cachedMetaPath": null
     },
-    "lastUpdated": "2026-03-22T12:53:49.011399Z",
+    "lastUpdated": "2026-03-26T13:17:52.345210Z",
     "isSubscribed": false,
     "isTrending": false,
     "isRecommended": false
