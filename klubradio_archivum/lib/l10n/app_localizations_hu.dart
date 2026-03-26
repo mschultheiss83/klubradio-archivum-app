@@ -190,17 +190,10 @@ class AppLocalizationsHu extends AppLocalizations {
   String get discoverScreenFeaturedCategoriesTitle => 'Kiemelt műsorok';
 
   @override
-  String get discoverScreenRecommendedShowsTitle => 'Ajánlott műsorok';
-
-  @override
   String get discoverScreenTrendingTitle => 'Felkapott';
 
   @override
   String get discoverScreenNoTopShows => 'Nincsenek kiemelt műsorok.';
-
-  @override
-  String get recommendedPodcastsNoRecommendations =>
-      'Nincs elérhető ajánlás. Frissítsd az adatokat később.';
 
   @override
   String get trendingPodcastsNoShows => 'Nincs felkapott műsor a listán.';
@@ -553,4 +546,31 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get aboutScreenContributionsEmpty => 'Légy támogató!';
+
+  @override
+  String get playerTooltipPrevious => 'Előző epizód';
+
+  @override
+  String get playerTooltipPlay => 'Lejátszás';
+
+  @override
+  String get playerTooltipPause => 'Szünet';
+
+  @override
+  String get playerTooltipNext => 'Következő epizód';
+
+  @override
+  String get discoverScreenLatestShowsTitle => 'Legújabb műsorok';
+
+  @override
+  String get discoverScreenNoLatestShows =>
+      'Nincsenek elérhető műsorok. Húzd le a frissítéshez.';
+
+  @override
+  String downloads_error(String details) {
+    return 'Hiba: $details';
+  }
+
+  @override
+  String get aboutScreenLegalNotFound => 'Jogi információk nem találhatók.';
 }

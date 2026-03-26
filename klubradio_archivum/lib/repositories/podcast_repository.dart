@@ -19,15 +19,6 @@ class PodcastRepository {
     );
   }
 
-  Future<List<Podcast>> recommended({bool useCacheFirst = true}) async {
-    return _cachedList(
-      cacheName: 'recommended_podcasts.json',
-      fetch: () async =>
-          (await api.recommended()).map((e) => Podcast.fromJson(e)).toList(),
-      useCacheFirst: useCacheFirst,
-    );
-  }
-
   Future<List<Podcast>> trending() async =>
       (await api.trending()).map(Podcast.fromJson).toList();
 

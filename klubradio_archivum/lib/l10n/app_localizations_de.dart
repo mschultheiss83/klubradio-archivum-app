@@ -190,18 +190,11 @@ class AppLocalizationsDe extends AppLocalizations {
   String get discoverScreenFeaturedCategoriesTitle => 'Top-Sendungen';
 
   @override
-  String get discoverScreenRecommendedShowsTitle => 'Empfohlene Sendungen';
-
-  @override
   String get discoverScreenTrendingTitle => 'Angesagt';
 
   @override
   String get discoverScreenNoTopShows =>
       'Keine vorgestellten Sendungen verfügbar.';
-
-  @override
-  String get recommendedPodcastsNoRecommendations =>
-      'Keine Empfehlungen verfügbar. Bitte aktualisiere die Daten später.';
 
   @override
   String get trendingPodcastsNoShows =>
@@ -557,4 +550,32 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get aboutScreenContributionsEmpty => 'Werde Unterstützer!';
+
+  @override
+  String get playerTooltipPrevious => 'Vorherige Folge';
+
+  @override
+  String get playerTooltipPlay => 'Abspielen';
+
+  @override
+  String get playerTooltipPause => 'Pause';
+
+  @override
+  String get playerTooltipNext => 'Nächste Folge';
+
+  @override
+  String get discoverScreenLatestShowsTitle => 'Neueste Sendungen';
+
+  @override
+  String get discoverScreenNoLatestShows =>
+      'Keine Sendungen verfügbar. Zum Aktualisieren herunterziehen.';
+
+  @override
+  String downloads_error(String details) {
+    return 'Fehler: $details';
+  }
+
+  @override
+  String get aboutScreenLegalNotFound =>
+      'Rechtliche Informationen nicht gefunden.';
 }

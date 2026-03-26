@@ -189,17 +189,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get discoverScreenFeaturedCategoriesTitle => 'Top Shows';
 
   @override
-  String get discoverScreenRecommendedShowsTitle => 'Recommended Shows';
-
-  @override
   String get discoverScreenTrendingTitle => 'Trending';
 
   @override
   String get discoverScreenNoTopShows => 'No featured shows available.';
-
-  @override
-  String get recommendedPodcastsNoRecommendations =>
-      'No recommendations available. Please refresh the data later.';
 
   @override
   String get trendingPodcastsNoShows => 'No trending shows on the list.';
@@ -551,4 +544,31 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get aboutScreenContributionsEmpty => 'Become a supporter!';
+
+  @override
+  String get playerTooltipPrevious => 'Previous Episode';
+
+  @override
+  String get playerTooltipPlay => 'Play';
+
+  @override
+  String get playerTooltipPause => 'Pause';
+
+  @override
+  String get playerTooltipNext => 'Next Episode';
+
+  @override
+  String get discoverScreenLatestShowsTitle => 'Latest Shows';
+
+  @override
+  String get discoverScreenNoLatestShows =>
+      'No shows available. Pull to refresh.';
+
+  @override
+  String downloads_error(String details) {
+    return 'Error: $details';
+  }
+
+  @override
+  String get aboutScreenLegalNotFound => 'Legal information not found.';
 }

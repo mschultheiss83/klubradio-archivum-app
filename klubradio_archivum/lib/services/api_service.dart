@@ -122,49 +122,7 @@ class ApiService {
     throw ApiException('Unable to fetch trending podcasts\n$serverMsg');
   }
 
-  Future<List<Podcast>> fetchRecommendedPodcasts({int limit = 10}) async {
-    const String cacheKey = 'recommended_podcasts';
-    final cachedData = await _cacheService.get(cacheKey);
-    if (cachedData != null) {
-      return (cachedData as List)
-          .whereType<Map<String, dynamic>>()
-          .map(Podcast.fromJson)
-          .map((p) => p.copyWith(isRecommended: true))
-          .toList();
-    }
 
-    if (!hasValidCredentials) {
-      return _mockPodcasts()
-          .take(limit)
-          .map((p) => p.copyWith(isRecommended: true))
-          .toList();
-    }
-
-    final uri = Uri.parse('$_supabaseUrl/rest/v1/${constants.podcastsTable}')
-        .replace(
-          queryParameters: {
-            'select': '*',
-            'order': 'last_updated.desc.nullslast',
-            // 'order': 'recommendation_score.desc.nullslast',
-            'limit': limit.toString(),
-          },
-        );
-    final res = await _httpClient
-        .get(uri, headers: _headers)
-        .timeout(_longTimeout);
-
-    if (res.statusCode >= 200 && res.statusCode < 300) {
-      final data = jsonDecode(res.body) as List<dynamic>;
-      await _cacheService.save(cacheKey, data, expiry: const Duration(hours: 3));
-      return data
-          .whereType<Map<String, dynamic>>()
-          .map(Podcast.fromJson)
-          .map((p) => p.copyWith(isRecommended: true))
-          .toList();
-    }
-    final serverMsg = getServerErrorMessage(res);
-    throw ApiException('Unable to fetch recommended podcasts\n$serverMsg');
-  }
 
   // =================== EPISODES ===================
 

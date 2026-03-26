@@ -190,17 +190,10 @@ class AppLocalizationsRo extends AppLocalizations {
   String get discoverScreenFeaturedCategoriesTitle => 'Emisiuni populare';
 
   @override
-  String get discoverScreenRecommendedShowsTitle => 'Emisiuni recomandate';
-
-  @override
   String get discoverScreenTrendingTitle => 'În tendințe';
 
   @override
   String get discoverScreenNoTopShows => 'Nicio emisiune populară disponibilă.';
-
-  @override
-  String get recommendedPodcastsNoRecommendations =>
-      'Nicio recomandare disponibilă. Vă rugăm să reîmprospătați datele mai târziu.';
 
   @override
   String get trendingPodcastsNoShows => 'Nicio emisiune în tendințe în listă.';
@@ -557,4 +550,32 @@ class AppLocalizationsRo extends AppLocalizations {
 
   @override
   String get aboutScreenContributionsEmpty => 'Devino susținător!';
+
+  @override
+  String get playerTooltipPrevious => 'Episodul anterior';
+
+  @override
+  String get playerTooltipPlay => 'Redare';
+
+  @override
+  String get playerTooltipPause => 'Pauză';
+
+  @override
+  String get playerTooltipNext => 'Episodul următor';
+
+  @override
+  String get discoverScreenLatestShowsTitle => 'Cele mai recente emisiuni';
+
+  @override
+  String get discoverScreenNoLatestShows =>
+      'Nu sunt emisiuni disponibile. Trageți pentru a reîmprospăta.';
+
+  @override
+  String downloads_error(String details) {
+    return 'Eroare: $details';
+  }
+
+  @override
+  String get aboutScreenLegalNotFound =>
+      'Informațiile juridice nu au fost găsite.';
 }

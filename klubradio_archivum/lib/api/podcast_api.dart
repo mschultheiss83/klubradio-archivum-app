@@ -37,17 +37,6 @@ class PodcastApi {
     return (json as List).cast<Map<String, dynamic>>();
   }
 
-  /// Fetches recommended podcasts.
-  ///
-  /// Returns raw JSON data that can be parsed into Podcast models.
-  Future<List<Map<String, dynamic>>> recommended({int limit = 10}) async {
-    final url =
-        '$baseUrl/rest/v1/${constants.podcastsTable}?select=*&order=last_updated.desc.nullslast&limit=$limit';
-    debugPrint('recommended url: $url');
-    final json = await _requester.getJson(url);
-    return (json as List).cast<Map<String, dynamic>>();
-  }
-
   /// Fetches trending podcasts.
   ///
   /// Returns raw JSON data that can be parsed into Podcast models.

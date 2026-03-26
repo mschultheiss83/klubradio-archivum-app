@@ -414,12 +414,6 @@ abstract class AppLocalizations {
   /// **'Top Shows'**
   String get discoverScreenFeaturedCategoriesTitle;
 
-  /// Title for the recommended shows section on the Discover screen.
-  ///
-  /// In en, this message translates to:
-  /// **'Recommended Shows'**
-  String get discoverScreenRecommendedShowsTitle;
-
   /// Title for the trending podcasts section on the Discover screen.
   ///
   /// In en, this message translates to:
@@ -431,12 +425,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No featured shows available.'**
   String get discoverScreenNoTopShows;
-
-  /// Message shown when there are no recommended podcasts to display.
-  ///
-  /// In en, this message translates to:
-  /// **'No recommendations available. Please refresh the data later.'**
-  String get recommendedPodcastsNoRecommendations;
 
   /// Message shown when there are no trending podcasts to display.
   ///
@@ -1079,6 +1067,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Become a supporter!'**
   String get aboutScreenContributionsEmpty;
+
+  /// No description provided for @playerTooltipPrevious.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous Episode'**
+  String get playerTooltipPrevious;
+
+  /// No description provided for @playerTooltipPlay.
+  ///
+  /// In en, this message translates to:
+  /// **'Play'**
+  String get playerTooltipPlay;
+
+  /// No description provided for @playerTooltipPause.
+  ///
+  /// In en, this message translates to:
+  /// **'Pause'**
+  String get playerTooltipPause;
+
+  /// No description provided for @playerTooltipNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next Episode'**
+  String get playerTooltipNext;
+
+  /// No description provided for @discoverScreenLatestShowsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Latest Shows'**
+  String get discoverScreenLatestShowsTitle;
+
+  /// No description provided for @discoverScreenNoLatestShows.
+  ///
+  /// In en, this message translates to:
+  /// **'No shows available. Pull to refresh.'**
+  String get discoverScreenNoLatestShows;
+
+  /// Error message in download list.
+  ///
+  /// In en, this message translates to:
+  /// **'Error: {details}'**
+  String downloads_error(String details);
+
+  /// No description provided for @aboutScreenLegalNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Legal information not found.'**
+  String get aboutScreenLegalNotFound;
 }
 
 class _AppLocalizationsDelegate

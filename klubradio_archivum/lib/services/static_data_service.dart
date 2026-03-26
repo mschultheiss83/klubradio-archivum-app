@@ -20,11 +20,6 @@ class StaticDataService {
     return _loadBundle('assets/data/trending_podcasts.json');
   }
 
-  /// Loads recommended podcasts from the bundled data.
-  Future<List<Map<String, dynamic>>> loadRecommendedPodcasts() async {
-    return _loadBundle('assets/data/recommended_podcasts.json');
-  }
-
   /// Loads recent episodes from the bundled data.
   Future<List<Map<String, dynamic>>> loadRecentEpisodes() async {
     return _loadBundle('assets/data/recent_episodes.json');

@@ -17,6 +17,10 @@ This folder contains issue-specific notes, backlog items, and supporting screens
 - [feature-contributions.md](feature-contributions.md)
 - [feature-download-overview.md](feature-download-overview.md)
 
+## Bug Scan Reports
+
+- [bug-scan-2026-03-26.md](bug-scan-2026-03-26.md) — Full codebase audit: 46 bugs (7 critical, 15 high, 14 medium, 10 low)
+
 ## Known Bugs (Upstream)
 
 - [bug-just-audio-threading.md](bug-just-audio-threading.md)

@@ -17,7 +17,6 @@ import 'providers/episode_provider.dart';
 import 'providers/podcast_provider.dart';
 import 'providers/latest_provider.dart';
 import 'providers/theme_provider.dart';
-import 'providers/recommended_provider.dart';
 import 'services/api_cache_service.dart';
 import 'services/api_service.dart';
 import 'services/audio_player_service.dart';
@@ -149,9 +148,6 @@ class _KlubradioArchivumAppState extends State<KlubradioArchivumApp> {
         ),
         ChangeNotifierProvider<LatestProvider>(
           create: (ctx) => LatestProvider(ctx.read<PodcastRepository>()),
-        ),
-        ChangeNotifierProvider<RecommendedProvider>(
-          create: (ctx) => RecommendedProvider(ctx.read<PodcastRepository>()),
         ),
         // Theme provider (consumed by the single MaterialApp below)
         ChangeNotifierProvider<ThemeProvider>(create: (_) => ThemeProvider()),

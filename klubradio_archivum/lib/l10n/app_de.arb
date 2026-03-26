@@ -248,20 +248,12 @@
   "@discoverScreenFeaturedCategoriesTitle": {
     "description": "Titel für den Abschnitt Top-Kategorien auf dem Entdecken-Bildschirm."
   },
-  "discoverScreenRecommendedShowsTitle": "Empfohlene Sendungen",
-  "@discoverScreenRecommendedShowsTitle": {
-    "description": "Titel für den Abschnitt Empfohlene Sendungen auf dem Entdecken-Bildschirm."
-  },
   "discoverScreenTrendingTitle": "Angesagt",
   "@discoverScreenTrendingTitle": {
     "description": "Titel für den Abschnitt Angesagte Podcasts auf dem Entdecken-Bildschirm."
   },
   "discoverScreenNoTopShows": "Keine vorgestellten Sendungen verfügbar.",
 
-  "recommendedPodcastsNoRecommendations": "Keine Empfehlungen verfügbar. Bitte aktualisiere die Daten später.",
-  "@recommendedPodcastsNoRecommendations": {
-    "description": "Nachricht, die angezeigt wird, wenn keine empfohlenen Podcasts vorhanden sind."
-  },
 
   "trendingPodcastsNoShows": "Keine angesagten Sendungen auf der Liste.",
   "@trendingPodcastsNoShows": {
@@ -532,6 +524,24 @@
   "privacySettingsRowSubtitle": "Tippen, um die Datenschutz- und Sicherheitshinweise anzuzeigen.",
   "aboutScreenAppIdLabel": "App-ID",
   "aboutScreenContributionsTitle": "Unterstützer",
-  "aboutScreenContributionsEmpty": "Werde Unterstützer!"
+  "aboutScreenContributionsEmpty": "Werde Unterstützer!",
+
+  "playerTooltipPrevious": "Vorherige Folge",
+  "playerTooltipPlay": "Abspielen",
+  "playerTooltipPause": "Pause",
+  "playerTooltipNext": "Nächste Folge",
+
+  "discoverScreenLatestShowsTitle": "Neueste Sendungen",
+  "discoverScreenNoLatestShows": "Keine Sendungen verfügbar. Zum Aktualisieren herunterziehen.",
+
+  "downloads_error": "Fehler: {details}",
+  "@downloads_error": {
+    "description": "Error message in download list.",
+    "placeholders": {
+      "details": { "type": "String" }
+    }
+  },
+
+  "aboutScreenLegalNotFound": "Rechtliche Informationen nicht gefunden."
 
 }

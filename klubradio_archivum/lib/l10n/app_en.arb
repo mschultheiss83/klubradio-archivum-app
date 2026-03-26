@@ -247,20 +247,11 @@
   "@discoverScreenFeaturedCategoriesTitle": {
     "description": "Title for the featured/top categories section on the Discover screen."
   },
-  "discoverScreenRecommendedShowsTitle": "Recommended Shows",
-  "@discoverScreenRecommendedShowsTitle": {
-    "description": "Title for the recommended shows section on the Discover screen."
-  },
   "discoverScreenTrendingTitle": "Trending",
   "@discoverScreenTrendingTitle": {
     "description": "Title for the trending podcasts section on the Discover screen."
   },
   "discoverScreenNoTopShows": "No featured shows available.",
-
-  "recommendedPodcastsNoRecommendations": "No recommendations available. Please refresh the data later.",
-  "@recommendedPodcastsNoRecommendations": {
-    "description": "Message shown when there are no recommended podcasts to display."
-  },
 
   "trendingPodcastsNoShows": "No trending shows on the list.",
   "@trendingPodcastsNoShows": {
@@ -570,6 +561,24 @@
   "aboutScreenContributionsEmpty": "Become a supporter!",
   "@aboutScreenContributionsEmpty": {
     "description": "Message shown when the supporters list is empty."
-  }
+  },
+
+  "playerTooltipPrevious": "Previous Episode",
+  "playerTooltipPlay": "Play",
+  "playerTooltipPause": "Pause",
+  "playerTooltipNext": "Next Episode",
+
+  "discoverScreenLatestShowsTitle": "Latest Shows",
+  "discoverScreenNoLatestShows": "No shows available. Pull to refresh.",
+
+  "downloads_error": "Error: {details}",
+  "@downloads_error": {
+    "description": "Error message in download list.",
+    "placeholders": {
+      "details": { "type": "String" }
+    }
+  },
+
+  "aboutScreenLegalNotFound": "Legal information not found."
 
 }

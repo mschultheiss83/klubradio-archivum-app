@@ -6,9 +6,8 @@ import 'package:provider/provider.dart';
 import 'package:klubradio_archivum/l10n/app_localizations.dart';
 import 'package:klubradio_archivum/providers/podcast_provider.dart';
 import 'package:klubradio_archivum/providers/latest_provider.dart';
-import 'package:klubradio_archivum/providers/recommended_provider.dart';
+import 'package:klubradio_archivum/screens/widgets/stateless/podcast_list_item.dart';
 
-import 'recommended_podcasts_list.dart';
 import 'top_shows_list.dart';
 
 class DiscoverScreen extends StatefulWidget {
@@ -27,17 +26,12 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
     Future.microtask(() async {
       if (!mounted) return;
       final latest = context.read<LatestProvider>();
-      final rec = context.read<RecommendedProvider>();
 
       // Cache-first sofort anzeigen
-      await Future.wait([
-        latest.load(useCacheFirst: true),
-        rec.load(useCacheFirst: true),
-      ], eagerError: false);
+      await latest.load(useCacheFirst: true);
 
       // im Hintergrund frische Daten (UI bleibt sichtbar)
       unawaited(latest.load(useCacheFirst: false));
-      unawaited(rec.load(useCacheFirst: false));
     });
   }
 
@@ -50,22 +44,6 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
         if (!mounted) return;
         context.read<PodcastProvider>().loadInitialData();
       });
-
-      WidgetsBinding.instance.addPostFrameCallback((_) async {
-        if (!mounted) return;
-        final latest = context.read<LatestProvider>();
-        final rec = context.read<RecommendedProvider>();
-
-        // Cache-first schnell, danach still fresh
-        await Future.wait([
-          latest.load(useCacheFirst: true),
-          rec.load(useCacheFirst: true),
-        ], eagerError: false);
-
-        // Silent refresh (UI bleibt sichtbar)
-        latest.load(useCacheFirst: false);
-        rec.load(useCacheFirst: false);
-      });
     }
   }
 
@@ -74,9 +52,8 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
     final l10n = AppLocalizations.of(context)!;
 
     final latest = context.watch<LatestProvider>();
-    final topShowsData = context
-        .watch<PodcastProvider>()
-        .topShows; // bleibt wie gehabt
+    final podcastProvider = context.watch<PodcastProvider>();
+    final topShowsData = podcastProvider.topShows;
 
     return RefreshIndicator(
       onRefresh: () async {
@@ -94,21 +71,33 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
           ),
           const SizedBox(height: 8),
 
-          if (latest.loading && latest.items.isEmpty)
+          if (podcastProvider.isLoadingTopShows && topShowsData.isEmpty)
             const Center(child: CircularProgressIndicator())
           else
             TopShowsList(topShows: topShowsData),
           const SizedBox(height: 24),
 
           Text(
-            l10n.discoverScreenRecommendedShowsTitle,
+            l10n.discoverScreenLatestShowsTitle,
             style: Theme.of(context).textTheme.titleLarge,
           ),
           const SizedBox(height: 12),
           if (latest.loading && latest.items.isEmpty)
             const Center(child: CircularProgressIndicator())
+          else if (latest.items.isEmpty)
+            Text(
+              l10n.discoverScreenNoLatestShows,
+              style: Theme.of(context).textTheme.bodyMedium,
+            )
           else
-            RecommendedPodcastsList(podcasts: latest.items),
+            ListView.separated(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: latest.items.length,
+              separatorBuilder: (_, _) => const SizedBox(height: 12),
+              itemBuilder: (context, index) =>
+                  PodcastListItem(podcast: latest.items[index]),
+            ),
         ],
       ),
     );

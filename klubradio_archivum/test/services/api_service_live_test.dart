@@ -43,7 +43,6 @@ void main() {
         final latest = await service.fetchLatestPodcasts(limit: 5);
         // final recentEpisodes = await service.fetchRecentEpisodes(limit: 20);
         final trending = await service.fetchTrendingPodcasts(limit: 10);
-        final recommended = await service.fetchRecommendedPodcasts(limit: 10);
 
         final latestEpisodes = await service.fetchEpisodesForPodcast(
           latest.first.id,
@@ -57,9 +56,6 @@ void main() {
           'generatedAt': DateTime.now().toIso8601String(),
           'latestPodcasts': latest.map((podcast) => podcast.toJson()).toList(),
           'trendingPodcasts': trending
-              .map((podcast) => podcast.toJson())
-              .toList(),
-          'recommendedPodcasts': recommended
               .map((podcast) => podcast.toJson())
               .toList(),
           'latestEpisodes': latestEpisodes

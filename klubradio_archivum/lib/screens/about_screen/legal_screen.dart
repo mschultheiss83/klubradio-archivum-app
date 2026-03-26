@@ -26,7 +26,7 @@ class LegalScreen extends StatelessWidget {
             if (!snap.hasData || snap.data!.isEmpty) {
               return Center(
                 child: Text(
-                  'LEGAL.md not found',
+                  l10n.aboutScreenLegalNotFound,
                   style: textTheme.bodyMedium?.copyWith(color: cs.error),
                 ),
               );

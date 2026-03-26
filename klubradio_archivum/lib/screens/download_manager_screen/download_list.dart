@@ -213,7 +213,7 @@ class _CompletedDownloadTile extends StatelessWidget {
                 return const CircularProgressIndicator();
               }
               if (snap.hasError) {
-                return Text('Error: ${snap.error}');
+                return Text(l10n.downloads_error(snap.error.toString()));
               }
               final showDate = snap.data?.showDate ?? '';
               final base =

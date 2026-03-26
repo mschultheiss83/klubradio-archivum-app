@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:klubradio_archivum/l10n/app_localizations.dart';
 import 'package:klubradio_archivum/providers/episode_provider.dart';
 import 'package:klubradio_archivum/screens/utils/constants.dart' as constants;
 
@@ -130,25 +131,26 @@ class _TransportCluster extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Row(
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         IconButton(
           iconSize: 36,
-          tooltip: 'Previous Episode',
+          tooltip: l10n.playerTooltipPrevious,
           icon: const Icon(Icons.skip_previous),
           onPressed: onPrev,
         ),
         IconButton(
           iconSize: 48,
-          tooltip: isPlaying ? 'Pause' : 'Play',
+          tooltip: isPlaying ? l10n.playerTooltipPause : l10n.playerTooltipPlay,
           icon: Icon(isPlaying ? Icons.pause_circle : Icons.play_circle),
           onPressed: onPlayPause,
         ),
         IconButton(
           iconSize: 36,
-          tooltip: 'Next Episode',
+          tooltip: l10n.playerTooltipNext,
           icon: const Icon(Icons.skip_next),
           onPressed: onNext,
         ),

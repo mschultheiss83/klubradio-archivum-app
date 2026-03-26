@@ -37,7 +37,6 @@
 ├── klubradio_archivum/lib/providers/latest_provider.dart
 ├── klubradio_archivum/lib/providers/podcast_provider.dart
 ├── klubradio_archivum/lib/providers/profile_provider.dart
-├── klubradio_archivum/lib/providers/recommended_provider.dart
 ├── klubradio_archivum/lib/providers/subscription_provider.dart
 ├── klubradio_archivum/lib/providers/theme_provider.dart
 ├── klubradio_archivum/lib/repositories/podcast_repository.dart
@@ -46,7 +45,6 @@
 ├── klubradio_archivum/lib/screens/about_screen/legal_screen.dart
 ├── klubradio_archivum/lib/screens/app_shell/app_shell.dart
 ├── klubradio_archivum/lib/screens/discover_screen/discover_screen.dart
-├── klubradio_archivum/lib/screens/discover_screen/recommended_podcasts_list.dart
 ├── klubradio_archivum/lib/screens/discover_screen/top_shows_list.dart
 ├── klubradio_archivum/lib/screens/discover_screen/trending_podcasts_list.dart
 ├── klubradio_archivum/lib/screens/download_manager_screen/download_list.dart
@@ -710,17 +708,6 @@ class PodcastApi {
     final url =
         '$baseUrl/rest/v1/${constants.podcastsTable}?select=*&order=last_updated.desc&limit=$limit';
     debugPrint('latest url: $url');
-    final json = await _requester.getJson(url);
-    return (json as List).cast<Map<String, dynamic>>();
-  }
-
-  /// Fetches recommended podcasts.
-  ///
-  /// Returns raw JSON data that can be parsed into Podcast models.
-  Future<List<Map<String, dynamic>>> recommended({int limit = 10}) async {
-    final url =
-        '$baseUrl/rest/v1/${constants.podcastsTable}?select=*&order=last_updated.desc.nullslast&limit=$limit';
-    debugPrint('recommended url: $url');
     final json = await _requester.getJson(url);
     return (json as List).cast<Map<String, dynamic>>();
   }
@@ -5397,12 +5384,6 @@ abstract class AppLocalizations {
   /// **'Top Shows'**
   String get discoverScreenFeaturedCategoriesTitle;
 
-  /// Title for the recommended shows section on the Discover screen.
-  ///
-  /// In en, this message translates to:
-  /// **'Recommended Shows'**
-  String get discoverScreenRecommendedShowsTitle;
-
   /// Title for the trending podcasts section on the Discover screen.
   ///
   /// In en, this message translates to:
@@ -5414,12 +5395,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No featured shows available.'**
   String get discoverScreenNoTopShows;
-
-  /// Message shown when there are no recommended podcasts to display.
-  ///
-  /// In en, this message translates to:
-  /// **'No recommendations available. Please refresh the data later.'**
-  String get recommendedPodcastsNoRecommendations;
 
   /// Message shown when there are no trending podcasts to display.
   ///
@@ -6062,6 +6037,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Become a supporter!'**
   String get aboutScreenContributionsEmpty;
+
+  /// No description provided for @playerTooltipPrevious.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous Episode'**
+  String get playerTooltipPrevious;
+
+  /// No description provided for @playerTooltipPlay.
+  ///
+  /// In en, this message translates to:
+  /// **'Play'**
+  String get playerTooltipPlay;
+
+  /// No description provided for @playerTooltipPause.
+  ///
+  /// In en, this message translates to:
+  /// **'Pause'**
+  String get playerTooltipPause;
+
+  /// No description provided for @playerTooltipNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next Episode'**
+  String get playerTooltipNext;
+
+  /// No description provided for @discoverScreenLatestShowsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Latest Shows'**
+  String get discoverScreenLatestShowsTitle;
+
+  /// No description provided for @discoverScreenNoLatestShows.
+  ///
+  /// In en, this message translates to:
+  /// **'No shows available. Pull to refresh.'**
+  String get discoverScreenNoLatestShows;
+
+  /// Error message in download list.
+  ///
+  /// In en, this message translates to:
+  /// **'Error: {details}'**
+  String downloads_error(String details);
+
+  /// No description provided for @aboutScreenLegalNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Legal information not found.'**
+  String get aboutScreenLegalNotFound;
 }
 
 class _AppLocalizationsDelegate
@@ -6297,18 +6320,11 @@ class AppLocalizationsDe extends AppLocalizations {
   String get discoverScreenFeaturedCategoriesTitle => 'Top-Sendungen';
 
   @override
-  String get discoverScreenRecommendedShowsTitle => 'Empfohlene Sendungen';
-
-  @override
   String get discoverScreenTrendingTitle => 'Angesagt';
 
   @override
   String get discoverScreenNoTopShows =>
       'Keine vorgestellten Sendungen verfügbar.';
-
-  @override
-  String get recommendedPodcastsNoRecommendations =>
-      'Keine Empfehlungen verfügbar. Bitte aktualisiere die Daten später.';
 
   @override
   String get trendingPodcastsNoShows =>
@@ -6664,6 +6680,34 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get aboutScreenContributionsEmpty => 'Werde Unterstützer!';
+
+  @override
+  String get playerTooltipPrevious => 'Vorherige Folge';
+
+  @override
+  String get playerTooltipPlay => 'Abspielen';
+
+  @override
+  String get playerTooltipPause => 'Pause';
+
+  @override
+  String get playerTooltipNext => 'Nächste Folge';
+
+  @override
+  String get discoverScreenLatestShowsTitle => 'Neueste Sendungen';
+
+  @override
+  String get discoverScreenNoLatestShows =>
+      'Keine Sendungen verfügbar. Zum Aktualisieren herunterziehen.';
+
+  @override
+  String downloads_error(String details) {
+    return 'Fehler: $details';
+  }
+
+  @override
+  String get aboutScreenLegalNotFound =>
+      'Rechtliche Informationen nicht gefunden.';
 }
 ```
 
@@ -6860,17 +6904,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get discoverScreenFeaturedCategoriesTitle => 'Top Shows';
 
   @override
-  String get discoverScreenRecommendedShowsTitle => 'Recommended Shows';
-
-  @override
   String get discoverScreenTrendingTitle => 'Trending';
 
   @override
   String get discoverScreenNoTopShows => 'No featured shows available.';
-
-  @override
-  String get recommendedPodcastsNoRecommendations =>
-      'No recommendations available. Please refresh the data later.';
 
   @override
   String get trendingPodcastsNoShows => 'No trending shows on the list.';
@@ -7222,6 +7259,33 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get aboutScreenContributionsEmpty => 'Become a supporter!';
+
+  @override
+  String get playerTooltipPrevious => 'Previous Episode';
+
+  @override
+  String get playerTooltipPlay => 'Play';
+
+  @override
+  String get playerTooltipPause => 'Pause';
+
+  @override
+  String get playerTooltipNext => 'Next Episode';
+
+  @override
+  String get discoverScreenLatestShowsTitle => 'Latest Shows';
+
+  @override
+  String get discoverScreenNoLatestShows =>
+      'No shows available. Pull to refresh.';
+
+  @override
+  String downloads_error(String details) {
+    return 'Error: $details';
+  }
+
+  @override
+  String get aboutScreenLegalNotFound => 'Legal information not found.';
 }
 ```
 
@@ -7419,17 +7483,10 @@ class AppLocalizationsHu extends AppLocalizations {
   String get discoverScreenFeaturedCategoriesTitle => 'Kiemelt műsorok';
 
   @override
-  String get discoverScreenRecommendedShowsTitle => 'Ajánlott műsorok';
-
-  @override
   String get discoverScreenTrendingTitle => 'Felkapott';
 
   @override
   String get discoverScreenNoTopShows => 'Nincsenek kiemelt műsorok.';
-
-  @override
-  String get recommendedPodcastsNoRecommendations =>
-      'Nincs elérhető ajánlás. Frissítsd az adatokat később.';
 
   @override
   String get trendingPodcastsNoShows => 'Nincs felkapott műsor a listán.';
@@ -7782,6 +7839,33 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get aboutScreenContributionsEmpty => 'Légy támogató!';
+
+  @override
+  String get playerTooltipPrevious => 'Előző epizód';
+
+  @override
+  String get playerTooltipPlay => 'Lejátszás';
+
+  @override
+  String get playerTooltipPause => 'Szünet';
+
+  @override
+  String get playerTooltipNext => 'Következő epizód';
+
+  @override
+  String get discoverScreenLatestShowsTitle => 'Legújabb műsorok';
+
+  @override
+  String get discoverScreenNoLatestShows =>
+      'Nincsenek elérhető műsorok. Húzd le a frissítéshez.';
+
+  @override
+  String downloads_error(String details) {
+    return 'Hiba: $details';
+  }
+
+  @override
+  String get aboutScreenLegalNotFound => 'Jogi információk nem találhatók.';
 }
 ```
 
@@ -7979,17 +8063,10 @@ class AppLocalizationsRo extends AppLocalizations {
   String get discoverScreenFeaturedCategoriesTitle => 'Emisiuni populare';
 
   @override
-  String get discoverScreenRecommendedShowsTitle => 'Emisiuni recomandate';
-
-  @override
   String get discoverScreenTrendingTitle => 'În tendințe';
 
   @override
   String get discoverScreenNoTopShows => 'Nicio emisiune populară disponibilă.';
-
-  @override
-  String get recommendedPodcastsNoRecommendations =>
-      'Nicio recomandare disponibilă. Vă rugăm să reîmprospătați datele mai târziu.';
 
   @override
   String get trendingPodcastsNoShows => 'Nicio emisiune în tendințe în listă.';
@@ -8346,6 +8423,34 @@ class AppLocalizationsRo extends AppLocalizations {
 
   @override
   String get aboutScreenContributionsEmpty => 'Devino susținător!';
+
+  @override
+  String get playerTooltipPrevious => 'Episodul anterior';
+
+  @override
+  String get playerTooltipPlay => 'Redare';
+
+  @override
+  String get playerTooltipPause => 'Pauză';
+
+  @override
+  String get playerTooltipNext => 'Episodul următor';
+
+  @override
+  String get discoverScreenLatestShowsTitle => 'Cele mai recente emisiuni';
+
+  @override
+  String get discoverScreenNoLatestShows =>
+      'Nu sunt emisiuni disponibile. Trageți pentru a reîmprospăta.';
+
+  @override
+  String downloads_error(String details) {
+    return 'Eroare: $details';
+  }
+
+  @override
+  String get aboutScreenLegalNotFound =>
+      'Informațiile juridice nu au fost găsite.';
 }
 ```
 
@@ -8370,7 +8475,6 @@ import 'providers/episode_provider.dart';
 import 'providers/podcast_provider.dart';
 import 'providers/latest_provider.dart';
 import 'providers/theme_provider.dart';
-import 'providers/recommended_provider.dart';
 import 'services/api_cache_service.dart';
 import 'services/api_service.dart';
 import 'services/audio_player_service.dart';
@@ -8502,9 +8606,6 @@ class _KlubradioArchivumAppState extends State<KlubradioArchivumApp> {
         ),
         ChangeNotifierProvider<LatestProvider>(
           create: (ctx) => LatestProvider(ctx.read<PodcastRepository>()),
-        ),
-        ChangeNotifierProvider<RecommendedProvider>(
-          create: (ctx) => RecommendedProvider(ctx.read<PodcastRepository>()),
         ),
         // Theme provider (consumed by the single MaterialApp below)
         ChangeNotifierProvider<ThemeProvider>(create: (_) => ThemeProvider()),
@@ -9576,7 +9677,6 @@ class PodcastProvider extends ChangeNotifier {
 
   List<Podcast> _podcasts = <Podcast>[];
   List<Podcast> _trendingPodcasts = <Podcast>[];
-  List<Podcast> _recommendedPodcasts = <Podcast>[];
   List<Episode> _recentEpisodes = <Episode>[];
 
   List<ShowData> _topShows = [];
@@ -9590,7 +9690,6 @@ class PodcastProvider extends ChangeNotifier {
 
   List<Podcast> get podcasts => _podcasts;
   List<Podcast> get trendingPodcasts => _trendingPodcasts;
-  List<Podcast> get recommendedPodcasts => _recommendedPodcasts;
   List<Episode> get recentEpisodes => _recentEpisodes;
   UserProfile? get userProfile => _userProfile;
   bool get isLoading => _isLoading;
@@ -9665,11 +9764,6 @@ class PodcastProvider extends ChangeNotifier {
         () => _apiService.fetchLatestPodcasts(),
       );
 
-      final fRecommended = _measure<List<Podcast>>(
-        'recommended',
-        () => _apiService.fetchRecommendedPodcasts(),
-      );
-
       final fTrending = _measure<List<Podcast>>(
         'trending',
         () => _apiService.fetchTrendingPodcasts(),
@@ -9687,7 +9781,6 @@ class PodcastProvider extends ChangeNotifier {
       final results = await Future.wait([
         fLatest,
         fTrending,
-        fRecommended,
         fRecent,
         fTopShows,
       ]);
@@ -9695,12 +9788,10 @@ class PodcastProvider extends ChangeNotifier {
       // Zuordnen, was da ist
       final latestPodcasts = results[0] as List<Podcast>?;
       final trending = results[1] as List<Podcast>?;
-      final recommended = results[2] as List<Podcast>?;
-      final recent = results[3] as List<Episode>?;
+      final recent = results[2] as List<Episode>?;
 
       if (latestPodcasts != null) _podcasts = latestPodcasts;
       if (trending != null) _trendingPodcasts = trending;
-      if (recommended != null) _recommendedPodcasts = recommended;
       if (recent != null) _recentEpisodes = recent;
 
       if (kDebugMode) {
@@ -9728,10 +9819,6 @@ class PodcastProvider extends ChangeNotifier {
     }
   }
 
-
-
-
-
   Future<void> downloadEpisode(Episode episode) async {
     try {
       await _downloadProvider.enqueue(episode);
@@ -9744,8 +9831,6 @@ class PodcastProvider extends ChangeNotifier {
     await _downloadProvider.removeLocalFile(episodeId);
     notifyListeners();
   }
-
-
 
   Future<List<Episode>> fetchEpisodesForPodcast(String podcastId) async {
     var episodes = _episodesByPodcast[podcastId];
@@ -9829,9 +9914,9 @@ class PodcastProvider extends ChangeNotifier {
 
     _isLoadingTopShows = true;
     notifyListeners();
+    final s0 = DateTime.now();
 
     try {
-      final s0 = DateTime.now();
       _topShows = await _apiService.fetchTopShowsThisYear();
       final s1 = DateTime.now();
       if (kDebugMode) {
@@ -9842,17 +9927,13 @@ class PodcastProvider extends ChangeNotifier {
     } catch (e) {
       final s1 = DateTime.now();
       debugPrint(
-        'LOAD ← topShows ERR Δ=${s1.difference(s1).inMilliseconds}ms  $e',
+        'LOAD ← topShows ERR Δ=${s1.difference(s0).inMilliseconds}ms  $e',
       );
     } finally {
       _isLoadingTopShows = false;
       notifyListeners();
     }
   }
-
-
-
-
 }
 ```
 
@@ -9931,36 +10012,6 @@ class ProfileProvider extends ChangeNotifier {
     _profile = profile.copyWith(recentlyPlayed: updated);
     await _repo.save(profile);
     notifyListeners();
-  }
-}
-```
-
-### Inhalt von `klubradio_archivum/lib/providers/recommended_provider.dart`
-```dart
-import 'package:flutter/foundation.dart';
-import 'package:klubradio_archivum/models/podcast.dart';
-import 'package:klubradio_archivum/repositories/podcast_repository.dart';
-
-class RecommendedProvider extends ChangeNotifier {
-  RecommendedProvider(this.repo);
-  final PodcastRepository repo;
-
-  List<Podcast> items = const [];
-  String? error;
-  bool loading = false;
-
-  Future<void> load({bool useCacheFirst = true}) async {
-    loading = true;
-    error = null;
-    notifyListeners();
-    try {
-      items = await repo.recommended(useCacheFirst: useCacheFirst);
-    } catch (e) {
-      error = e.toString();
-    } finally {
-      loading = false;
-      notifyListeners();
-    }
   }
 }
 ```
@@ -10157,15 +10208,6 @@ class PodcastRepository {
       cacheName: 'latest_podcasts.json',
       fetch: () async =>
           (await api.latest()).map((e) => Podcast.fromJson(e)).toList(),
-      useCacheFirst: useCacheFirst,
-    );
-  }
-
-  Future<List<Podcast>> recommended({bool useCacheFirst = true}) async {
-    return _cachedList(
-      cacheName: 'recommended_podcasts.json',
-      fetch: () async =>
-          (await api.recommended()).map((e) => Podcast.fromJson(e)).toList(),
       useCacheFirst: useCacheFirst,
     );
   }
@@ -10544,7 +10586,7 @@ class LegalScreen extends StatelessWidget {
             if (!snap.hasData || snap.data!.isEmpty) {
               return Center(
                 child: Text(
-                  'LEGAL.md not found',
+                  l10n.aboutScreenLegalNotFound,
                   style: textTheme.bodyMedium?.copyWith(color: cs.error),
                 ),
               );
@@ -10812,9 +10854,8 @@ import 'package:provider/provider.dart';
 import 'package:klubradio_archivum/l10n/app_localizations.dart';
 import 'package:klubradio_archivum/providers/podcast_provider.dart';
 import 'package:klubradio_archivum/providers/latest_provider.dart';
-import 'package:klubradio_archivum/providers/recommended_provider.dart';
+import 'package:klubradio_archivum/screens/widgets/stateless/podcast_list_item.dart';
 
-import 'recommended_podcasts_list.dart';
 import 'top_shows_list.dart';
 
 class DiscoverScreen extends StatefulWidget {
@@ -10833,17 +10874,12 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
     Future.microtask(() async {
       if (!mounted) return;
       final latest = context.read<LatestProvider>();
-      final rec = context.read<RecommendedProvider>();
 
       // Cache-first sofort anzeigen
-      await Future.wait([
-        latest.load(useCacheFirst: true),
-        rec.load(useCacheFirst: true),
-      ], eagerError: false);
+      await latest.load(useCacheFirst: true);
 
       // im Hintergrund frische Daten (UI bleibt sichtbar)
       unawaited(latest.load(useCacheFirst: false));
-      unawaited(rec.load(useCacheFirst: false));
     });
   }
 
@@ -10856,22 +10892,6 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
         if (!mounted) return;
         context.read<PodcastProvider>().loadInitialData();
       });
-
-      WidgetsBinding.instance.addPostFrameCallback((_) async {
-        if (!mounted) return;
-        final latest = context.read<LatestProvider>();
-        final rec = context.read<RecommendedProvider>();
-
-        // Cache-first schnell, danach still fresh
-        await Future.wait([
-          latest.load(useCacheFirst: true),
-          rec.load(useCacheFirst: true),
-        ], eagerError: false);
-
-        // Silent refresh (UI bleibt sichtbar)
-        latest.load(useCacheFirst: false);
-        rec.load(useCacheFirst: false);
-      });
     }
   }
 
@@ -10880,9 +10900,8 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
     final l10n = AppLocalizations.of(context)!;
 
     final latest = context.watch<LatestProvider>();
-    final topShowsData = context
-        .watch<PodcastProvider>()
-        .topShows; // bleibt wie gehabt
+    final podcastProvider = context.watch<PodcastProvider>();
+    final topShowsData = podcastProvider.topShows;
 
     return RefreshIndicator(
       onRefresh: () async {
@@ -10900,64 +10919,35 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
           ),
           const SizedBox(height: 8),
 
-          if (latest.loading && latest.items.isEmpty)
+          if (podcastProvider.isLoadingTopShows && topShowsData.isEmpty)
             const Center(child: CircularProgressIndicator())
           else
             TopShowsList(topShows: topShowsData),
           const SizedBox(height: 24),
 
           Text(
-            l10n.discoverScreenRecommendedShowsTitle,
+            l10n.discoverScreenLatestShowsTitle,
             style: Theme.of(context).textTheme.titleLarge,
           ),
           const SizedBox(height: 12),
           if (latest.loading && latest.items.isEmpty)
             const Center(child: CircularProgressIndicator())
+          else if (latest.items.isEmpty)
+            Text(
+              l10n.discoverScreenNoLatestShows,
+              style: Theme.of(context).textTheme.bodyMedium,
+            )
           else
-            RecommendedPodcastsList(podcasts: latest.items),
+            ListView.separated(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: latest.items.length,
+              separatorBuilder: (_, _) => const SizedBox(height: 12),
+              itemBuilder: (context, index) =>
+                  PodcastListItem(podcast: latest.items[index]),
+            ),
         ],
       ),
-    );
-  }
-}
-```
-
-### Inhalt von `klubradio_archivum/lib/screens/discover_screen/recommended_podcasts_list.dart`
-```dart
-import 'package:flutter/material.dart';
-import 'package:klubradio_archivum/l10n/app_localizations.dart';
-
-import 'package:klubradio_archivum/models/podcast.dart';
-import 'package:klubradio_archivum/screens/widgets/stateless/podcast_list_item.dart';
-
-class RecommendedPodcastsList extends StatelessWidget {
-  const RecommendedPodcastsList({super.key, required this.podcasts});
-
-  final List<Podcast> podcasts;
-
-  @override
-  Widget build(BuildContext context) {
-    // Get l10n instance
-    final l10n = AppLocalizations.of(context)!;
-
-    if (podcasts.isEmpty) {
-      return Text(
-        l10n.recommendedPodcastsNoRecommendations, // Use localized string
-        style: Theme.of(context).textTheme.bodyMedium,
-        textAlign: TextAlign
-            .center, // Optional: for better display of multi-line messages
-      );
-    }
-
-    return ListView.separated(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: podcasts.length,
-      separatorBuilder: (_, _) => const SizedBox(height: 12),
-      itemBuilder: (BuildContext context, int index) {
-        final Podcast podcast = podcasts[index];
-        return PodcastListItem(podcast: podcast);
-      },
     );
   }
 }
@@ -11287,7 +11277,7 @@ class _CompletedDownloadTile extends StatelessWidget {
                 return const CircularProgressIndicator();
               }
               if (snap.hasError) {
-                return Text('Error: ${snap.error}');
+                return Text(l10n.downloads_error(snap.error.toString()));
               }
               final showDate = snap.data?.showDate ?? '';
               final base =
@@ -11930,6 +11920,7 @@ class SubscribedPodcastsList extends StatelessWidget {
 ### Inhalt von `klubradio_archivum/lib/screens/now_playing_screen/audio_player_controls.dart`
 ```dart
 import 'package:flutter/material.dart';
+import 'package:klubradio_archivum/l10n/app_localizations.dart';
 import 'package:klubradio_archivum/providers/episode_provider.dart';
 import 'package:klubradio_archivum/screens/utils/constants.dart' as constants;
 
@@ -12061,25 +12052,26 @@ class _TransportCluster extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Row(
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         IconButton(
           iconSize: 36,
-          tooltip: 'Previous Episode',
+          tooltip: l10n.playerTooltipPrevious,
           icon: const Icon(Icons.skip_previous),
           onPressed: onPrev,
         ),
         IconButton(
           iconSize: 48,
-          tooltip: isPlaying ? 'Pause' : 'Play',
+          tooltip: isPlaying ? l10n.playerTooltipPause : l10n.playerTooltipPlay,
           icon: Icon(isPlaying ? Icons.pause_circle : Icons.play_circle),
           onPressed: onPlayPause,
         ),
         IconButton(
           iconSize: 36,
-          tooltip: 'Next Episode',
+          tooltip: l10n.playerTooltipNext,
           icon: const Icon(Icons.skip_next),
           onPressed: onNext,
         ),
@@ -13982,7 +13974,7 @@ String formatDownloadStatus(BuildContext context, DownloadStatus status) {
     case DownloadStatus.queued:
       return l10n.downloadStatusQueued;
     case DownloadStatus.canceled:
-      return 'Canceled'; // Placeholder until localization is added
+      return l10n.downloads_status_canceled;
   }
 }
 
@@ -15150,49 +15142,7 @@ class ApiService {
     throw ApiException('Unable to fetch trending podcasts\n$serverMsg');
   }
 
-  Future<List<Podcast>> fetchRecommendedPodcasts({int limit = 10}) async {
-    const String cacheKey = 'recommended_podcasts';
-    final cachedData = await _cacheService.get(cacheKey);
-    if (cachedData != null) {
-      return (cachedData as List)
-          .whereType<Map<String, dynamic>>()
-          .map(Podcast.fromJson)
-          .map((p) => p.copyWith(isRecommended: true))
-          .toList();
-    }
 
-    if (!hasValidCredentials) {
-      return _mockPodcasts()
-          .take(limit)
-          .map((p) => p.copyWith(isRecommended: true))
-          .toList();
-    }
-
-    final uri = Uri.parse('$_supabaseUrl/rest/v1/${constants.podcastsTable}')
-        .replace(
-          queryParameters: {
-            'select': '*',
-            'order': 'last_updated.desc.nullslast',
-            // 'order': 'recommendation_score.desc.nullslast',
-            'limit': limit.toString(),
-          },
-        );
-    final res = await _httpClient
-        .get(uri, headers: _headers)
-        .timeout(_longTimeout);
-
-    if (res.statusCode >= 200 && res.statusCode < 300) {
-      final data = jsonDecode(res.body) as List<dynamic>;
-      await _cacheService.save(cacheKey, data, expiry: const Duration(hours: 3));
-      return data
-          .whereType<Map<String, dynamic>>()
-          .map(Podcast.fromJson)
-          .map((p) => p.copyWith(isRecommended: true))
-          .toList();
-    }
-    final serverMsg = getServerErrorMessage(res);
-    throw ApiException('Unable to fetch recommended podcasts\n$serverMsg');
-  }
 
   // =================== EPISODES ===================
 
@@ -16357,11 +16307,6 @@ class StaticDataService {
   /// Loads trending podcasts from the bundled data.
   Future<List<Map<String, dynamic>>> loadTrendingPodcasts() async {
     return _loadBundle('assets/data/trending_podcasts.json');
-  }
-
-  /// Loads recommended podcasts from the bundled data.
-  Future<List<Map<String, dynamic>>> loadRecommendedPodcasts() async {
-    return _loadBundle('assets/data/recommended_podcasts.json');
   }
 
   /// Loads recent episodes from the bundled data.
@@ -23754,7 +23699,6 @@ void main() {
         final latest = await service.fetchLatestPodcasts(limit: 5);
         // final recentEpisodes = await service.fetchRecentEpisodes(limit: 20);
         final trending = await service.fetchTrendingPodcasts(limit: 10);
-        final recommended = await service.fetchRecommendedPodcasts(limit: 10);
 
         final latestEpisodes = await service.fetchEpisodesForPodcast(
           latest.first.id,
@@ -23768,9 +23712,6 @@ void main() {
           'generatedAt': DateTime.now().toIso8601String(),
           'latestPodcasts': latest.map((podcast) => podcast.toJson()).toList(),
           'trendingPodcasts': trending
-              .map((podcast) => podcast.toJson())
-              .toList(),
-          'recommendedPodcasts': recommended
               .map((podcast) => podcast.toJson())
               .toList(),
           'latestEpisodes': latestEpisodes

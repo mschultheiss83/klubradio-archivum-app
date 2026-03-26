@@ -36,7 +36,6 @@ class PodcastProvider extends ChangeNotifier {
 
   List<Podcast> _podcasts = <Podcast>[];
   List<Podcast> _trendingPodcasts = <Podcast>[];
-  List<Podcast> _recommendedPodcasts = <Podcast>[];
   List<Episode> _recentEpisodes = <Episode>[];
 
   List<ShowData> _topShows = [];
@@ -50,7 +49,6 @@ class PodcastProvider extends ChangeNotifier {
 
   List<Podcast> get podcasts => _podcasts;
   List<Podcast> get trendingPodcasts => _trendingPodcasts;
-  List<Podcast> get recommendedPodcasts => _recommendedPodcasts;
   List<Episode> get recentEpisodes => _recentEpisodes;
   UserProfile? get userProfile => _userProfile;
   bool get isLoading => _isLoading;
@@ -125,11 +123,6 @@ class PodcastProvider extends ChangeNotifier {
         () => _apiService.fetchLatestPodcasts(),
       );
 
-      final fRecommended = _measure<List<Podcast>>(
-        'recommended',
-        () => _apiService.fetchRecommendedPodcasts(),
-      );
-
       final fTrending = _measure<List<Podcast>>(
         'trending',
         () => _apiService.fetchTrendingPodcasts(),
@@ -147,7 +140,6 @@ class PodcastProvider extends ChangeNotifier {
       final results = await Future.wait([
         fLatest,
         fTrending,
-        fRecommended,
         fRecent,
         fTopShows,
       ]);
@@ -155,12 +147,10 @@ class PodcastProvider extends ChangeNotifier {
       // Zuordnen, was da ist
       final latestPodcasts = results[0] as List<Podcast>?;
       final trending = results[1] as List<Podcast>?;
-      final recommended = results[2] as List<Podcast>?;
-      final recent = results[3] as List<Episode>?;
+      final recent = results[2] as List<Episode>?;
 
       if (latestPodcasts != null) _podcasts = latestPodcasts;
       if (trending != null) _trendingPodcasts = trending;
-      if (recommended != null) _recommendedPodcasts = recommended;
       if (recent != null) _recentEpisodes = recent;
 
       if (kDebugMode) {
@@ -188,10 +178,6 @@ class PodcastProvider extends ChangeNotifier {
     }
   }
 
-
-
-
-
   Future<void> downloadEpisode(Episode episode) async {
     try {
       await _downloadProvider.enqueue(episode);
@@ -204,8 +190,6 @@ class PodcastProvider extends ChangeNotifier {
     await _downloadProvider.removeLocalFile(episodeId);
     notifyListeners();
   }
-
-
 
   Future<List<Episode>> fetchEpisodesForPodcast(String podcastId) async {
     var episodes = _episodesByPodcast[podcastId];
@@ -289,9 +273,9 @@ class PodcastProvider extends ChangeNotifier {
 
     _isLoadingTopShows = true;
     notifyListeners();
+    final s0 = DateTime.now();
 
     try {
-      final s0 = DateTime.now();
       _topShows = await _apiService.fetchTopShowsThisYear();
       final s1 = DateTime.now();
       if (kDebugMode) {
@@ -302,15 +286,11 @@ class PodcastProvider extends ChangeNotifier {
     } catch (e) {
       final s1 = DateTime.now();
       debugPrint(
-        'LOAD ← topShows ERR Δ=${s1.difference(s1).inMilliseconds}ms  $e',
+        'LOAD ← topShows ERR Δ=${s1.difference(s0).inMilliseconds}ms  $e',
       );
     } finally {
       _isLoadingTopShows = false;
       notifyListeners();
     }
   }
-
-
-
-
 }

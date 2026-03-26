@@ -248,20 +248,12 @@
   "@discoverScreenFeaturedCategoriesTitle": {
     "description": "Titlul secțiunii de categorii prezentate/populare pe ecranul Descoperiți."
   },
-  "discoverScreenRecommendedShowsTitle": "Emisiuni recomandate",
-  "@discoverScreenRecommendedShowsTitle": {
-    "description": "Titlul secțiunii de emisiuni recomandate pe ecranul Descoperiți."
-  },
   "discoverScreenTrendingTitle": "În tendințe",
   "@discoverScreenTrendingTitle": {
     "description": "Titlul secțiunii de podcasturi în tendințe pe ecranul Descoperiți."
   },
   "discoverScreenNoTopShows": "Nicio emisiune populară disponibilă.",
 
-  "recommendedPodcastsNoRecommendations": "Nicio recomandare disponibilă. Vă rugăm să reîmprospătați datele mai târziu.",
-  "@recommendedPodcastsNoRecommendations": {
-    "description": "Mesaj afișat când nu există podcasturi recomandate de afișat."
-  },
 
   "trendingPodcastsNoShows": "Nicio emisiune în tendințe în listă.",
   "@trendingPodcastsNoShows": {
@@ -532,5 +524,24 @@
   "privacySettingsRowSubtitle": "Atingeți pentru a vizualiza informațiile de confidențialitate și securitate.",
   "aboutScreenAppIdLabel": "ID aplicație",
   "aboutScreenContributionsTitle": "Susținători",
-  "aboutScreenContributionsEmpty": "Devino susținător!"
+  "aboutScreenContributionsEmpty": "Devino susținător!",
+
+  "playerTooltipPrevious": "Episodul anterior",
+  "playerTooltipPlay": "Redare",
+  "playerTooltipPause": "Pauză",
+  "playerTooltipNext": "Episodul următor",
+
+  "discoverScreenLatestShowsTitle": "Cele mai recente emisiuni",
+  "discoverScreenNoLatestShows": "Nu sunt emisiuni disponibile. Trageți pentru a reîmprospăta.",
+
+  "downloads_error": "Eroare: {details}",
+  "@downloads_error": {
+    "description": "Error message in download list.",
+    "placeholders": {
+      "details": { "type": "String" }
+    }
+  },
+
+  "aboutScreenLegalNotFound": "Informațiile juridice nu au fost găsite."
+
 }
