@@ -360,10 +360,10 @@ abstract class AppLocalizations {
   /// **'Downloads'**
   String get bottomNavDownloads;
 
-  /// Navigation tab label: Profile
+  /// Navigation tab label: My Subscriptions
   ///
   /// In en, this message translates to:
-  /// **'Profile'**
+  /// **'My Subs'**
   String get bottomNavProfile;
 
   /// Navigation tab label: Settings

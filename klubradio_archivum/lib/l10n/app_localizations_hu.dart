@@ -150,7 +150,7 @@ class AppLocalizationsHu extends AppLocalizations {
   String get bottomNavDownloads => 'Letöltések';
 
   @override
-  String get bottomNavProfile => 'Profil';
+  String get bottomNavProfile => 'Előfizetéseim';
 
   @override
   String get bottomNavSettings => 'Beállítások';

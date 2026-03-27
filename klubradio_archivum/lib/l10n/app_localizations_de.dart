@@ -150,7 +150,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get bottomNavDownloads => 'Downloads';
 
   @override
-  String get bottomNavProfile => 'Profil';
+  String get bottomNavProfile => 'Meine Abos';
 
   @override
   String get bottomNavSettings => 'Einstellungen';

@@ -191,9 +191,9 @@
   "@bottomNavDownloads": {
     "description": "Etichetă filă de navigare: Descărcări"
   },
-  "bottomNavProfile": "Profil",
+  "bottomNavProfile": "Abonamentele",
   "@bottomNavProfile": {
-    "description": "Etichetă filă de navigare: Profil"
+    "description": "Etichetă filă de navigare: Abonamentele mele"
   },
   "bottomNavSettings": "Setări",
   "@bottomNavSettings": {

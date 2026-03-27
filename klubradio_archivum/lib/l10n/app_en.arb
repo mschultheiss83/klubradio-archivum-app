@@ -190,9 +190,9 @@
   "@bottomNavDownloads": {
     "description": "Navigation tab label: Downloads"
   },
-  "bottomNavProfile": "Profile",
+  "bottomNavProfile": "My Subs",
   "@bottomNavProfile": {
-    "description": "Navigation tab label: Profile"
+    "description": "Navigation tab label: My Subscriptions"
   },
   "bottomNavSettings": "Settings",
   "@bottomNavSettings": {

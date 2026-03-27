@@ -5325,10 +5325,10 @@ abstract class AppLocalizations {
   /// **'Downloads'**
   String get bottomNavDownloads;
 
-  /// Navigation tab label: Profile
+  /// Navigation tab label: My Subscriptions
   ///
   /// In en, this message translates to:
-  /// **'Profile'**
+  /// **'My Subs'**
   String get bottomNavProfile;
 
   /// Navigation tab label: Settings
@@ -6275,7 +6275,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get bottomNavDownloads => 'Downloads';
 
   @override
-  String get bottomNavProfile => 'Profil';
+  String get bottomNavProfile => 'Meine Abos';
 
   @override
   String get bottomNavSettings => 'Einstellungen';
@@ -6859,7 +6859,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get bottomNavDownloads => 'Downloads';
 
   @override
-  String get bottomNavProfile => 'Profile';
+  String get bottomNavProfile => 'My Subs';
 
   @override
   String get bottomNavSettings => 'Settings';
@@ -7438,7 +7438,7 @@ class AppLocalizationsHu extends AppLocalizations {
   String get bottomNavDownloads => 'Letöltések';
 
   @override
-  String get bottomNavProfile => 'Profil';
+  String get bottomNavProfile => 'Előfizetéseim';
 
   @override
   String get bottomNavSettings => 'Beállítások';
@@ -8018,7 +8018,7 @@ class AppLocalizationsRo extends AppLocalizations {
   String get bottomNavDownloads => 'Descărcări';
 
   @override
-  String get bottomNavProfile => 'Profil';
+  String get bottomNavProfile => 'Abonamentele';
 
   @override
   String get bottomNavSettings => 'Setări';
@@ -10808,8 +10808,8 @@ class _AppShellState extends State<AppShell> {
           l10n.bottomNavDownloads,
         ),
       AppBottomNavigationBar.buildDestination(
-        Icons.person_outline,
-        Icons.person,
+        Icons.subscriptions_outlined,
+        Icons.subscriptions,
         l10n.bottomNavProfile,
       ),
       AppBottomNavigationBar.buildDestination(
@@ -12459,64 +12459,73 @@ class _PodcastDetailScreenState extends State<PodcastDetailScreen> {
 
               return Padding(
                 padding: const EdgeInsets.only(right: 8),
-                child: FilledButton.icon(
-                  onPressed: subscriptionProvider.busy
-                      ? null
-                      : () async {
-                    final snack = ScaffoldMessenger.of(context);
-                    try {
-                      if (isSubscribed) {
-                        await showUnsubscribeDialog(
-                            context, widget.podcast.id);
-                      } else {
-                        await subscriptionProvider.toggleSubscription(
-                          widget.podcast.id,
-                          isSubscribed,
-                        );
-                      }
-                      if (!context.mounted) return;
-
-                      snack.showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            isSubscribed
-                                ? l10n.podcastDetailScreenUnsubscribeSuccess
-                                : l10n.podcastDetailScreenSubscribeSuccess,
-                          ),
+                child: isSubscribed
+                    ? OutlinedButton.icon(
+                        onPressed: subscriptionProvider.busy
+                            ? null
+                            : () async {
+                                final snack = ScaffoldMessenger.of(context);
+                                try {
+                                  await showUnsubscribeDialog(
+                                      context, widget.podcast.id);
+                                  if (!context.mounted) return;
+                                  snack.showSnackBar(
+                                    SnackBar(
+                                      content: Text(l10n.podcastDetailScreenUnsubscribeSuccess),
+                                    ),
+                                  );
+                                } catch (e) {
+                                  snack.showSnackBar(
+                                    SnackBar(
+                                      content: Text(l10n.podcastDetailScreenErrorMessage(e.toString())),
+                                      backgroundColor: Theme.of(context).colorScheme.error,
+                                    ),
+                                  );
+                                }
+                              },
+                        icon: subscriptionProvider.busy
+                            ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
+                            : const Icon(Icons.check),
+                        label: Text(l10n.podcastDetailScreenUnsubscribeButton),
+                        style: OutlinedButton.styleFrom(
+                          visualDensity: VisualDensity.compact,
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
                         ),
-                      );
-                    } catch (e) {
-                      snack.showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            l10n.podcastDetailScreenErrorMessage(
-                              e.toString(),
-                            ),
-                          ),
-                          backgroundColor: Theme.of(
-                            context,
-                          ).colorScheme.error,
+                      )
+                    : FilledButton.icon(
+                        onPressed: subscriptionProvider.busy
+                            ? null
+                            : () async {
+                                final snack = ScaffoldMessenger.of(context);
+                                try {
+                                  await subscriptionProvider.toggleSubscription(
+                                    widget.podcast.id,
+                                    isSubscribed,
+                                  );
+                                  if (!context.mounted) return;
+                                  snack.showSnackBar(
+                                    SnackBar(
+                                      content: Text(l10n.podcastDetailScreenSubscribeSuccess),
+                                    ),
+                                  );
+                                } catch (e) {
+                                  snack.showSnackBar(
+                                    SnackBar(
+                                      content: Text(l10n.podcastDetailScreenErrorMessage(e.toString())),
+                                      backgroundColor: Theme.of(context).colorScheme.error,
+                                    ),
+                                  );
+                                }
+                              },
+                        icon: subscriptionProvider.busy
+                            ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
+                            : const Icon(Icons.add),
+                        label: Text(l10n.podcastDetailScreenSubscribeButton),
+                        style: FilledButton.styleFrom(
+                          visualDensity: VisualDensity.compact,
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
                         ),
-                      );
-                    }
-                  },
-                  icon: subscriptionProvider.busy
-                      ? const SizedBox(
-                          width: 18,
-                          height: 18,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : Icon(isSubscribed ? Icons.check : Icons.add),
-                  label: Text(
-                    isSubscribed
-                        ? l10n.podcastDetailScreenUnsubscribeButton
-                        : l10n.podcastDetailScreenSubscribeButton,
-                  ),
-                  style: FilledButton.styleFrom(
-                    visualDensity: VisualDensity.compact,
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                  ),
-                ),
+                      ),
               );
             },
           ),
@@ -12662,14 +12671,12 @@ class PodcastInfoCard extends StatelessWidget {
 ```dart
 // lib/screens/profile_screen/profile_screen.dart
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:klubradio_archivum/l10n/app_localizations.dart';
 import 'package:klubradio_archivum/db/app_database.dart' as db;
 import 'package:klubradio_archivum/db/daos.dart';
 import 'package:klubradio_archivum/models/podcast.dart';
 import 'package:klubradio_archivum/providers/podcast_provider.dart';
-import 'package:klubradio_archivum/providers/profile_provider.dart';
 import 'package:klubradio_archivum/screens/profile_screen/subscriptions_panel.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -12678,73 +12685,17 @@ class ProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final profileProv = context.watch<ProfileProvider>();
-    final profile = profileProv.profileOrNull; // <- nullable getter benutzen
-
-    // Warten nur auf das lokale Profil – NICHT mehr auf PodcastProvider.userProfile
-    if (profile == null) {
-      return const Center(child: CircularProgressIndicator());
-    }
 
     return ListView(
       padding: const EdgeInsets.all(16),
       children: <Widget>[
-        // App-ID Karte
-        Card(
-          child: ListTile(
-            title: Text(l10n.profileScreenAppIdTitle),
-            subtitle: Text(
-              profile.id,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-            trailing: IconButton(
-              icon: const Icon(Icons.copy),
-              onPressed: () async {
-                await Clipboard.setData(ClipboardData(text: profile.id));
-                if (!context.mounted) return;
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(l10n.profileScreenIdCopied)),
-                );
-              },
-            ),
-          ),
-        ),
-
-        // Auto-Downloads
-        ListTile(
-          title: Text(l10n.profileScreenDownloadSettingsTitle),
-          subtitle: Text(
-            l10n.profileScreenAutoDownloadsSubtitle(profile.maxAutoDownload),
-          ),
-          onTap: () async {
-            final n = await _pickNumber(context, profile.maxAutoDownload);
-            if (n != null && context.mounted) {
-              await context.read<ProfileProvider>().setMaxAutoDownload(n);
-            }
-          },
-        ),
-
-        // Playback Speed
-        ListTile(
-          title: Text(l10n.profileScreenPlaybackSpeedTitle),
-          subtitle: Text('${profile.playbackSpeed.toStringAsFixed(2)}×'),
-          onTap: () async {
-            final v = await _pickSpeed(context, profile.playbackSpeed);
-            if (v != null && context.mounted) {
-              await context.read<ProfileProvider>().setPlaybackSpeed(v);
-            }
-          },
-        ),
-
-        const SizedBox(height: 24),
         Text(
           l10n.homeScreenSubscribedPodcastsTitle,
           style: Theme.of(context).textTheme.titleLarge,
         ),
         const SizedBox(height: 12),
 
-        // Subscriptions: direkt aus lokaler DB, kein Warten auf userProfile
+        // Subscriptions: direkt aus lokaler DB
         StreamBuilder<List<db.Subscription>>(
           stream: context.read<SubscriptionsDao>().watchAllActive(),
           builder: (context, subsSnap) {
@@ -12764,7 +12715,6 @@ class ProfileScreen extends StatelessWidget {
               );
             }
 
-            // Lade die zugehörigen Podcasts, aber blockiere das UI nicht:
             final ids = subs.map((s) => s.podcastId).toList();
             return FutureBuilder<List<Podcast?>>(
               future: Future.wait(
@@ -12793,94 +12743,6 @@ class ProfileScreen extends StatelessWidget {
       ],
     );
   }
-}
-
-/// Dialog: Zahl (0–50) per Slider wählen
-Future<int?> _pickNumber(BuildContext context, int current) async {
-  int temp = current.clamp(0, 50);
-  return showDialog<int>(
-    context: context,
-    builder: (ctx) {
-      return StatefulBuilder(
-        builder: (ctx, setState) {
-          return AlertDialog(
-            title: Text(
-              AppLocalizations.of(ctx)!.profileScreenAutoDownloadsTitle,
-            ),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Slider(
-                  value: temp.toDouble(),
-                  min: 0,
-                  max: 50,
-                  divisions: 50,
-                  label: '$temp',
-                  onChanged: (v) => setState(() => temp = v.round()),
-                ),
-                Text('${AppLocalizations.of(ctx)!.commonCount}: $temp'),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(ctx).pop(),
-                child: Text(AppLocalizations.of(ctx)!.commonCancel),
-              ),
-              TextButton(
-                onPressed: () => Navigator.of(ctx).pop(temp),
-                child: Text(AppLocalizations.of(ctx)!.commonOk),
-              ),
-            ],
-          );
-        },
-      );
-    },
-  );
-}
-
-/// Dialog: Speed (0.5–2.0) per Slider wählen
-Future<double?> _pickSpeed(BuildContext context, double current) async {
-  double temp = current.clamp(0.5, 2.0);
-  return showDialog<double>(
-    context: context,
-    builder: (ctx) {
-      return StatefulBuilder(
-        builder: (ctx, setState) {
-          return AlertDialog(
-            title: Text(
-              AppLocalizations.of(ctx)!.profileScreenPlaybackSpeedTitle,
-            ),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Slider(
-                  value: temp,
-                  min: 0.5,
-                  max: 2.0,
-                  divisions: 30,
-                  label: '${temp.toStringAsFixed(2)}×',
-                  onChanged: (v) => setState(() => temp = v),
-                ),
-                Text(
-                  '${AppLocalizations.of(ctx)!.profileScreenPlaybackSpeedValue(temp.toStringAsFixed(2))}×',
-                ),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(ctx).pop(),
-                child: Text(AppLocalizations.of(ctx)!.commonCancel),
-              ),
-              TextButton(
-                onPressed: () => Navigator.of(ctx).pop(temp),
-                child: Text(AppLocalizations.of(ctx)!.commonOk),
-              ),
-            ],
-          );
-        },
-      );
-    },
-  );
 }
 ```
 

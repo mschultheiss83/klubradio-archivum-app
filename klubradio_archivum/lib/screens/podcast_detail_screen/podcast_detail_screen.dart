@@ -57,64 +57,73 @@ class _PodcastDetailScreenState extends State<PodcastDetailScreen> {
 
               return Padding(
                 padding: const EdgeInsets.only(right: 8),
-                child: FilledButton.icon(
-                  onPressed: subscriptionProvider.busy
-                      ? null
-                      : () async {
-                    final snack = ScaffoldMessenger.of(context);
-                    try {
-                      if (isSubscribed) {
-                        await showUnsubscribeDialog(
-                            context, widget.podcast.id);
-                      } else {
-                        await subscriptionProvider.toggleSubscription(
-                          widget.podcast.id,
-                          isSubscribed,
-                        );
-                      }
-                      if (!context.mounted) return;
-
-                      snack.showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            isSubscribed
-                                ? l10n.podcastDetailScreenUnsubscribeSuccess
-                                : l10n.podcastDetailScreenSubscribeSuccess,
-                          ),
+                child: isSubscribed
+                    ? OutlinedButton.icon(
+                        onPressed: subscriptionProvider.busy
+                            ? null
+                            : () async {
+                                final snack = ScaffoldMessenger.of(context);
+                                try {
+                                  await showUnsubscribeDialog(
+                                      context, widget.podcast.id);
+                                  if (!context.mounted) return;
+                                  snack.showSnackBar(
+                                    SnackBar(
+                                      content: Text(l10n.podcastDetailScreenUnsubscribeSuccess),
+                                    ),
+                                  );
+                                } catch (e) {
+                                  snack.showSnackBar(
+                                    SnackBar(
+                                      content: Text(l10n.podcastDetailScreenErrorMessage(e.toString())),
+                                      backgroundColor: Theme.of(context).colorScheme.error,
+                                    ),
+                                  );
+                                }
+                              },
+                        icon: subscriptionProvider.busy
+                            ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
+                            : const Icon(Icons.check),
+                        label: Text(l10n.podcastDetailScreenUnsubscribeButton),
+                        style: OutlinedButton.styleFrom(
+                          visualDensity: VisualDensity.compact,
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
                         ),
-                      );
-                    } catch (e) {
-                      snack.showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            l10n.podcastDetailScreenErrorMessage(
-                              e.toString(),
-                            ),
-                          ),
-                          backgroundColor: Theme.of(
-                            context,
-                          ).colorScheme.error,
+                      )
+                    : FilledButton.icon(
+                        onPressed: subscriptionProvider.busy
+                            ? null
+                            : () async {
+                                final snack = ScaffoldMessenger.of(context);
+                                try {
+                                  await subscriptionProvider.toggleSubscription(
+                                    widget.podcast.id,
+                                    isSubscribed,
+                                  );
+                                  if (!context.mounted) return;
+                                  snack.showSnackBar(
+                                    SnackBar(
+                                      content: Text(l10n.podcastDetailScreenSubscribeSuccess),
+                                    ),
+                                  );
+                                } catch (e) {
+                                  snack.showSnackBar(
+                                    SnackBar(
+                                      content: Text(l10n.podcastDetailScreenErrorMessage(e.toString())),
+                                      backgroundColor: Theme.of(context).colorScheme.error,
+                                    ),
+                                  );
+                                }
+                              },
+                        icon: subscriptionProvider.busy
+                            ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
+                            : const Icon(Icons.add),
+                        label: Text(l10n.podcastDetailScreenSubscribeButton),
+                        style: FilledButton.styleFrom(
+                          visualDensity: VisualDensity.compact,
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
                         ),
-                      );
-                    }
-                  },
-                  icon: subscriptionProvider.busy
-                      ? const SizedBox(
-                          width: 18,
-                          height: 18,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : Icon(isSubscribed ? Icons.check : Icons.add),
-                  label: Text(
-                    isSubscribed
-                        ? l10n.podcastDetailScreenUnsubscribeButton
-                        : l10n.podcastDetailScreenSubscribeButton,
-                  ),
-                  style: FilledButton.styleFrom(
-                    visualDensity: VisualDensity.compact,
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                  ),
-                ),
+                      ),
               );
             },
           ),

@@ -142,8 +142,8 @@ class _AppShellState extends State<AppShell> {
           l10n.bottomNavDownloads,
         ),
       AppBottomNavigationBar.buildDestination(
-        Icons.person_outline,
-        Icons.person,
+        Icons.subscriptions_outlined,
+        Icons.subscriptions,
         l10n.bottomNavProfile,
       ),
       AppBottomNavigationBar.buildDestination(

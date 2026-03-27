@@ -191,9 +191,9 @@
   "@bottomNavDownloads": {
     "description": "Beschriftung für den Navigations-Tab: Downloads"
   },
-  "bottomNavProfile": "Profil",
+  "bottomNavProfile": "Meine Abos",
   "@bottomNavProfile": {
-    "description": "Beschriftung für den Navigations-Tab: Profil"
+    "description": "Beschriftung für den Navigations-Tab: Meine Abos"
   },
   "bottomNavSettings": "Einstellungen",
   "@bottomNavSettings": {

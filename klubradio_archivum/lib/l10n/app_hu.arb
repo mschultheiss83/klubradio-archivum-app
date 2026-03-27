@@ -190,9 +190,9 @@
   "@bottomNavDownloads": {
     "description": "Navigációs fül címke: Letöltések"
   },
-  "bottomNavProfile": "Profil",
+  "bottomNavProfile": "Előfizetéseim",
   "@bottomNavProfile": {
-    "description": "Navigációs fül címke: Profil"
+    "description": "Navigációs fül címke: Előfizetéseim"
   },
   "bottomNavSettings": "Beállítások",
   "@bottomNavSettings": {
