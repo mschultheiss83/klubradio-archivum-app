@@ -154,6 +154,7 @@ class DownloadService {
     _disposed = true;
     await _sub?.cancel();
     _autodownloadTimer?.cancel();
+    _downloader.destroy();
   }
 
   Future<void> enqueueEpisode(model.Episode ep) async {
@@ -354,7 +355,13 @@ class DownloadService {
                 epRow.podcastId,
               );
               for (final id in plan.toDeleteIds) {
-                await removeLocalFile(id);
+                try {
+                  await removeLocalFile(id);
+                } catch (e) {
+                  debugPrint(
+                    '[DownloadService] retention cleanup failed for $id: $e',
+                  );
+                }
               }
             }
             // Notify EpisodeProvider that the episode has been downloaded

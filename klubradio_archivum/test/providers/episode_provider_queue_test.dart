@@ -70,6 +70,7 @@ void main() {
     when(mockAudio.playerStateStream)
         .thenAnswer((_) => playerStateCtrl.stream);
     when(mockAudio.bufferingStream).thenAnswer((_) => bufferingCtrl.stream);
+    when(mockAudio.errorStream).thenAnswer((_) => const Stream<String?>.empty());
     when(mockAudio.isPlaying).thenReturn(false);
     when(mockAudio.totalDuration).thenReturn(null);
     // loadEpisode is called by playEpisode; return immediately without errors

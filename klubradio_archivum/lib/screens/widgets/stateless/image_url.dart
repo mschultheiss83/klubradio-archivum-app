@@ -12,7 +12,7 @@ import 'package:klubradio_archivum/utils/web_image_proxy.dart';
 ///
 /// Mindestens eines von [path] oder [url] sollte gesetzt sein.
 /// Auf Web wird [path] ignoriert (da kein direkter Dateizugriff).
-class ImageUrl extends StatelessWidget {
+class ImageUrl extends StatefulWidget {
   const ImageUrl({
     super.key,
     this.path,
@@ -48,8 +48,45 @@ class ImageUrl extends StatelessWidget {
   /// Background color for the loading placeholder.
   final Color? loadingBackgroundColor;
 
+  @override
+  State<ImageUrl> createState() => _ImageUrlState();
+}
+
+class _ImageUrlState extends State<ImageUrl> {
+  /// Cached result of the async file-existence check.
+  /// null means the check hasn't completed yet.
+  bool? _pathExists;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkPath();
+  }
+
+  @override
+  void didUpdateWidget(ImageUrl oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.path != widget.path) {
+      _pathExists = null;
+      _checkPath();
+    }
+  }
+
+  void _checkPath() {
+    if (kIsWeb || (widget.path ?? '').isEmpty) {
+      _pathExists = false;
+      return;
+    }
+    // Perform async I/O off the UI thread.
+    File(widget.path!).exists().then((exists) {
+      if (mounted) setState(() => _pathExists = exists);
+    }).catchError((_) {
+      if (mounted) setState(() => _pathExists = false);
+    });
+  }
+
   bool get _hasValidUrl {
-    final u = url ?? '';
+    final u = widget.url ?? '';
     if (u.isEmpty) return false;
     final parsed = Uri.tryParse(u);
     return parsed != null &&
@@ -57,24 +94,13 @@ class ImageUrl extends StatelessWidget {
         (parsed.host.isNotEmpty);
   }
 
-  bool get _hasUsablePath {
-    if (kIsWeb) return false; // auf Web keine Dateisystemzugriffe
-    final p = path ?? '';
-    if (p.isEmpty) return false;
-    try {
-      return File(p).existsSync();
-    } catch (_) {
-      return false;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    final w = width ?? 72.0;
-    final h = height ?? 72.0;
+    final w = widget.width ?? 72.0;
+    final h = widget.height ?? 72.0;
     final baseBackgroundColor =
-        backgroundColor ?? Theme.of(context).colorScheme.primaryContainer;
-    final resolvedLoadingBackgroundColor = loadingBackgroundColor ??
+        widget.backgroundColor ?? Theme.of(context).colorScheme.primaryContainer;
+    final resolvedLoadingBackgroundColor = widget.loadingBackgroundColor ??
         Theme.of(context).colorScheme.surfaceContainerHighest;
 
     Widget fallback([Color? color]) => Container(
@@ -82,35 +108,37 @@ class ImageUrl extends StatelessWidget {
       height: h,
       color: color ?? baseBackgroundColor,
       alignment: Alignment.center,
-      child: Icon(icon, size: w * 0.5),
+      child: Icon(widget.icon, size: w * 0.5),
     );
 
     Widget clip(Widget child) => ClipRRect(
-      borderRadius: BorderRadius.circular(borderRadius),
+      borderRadius: BorderRadius.circular(widget.borderRadius),
       child: child,
     );
 
     // Handle asset images first
-    if (url != null && url!.startsWith('assets/')) {
+    if (widget.url != null && widget.url!.startsWith('assets/')) {
       return clip(
         Image.asset(
-          url!,
+          widget.url!,
           width: w,
           height: h,
-          fit: fit,
+          fit: widget.fit,
           errorBuilder: (ctx, _, _) => fallback(),
         ),
       );
     }
 
+    final bool pathUsable = _pathExists ?? false;
+
     // Priorität: lokal (wenn preferLocal & vorhanden) → URL → Fallback
-    if (preferLocal && _hasUsablePath) {
+    if (widget.preferLocal && pathUsable) {
       return clip(
         Image.file(
-          File(path!),
+          File(widget.path!),
           width: w,
           height: h,
-          fit: fit,
+          fit: widget.fit,
           errorBuilder: (ctx, _, _) => fallback(),
         ),
       );
@@ -118,14 +146,14 @@ class ImageUrl extends StatelessWidget {
 
     if (_hasValidUrl) {
       // Transform URL for web platform to avoid CORS issues
-      final imageUrl = WebImageProxy.transform(url!);
+      final imageUrl = WebImageProxy.transform(widget.url!);
 
       return clip(
         Image.network(
           imageUrl,
           width: w,
           height: h,
-          fit: fit,
+          fit: widget.fit,
           // Leichtgewichtiger Placeholder beim Laden
           loadingBuilder: (ctx, child, progress) {
             if (progress == null) return child;
@@ -139,13 +167,13 @@ class ImageUrl extends StatelessWidget {
 
     // Wenn URL nicht valide oder kein lokales Bild verfügbar ist:
     // ggf. trotzdem lokales Bild versuchen (falls preferLocal=false)
-    if (!preferLocal && _hasUsablePath) {
+    if (!widget.preferLocal && pathUsable) {
       return clip(
         Image.file(
-          File(path!),
+          File(widget.path!),
           width: w,
           height: h,
-          fit: fit,
+          fit: widget.fit,
           errorBuilder: (ctx, _, _) => fallback(),
         ),
       );

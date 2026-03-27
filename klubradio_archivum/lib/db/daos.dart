@@ -75,8 +75,8 @@ class SubscriptionsDao extends DatabaseAccessor<AppDatabase>
 
   // Regel-Setter
   Future<int> setAutoDownloadN(String podcastId, int? n) {
-    // 0 => null (aus)
-    final normalized = (n ?? 0) <= 0 ? null : n;
+    // null => not set (use global default), 0 => disabled, negative => null
+    final normalized = n == null ? null : (n < 0 ? null : n);
     return (update(subscriptions)..where((s) => s.podcastId.equals(podcastId)))
         .write(SubscriptionsCompanion(autoDownloadN: Value(normalized)));
   }

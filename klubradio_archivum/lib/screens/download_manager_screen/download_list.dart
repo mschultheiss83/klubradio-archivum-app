@@ -212,13 +212,21 @@ class _CompletedDownloadTile extends StatelessWidget {
           subtitle: FutureBuilder<model.Episode?>(
             future: (ep.cachedMetaPath?.isNotEmpty ?? false)
                 ? readEpisodeFromCacheJson(ep.cachedMetaPath!)
+                    .timeout(const Duration(seconds: 5), onTimeout: () => null)
                 : Future.value(null),
             builder: (context, snap) {
               if (snap.connectionState == ConnectionState.waiting) {
-                return const CircularProgressIndicator();
+                return const SizedBox(
+                  height: 16,
+                  width: 16,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                );
               }
-              if (snap.hasError) {
-                return Text(l10n.downloads_error(snap.error.toString()));
+              // On error or null data, show fallback from DB row
+              if (snap.hasError || snap.data == null) {
+                final base =
+                    '${l10n.downloads_status_done} • ${ep.id} - ${ep.localPath}';
+                return Text(base);
               }
               final showDate = snap.data?.showDate ?? '';
               final base =
@@ -459,15 +467,15 @@ class _DownloadButton extends StatelessWidget {
   }
 }
 
-void _openInFolder(String filePath) {
+Future<void> _openInFolder(String filePath) async {
   try {
     if (Platform.isWindows) {
-      Process.run('explorer', ['/select,', filePath]);
+      await Process.run('explorer', ['/select,', filePath]);
     } else if (Platform.isMacOS) {
-      Process.run('open', ['-R', filePath]);
+      await Process.run('open', ['-R', filePath]);
     } else if (Platform.isLinux) {
       final dir = File(filePath).parent.path;
-      Process.run('xdg-open', [dir]);
+      await Process.run('xdg-open', [dir]);
     }
   } catch (_) {
     // Debug-only no-op.

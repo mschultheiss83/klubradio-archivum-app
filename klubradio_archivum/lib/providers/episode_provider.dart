@@ -28,6 +28,9 @@ class EpisodeProvider extends ChangeNotifier {
     _bufferingSubscription = _audioPlayerService.bufferingStream.listen(
       _onBufferingChanged,
     );
+    _errorSubscription = _audioPlayerService.errorStream.listen(
+      _onAudioError,
+    );
   }
 
   late db.AppDatabase _db;
@@ -37,6 +40,7 @@ class EpisodeProvider extends ChangeNotifier {
   StreamSubscription<Duration>? _positionSubscription;
   StreamSubscription<PlayerState>? _playerStateSubscription;
   StreamSubscription<bool>? _bufferingSubscription;
+  StreamSubscription<String?>? _errorSubscription;
 
   final ValueNotifier<Duration> _positionNotifier =
       ValueNotifier<Duration>(Duration.zero);
@@ -68,6 +72,7 @@ class EpisodeProvider extends ChangeNotifier {
       _positionSubscription?.cancel();
       _playerStateSubscription?.cancel();
       _bufferingSubscription?.cancel();
+      _errorSubscription?.cancel();
       _audioPlayerService = audioPlayerService;
       _positionSubscription = _audioPlayerService.positionStream.listen(
         _onPositionChanged,
@@ -78,6 +83,9 @@ class EpisodeProvider extends ChangeNotifier {
       _bufferingSubscription = _audioPlayerService.bufferingStream.listen(
         _onBufferingChanged,
       );
+      _errorSubscription = _audioPlayerService.errorStream.listen(
+        _onAudioError,
+      );
     }
   }
 
@@ -85,14 +93,30 @@ class EpisodeProvider extends ChangeNotifier {
     return _apiService.fetchEpisodesForPodcast(podcastId);
   }
 
-  final Set<String> _loadedPodcasts = {};
+  /// Tracks when each podcast's episodes were last loaded into DB.
+  /// Entries expire after [_cacheMaxAge] so new episodes are picked up
+  /// without requiring an app restart.
+  final Map<String, DateTime> _loadedPodcasts = {};
+  static const Duration _cacheMaxAge = Duration(minutes: 5);
+
+  /// Clears the loaded-podcasts cache so the next call to
+  /// [loadEpisodesIntoDb] will fetch fresh data from the API.
+  void clearLoadedPodcastsCache() {
+    _loadedPodcasts.clear();
+  }
 
   /// Fetches episodes from the API and upserts them into the local DB.
-  /// Skips if already loaded this session. The StreamBuilder in
+  /// Skips if already loaded within [_cacheMaxAge]. The StreamBuilder in
   /// PodcastDetailScreen will reactively update.
-  Future<void> loadEpisodesIntoDb(String podcastId) async {
-    if (_loadedPodcasts.contains(podcastId)) return;
-    _loadedPodcasts.add(podcastId);
+  Future<void> loadEpisodesIntoDb(String podcastId, {bool forceRefresh = false}) async {
+    if (!forceRefresh) {
+      final loadedAt = _loadedPodcasts[podcastId];
+      if (loadedAt != null &&
+          DateTime.now().difference(loadedAt) < _cacheMaxAge) {
+        return;
+      }
+    }
+    _loadedPodcasts[podcastId] = DateTime.now();
     try {
       final episodes = await _apiService.fetchEpisodesForPodcast(podcastId);
       final companions = episodes.map((ep) => db.EpisodesCompanion(
@@ -110,7 +134,7 @@ class EpisodeProvider extends ChangeNotifier {
         await EpisodesDao(_db).upsertAll(companions);
       }
     } catch (e) {
-      _loadedPodcasts.remove(podcastId);
+      _loadedPodcasts.remove(podcastId); // allow retry on next call
       debugPrint('loadEpisodesIntoDb($podcastId): $e');
     }
   }
@@ -271,11 +295,22 @@ class EpisodeProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void _onAudioError(String? errorMessage) {
+    // Sync provider state with service: clear stale episode on load failure
+    if (_audioPlayerService.currentEpisode == null) {
+      _currentEpisode = null;
+      _positionNotifier.value = Duration.zero;
+      debugPrint('EpisodeProvider: cleared stale episode after audio error: $errorMessage');
+    }
+    notifyListeners();
+  }
+
   @override
   Future<void> dispose() async {
     await _positionSubscription?.cancel();
     await _playerStateSubscription?.cancel();
     await _bufferingSubscription?.cancel();
+    await _errorSubscription?.cancel();
     _positionNotifier.dispose();
     super.dispose();
   }

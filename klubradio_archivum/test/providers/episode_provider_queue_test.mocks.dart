@@ -187,6 +187,14 @@ class MockAudioPlayerService extends _i1.Mock
           as _i6.Stream<bool>);
 
   @override
+  _i6.Stream<String?> get errorStream =>
+      (super.noSuchMethod(
+            Invocation.getter(#errorStream),
+            returnValue: _i6.Stream<String?>.empty(),
+          )
+          as _i6.Stream<String?>);
+
+  @override
   _i6.Stream<Duration> get positionStream =>
       (super.noSuchMethod(
             Invocation.getter(#positionStream),
