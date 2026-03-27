@@ -193,6 +193,50 @@ void main() {
       expect(skipIds, containsAll(['ep1', 'ep2']));
     });
 
+    // ==================== L4: setAutoDownloadN normalization ====================
+
+    test('setAutoDownloadN(0) stores 0 (disabled, not null)', () async {
+      await subscriptionsDao.toggleSubscribe(
+        podcastId: 'p1',
+        active: true,
+        autoDownloadN: 5,
+      );
+
+      await subscriptionsDao.setAutoDownloadN('p1', 0);
+
+      final sub = await subscriptionsDao.getById('p1');
+      expect(sub!.autoDownloadN, 0,
+          reason: '0 means "disabled" and must be stored, not normalized to null');
+    });
+
+    test('setAutoDownloadN(-1) normalizes to null', () async {
+      await subscriptionsDao.toggleSubscribe(
+        podcastId: 'p1',
+        active: true,
+        autoDownloadN: 5,
+      );
+
+      await subscriptionsDao.setAutoDownloadN('p1', -1);
+
+      final sub = await subscriptionsDao.getById('p1');
+      expect(sub!.autoDownloadN, isNull,
+          reason: 'Negative values should be normalized to null');
+    });
+
+    test('setAutoDownloadN(null) stores null', () async {
+      await subscriptionsDao.toggleSubscribe(
+        podcastId: 'p1',
+        active: true,
+        autoDownloadN: 5,
+      );
+
+      await subscriptionsDao.setAutoDownloadN('p1', null);
+
+      final sub = await subscriptionsDao.getById('p1');
+      expect(sub!.autoDownloadN, isNull,
+          reason: 'null means "use global default"');
+    });
+
     test('failed and canceled episodes are NOT skipped (will retry)', () async {
       await subscriptionsDao.toggleSubscribe(
         podcastId: 'p1',

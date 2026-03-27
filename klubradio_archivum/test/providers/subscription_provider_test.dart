@@ -122,6 +122,16 @@ void main() {
 
       expect(calls, 1);
     });
+
+    test('sets loaded=true even when getById throws', () async {
+      when(mockSubsDao.getById('pod-err'))
+          .thenThrow(Exception('DB error'));
+
+      expect(provider.loaded, false);
+      await provider.loadSubscription('pod-err');
+      expect(provider.loaded, true);
+      expect(provider.currentSubscription, isNull);
+    });
   });
 
   // ==================== watchSubscription ====================

@@ -17253,6 +17253,50 @@ void main() {
       expect(skipIds, containsAll(['ep1', 'ep2']));
     });
 
+    // ==================== L4: setAutoDownloadN normalization ====================
+
+    test('setAutoDownloadN(0) stores 0 (disabled, not null)', () async {
+      await subscriptionsDao.toggleSubscribe(
+        podcastId: 'p1',
+        active: true,
+        autoDownloadN: 5,
+      );
+
+      await subscriptionsDao.setAutoDownloadN('p1', 0);
+
+      final sub = await subscriptionsDao.getById('p1');
+      expect(sub!.autoDownloadN, 0,
+          reason: '0 means "disabled" and must be stored, not normalized to null');
+    });
+
+    test('setAutoDownloadN(-1) normalizes to null', () async {
+      await subscriptionsDao.toggleSubscribe(
+        podcastId: 'p1',
+        active: true,
+        autoDownloadN: 5,
+      );
+
+      await subscriptionsDao.setAutoDownloadN('p1', -1);
+
+      final sub = await subscriptionsDao.getById('p1');
+      expect(sub!.autoDownloadN, isNull,
+          reason: 'Negative values should be normalized to null');
+    });
+
+    test('setAutoDownloadN(null) stores null', () async {
+      await subscriptionsDao.toggleSubscribe(
+        podcastId: 'p1',
+        active: true,
+        autoDownloadN: 5,
+      );
+
+      await subscriptionsDao.setAutoDownloadN('p1', null);
+
+      final sub = await subscriptionsDao.getById('p1');
+      expect(sub!.autoDownloadN, isNull,
+          reason: 'null means "use global default"');
+    });
+
     test('failed and canceled episodes are NOT skipped (will retry)', () async {
       await subscriptionsDao.toggleSubscribe(
         podcastId: 'p1',
@@ -17374,6 +17418,53 @@ void main() {
       expect(settings.playOrder, 'oldest');
     },
   );
+
+  // ==================== H13: ensureDefaults idempotency ====================
+
+  group('ensureDefaults (H13 — insertOrIgnore)', () {
+    test('creates default row on first call', () async {
+      expect(await dao.getOne(), isNull);
+
+      await dao.ensureDefaults();
+
+      final settings = await dao.getOne();
+      expect(settings, isNotNull);
+      expect(settings!.id, 1);
+      expect(settings.autodownloadSubscribed, false);
+      expect(settings.maxParallel, 2);
+      expect(settings.keepLatestN, isNull);
+      expect(settings.deleteAfterHours, isNull);
+      expect(settings.playOrder, 'newest');
+    });
+
+    test('is idempotent — second call does not reset user changes', () async {
+      await dao.ensureDefaults();
+      await dao.setAutodownloadSubscribed(true);
+      await dao.setKeepLatestN(10);
+
+      // Second call must NOT overwrite user settings
+      await dao.ensureDefaults();
+
+      final settings = await dao.getOne();
+      expect(settings!.autodownloadSubscribed, true,
+          reason: 'ensureDefaults must not reset user setting');
+      expect(settings.keepLatestN, 10,
+          reason: 'ensureDefaults must not reset user setting');
+    });
+
+    test('concurrent calls do not throw or corrupt data', () async {
+      // Fire multiple ensureDefaults concurrently — insertOrIgnore prevents conflict
+      await Future.wait([
+        dao.ensureDefaults(),
+        dao.ensureDefaults(),
+        dao.ensureDefaults(),
+      ]);
+
+      final settings = await dao.getOne();
+      expect(settings, isNotNull);
+      expect(settings!.id, 1);
+    });
+  });
 }
 ```
 
@@ -20141,6 +20232,16 @@ void main() {
       await provider.loadSubscription('pod-1');
 
       expect(calls, 1);
+    });
+
+    test('sets loaded=true even when getById throws', () async {
+      when(mockSubsDao.getById('pod-err'))
+          .thenThrow(Exception('DB error'));
+
+      expect(provider.loaded, false);
+      await provider.loadSubscription('pod-err');
+      expect(provider.loaded, true);
+      expect(provider.currentSubscription, isNull);
     });
   });
 
