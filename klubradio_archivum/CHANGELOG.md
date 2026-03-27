@@ -30,7 +30,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **Database schema**: migrated v2 → v3 for `playOrder` column
 - **Settings initialization**: default `settings` row is now created centrally so `playOrder` updates work even before opening download settings
 - **Database schema cleanup**: reset `schemaVersion` to `1` and removed obsolete incremental migrations for the unreleased app state
-- **Deep Bug Scan (41 fixes)** — see `docs/issues/bug-scan-2026-03-26.md` for full details:
+- **C5**: Removed decorative FK constraint from Episodes table (was never enforced, blocked unsubscribed podcast browsing if enabled), bumped schema v3→v4
+- **M11 (partial)**: Removed `rethrow` in `toggleSubscription` — callers never await, error became unhandled async exception
+- **Deep Bug Scan (43 fixes)** — see `docs/issues/bug-scan-2026-03-26.md` for full details:
   - **Critical**: ProfileProvider null crash (C1), inverted subscribe messages (C3/C4), download queue race condition (C6), async void `_refresh()` (C7)
   - **High**: timing bug H1, ThemeProvider await (H2), onEpisodeDownloaded await (H3), notifyListeners for all downloads (H4), infinite spinner on loadSubscription fail (H6), unsubscribe dialog safety (H7), AudioPlayerService error stream (H8), silent download error suppression (H9), unbounded search results (H10), addRecentSearch on error (H11), RetentionDao null-check (H12), ensureDefaults race condition (H13), discover_screen duplicate init (H14/H15)
   - **Medium**: l10n hardcoded strings (M1-M3), Episode.fromDb description fallback (M4), corrupted cache spinner (M5), stale audio state (M6), ensureDefaults in build (M7), empty episodeId guard (M8), orphaned retention files (M9), slider precision (M13), internal ID in UI (M14)

@@ -94,7 +94,7 @@ class SubscriptionProvider extends ChangeNotifier {
       }
     } catch (e) {
       debugPrint('toggleSubscription: Error: $e');
-      rethrow; // Re-throw the error so it can be caught by the UI
+      // Error already logged; do not rethrow — callers never await this.
     } finally {
       _busy = false;
       notifyListeners();

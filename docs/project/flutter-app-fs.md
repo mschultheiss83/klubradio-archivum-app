@@ -10157,7 +10157,7 @@ class SubscriptionProvider extends ChangeNotifier {
       }
     } catch (e) {
       debugPrint('toggleSubscription: Error: $e');
-      rethrow; // Re-throw the error so it can be caught by the UI
+      // Error already logged; do not rethrow — callers never await this.
     } finally {
       _busy = false;
       notifyListeners();
@@ -20505,7 +20505,7 @@ void main() {
       expect(provider.busy, false);
     });
 
-    test('rethrows errors from toggleSubscribe', () async {
+    test('swallows errors from toggleSubscribe (callers never await)', () async {
       when(mockSettingsDao.getOne())
           .thenAnswer((_) async => makeSetting(keepLatestN: 3));
       when(mockSubsDao.toggleSubscribe(
@@ -20514,10 +20514,9 @@ void main() {
         autoDownloadN: anyNamed('autoDownloadN'),
       )).thenThrow(Exception('DB error'));
 
-      expect(
-        () => provider.toggleSubscription('pod-1', false),
-        throwsA(isA<Exception>()),
-      );
+      // Should complete without throwing — error is logged, not rethrown
+      await provider.toggleSubscription('pod-1', false);
+      expect(provider.busy, false);
     });
   });
 
