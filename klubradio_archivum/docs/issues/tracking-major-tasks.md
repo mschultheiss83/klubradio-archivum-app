@@ -51,9 +51,10 @@ This issue serves as a central place to track major tasks, enhancements, and kno
 ### 🐛 Known Issues / Bugs
 
 - [x] **Episode offline cache crash** — `_downloadStatusFromJson` expected `int?` but `toJson()` wrote `String`. Fixed 2026-03-22.
+- [x] **Subscribe button spinner forever** — Fixed in H6 (loadSubscription error handling). Fixed 2026-03-26.
+- [x] **Auto-download ignores per-podcast autoDownloadN** — Fixed in L4 (0 vs null normalization). Fixed 2026-03-26.
+- [x] **Deep Bug Scan (41 fixes)** — See `docs/issues/bug-scan-2026-03-26.md` for full details. Fixed 2026-03-26.
 - [ ] **PodcastDetailScreen only reads local DB** — Screen uses `StreamBuilder<EpisodesDao.watchByPodcast()>` but never fetches episodes from API. First-time users see empty list.
-- [ ] **Subscribe button spinner forever** — `currentSubscription == null && !busy` shows spinner even after loading completes with no subscription.
-- [ ] **Auto-download ignores per-podcast autoDownloadN** — Uses global `keepLatestN` (default null → 0 → never downloads).
 
 ---
 **Instructions for use:**
