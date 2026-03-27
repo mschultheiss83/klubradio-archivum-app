@@ -1,4 +1,6 @@
 // lib/screens/download_manager_screen/download_list.dart
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -50,7 +52,7 @@ class _EpisodeListState extends State<EpisodeList> {
                       ep,
                       queue: widget.episodes,
                     );
-                    podcastProvider.addRecentlyPlayed(ep);
+                    unawaited(podcastProvider.addRecentlyPlayed(ep));
                   },
                   trailing: widget.enableDownloads && PlatformUtils.supportsDownloads
                       ? _DownloadButton(episode: ep, queue: widget.episodes)

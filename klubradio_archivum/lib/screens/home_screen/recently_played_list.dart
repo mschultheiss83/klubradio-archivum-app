@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -45,7 +47,7 @@ class _EpisodeCard extends StatelessWidget {
         final EpisodeProvider episodeProvider = context.read<EpisodeProvider>();
         final PodcastProvider podcastProvider = context.read<PodcastProvider>();
         await episodeProvider.playEpisode(episode);
-        podcastProvider.addRecentlyPlayed(episode);
+        unawaited(podcastProvider.addRecentlyPlayed(episode));
       },
       child: Container(
         width: 220,

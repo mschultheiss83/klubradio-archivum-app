@@ -11114,6 +11114,7 @@ class TrendingPodcastsList extends StatelessWidget {
 
 ### Inhalt von `klubradio_archivum/lib/screens/download_manager_screen/download_list.dart`
 ```dart
+import 'dart:async';
 import 'dart:io';
 
 import 'package:drift/drift.dart' as d show OrderingTerm;
@@ -11499,7 +11500,7 @@ class _EpisodeListState extends State<EpisodeList> {
               episode: ep,
               onTap: () async {
                 await episodeProvider.playEpisode(ep, queue: widget.episodes);
-                podcastProvider.addRecentlyPlayed(ep);
+                unawaited(podcastProvider.addRecentlyPlayed(ep));
               },
               trailing: widget.enableDownloads
                   ? _DownloadButton(episode: ep)
@@ -11862,6 +11863,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
 ### Inhalt von `klubradio_archivum/lib/screens/home_screen/recently_played_list.dart`
 ```dart
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -11909,7 +11912,7 @@ class _EpisodeCard extends StatelessWidget {
         final EpisodeProvider episodeProvider = context.read<EpisodeProvider>();
         final PodcastProvider podcastProvider = context.read<PodcastProvider>();
         await episodeProvider.playEpisode(episode);
-        podcastProvider.addRecentlyPlayed(episode);
+        unawaited(podcastProvider.addRecentlyPlayed(episode));
       },
       child: Container(
         width: 220,
@@ -14110,6 +14113,8 @@ Future<void> showPrivacyDialog(BuildContext context) async {
 ### Inhalt von `klubradio_archivum/lib/screens/widgets/stateful/episode_list.dart`
 ```dart
 // lib/screens/download_manager_screen/download_list.dart
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -14161,7 +14166,7 @@ class _EpisodeListState extends State<EpisodeList> {
                       ep,
                       queue: widget.episodes,
                     );
-                    podcastProvider.addRecentlyPlayed(ep);
+                    unawaited(podcastProvider.addRecentlyPlayed(ep));
                   },
                   trailing: widget.enableDownloads && PlatformUtils.supportsDownloads
                       ? _DownloadButton(episode: ep, queue: widget.episodes)

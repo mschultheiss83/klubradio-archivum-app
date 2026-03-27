@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:drift/drift.dart' as d show OrderingTerm;
@@ -383,7 +384,7 @@ class _EpisodeListState extends State<EpisodeList> {
               episode: ep,
               onTap: () async {
                 await episodeProvider.playEpisode(ep, queue: widget.episodes);
-                podcastProvider.addRecentlyPlayed(ep);
+                unawaited(podcastProvider.addRecentlyPlayed(ep));
               },
               trailing: widget.enableDownloads
                   ? _DownloadButton(episode: ep)
