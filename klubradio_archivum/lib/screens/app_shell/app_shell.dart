@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:klubradio_archivum/l10n/app_localizations.dart';
 import 'package:klubradio_archivum/providers/episode_provider.dart';
 import 'package:klubradio_archivum/providers/podcast_provider.dart';
+import 'package:klubradio_archivum/providers/profile_provider.dart';
 
 import 'package:klubradio_archivum/screens/home_screen/home_screen.dart';
 import 'package:klubradio_archivum/screens/discover_screen/discover_screen.dart';
@@ -39,6 +40,7 @@ class _AppShellState extends State<AppShell> {
     super.didChangeDependencies();
     if (!_initialized) {
       _initializeNavigation();
+      _restorePlaybackSpeed();
       _initialized = true;
     }
     if (!_privacyCheckDone) {
@@ -52,6 +54,13 @@ class _AppShellState extends State<AppShell> {
     if (shouldShow && mounted) {
       await showPrivacyDialog(context);
       await PrivacyNoticeService.markNoticeShown();
+    }
+  }
+
+  void _restorePlaybackSpeed() {
+    final profile = context.read<ProfileProvider>().profileOrNull;
+    if (profile != null) {
+      context.read<EpisodeProvider>().updatePlaybackSpeed(profile.playbackSpeed);
     }
   }
 

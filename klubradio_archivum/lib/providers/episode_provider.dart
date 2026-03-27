@@ -161,6 +161,7 @@ class EpisodeProvider extends ChangeNotifier {
     _currentEpisode = episodeForPlay;
 
     await _audioPlayerService.loadEpisode(episodeForPlay);
+    await _audioPlayerService.setSpeed(_playbackSpeed);
     notifyListeners();
   }
 

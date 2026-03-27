@@ -92,6 +92,7 @@ class _DownloadSettingsPanelState extends State<DownloadSettingsPanel> {
                   value: s.autodownloadSubscribed,
                   onChanged: (v) => _dao.setAutodownloadSubscribed(v),
                 ),
+
                 const SizedBox(height: 8),
 
                 // Max parallel
