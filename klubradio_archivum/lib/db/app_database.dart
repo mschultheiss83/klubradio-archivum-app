@@ -59,10 +59,6 @@ class Episodes extends Table {
   @override
   Set<Column> get primaryKey => {id};
 
-  @override
-  List<String> get customConstraints => [
-    'FOREIGN KEY(podcast_id) REFERENCES subscriptions(podcast_id) ON DELETE CASCADE',
-  ];
 }
 
 class Settings extends Table {
@@ -94,7 +90,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(

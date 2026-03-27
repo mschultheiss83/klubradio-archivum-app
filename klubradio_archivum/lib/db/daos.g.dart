@@ -16,18 +16,18 @@ class SubscriptionsDaoManager {
 }
 
 mixin _$EpisodesDaoMixin on DatabaseAccessor<AppDatabase> {
-  $SubscriptionsTable get subscriptions => attachedDatabase.subscriptions;
   $EpisodesTable get episodes => attachedDatabase.episodes;
+  $SubscriptionsTable get subscriptions => attachedDatabase.subscriptions;
   EpisodesDaoManager get managers => EpisodesDaoManager(this);
 }
 
 class EpisodesDaoManager {
   final _$EpisodesDaoMixin _db;
   EpisodesDaoManager(this._db);
-  $$SubscriptionsTableTableManager get subscriptions =>
-      $$SubscriptionsTableTableManager(_db.attachedDatabase, _db.subscriptions);
   $$EpisodesTableTableManager get episodes =>
       $$EpisodesTableTableManager(_db.attachedDatabase, _db.episodes);
+  $$SubscriptionsTableTableManager get subscriptions =>
+      $$SubscriptionsTableTableManager(_db.attachedDatabase, _db.subscriptions);
 }
 
 mixin _$SettingsDaoMixin on DatabaseAccessor<AppDatabase> {

@@ -1098,10 +1098,6 @@ class Episodes extends Table {
   @override
   Set<Column> get primaryKey => {id};
 
-  @override
-  List<String> get customConstraints => [
-    'FOREIGN KEY(podcast_id) REFERENCES subscriptions(podcast_id) ON DELETE CASCADE',
-  ];
 }
 
 class Settings extends Table {
@@ -1133,7 +1129,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -4938,18 +4934,18 @@ class SubscriptionsDaoManager {
 }
 
 mixin _$EpisodesDaoMixin on DatabaseAccessor<AppDatabase> {
-  $SubscriptionsTable get subscriptions => attachedDatabase.subscriptions;
   $EpisodesTable get episodes => attachedDatabase.episodes;
+  $SubscriptionsTable get subscriptions => attachedDatabase.subscriptions;
   EpisodesDaoManager get managers => EpisodesDaoManager(this);
 }
 
 class EpisodesDaoManager {
   final _$EpisodesDaoMixin _db;
   EpisodesDaoManager(this._db);
-  $$SubscriptionsTableTableManager get subscriptions =>
-      $$SubscriptionsTableTableManager(_db.attachedDatabase, _db.subscriptions);
   $$EpisodesTableTableManager get episodes =>
       $$EpisodesTableTableManager(_db.attachedDatabase, _db.episodes);
+  $$SubscriptionsTableTableManager get subscriptions =>
+      $$SubscriptionsTableTableManager(_db.attachedDatabase, _db.subscriptions);
 }
 
 mixin _$SettingsDaoMixin on DatabaseAccessor<AppDatabase> {
