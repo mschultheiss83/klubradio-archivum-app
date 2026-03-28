@@ -49,6 +49,7 @@ class EpisodeProvider extends ChangeNotifier {
   List<model.Episode> _queue = <model.Episode>[];
   bool _isBuffering = false;
   double _playbackSpeed = 1.0;
+  bool _playBusy = false;
 
   model.Episode? get currentEpisode => _currentEpisode;
   ValueNotifier<Duration> get positionNotifier => _positionNotifier;
@@ -150,42 +151,60 @@ class EpisodeProvider extends ChangeNotifier {
     List<model.Episode>? queue,
     bool preferLocal = true,
   }) async {
-    if (queue != null) {
-      _queue = List<model.Episode>.of(queue);
-    } else if (!_queue.any((model.Episode item) => item.id == episode.id)) {
-      _queue.insert(0, episode);
+    if (_playBusy) {
+      debugPrint('playEpisode: busy, ignoring call for ${episode.id}');
+      return;
     }
-
-    model.Episode episodeForPlay = episode;
-    if (preferLocal && (episode.cachedMetaPath?.isNotEmpty ?? false)) {
-      final fromCache = await readEpisodeFromCacheJson(episode.cachedMetaPath!);
-      if (fromCache != null) {
-        episodeForPlay = fromCache;
+    _playBusy = true;
+    try {
+      if (queue != null) {
+        _queue = List<model.Episode>.of(queue);
+      } else if (!_queue.any((model.Episode item) => item.id == episode.id)) {
+        _queue.insert(0, episode);
       }
+
+      model.Episode episodeForPlay = episode;
+      if (preferLocal && (episode.cachedMetaPath?.isNotEmpty ?? false)) {
+        final fromCache = await readEpisodeFromCacheJson(episode.cachedMetaPath!);
+        if (fromCache != null) {
+          episodeForPlay = fromCache;
+        }
+      }
+
+      _currentEpisode = episodeForPlay;
+      notifyListeners();
+
+      await _audioPlayerService.loadEpisode(episodeForPlay);
+      await _audioPlayerService.setSpeed(_playbackSpeed);
+      notifyListeners();
+    } catch (e) {
+      debugPrint('playEpisode(${episode.id}): $e');
+      _currentEpisode = null;
+      notifyListeners();
+    } finally {
+      _playBusy = false;
     }
-
-    _currentEpisode = episodeForPlay;
-
-    await _audioPlayerService.loadEpisode(episodeForPlay);
-    await _audioPlayerService.setSpeed(_playbackSpeed);
-    notifyListeners();
   }
 
   Future<void> onEpisodeDownloaded(String episodeId, String localPath) async {
-    if (_currentEpisode?.id == episodeId) {
-      // If the downloaded episode is currently playing
-      final currentPosition = _positionNotifier.value;
-      await _audioPlayerService.stop(); // Stop playback
+    try {
+      // Snapshot current state before any async gap
+      final current = _currentEpisode;
+      if (current != null && current.id == episodeId && !_playBusy) {
+        final currentPosition = _positionNotifier.value;
+        await _audioPlayerService.stop();
 
-      // Update _currentEpisode to point to the local path
-      _currentEpisode = _currentEpisode!.copyWith(localFilePath: localPath);
-
-      // Reload episode and resume playback from local
-      await _audioPlayerService.loadEpisode(_currentEpisode!);
-      await _audioPlayerService.seek(currentPosition);
-      await _audioPlayerService.togglePlayPause();
+        // Re-check after async gap — episode may have changed
+        if (_currentEpisode?.id == episodeId) {
+          _currentEpisode = _currentEpisode!.copyWith(localFilePath: localPath);
+          await _audioPlayerService.loadEpisode(_currentEpisode!);
+          await _audioPlayerService.seek(currentPosition);
+          await _audioPlayerService.togglePlayPause();
+        }
+      }
+    } catch (e) {
+      debugPrint('onEpisodeDownloaded($episodeId): $e');
     }
-    // Always notify so UI updates download status for all episodes
     notifyListeners();
   }
 
@@ -232,12 +251,9 @@ class EpisodeProvider extends ChangeNotifier {
   }
 
   model.Episode? getNextEpisode() {
-    if (_currentEpisode == null) {
-      return null;
-    }
-    final int index = _queue.indexWhere(
-      (model.Episode episode) => episode.id == _currentEpisode!.id,
-    );
+    final current = _currentEpisode;
+    if (current == null) return null;
+    final int index = _queue.indexWhere((e) => e.id == current.id);
     if (index != -1 && index + 1 < _queue.length) {
       return _queue[index + 1];
     }
@@ -245,12 +261,9 @@ class EpisodeProvider extends ChangeNotifier {
   }
 
   model.Episode? getPreviousEpisode() {
-    if (_currentEpisode == null) {
-      return null;
-    }
-    final int index = _queue.indexWhere(
-      (model.Episode episode) => episode.id == _currentEpisode!.id,
-    );
+    final current = _currentEpisode;
+    if (current == null) return null;
+    final int index = _queue.indexWhere((e) => e.id == current.id);
     if (index > 0) {
       return _queue[index - 1];
     }

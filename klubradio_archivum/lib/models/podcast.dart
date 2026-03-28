@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'episode.dart';
 import 'show_host.dart';
+import 'package:klubradio_archivum/screens/utils/constants.dart' as constants;
 
 /// Represents a podcast or show within the Klubrádió archive.
 class Podcast {
@@ -25,7 +26,9 @@ class Podcast {
       id: json['id']?.toString() ?? '',
       title: json['title'] as String? ?? 'Ismeretlen műsor',
       description: json['description'] as String? ?? '',
-      coverImageUrl: json['cover_image_url'] as String? ?? '',
+      coverImageUrl: (json['cover_image_url'] as String?)?.isNotEmpty == true
+          ? json['cover_image_url'] as String
+          : constants.defaultPodcastImageUrl,
       episodeCount: json['episode_count'] is int
           ? json['episode_count'] as int
           : int.tryParse(json['episode_count']?.toString() ?? '') ?? 0,

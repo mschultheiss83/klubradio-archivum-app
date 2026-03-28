@@ -55,6 +55,7 @@ const Duration episodeCacheMaxAge = Duration(minutes: 5);
 const String problematicEpisodeImageUrl =
     'https://www.klubradio.hu/data/sound-speaker-radio-microphone_focuspoint_340x340.jpg';
 const String defaultEpisodeImageUrl = 'assets/app_icon/app_icon.png';
+const String defaultPodcastImageUrl = 'assets/app_icon/app_icon.png';
 
 // ── User / Auth ───────────────────────────────────────────────────
 

@@ -10,7 +10,7 @@ void main() {
       expect(p.id, '1');
       expect(p.title, 'Test');
       expect(p.description, '');
-      expect(p.coverImageUrl, '');
+      expect(p.coverImageUrl, 'assets/app_icon/app_icon.png');
       expect(p.episodeCount, 0);
       expect(p.hosts, isEmpty);
       expect(p.latestEpisode, isNull);

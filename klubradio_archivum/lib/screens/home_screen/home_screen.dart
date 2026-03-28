@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -33,12 +35,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
       if (episodeProvider.currentEpisode == null &&
           podcastProvider.recentEpisodes.isNotEmpty) {
-        await episodeProvider.playEpisode(
+        // Fire-and-forget: don't block UI while audio buffers
+        unawaited(episodeProvider.playEpisode(
           podcastProvider.recentEpisodes.first,
           queue: podcastProvider.recentEpisodes,
-        );
-        // TODO: Test autoplay on app startup across all platforms (web, mobile, desktop)
-        // Currently disabled - togglePlayPause() removed to prevent autoplay issues
+        ));
       }
     });
   }

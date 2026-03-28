@@ -465,7 +465,7 @@ void main() {
       expect(podcast.id, '1');
       expect(podcast.title, 'Minimal');
       expect(podcast.description, '');
-      expect(podcast.coverImageUrl, '');
+      expect(podcast.coverImageUrl, 'assets/app_icon/app_icon.png');
       expect(podcast.episodeCount, 0);
       expect(podcast.hosts, isEmpty);
       expect(podcast.latestEpisode, isNull);
