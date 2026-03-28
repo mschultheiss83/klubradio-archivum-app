@@ -352,6 +352,26 @@
     "description": "Short subtitle/summary shown under the license card title."
   },
 
+  "aboutScreenImpressumTitle": "Imprint",
+  "@aboutScreenImpressumTitle": {
+    "description": "Title for the Impressum/Imprint card in the About screen."
+  },
+
+  "aboutScreenImpressumSummary": "View provider information",
+  "@aboutScreenImpressumSummary": {
+    "description": "Subtitle for the Impressum card."
+  },
+
+  "aboutScreenPrivacyPolicyTitle": "Privacy Policy",
+  "@aboutScreenPrivacyPolicyTitle": {
+    "description": "Title for the Privacy Policy card in the About screen."
+  },
+
+  "aboutScreenPrivacyPolicySummary": "Open privacy policy",
+  "@aboutScreenPrivacyPolicySummary": {
+    "description": "Subtitle for the Privacy Policy card."
+  },
+
   "aboutScreenVersionTitle": "Version",
   "@aboutScreenVersionTitle": {
     "description": "Title for the card that shows the current app version/build."

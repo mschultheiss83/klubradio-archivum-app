@@ -354,6 +354,26 @@
     "description": "Subtitlu/rezumat scurt afișat sub titlul cardului de licență."
   },
 
+  "aboutScreenImpressumTitle": "Imprimat",
+  "@aboutScreenImpressumTitle": {
+    "description": "Title for the Impressum/Imprint card in the About screen."
+  },
+
+  "aboutScreenImpressumSummary": "Vizualizați informațiile furnizorului",
+  "@aboutScreenImpressumSummary": {
+    "description": "Subtitle for the Impressum card."
+  },
+
+  "aboutScreenPrivacyPolicyTitle": "Politica de confidențialitate",
+  "@aboutScreenPrivacyPolicyTitle": {
+    "description": "Title for the Privacy Policy card in the About screen."
+  },
+
+  "aboutScreenPrivacyPolicySummary": "Deschideți politica de confidențialitate",
+  "@aboutScreenPrivacyPolicySummary": {
+    "description": "Subtitle for the Privacy Policy card."
+  },
+
   "aboutScreenVersionTitle": "Versiune",
   "@aboutScreenVersionTitle": {
     "description": "Titlul cardului care afișează versiunea/build-ul curent al aplicației."

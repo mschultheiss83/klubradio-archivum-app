@@ -267,6 +267,20 @@ class AppLocalizationsRo extends AppLocalizations {
       'Deschideți informațiile despre licență și legale.';
 
   @override
+  String get aboutScreenImpressumTitle => 'Imprimat';
+
+  @override
+  String get aboutScreenImpressumSummary =>
+      'Vizualizați informațiile furnizorului';
+
+  @override
+  String get aboutScreenPrivacyPolicyTitle => 'Politica de confidențialitate';
+
+  @override
+  String get aboutScreenPrivacyPolicySummary =>
+      'Deschideți politica de confidențialitate';
+
+  @override
   String get aboutScreenVersionTitle => 'Versiune';
 
   @override

@@ -354,6 +354,26 @@
     "description": "Kurze Unterzeile/Zusammenfassung unter dem Lizenz-Kartentitel."
   },
 
+  "aboutScreenImpressumTitle": "Impressum",
+  "@aboutScreenImpressumTitle": {
+    "description": "Title for the Impressum/Imprint card in the About screen."
+  },
+
+  "aboutScreenImpressumSummary": "Anbieterinformationen anzeigen",
+  "@aboutScreenImpressumSummary": {
+    "description": "Subtitle for the Impressum card."
+  },
+
+  "aboutScreenPrivacyPolicyTitle": "Datenschutzerklärung",
+  "@aboutScreenPrivacyPolicyTitle": {
+    "description": "Title for the Privacy Policy card in the About screen."
+  },
+
+  "aboutScreenPrivacyPolicySummary": "Datenschutzrichtlinie öffnen",
+  "@aboutScreenPrivacyPolicySummary": {
+    "description": "Subtitle for the Privacy Policy card."
+  },
+
   "aboutScreenVersionTitle": "Version",
   "@aboutScreenVersionTitle": {
     "description": "Titel der Karte, die die aktuelle App-Version/Build zeigt."

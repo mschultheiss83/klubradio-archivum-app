@@ -552,6 +552,30 @@ abstract class AppLocalizations {
   /// **'Open the license and legal information.'**
   String get aboutScreenLicenseSummary;
 
+  /// Title for the Impressum/Imprint card in the About screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Imprint'**
+  String get aboutScreenImpressumTitle;
+
+  /// Subtitle for the Impressum card.
+  ///
+  /// In en, this message translates to:
+  /// **'View provider information'**
+  String get aboutScreenImpressumSummary;
+
+  /// Title for the Privacy Policy card in the About screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy Policy'**
+  String get aboutScreenPrivacyPolicyTitle;
+
+  /// Subtitle for the Privacy Policy card.
+  ///
+  /// In en, this message translates to:
+  /// **'Open privacy policy'**
+  String get aboutScreenPrivacyPolicySummary;
+
   /// Title for the card that shows the current app version/build.
   ///
   /// In en, this message translates to:

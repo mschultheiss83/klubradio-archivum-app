@@ -271,6 +271,18 @@ class AppLocalizationsDe extends AppLocalizations {
       'Lizenz- und rechtliche Hinweise öffnen.';
 
   @override
+  String get aboutScreenImpressumTitle => 'Impressum';
+
+  @override
+  String get aboutScreenImpressumSummary => 'Anbieterinformationen anzeigen';
+
+  @override
+  String get aboutScreenPrivacyPolicyTitle => 'Datenschutzerklärung';
+
+  @override
+  String get aboutScreenPrivacyPolicySummary => 'Datenschutzrichtlinie öffnen';
+
+  @override
   String get aboutScreenVersionTitle => 'Version';
 
   @override

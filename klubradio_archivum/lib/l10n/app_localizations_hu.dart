@@ -266,6 +266,19 @@ class AppLocalizationsHu extends AppLocalizations {
       'Licenc és jogi információk megnyitása.';
 
   @override
+  String get aboutScreenImpressumTitle => 'Impresszum';
+
+  @override
+  String get aboutScreenImpressumSummary => 'Szolgáltatói adatok megtekintése';
+
+  @override
+  String get aboutScreenPrivacyPolicyTitle => 'Adatvédelmi nyilatkozat';
+
+  @override
+  String get aboutScreenPrivacyPolicySummary =>
+      'Adatvédelmi szabályzat megnyitása';
+
+  @override
   String get aboutScreenVersionTitle => 'Verzió';
 
   @override

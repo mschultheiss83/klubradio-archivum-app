@@ -5517,6 +5517,30 @@ abstract class AppLocalizations {
   /// **'Open the license and legal information.'**
   String get aboutScreenLicenseSummary;
 
+  /// Title for the Impressum/Imprint card in the About screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Imprint'**
+  String get aboutScreenImpressumTitle;
+
+  /// Subtitle for the Impressum card.
+  ///
+  /// In en, this message translates to:
+  /// **'View provider information'**
+  String get aboutScreenImpressumSummary;
+
+  /// Title for the Privacy Policy card in the About screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy Policy'**
+  String get aboutScreenPrivacyPolicyTitle;
+
+  /// Subtitle for the Privacy Policy card.
+  ///
+  /// In en, this message translates to:
+  /// **'Open privacy policy'**
+  String get aboutScreenPrivacyPolicySummary;
+
   /// Title for the card that shows the current app version/build.
   ///
   /// In en, this message translates to:
@@ -6396,6 +6420,18 @@ class AppLocalizationsDe extends AppLocalizations {
       'Lizenz- und rechtliche Hinweise öffnen.';
 
   @override
+  String get aboutScreenImpressumTitle => 'Impressum';
+
+  @override
+  String get aboutScreenImpressumSummary => 'Anbieterinformationen anzeigen';
+
+  @override
+  String get aboutScreenPrivacyPolicyTitle => 'Datenschutzerklärung';
+
+  @override
+  String get aboutScreenPrivacyPolicySummary => 'Datenschutzrichtlinie öffnen';
+
+  @override
   String get aboutScreenVersionTitle => 'Version';
 
   @override
@@ -6972,6 +7008,18 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get aboutScreenLicenseSummary =>
       'Open the license and legal information.';
+
+  @override
+  String get aboutScreenImpressumTitle => 'Imprint';
+
+  @override
+  String get aboutScreenImpressumSummary => 'View provider information';
+
+  @override
+  String get aboutScreenPrivacyPolicyTitle => 'Privacy Policy';
+
+  @override
+  String get aboutScreenPrivacyPolicySummary => 'Open privacy policy';
 
   @override
   String get aboutScreenVersionTitle => 'Version';
@@ -7554,6 +7602,19 @@ class AppLocalizationsHu extends AppLocalizations {
       'Licenc és jogi információk megnyitása.';
 
   @override
+  String get aboutScreenImpressumTitle => 'Impresszum';
+
+  @override
+  String get aboutScreenImpressumSummary => 'Szolgáltatói adatok megtekintése';
+
+  @override
+  String get aboutScreenPrivacyPolicyTitle => 'Adatvédelmi nyilatkozat';
+
+  @override
+  String get aboutScreenPrivacyPolicySummary =>
+      'Adatvédelmi szabályzat megnyitása';
+
+  @override
   String get aboutScreenVersionTitle => 'Verzió';
 
   @override
@@ -8133,6 +8194,20 @@ class AppLocalizationsRo extends AppLocalizations {
   @override
   String get aboutScreenLicenseSummary =>
       'Deschideți informațiile despre licență și legale.';
+
+  @override
+  String get aboutScreenImpressumTitle => 'Imprimat';
+
+  @override
+  String get aboutScreenImpressumSummary =>
+      'Vizualizați informațiile furnizorului';
+
+  @override
+  String get aboutScreenPrivacyPolicyTitle => 'Politica de confidențialitate';
+
+  @override
+  String get aboutScreenPrivacyPolicySummary =>
+      'Deschideți politica de confidențialitate';
 
   @override
   String get aboutScreenVersionTitle => 'Versiune';
@@ -10393,6 +10468,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:klubradio_archivum/l10n/app_localizations.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:klubradio_archivum/screens/about_screen/legal_screen.dart';
 import 'package:klubradio_archivum/screens/widgets/privacy_dialog.dart';
 
@@ -10520,6 +10596,40 @@ class _AboutScreenState extends State<AboutScreen> {
                     MaterialPageRoute(builder: (_) => const LegalScreen()),
                   );
                 },
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            // Impressum Card
+            Card(
+              clipBehavior: Clip.antiAlias,
+              child: ListTile(
+                leading: const Icon(Icons.business_outlined),
+                title: Text(l10n.aboutScreenImpressumTitle),
+                subtitle: Text(l10n.aboutScreenImpressumSummary),
+                trailing: const Icon(Icons.open_in_new, size: 18),
+                onTap: () => launchUrl(
+                  Uri.parse('https://multilevelstudios.de/impressum.html'),
+                  mode: LaunchMode.externalApplication,
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            // Privacy Policy Card
+            Card(
+              clipBehavior: Clip.antiAlias,
+              child: ListTile(
+                leading: const Icon(Icons.policy_outlined),
+                title: Text(l10n.aboutScreenPrivacyPolicyTitle),
+                subtitle: Text(l10n.aboutScreenPrivacyPolicySummary),
+                trailing: const Icon(Icons.open_in_new, size: 18),
+                onTap: () => launchUrl(
+                  Uri.parse('https://multilevelstudios.de/datenschutz.html'),
+                  mode: LaunchMode.externalApplication,
+                ),
               ),
             ),
 

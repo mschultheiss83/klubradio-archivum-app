@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:klubradio_archivum/l10n/app_localizations.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:klubradio_archivum/screens/about_screen/legal_screen.dart';
 import 'package:klubradio_archivum/screens/widgets/privacy_dialog.dart';
 
@@ -131,6 +132,40 @@ class _AboutScreenState extends State<AboutScreen> {
                     MaterialPageRoute(builder: (_) => const LegalScreen()),
                   );
                 },
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            // Impressum Card
+            Card(
+              clipBehavior: Clip.antiAlias,
+              child: ListTile(
+                leading: const Icon(Icons.business_outlined),
+                title: Text(l10n.aboutScreenImpressumTitle),
+                subtitle: Text(l10n.aboutScreenImpressumSummary),
+                trailing: const Icon(Icons.open_in_new, size: 18),
+                onTap: () => launchUrl(
+                  Uri.parse('https://multilevelstudios.de/impressum.html'),
+                  mode: LaunchMode.externalApplication,
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            // Privacy Policy Card
+            Card(
+              clipBehavior: Clip.antiAlias,
+              child: ListTile(
+                leading: const Icon(Icons.policy_outlined),
+                title: Text(l10n.aboutScreenPrivacyPolicyTitle),
+                subtitle: Text(l10n.aboutScreenPrivacyPolicySummary),
+                trailing: const Icon(Icons.open_in_new, size: 18),
+                onTap: () => launchUrl(
+                  Uri.parse('https://multilevelstudios.de/datenschutz.html'),
+                  mode: LaunchMode.externalApplication,
+                ),
               ),
             ),
 

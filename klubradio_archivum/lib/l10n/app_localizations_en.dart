@@ -264,6 +264,18 @@ class AppLocalizationsEn extends AppLocalizations {
       'Open the license and legal information.';
 
   @override
+  String get aboutScreenImpressumTitle => 'Imprint';
+
+  @override
+  String get aboutScreenImpressumSummary => 'View provider information';
+
+  @override
+  String get aboutScreenPrivacyPolicyTitle => 'Privacy Policy';
+
+  @override
+  String get aboutScreenPrivacyPolicySummary => 'Open privacy policy';
+
+  @override
   String get aboutScreenVersionTitle => 'Version';
 
   @override

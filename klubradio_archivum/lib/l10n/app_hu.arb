@@ -351,6 +351,26 @@
     "description": "Rövid alcím/összefoglaló a licenc kártya címe alatt."
   },
 
+  "aboutScreenImpressumTitle": "Impresszum",
+  "@aboutScreenImpressumTitle": {
+    "description": "Title for the Impressum/Imprint card in the About screen."
+  },
+
+  "aboutScreenImpressumSummary": "Szolgáltatói adatok megtekintése",
+  "@aboutScreenImpressumSummary": {
+    "description": "Subtitle for the Impressum card."
+  },
+
+  "aboutScreenPrivacyPolicyTitle": "Adatvédelmi nyilatkozat",
+  "@aboutScreenPrivacyPolicyTitle": {
+    "description": "Title for the Privacy Policy card in the About screen."
+  },
+
+  "aboutScreenPrivacyPolicySummary": "Adatvédelmi szabályzat megnyitása",
+  "@aboutScreenPrivacyPolicySummary": {
+    "description": "Subtitle for the Privacy Policy card."
+  },
+
   "aboutScreenVersionTitle": "Verzió",
   "@aboutScreenVersionTitle": {
     "description": "Kártya címe, amely az aktuális alkalmazás verzióját/buildjét mutatja."
