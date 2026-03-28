@@ -187,23 +187,11 @@ class EpisodeProvider extends ChangeNotifier {
   }
 
   Future<void> onEpisodeDownloaded(String episodeId, String localPath) async {
-    try {
-      // Snapshot current state before any async gap
-      final current = _currentEpisode;
-      if (current != null && current.id == episodeId && !_playBusy) {
-        final currentPosition = _positionNotifier.value;
-        await _audioPlayerService.stop();
-
-        // Re-check after async gap — episode may have changed
-        if (_currentEpisode?.id == episodeId) {
-          _currentEpisode = _currentEpisode!.copyWith(localFilePath: localPath);
-          await _audioPlayerService.loadEpisode(_currentEpisode!);
-          await _audioPlayerService.seek(currentPosition);
-          await _audioPlayerService.togglePlayPause();
-        }
-      }
-    } catch (e) {
-      debugPrint('onEpisodeDownloaded($episodeId): $e');
+    // Update the local path on the current episode model so that next play
+    // uses the local file. Do NOT hot-swap the audio source during playback —
+    // just_audio_windows crashes when reloading on a non-platform thread.
+    if (_currentEpisode?.id == episodeId) {
+      _currentEpisode = _currentEpisode!.copyWith(localFilePath: localPath);
     }
     notifyListeners();
   }
