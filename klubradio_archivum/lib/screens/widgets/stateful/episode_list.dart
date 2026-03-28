@@ -65,6 +65,46 @@ class _EpisodeListState extends State<EpisodeList> {
   }
 }
 
+/// Sliver-based episode list for use inside CustomScrollView.
+/// Only renders visible items — efficient for 200+ episodes.
+class SliverEpisodeList extends StatelessWidget {
+  const SliverEpisodeList({
+    super.key,
+    required this.episodes,
+    this.enableDownloads = true,
+  });
+
+  final List<model.Episode> episodes;
+  final bool enableDownloads;
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer2<EpisodeProvider, PodcastProvider>(
+      builder: (context, episodeProvider, podcastProvider, _) {
+        return SliverList.builder(
+          itemCount: episodes.length,
+          itemBuilder: (context, index) {
+            final ep = episodes[index];
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: EpisodeListItem(
+                episode: ep,
+                onTap: () async {
+                  await episodeProvider.playEpisode(ep, queue: episodes);
+                  unawaited(podcastProvider.addRecentlyPlayed(ep));
+                },
+                trailing: enableDownloads && PlatformUtils.supportsDownloads
+                    ? _DownloadButton(episode: ep, queue: episodes)
+                    : null,
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+}
+
 class _DownloadButton extends StatelessWidget {
   const _DownloadButton({required this.episode, this.queue});
   final model.Episode episode;

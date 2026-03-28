@@ -218,7 +218,7 @@
       }
     }
   },
-  "playbackSettingsAutoDownloadLabel": "Descărcări automate:",
+  "playbackSettingsAutoDownloadLabel": "Descărcări per podcast:",
   "@playbackSettingsAutoDownloadLabel": {
     "description": "Etichetă pentru setarea numărului de descărcări automate."
   },
@@ -313,7 +313,7 @@
   "@profileScreenDownloadSettingsTitle": {
     "description": "Titlul secțiunii de setări descărcări de pe ecranul de profil."
   },
-  "profileScreenAutoDownloadsTitle": "Descărcări automate",
+  "profileScreenAutoDownloadsTitle": "Descărcări per podcast",
   "@profileScreenAutoDownloadsTitle": {
     "description": "Titlul opțiunii de descărcări automate din setările de profil."
   },

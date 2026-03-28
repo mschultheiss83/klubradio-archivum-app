@@ -393,7 +393,7 @@ abstract class AppLocalizations {
   /// Label for the automatic downloads count setting.
   ///
   /// In en, this message translates to:
-  /// **'Automatic downloads:'**
+  /// **'Downloads per podcast:'**
   String get playbackSettingsAutoDownloadLabel;
 
   /// Format for displaying the number of episodes to auto-download. Example: 5 episodes
@@ -507,7 +507,7 @@ abstract class AppLocalizations {
   /// Title for the automatic downloads option in profile settings.
   ///
   /// In en, this message translates to:
-  /// **'Automatic Downloads'**
+  /// **'Downloads per podcast'**
   String get profileScreenAutoDownloadsTitle;
 
   /// Subtitle indicating the number of episodes set for automatic download.

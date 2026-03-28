@@ -217,7 +217,7 @@
       }
     }
   },
-  "playbackSettingsAutoDownloadLabel": "Automatikus letöltések:",
+  "playbackSettingsAutoDownloadLabel": "Letöltések podcastonként:",
   "@playbackSettingsAutoDownloadLabel": {
     "description": "Címke az automatikus letöltések számának beállításhoz."
   },
@@ -310,7 +310,7 @@
   "@profileScreenDownloadSettingsTitle": {
     "description": "A letöltési beállítások szekció címe a profil képernyőn."
   },
-  "profileScreenAutoDownloadsTitle": "Automatikus letöltések",
+  "profileScreenAutoDownloadsTitle": "Letöltések podcastonként",
   "@profileScreenAutoDownloadsTitle": {
     "description": "Az automatikus letöltések opció címe a profil beállításokban."
   },

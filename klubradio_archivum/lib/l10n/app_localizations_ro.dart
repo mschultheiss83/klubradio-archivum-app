@@ -167,7 +167,7 @@ class AppLocalizationsRo extends AppLocalizations {
   }
 
   @override
-  String get playbackSettingsAutoDownloadLabel => 'Descărcări automate:';
+  String get playbackSettingsAutoDownloadLabel => 'Descărcări per podcast:';
 
   @override
   String playbackSettingsAutoDownloadValue(int count) {
@@ -240,7 +240,7 @@ class AppLocalizationsRo extends AppLocalizations {
   String get profileScreenDownloadSettingsTitle => 'Setări descărcări';
 
   @override
-  String get profileScreenAutoDownloadsTitle => 'Descărcări automate';
+  String get profileScreenAutoDownloadsTitle => 'Descărcări per podcast';
 
   @override
   String profileScreenAutoDownloadsSubtitle(int count) {

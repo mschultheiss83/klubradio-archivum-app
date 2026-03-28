@@ -218,7 +218,7 @@
       }
     }
   },
-  "playbackSettingsAutoDownloadLabel": "Automatische Downloads:",
+  "playbackSettingsAutoDownloadLabel": "Downloads pro Podcast:",
   "@playbackSettingsAutoDownloadLabel": {
     "description": "Beschriftung für die Einstellung der Anzahl automatischer Downloads."
   },
@@ -313,7 +313,7 @@
   "@profileScreenDownloadSettingsTitle": {
     "description": "Titel für den Abschnitt Downloadeinstellungen auf dem Profilbildschirm."
   },
-  "profileScreenAutoDownloadsTitle": "Automatische Downloads",
+  "profileScreenAutoDownloadsTitle": "Anzahl der Downloads pro Podcast",
   "@profileScreenAutoDownloadsTitle": {
     "description": "Titel für die Option Automatische Downloads in den Profileinstellungen."
   },

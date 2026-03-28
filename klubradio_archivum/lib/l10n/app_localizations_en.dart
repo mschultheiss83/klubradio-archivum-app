@@ -166,7 +166,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get playbackSettingsAutoDownloadLabel => 'Automatic downloads:';
+  String get playbackSettingsAutoDownloadLabel => 'Downloads per podcast:';
 
   @override
   String playbackSettingsAutoDownloadValue(int count) {
@@ -237,7 +237,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileScreenDownloadSettingsTitle => 'Download Settings';
 
   @override
-  String get profileScreenAutoDownloadsTitle => 'Automatic Downloads';
+  String get profileScreenAutoDownloadsTitle => 'Downloads per podcast';
 
   @override
   String profileScreenAutoDownloadsSubtitle(int count) {

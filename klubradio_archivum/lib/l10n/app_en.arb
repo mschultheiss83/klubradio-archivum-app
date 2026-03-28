@@ -217,7 +217,7 @@
       }
     }
   },
-  "playbackSettingsAutoDownloadLabel": "Automatic downloads:",
+  "playbackSettingsAutoDownloadLabel": "Downloads per podcast:",
   "@playbackSettingsAutoDownloadLabel": {
     "description": "Label for the automatic downloads count setting."
   },
@@ -311,7 +311,7 @@
   "@profileScreenDownloadSettingsTitle": {
     "description": "Title for the download settings section on the profile screen."
   },
-  "profileScreenAutoDownloadsTitle": "Automatic Downloads",
+  "profileScreenAutoDownloadsTitle": "Downloads per podcast",
   "@profileScreenAutoDownloadsTitle": {
     "description": "Title for the automatic downloads option in profile settings."
   },

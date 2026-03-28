@@ -167,7 +167,7 @@ class AppLocalizationsHu extends AppLocalizations {
   }
 
   @override
-  String get playbackSettingsAutoDownloadLabel => 'Automatikus letöltések:';
+  String get playbackSettingsAutoDownloadLabel => 'Letöltések podcastonként:';
 
   @override
   String playbackSettingsAutoDownloadValue(int count) {
@@ -239,7 +239,7 @@ class AppLocalizationsHu extends AppLocalizations {
   String get profileScreenDownloadSettingsTitle => 'Letöltési beállítások';
 
   @override
-  String get profileScreenAutoDownloadsTitle => 'Automatikus letöltések';
+  String get profileScreenAutoDownloadsTitle => 'Letöltések podcastonként';
 
   @override
   String profileScreenAutoDownloadsSubtitle(int count) {

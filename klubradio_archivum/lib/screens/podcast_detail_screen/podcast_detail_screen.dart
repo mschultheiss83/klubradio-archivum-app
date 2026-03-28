@@ -129,56 +129,61 @@ class _PodcastDetailScreenState extends State<PodcastDetailScreen> {
           ),
         ],
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: <Widget>[
-          PodcastInfoCard(podcast: widget.podcast),
-          const SizedBox(height: 12),
-          StreamBuilder<db.Setting?>(
-            stream: (context.read<db.AppDatabase>().select(
-              context.read<db.AppDatabase>().settings,
-            )..where((s) => s.id.equals(1))).watchSingleOrNull(),
-            builder: (context, settingsSnap) {
-              final ascending = settingsSnap.data?.playOrder == 'oldest';
-              return StreamBuilder<List<db.Episode>>(
+      body: StreamBuilder<db.Setting?>(
+        stream: (context.read<db.AppDatabase>().select(
+          context.read<db.AppDatabase>().settings,
+        )..where((s) => s.id.equals(1))).watchSingleOrNull(),
+        builder: (context, settingsSnap) {
+          final ascending = settingsSnap.data?.playOrder == 'oldest';
+          return StreamBuilder<List<db.Episode>>(
             stream: context.read<EpisodesDao>().watchByPodcast(
               widget.podcast.id,
               ascending: ascending,
             ),
             builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(vertical: 40.0),
-                    child: CircularProgressIndicator(),
-                  ),
-                );
-              }
-
-              if (snapshot.hasError) {
-                String errorDetails = snapshot.error.toString();
-                if (snapshot.error is ApiException) {
-                  errorDetails = (snapshot.error as ApiException).message;
-                }
-                return Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(24),
-                    child: Text(
-                      l10n.podcastDetailScreenErrorMessage(errorDetails),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                );
-              }
-
               final List<model.Episode> episodeList =
                   snapshot.data?.map((e) => model.Episode.fromDb(e)).toList() ?? const <model.Episode>[];
-              return EpisodeList(episodes: episodeList);
+
+              return CustomScrollView(
+                slivers: [
+                  // Podcast info card (non-scrollable header)
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+                      child: PodcastInfoCard(podcast: widget.podcast),
+                    ),
+                  ),
+
+                  // Loading / Error / Episode list
+                  if (snapshot.connectionState == ConnectionState.waiting && episodeList.isEmpty)
+                    const SliverFillRemaining(
+                      child: Center(child: CircularProgressIndicator()),
+                    )
+                  else if (snapshot.hasError)
+                    SliverFillRemaining(
+                      child: Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(24),
+                          child: Text(
+                            l10n.podcastDetailScreenErrorMessage(
+                              snapshot.error is ApiException
+                                  ? (snapshot.error as ApiException).message
+                                  : snapshot.error.toString(),
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ),
+                    )
+                  else
+                    SliverEpisodeList(
+                      episodes: episodeList,
+                    ),
+                ],
+              );
             },
           );
-            },
-          ),
-        ],
+        },
       ),
     );
   }

@@ -5360,7 +5360,7 @@ abstract class AppLocalizations {
   /// Label for the automatic downloads count setting.
   ///
   /// In en, this message translates to:
-  /// **'Automatic downloads:'**
+  /// **'Downloads per podcast:'**
   String get playbackSettingsAutoDownloadLabel;
 
   /// Format for displaying the number of episodes to auto-download. Example: 5 episodes
@@ -5474,7 +5474,7 @@ abstract class AppLocalizations {
   /// Title for the automatic downloads option in profile settings.
   ///
   /// In en, this message translates to:
-  /// **'Automatic Downloads'**
+  /// **'Downloads per podcast'**
   String get profileScreenAutoDownloadsTitle;
 
   /// Subtitle indicating the number of episodes set for automatic download.
@@ -6318,7 +6318,7 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
-  String get playbackSettingsAutoDownloadLabel => 'Automatische Downloads:';
+  String get playbackSettingsAutoDownloadLabel => 'Downloads pro Podcast:';
 
   @override
   String playbackSettingsAutoDownloadValue(int count) {
@@ -6394,7 +6394,8 @@ class AppLocalizationsDe extends AppLocalizations {
   String get profileScreenDownloadSettingsTitle => 'Downloadeinstellungen';
 
   @override
-  String get profileScreenAutoDownloadsTitle => 'Automatische Downloads';
+  String get profileScreenAutoDownloadsTitle =>
+      'Anzahl der Downloads pro Podcast';
 
   @override
   String profileScreenAutoDownloadsSubtitle(int count) {
@@ -6914,7 +6915,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get playbackSettingsAutoDownloadLabel => 'Automatic downloads:';
+  String get playbackSettingsAutoDownloadLabel => 'Downloads per podcast:';
 
   @override
   String playbackSettingsAutoDownloadValue(int count) {
@@ -6985,7 +6986,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileScreenDownloadSettingsTitle => 'Download Settings';
 
   @override
-  String get profileScreenAutoDownloadsTitle => 'Automatic Downloads';
+  String get profileScreenAutoDownloadsTitle => 'Downloads per podcast';
 
   @override
   String profileScreenAutoDownloadsSubtitle(int count) {
@@ -7505,7 +7506,7 @@ class AppLocalizationsHu extends AppLocalizations {
   }
 
   @override
-  String get playbackSettingsAutoDownloadLabel => 'Automatikus letöltések:';
+  String get playbackSettingsAutoDownloadLabel => 'Letöltések podcastonként:';
 
   @override
   String playbackSettingsAutoDownloadValue(int count) {
@@ -7577,7 +7578,7 @@ class AppLocalizationsHu extends AppLocalizations {
   String get profileScreenDownloadSettingsTitle => 'Letöltési beállítások';
 
   @override
-  String get profileScreenAutoDownloadsTitle => 'Automatikus letöltések';
+  String get profileScreenAutoDownloadsTitle => 'Letöltések podcastonként';
 
   @override
   String profileScreenAutoDownloadsSubtitle(int count) {
@@ -8098,7 +8099,7 @@ class AppLocalizationsRo extends AppLocalizations {
   }
 
   @override
-  String get playbackSettingsAutoDownloadLabel => 'Descărcări automate:';
+  String get playbackSettingsAutoDownloadLabel => 'Descărcări per podcast:';
 
   @override
   String playbackSettingsAutoDownloadValue(int count) {
@@ -8171,7 +8172,7 @@ class AppLocalizationsRo extends AppLocalizations {
   String get profileScreenDownloadSettingsTitle => 'Setări descărcări';
 
   @override
-  String get profileScreenAutoDownloadsTitle => 'Descărcări automate';
+  String get profileScreenAutoDownloadsTitle => 'Descărcări per podcast';
 
   @override
   String profileScreenAutoDownloadsSubtitle(int count) {
@@ -12670,56 +12671,61 @@ class _PodcastDetailScreenState extends State<PodcastDetailScreen> {
           ),
         ],
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: <Widget>[
-          PodcastInfoCard(podcast: widget.podcast),
-          const SizedBox(height: 12),
-          StreamBuilder<db.Setting?>(
-            stream: (context.read<db.AppDatabase>().select(
-              context.read<db.AppDatabase>().settings,
-            )..where((s) => s.id.equals(1))).watchSingleOrNull(),
-            builder: (context, settingsSnap) {
-              final ascending = settingsSnap.data?.playOrder == 'oldest';
-              return StreamBuilder<List<db.Episode>>(
+      body: StreamBuilder<db.Setting?>(
+        stream: (context.read<db.AppDatabase>().select(
+          context.read<db.AppDatabase>().settings,
+        )..where((s) => s.id.equals(1))).watchSingleOrNull(),
+        builder: (context, settingsSnap) {
+          final ascending = settingsSnap.data?.playOrder == 'oldest';
+          return StreamBuilder<List<db.Episode>>(
             stream: context.read<EpisodesDao>().watchByPodcast(
               widget.podcast.id,
               ascending: ascending,
             ),
             builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(vertical: 40.0),
-                    child: CircularProgressIndicator(),
-                  ),
-                );
-              }
-
-              if (snapshot.hasError) {
-                String errorDetails = snapshot.error.toString();
-                if (snapshot.error is ApiException) {
-                  errorDetails = (snapshot.error as ApiException).message;
-                }
-                return Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(24),
-                    child: Text(
-                      l10n.podcastDetailScreenErrorMessage(errorDetails),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                );
-              }
-
               final List<model.Episode> episodeList =
                   snapshot.data?.map((e) => model.Episode.fromDb(e)).toList() ?? const <model.Episode>[];
-              return EpisodeList(episodes: episodeList);
+
+              return CustomScrollView(
+                slivers: [
+                  // Podcast info card (non-scrollable header)
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+                      child: PodcastInfoCard(podcast: widget.podcast),
+                    ),
+                  ),
+
+                  // Loading / Error / Episode list
+                  if (snapshot.connectionState == ConnectionState.waiting && episodeList.isEmpty)
+                    const SliverFillRemaining(
+                      child: Center(child: CircularProgressIndicator()),
+                    )
+                  else if (snapshot.hasError)
+                    SliverFillRemaining(
+                      child: Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(24),
+                          child: Text(
+                            l10n.podcastDetailScreenErrorMessage(
+                              snapshot.error is ApiException
+                                  ? (snapshot.error as ApiException).message
+                                  : snapshot.error.toString(),
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ),
+                    )
+                  else
+                    SliverEpisodeList(
+                      episodes: episodeList,
+                    ),
+                ],
+              );
             },
           );
-            },
-          ),
-        ],
+        },
       ),
     );
   }
@@ -14193,6 +14199,46 @@ class _EpisodeListState extends State<EpisodeList> {
               },
             );
           },
+    );
+  }
+}
+
+/// Sliver-based episode list for use inside CustomScrollView.
+/// Only renders visible items — efficient for 200+ episodes.
+class SliverEpisodeList extends StatelessWidget {
+  const SliverEpisodeList({
+    super.key,
+    required this.episodes,
+    this.enableDownloads = true,
+  });
+
+  final List<model.Episode> episodes;
+  final bool enableDownloads;
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer2<EpisodeProvider, PodcastProvider>(
+      builder: (context, episodeProvider, podcastProvider, _) {
+        return SliverList.builder(
+          itemCount: episodes.length,
+          itemBuilder: (context, index) {
+            final ep = episodes[index];
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: EpisodeListItem(
+                episode: ep,
+                onTap: () async {
+                  await episodeProvider.playEpisode(ep, queue: episodes);
+                  unawaited(podcastProvider.addRecentlyPlayed(ep));
+                },
+                trailing: enableDownloads && PlatformUtils.supportsDownloads
+                    ? _DownloadButton(episode: ep, queue: episodes)
+                    : null,
+              ),
+            );
+          },
+        );
+      },
     );
   }
 }
