@@ -88,22 +88,16 @@ class SubscriptionProvider extends ChangeNotifier {
       );
 
       if (!currentlySubscribed) {
-        // Only auto-download if autodownloadSubscribed is enabled in settings
-        final settings = await settingsDao.getOne();
-        final autodownloadEnabled = settings?.autodownloadSubscribed ?? false;
-        if (autodownloadEnabled) {
-          final downloadCount = await downloadProvider.autodownloadPodcast(
-            podcastId,
-            globalAutoDownloadN: autoDownloadEpisodeCount ?? constants.defaultAutoDownloadCount,
-          );
-          debugPrint(
-            'toggleSubscription: autodownload called, downloading files: $downloadCount',
-          );
-        } else {
-          debugPrint(
-            'toggleSubscription: autodownloadSubscribed=false, skipping auto-download',
-          );
-        }
+        // Seed a new subscription immediately. The settings toggle only controls
+        // later background checks for newly published episodes.
+        final downloadCount = await downloadProvider.autodownloadPodcast(
+          podcastId,
+          globalAutoDownloadN:
+              autoDownloadEpisodeCount ?? constants.defaultAutoDownloadCount,
+        );
+        debugPrint(
+          'toggleSubscription: initial autodownload called, downloading files: $downloadCount',
+        );
       }
     } catch (e) {
       debugPrint('toggleSubscription: Error: $e');

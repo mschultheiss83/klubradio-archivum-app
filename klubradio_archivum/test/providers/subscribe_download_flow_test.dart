@@ -6,8 +6,8 @@
 //   1. Subscribe to "Esti gyors" → triggers 2 downloads (autoDownloadEpisodeCount=2)
 //   2. Unsubscribe (keep files) → no downloads triggered
 //   3. Delete one file, re-subscribe → only 1 new download (1 already completed)
-//   4. autodownloadSubscribed=false → subscribing should NOT trigger auto-downloads
-//   5. autodownloadSubscribed=true → subscribing triggers auto-downloads
+//   4. subscribing seeds downloads even when autodownloadSubscribed=false
+//   5. subscribing also seeds downloads when autodownloadSubscribed=true
 //
 // Uses Mockito mocks for SubscriptionsDao, SettingsDao, DownloadProvider.
 
@@ -197,17 +197,21 @@ void main() {
     });
   });
 
-  // ==================== Scenario 4: BUG — autodownloadSubscribed=false ====================
+  // ==================== Scenario 4: Initial subscribe is independent of background autodownload setting ====================
 
   group('Scenario 4: autodownloadSubscribed setting check', () {
     test(
-      'subscribing does NOT trigger auto-download when autodownloadSubscribed=false',
+      'subscribing still triggers initial downloads when autodownloadSubscribed=false',
       () async {
         when(mockSettingsDao.getOne())
             .thenAnswer((_) async => makeSetting(autodownloadSubscribed: false));
         stubToggleSubscribe();
         when(mockSubsDao.getById(podcastId))
             .thenAnswer((_) async => makeSub(podcastId, autoDownloadN: 2));
+        when(mockDownloadProvider.autodownloadPodcast(
+          podcastId,
+          globalAutoDownloadN: 2,
+        )).thenAnswer((_) async => 2);
 
         await provider.toggleSubscription(podcastId, false);
 
@@ -218,11 +222,11 @@ void main() {
           autoDownloadN: 2,
         )).called(1);
 
-        // But no downloads should be triggered
-        verifyNever(mockDownloadProvider.autodownloadPodcast(
-          any,
-          globalAutoDownloadN: anyNamed('globalAutoDownloadN'),
-        ));
+        // Initial download seeding should still happen
+        verify(mockDownloadProvider.autodownloadPodcast(
+          podcastId,
+          globalAutoDownloadN: 2,
+        )).called(1);
       },
     );
 

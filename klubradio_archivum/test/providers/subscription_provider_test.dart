@@ -1,14 +1,14 @@
 // test/providers/subscription_provider_test.dart
 //
-// Unit tests for SubscriptionProvider, focusing on the settingsDao parameter
-// introduced to read keepLatestN when subscribing.
+// Unit tests for SubscriptionProvider, focusing on initial download seeding for
+// new subscriptions and the provider's busy/load state handling.
 //
 // Covers:
 //   - loadSubscription: sets currentSubscription from DAO, sets loaded=true
 //   - watchSubscription: returns stream from DAO
-//   - toggleSubscription (subscribing): reads keepLatestN from settingsDao
-//   - toggleSubscription (subscribing, no settings): falls back to defaultAutoDownloadCount
-//   - toggleSubscription (unsubscribing): does NOT read settingsDao
+//   - toggleSubscription (subscribing): uses autoDownloadEpisodeCount
+//   - toggleSubscription (subscribing, no profile value): falls back to defaultAutoDownloadCount
+//   - toggleSubscription (unsubscribing): does not seed downloads
 //   - toggleSubscription: busy flag lifecycle (true during, false after)
 //   - updateDependencies: updates downloadProvider reference
 //
@@ -75,7 +75,7 @@ void main() {
     mockSettingsDao = MockSettingsDao();
     mockDownloadProvider = MockDownloadProvider();
 
-    // Default: settingsDao returns autodownloadSubscribed=true so subscribe tests trigger downloads
+    // Keep a default settings row stub because the provider still depends on the DAO.
     when(mockSettingsDao.getOne()).thenAnswer((_) async => makeSetting(
           keepLatestN: null,
           autodownloadSubscribed: true,
