@@ -213,11 +213,13 @@ class EpisodesDao extends DatabaseAccessor<AppDatabase>
         ),
       );
 
-  // Nach File-Löschung: DB-Felder bereinigen
+  // Nach File-Löschung: DB-Felder bereinigen (MP3 + JSON + JPG)
   Future<int> clearLocalFile(String id) =>
       (update(episodes)..where((e) => e.id.equals(id))).write(
         const EpisodesCompanion(
           localPath: Value(null),
+          cachedMetaPath: Value(null),
+          cachedImagePath: Value(null),
           status: Value(0), // none
         ),
       );

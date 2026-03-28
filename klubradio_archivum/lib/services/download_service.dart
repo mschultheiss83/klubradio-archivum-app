@@ -406,14 +406,22 @@ class DownloadService {
     if (_disposed) return;
 
     final ep = await episodesDao.getById(episodeId);
-    if (ep?.localPath != null) {
-      try {
-        final f = File(ep!.localPath!);
-        if (await f.exists()) {
-          await f.delete();
+    if (ep == null) return;
+
+    // Delete MP3, JSON metadata, and JPG cover
+    final paths = [
+      ep.localPath,
+      ep.cachedMetaPath,
+      ep.cachedImagePath,
+    ];
+    for (final path in paths) {
+      if (path != null && path.isNotEmpty) {
+        try {
+          final f = File(path);
+          if (await f.exists()) await f.delete();
+        } catch (_) {
+          // optional: loggen
         }
-      } catch (_) {
-        // optional: loggen
       }
     }
     await episodesDao.clearLocalFile(episodeId);
@@ -424,9 +432,25 @@ class DownloadService {
     if (_disposed) return;
 
     final episodes = await episodesDao.getEpisodesByPodcastId(podcastId);
+    String? podcastDir;
     for (final episode in episodes) {
       if (episode.localPath != null && episode.localPath!.isNotEmpty) {
+        // Capture the podcast directory from the first episode's path
+        podcastDir ??= p.dirname(episode.localPath!);
         await removeLocalFile(episode.id);
+      }
+    }
+
+    // Remove empty podcast directory (e.g. .../269/)
+    if (podcastDir != null) {
+      try {
+        final dir = Directory(podcastDir);
+        if (await dir.exists()) {
+          final remaining = await dir.list().length;
+          if (remaining == 0) await dir.delete();
+        }
+      } catch (_) {
+        // optional: loggen
       }
     }
   }
