@@ -14,7 +14,7 @@ This issue serves as a central place to track major tasks, enhancements, and kno
 
 - [ ] **Downloader Refinements**
     - [ ] Test guards: ensure later events are ignored after `complete`.
-    - [ ] adapt Windows path/branding `com.example` to Company/Product in `windows/runner`.
+    - [x] adapt Windows path/branding `com.example` → `de.multilevelstudios.klubradioarchivum` in docs.
 
 ### ✅ Testing Improvements
 

@@ -5,9 +5,9 @@ hier eine kurze, saubere Übersicht — **Runtime-FS** (wo Dateien landen):
 
 Basisverzeichnis (plattformabhängig):
 
-* **Windows:** `%AppData%\com.example\klubradio_archivum\`
-* **macOS:** `~/Library/Application Support/com.example.klubradio_archivum/`
-* **Linux:** `~/.local/share/com.example.klubradio_archivum/`
+* **Windows:** `%AppData%\de.multilevelstudios\klubradioarchivum\`
+* **macOS:** `~/Library/Application Support/de.multilevelstudios.klubradioarchivum/`
+* **Linux:** `~/.local/share/de.multilevelstudios.klubradioarchivum/`
 
 Darin legt die App (per `applicationSupport`) den Ordner **`Klubradio/`** an:
 

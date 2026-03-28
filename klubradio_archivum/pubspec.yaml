@@ -2,7 +2,7 @@ name: klubradio_archivum
 description: "Flutter app providing podcast-style access to the [Klubrádió Archive](https://www.klubradio.hu/archivum)."
 publish_to: 'none' # Prevent accidental publishing to pub.dev
 
-version: 1.0.4
+version: 1.0.5
 
 environment:
   sdk: ^3.9.2

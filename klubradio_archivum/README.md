@@ -131,7 +131,7 @@ Wenn iOS-Builds genutzt werden:
 2. **Downloader-Feinschliff**
 
    * Guards testen: nach `complete` ignorieren wir spätere Events 
-   * Windows Pfad/Branding später: `com.example` → Company/Product in `windows/runner` anpassen.
+   * ✅ Windows Pfad/Branding: `com.example` → `de.multilevelstudios.klubradioarchivum` angepasst.
 
 3. **Integrationstest**
 
