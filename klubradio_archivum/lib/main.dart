@@ -107,24 +107,6 @@ class _KlubradioArchivumAppState extends State<KlubradioArchivumApp> {
         Provider<EpisodesDao>(
           create: (ctx) => EpisodesDao(ctx.read<AppDatabase>()),
         ),
-        ChangeNotifierProxyProvider<DownloadProvider, SubscriptionProvider>(
-          create: (ctx) => SubscriptionProvider(
-            subscriptionsDao: ctx.read<SubscriptionsDao>(),
-            settingsDao: SettingsDao(ctx.read<AppDatabase>()),
-            downloadProvider: ctx.read<DownloadProvider>(),
-          ),
-          update: (context, downloadProvider, previous) {
-            if (previous != null) {
-              previous.updateDependencies(downloadProvider: downloadProvider);
-              return previous;
-            }
-            return SubscriptionProvider(
-              subscriptionsDao: context.read<SubscriptionsDao>(),
-              settingsDao: SettingsDao(context.read<AppDatabase>()),
-              downloadProvider: downloadProvider,
-            );
-          },
-        ),
         // Repository layer for podcasts
         Provider<PodcastRepository>(
           create: (ctx) {
@@ -145,6 +127,26 @@ class _KlubradioArchivumAppState extends State<KlubradioArchivumApp> {
         ChangeNotifierProvider<ProfileProvider>(
           create: (ctx) =>
               ProfileProvider(repo: ctx.read<ProfileRepository>())..load(),
+        ),
+        // SubscriptionProvider depends on DownloadProvider + ProfileProvider
+        ChangeNotifierProxyProvider2<DownloadProvider, ProfileProvider, SubscriptionProvider>(
+          create: (ctx) => SubscriptionProvider(
+            subscriptionsDao: ctx.read<SubscriptionsDao>(),
+            settingsDao: SettingsDao(ctx.read<AppDatabase>()),
+            downloadProvider: ctx.read<DownloadProvider>(),
+          ),
+          update: (context, downloadProvider, profileProvider, previous) {
+            if (previous != null) {
+              previous.updateDependencies(downloadProvider: downloadProvider);
+              previous.autoDownloadEpisodeCount = profileProvider.profileOrNull?.autoDownloadEpisodeCount;
+              return previous;
+            }
+            return SubscriptionProvider(
+              subscriptionsDao: context.read<SubscriptionsDao>(),
+              settingsDao: SettingsDao(context.read<AppDatabase>()),
+              downloadProvider: downloadProvider,
+            )..autoDownloadEpisodeCount = profileProvider.profileOrNull?.autoDownloadEpisodeCount;
+          },
         ),
         ChangeNotifierProvider<LatestProvider>(
           create: (ctx) => LatestProvider(ctx.read<PodcastRepository>()),

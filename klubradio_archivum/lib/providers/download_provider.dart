@@ -106,9 +106,9 @@ class DownloadProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<int> autodownloadPodcast(String podcastId) async {
+  Future<int> autodownloadPodcast(String podcastId, {int globalAutoDownloadN = 0}) async {
     if (!_isDownloadsSupported) return 0;
-    final count = await _service!.autodownloadPodcast(podcastId);
+    final count = await _service!.autodownloadPodcast(podcastId, globalAutoDownloadN: globalAutoDownloadN);
     notifyListeners();
     return count;
   }

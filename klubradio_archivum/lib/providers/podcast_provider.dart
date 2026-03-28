@@ -255,7 +255,7 @@ class PodcastProvider extends ChangeNotifier {
   void updateAutoDownloadCount(int count) {
     final profile = _userProfile;
     if (profile == null) return;
-    _userProfile = profile.copyWith(maxAutoDownload: count);
+    _userProfile = profile.copyWith(autoDownloadEpisodeCount: count);
     notifyListeners();
   }
 

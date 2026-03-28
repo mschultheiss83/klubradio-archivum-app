@@ -430,22 +430,21 @@ class DownloadService {
     }
   }
 
-  Future<void> checkAutodownloads() async {
+  Future<void> checkAutodownloads({int globalAutoDownloadN = 0}) async {
     if (_disposed) return;
     final settings = await settingsDao.getOne();
     if (settings?.autodownloadSubscribed ?? false) {
       final activeSubscriptions = await subscriptionsDao.watchAllActive().first;
       for (final sub in activeSubscriptions) {
-        await autodownloadPodcast(sub.podcastId);
+        await autodownloadPodcast(sub.podcastId, globalAutoDownloadN: globalAutoDownloadN);
       }
     }
   }
 
-  Future<int> autodownloadPodcast(String podcastId) async {
-    // Per-podcast autoDownloadN takes priority, then global keepLatestN
+  Future<int> autodownloadPodcast(String podcastId, {int globalAutoDownloadN = 0}) async {
+    // Per-podcast autoDownloadN takes priority, then global autoDownloadEpisodeCount
     final sub = await subscriptionsDao.getById(podcastId);
-    final settings = await settingsDao.getOne();
-    final keepN = sub?.autoDownloadN ?? settings?.keepLatestN ?? 0;
+    final keepN = sub?.autoDownloadN ?? globalAutoDownloadN;
 
     if (keepN <= 0) {
       return 0;

@@ -40,10 +40,10 @@ class ProfileProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> setMaxAutoDownload(int n) async {
+  Future<void> setAutoDownloadEpisodeCount(int n) async {
     final p = _profile;
     if (p == null) return;
-    _profile = p.copyWith(maxAutoDownload: n);
+    _profile = p.copyWith(autoDownloadEpisodeCount: n);
     await _repo.save(_profile!);
     notifyListeners();
   }

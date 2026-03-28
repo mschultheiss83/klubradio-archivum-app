@@ -6,6 +6,7 @@ import 'package:klubradio_archivum/l10n/app_localizations.dart';
 import 'package:klubradio_archivum/db/app_database.dart';
 import 'package:klubradio_archivum/db/daos.dart';
 import 'package:klubradio_archivum/models/retention_mode.dart';
+import 'package:klubradio_archivum/providers/profile_provider.dart';
 import 'package:klubradio_archivum/screens/widgets/stateless/platform_utils.dart'; // Import PlatformUtils
 
 class DownloadSettingsPanel extends StatefulWidget {
@@ -93,6 +94,25 @@ class _DownloadSettingsPanelState extends State<DownloadSettingsPanel> {
                   onChanged: (v) => _dao.setAutodownloadSubscribed(v),
                 ),
 
+                // Episodes per auto-download (global default)
+                Builder(
+                  builder: (context) {
+                    final profileProv = context.watch<ProfileProvider>();
+                    final count = profileProv.profileOrNull?.autoDownloadEpisodeCount ?? 2;
+                    return _StepperRow(
+                      label: l10n.profileScreenAutoDownloadsTitle,
+                      hint: l10n.profileScreenAutoDownloadsSubtitle(count),
+                      valueText: '$count',
+                      onMinus: count > 0
+                          ? () => profileProv.setAutoDownloadEpisodeCount(count - 1)
+                          : null,
+                      onPlus: count < 50
+                          ? () => profileProv.setAutoDownloadEpisodeCount(count + 1)
+                          : null,
+                      cs: cs,
+                    );
+                  },
+                ),
                 const SizedBox(height: 8),
 
                 // Max parallel

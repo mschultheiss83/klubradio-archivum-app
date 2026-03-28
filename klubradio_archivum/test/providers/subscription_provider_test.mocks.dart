@@ -1519,9 +1519,16 @@ class MockDownloadProvider extends _i1.Mock implements _i10.DownloadProvider {
           as _i6.Future<void>);
 
   @override
-  _i6.Future<int> autodownloadPodcast(String? podcastId) =>
+  _i6.Future<int> autodownloadPodcast(
+    String? podcastId, {
+    int? globalAutoDownloadN = 0,
+  }) =>
       (super.noSuchMethod(
-            Invocation.method(#autodownloadPodcast, [podcastId]),
+            Invocation.method(
+              #autodownloadPodcast,
+              [podcastId],
+              {#globalAutoDownloadN: globalAutoDownloadN},
+            ),
             returnValue: _i6.Future<int>.value(0),
           )
           as _i6.Future<int>);

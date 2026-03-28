@@ -8560,24 +8560,6 @@ class _KlubradioArchivumAppState extends State<KlubradioArchivumApp> {
         Provider<EpisodesDao>(
           create: (ctx) => EpisodesDao(ctx.read<AppDatabase>()),
         ),
-        ChangeNotifierProxyProvider<DownloadProvider, SubscriptionProvider>(
-          create: (ctx) => SubscriptionProvider(
-            subscriptionsDao: ctx.read<SubscriptionsDao>(),
-            settingsDao: SettingsDao(ctx.read<AppDatabase>()),
-            downloadProvider: ctx.read<DownloadProvider>(),
-          ),
-          update: (context, downloadProvider, previous) {
-            if (previous != null) {
-              previous.updateDependencies(downloadProvider: downloadProvider);
-              return previous;
-            }
-            return SubscriptionProvider(
-              subscriptionsDao: context.read<SubscriptionsDao>(),
-              settingsDao: SettingsDao(context.read<AppDatabase>()),
-              downloadProvider: downloadProvider,
-            );
-          },
-        ),
         // Repository layer for podcasts
         Provider<PodcastRepository>(
           create: (ctx) {
@@ -8598,6 +8580,26 @@ class _KlubradioArchivumAppState extends State<KlubradioArchivumApp> {
         ChangeNotifierProvider<ProfileProvider>(
           create: (ctx) =>
               ProfileProvider(repo: ctx.read<ProfileRepository>())..load(),
+        ),
+        // SubscriptionProvider depends on DownloadProvider + ProfileProvider
+        ChangeNotifierProxyProvider2<DownloadProvider, ProfileProvider, SubscriptionProvider>(
+          create: (ctx) => SubscriptionProvider(
+            subscriptionsDao: ctx.read<SubscriptionsDao>(),
+            settingsDao: SettingsDao(ctx.read<AppDatabase>()),
+            downloadProvider: ctx.read<DownloadProvider>(),
+          ),
+          update: (context, downloadProvider, profileProvider, previous) {
+            if (previous != null) {
+              previous.updateDependencies(downloadProvider: downloadProvider);
+              previous.autoDownloadEpisodeCount = profileProvider.profileOrNull?.autoDownloadEpisodeCount;
+              return previous;
+            }
+            return SubscriptionProvider(
+              subscriptionsDao: context.read<SubscriptionsDao>(),
+              settingsDao: SettingsDao(context.read<AppDatabase>()),
+              downloadProvider: downloadProvider,
+            )..autoDownloadEpisodeCount = profileProvider.profileOrNull?.autoDownloadEpisodeCount;
+          },
         ),
         ChangeNotifierProvider<LatestProvider>(
           create: (ctx) => LatestProvider(ctx.read<PodcastRepository>()),
@@ -9065,7 +9067,7 @@ class UserProfile {
   final String id; // anonymous app id
   final String languageCode; // 'de' | 'en' | 'hu'
   final double playbackSpeed; // 0.5..3.0
-  final int maxAutoDownload; // z.B. 10
+  final int autoDownloadEpisodeCount; // How many episodes to auto-download per subscription (default: 2)
   final Set<String> subscribedPodcastIds;
   final Set<String> favouriteEpisodeIds;
   final List<Episode> recentlyPlayed;
@@ -9074,7 +9076,7 @@ class UserProfile {
     required this.id,
     required this.languageCode,
     required this.playbackSpeed,
-    required this.maxAutoDownload,
+    required this.autoDownloadEpisodeCount,
     required this.subscribedPodcastIds,
     required this.favouriteEpisodeIds,
     required this.recentlyPlayed,
@@ -9084,7 +9086,7 @@ class UserProfile {
     String? id,
     String? languageCode,
     double? playbackSpeed,
-    int? maxAutoDownload,
+    int? autoDownloadEpisodeCount,
     Set<String>? subscribedPodcastIds,
     List<Episode>? recentlyPlayed,
     Set<String>? favouriteEpisodeIds,
@@ -9093,7 +9095,7 @@ class UserProfile {
       id: id ?? this.id,
       languageCode: languageCode ?? this.languageCode,
       playbackSpeed: playbackSpeed ?? this.playbackSpeed,
-      maxAutoDownload: maxAutoDownload ?? this.maxAutoDownload,
+      autoDownloadEpisodeCount: autoDownloadEpisodeCount ?? this.autoDownloadEpisodeCount,
       subscribedPodcastIds: subscribedPodcastIds ?? this.subscribedPodcastIds,
       favouriteEpisodeIds: favouriteEpisodeIds ?? this.favouriteEpisodeIds,
       recentlyPlayed: recentlyPlayed ?? this.recentlyPlayed,
@@ -9105,7 +9107,7 @@ class UserProfile {
       id: id,
       languageCode: languageCode,
       playbackSpeed: 1.0,
-      maxAutoDownload: 10,
+      autoDownloadEpisodeCount: 2,
       subscribedPodcastIds: <String>{},
       favouriteEpisodeIds: <String>{},
       recentlyPlayed: const <Episode>[],
@@ -9118,7 +9120,9 @@ class UserProfile {
       id: json['id'] as String,
       languageCode: (json['languageCode'] ?? 'de') as String,
       playbackSpeed: (json['playbackSpeed'] as num?)?.toDouble() ?? 1.0,
-      maxAutoDownload: (json['maxAutoDownload'] as num?)?.toInt() ?? 10,
+      autoDownloadEpisodeCount: (json['autoDownloadEpisodeCount'] as num?)?.toInt()
+          ?? (json['maxAutoDownload'] as num?)?.toInt() // migration from old key
+          ?? 2,
       subscribedPodcastIds:
           (json['subscribedPodcastIds'] as List?)
               ?.map((e) => e.toString())
@@ -9141,7 +9145,7 @@ class UserProfile {
     'id': id,
     'languageCode': languageCode,
     'playbackSpeed': playbackSpeed,
-    'maxAutoDownload': maxAutoDownload,
+    'autoDownloadEpisodeCount': autoDownloadEpisodeCount,
     'subscribedPodcastIds': subscribedPodcastIds.toList(),
     'recentlyPlayed': recentlyPlayed.map((e) => e.toJson()).toList(),
     'favouriteEpisodeIds': favouriteEpisodeIds.toList(),
@@ -9262,9 +9266,9 @@ class DownloadProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<int> autodownloadPodcast(String podcastId) async {
+  Future<int> autodownloadPodcast(String podcastId, {int globalAutoDownloadN = 0}) async {
     if (!_isDownloadsSupported) return 0;
-    final count = await _service!.autodownloadPodcast(podcastId);
+    final count = await _service!.autodownloadPodcast(podcastId, globalAutoDownloadN: globalAutoDownloadN);
     notifyListeners();
     return count;
   }
@@ -9928,7 +9932,7 @@ class PodcastProvider extends ChangeNotifier {
   void updateAutoDownloadCount(int count) {
     final profile = _userProfile;
     if (profile == null) return;
-    _userProfile = profile.copyWith(maxAutoDownload: count);
+    _userProfile = profile.copyWith(autoDownloadEpisodeCount: count);
     notifyListeners();
   }
 
@@ -10014,10 +10018,10 @@ class ProfileProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> setMaxAutoDownload(int n) async {
+  Future<void> setAutoDownloadEpisodeCount(int n) async {
     final p = _profile;
     if (p == null) return;
-    _profile = p.copyWith(maxAutoDownload: n);
+    _profile = p.copyWith(autoDownloadEpisodeCount: n);
     await _repo.save(_profile!);
     notifyListeners();
   }
@@ -10084,6 +10088,7 @@ class SubscriptionProvider extends ChangeNotifier {
   final SubscriptionsDao subscriptionsDao;
   final SettingsDao settingsDao;
   DownloadProvider downloadProvider; // Make it non-final to allow updating
+  int? autoDownloadEpisodeCount; // Global default from UserProfile
 
   Subscription? _currentSubscription;
   Subscription? get currentSubscription => _currentSubscription;
@@ -10134,9 +10139,7 @@ class SubscriptionProvider extends ChangeNotifier {
     try {
       int? autoDownloadDefault;
       if (!currentlySubscribed) {
-        final settings = await settingsDao.getOne();
-        autoDownloadDefault =
-            settings?.keepLatestN ?? constants.defaultAutoDownloadCount;
+        autoDownloadDefault = autoDownloadEpisodeCount ?? constants.defaultAutoDownloadCount;
       }
       await subscriptionsDao.toggleSubscribe(
         podcastId: podcastId,
@@ -10151,6 +10154,7 @@ class SubscriptionProvider extends ChangeNotifier {
       if (!currentlySubscribed) {
         final downloadCount = await downloadProvider.autodownloadPodcast(
           podcastId,
+          globalAutoDownloadN: autoDownloadEpisodeCount ?? constants.defaultAutoDownloadCount,
         );
         debugPrint(
           'toggleSubscription: autodownload called, downloading files: $downloadCount',
@@ -13257,6 +13261,7 @@ import 'package:klubradio_archivum/l10n/app_localizations.dart';
 import 'package:klubradio_archivum/db/app_database.dart';
 import 'package:klubradio_archivum/db/daos.dart';
 import 'package:klubradio_archivum/models/retention_mode.dart';
+import 'package:klubradio_archivum/providers/profile_provider.dart';
 import 'package:klubradio_archivum/screens/widgets/stateless/platform_utils.dart'; // Import PlatformUtils
 
 class DownloadSettingsPanel extends StatefulWidget {
@@ -13344,6 +13349,25 @@ class _DownloadSettingsPanelState extends State<DownloadSettingsPanel> {
                   onChanged: (v) => _dao.setAutodownloadSubscribed(v),
                 ),
 
+                // Episodes per auto-download (global default)
+                Builder(
+                  builder: (context) {
+                    final profileProv = context.watch<ProfileProvider>();
+                    final count = profileProv.profileOrNull?.autoDownloadEpisodeCount ?? 2;
+                    return _StepperRow(
+                      label: l10n.profileScreenAutoDownloadsTitle,
+                      hint: l10n.profileScreenAutoDownloadsSubtitle(count),
+                      valueText: '$count',
+                      onMinus: count > 0
+                          ? () => profileProv.setAutoDownloadEpisodeCount(count - 1)
+                          : null,
+                      onPlus: count < 50
+                          ? () => profileProv.setAutoDownloadEpisodeCount(count + 1)
+                          : null,
+                      cs: cs,
+                    );
+                  },
+                ),
                 const SizedBox(height: 8),
 
                 // Max parallel
@@ -15348,7 +15372,7 @@ class ApiService {
         id: userId,
         languageCode: 'de',
         playbackSpeed: 1.0,
-        maxAutoDownload: 10,
+        autoDownloadEpisodeCount: 2,
         subscribedPodcastIds: podcasts.take(2).map((p) => p.id).toSet(),
         recentlyPlayed: episodes.take(4).toList(),
         favouriteEpisodeIds: episodes.take(3).map((e) => e.id).toSet(),
@@ -16081,22 +16105,21 @@ class DownloadService {
     }
   }
 
-  Future<void> checkAutodownloads() async {
+  Future<void> checkAutodownloads({int globalAutoDownloadN = 0}) async {
     if (_disposed) return;
     final settings = await settingsDao.getOne();
     if (settings?.autodownloadSubscribed ?? false) {
       final activeSubscriptions = await subscriptionsDao.watchAllActive().first;
       for (final sub in activeSubscriptions) {
-        await autodownloadPodcast(sub.podcastId);
+        await autodownloadPodcast(sub.podcastId, globalAutoDownloadN: globalAutoDownloadN);
       }
     }
   }
 
-  Future<int> autodownloadPodcast(String podcastId) async {
-    // Per-podcast autoDownloadN takes priority, then global keepLatestN
+  Future<int> autodownloadPodcast(String podcastId, {int globalAutoDownloadN = 0}) async {
+    // Per-podcast autoDownloadN takes priority, then global autoDownloadEpisodeCount
     final sub = await subscriptionsDao.getById(podcastId);
-    final settings = await settingsDao.getOne();
-    final keepN = sub?.autoDownloadN ?? settings?.keepLatestN ?? 0;
+    final keepN = sub?.autoDownloadN ?? globalAutoDownloadN;
 
     if (keepN <= 0) {
       return 0;
@@ -18004,7 +18027,7 @@ void main() {
       expect(p.id, 'user-1');
       expect(p.languageCode, 'de');
       expect(p.playbackSpeed, 1.0);
-      expect(p.maxAutoDownload, 10);
+      expect(p.autoDownloadEpisodeCount, 2);
       expect(p.subscribedPodcastIds, isEmpty);
       expect(p.favouriteEpisodeIds, isEmpty);
       expect(p.recentlyPlayed, isEmpty);
@@ -18022,7 +18045,7 @@ void main() {
         'id': 'u1',
         'languageCode': 'en',
         'playbackSpeed': 1.5,
-        'maxAutoDownload': 5,
+        'autoDownloadEpisodeCount': 5,
         'subscribedPodcastIds': ['p1', 'p2'],
         'favouriteEpisodeIds': ['e1'],
         'recentlyPlayed': [
@@ -18036,7 +18059,7 @@ void main() {
       expect(p.id, 'u1');
       expect(p.languageCode, 'en');
       expect(p.playbackSpeed, 1.5);
-      expect(p.maxAutoDownload, 5);
+      expect(p.autoDownloadEpisodeCount, 5);
       expect(p.subscribedPodcastIds, {'p1', 'p2'});
       expect(p.favouriteEpisodeIds, {'e1'});
       expect(p.recentlyPlayed.length, 1);
@@ -18047,7 +18070,7 @@ void main() {
 
       expect(p.languageCode, 'de');
       expect(p.playbackSpeed, 1.0);
-      expect(p.maxAutoDownload, 10);
+      expect(p.autoDownloadEpisodeCount, 2);
       expect(p.subscribedPodcastIds, isEmpty);
       expect(p.favouriteEpisodeIds, isEmpty);
       expect(p.recentlyPlayed, isEmpty);
@@ -18065,7 +18088,7 @@ void main() {
         id: 'u1',
         languageCode: 'hu',
         playbackSpeed: 1.25,
-        maxAutoDownload: 3,
+        autoDownloadEpisodeCount: 3,
         subscribedPodcastIds: {'p1', 'p2'},
         favouriteEpisodeIds: {'e1', 'e2'},
         recentlyPlayed: const [],
@@ -18077,7 +18100,7 @@ void main() {
       expect(restored.id, original.id);
       expect(restored.languageCode, original.languageCode);
       expect(restored.playbackSpeed, original.playbackSpeed);
-      expect(restored.maxAutoDownload, original.maxAutoDownload);
+      expect(restored.autoDownloadEpisodeCount, original.autoDownloadEpisodeCount);
       expect(restored.subscribedPodcastIds, original.subscribedPodcastIds);
       expect(restored.favouriteEpisodeIds, original.favouriteEpisodeIds);
     });
@@ -18100,7 +18123,7 @@ void main() {
       expect(copy.languageCode, 'en');
       expect(copy.playbackSpeed, 2.0);
       expect(copy.id, 'u');
-      expect(copy.maxAutoDownload, 10);
+      expect(copy.autoDownloadEpisodeCount, 2);
     });
 
     test('preserves all fields when no overrides', () {
@@ -18108,7 +18131,7 @@ void main() {
         id: 'u',
         languageCode: 'hu',
         playbackSpeed: 1.5,
-        maxAutoDownload: 7,
+        autoDownloadEpisodeCount: 7,
         subscribedPodcastIds: {'p1'},
         favouriteEpisodeIds: {'e1'},
         recentlyPlayed: const [],
@@ -18118,7 +18141,7 @@ void main() {
       expect(copy.id, original.id);
       expect(copy.languageCode, original.languageCode);
       expect(copy.playbackSpeed, original.playbackSpeed);
-      expect(copy.maxAutoDownload, original.maxAutoDownload);
+      expect(copy.autoDownloadEpisodeCount, original.autoDownloadEpisodeCount);
       expect(copy.subscribedPodcastIds, original.subscribedPodcastIds);
       expect(copy.favouriteEpisodeIds, original.favouriteEpisodeIds);
     });
@@ -20060,7 +20083,7 @@ void main() {
       subscriptionsDao: mockSubsDao,
       settingsDao: mockSettingsDao,
       downloadProvider: mockDownloadProvider,
-    );
+    )..autoDownloadEpisodeCount = 5; // default for tests
   });
 
   // ==================== loadSubscription ====================
@@ -20160,32 +20183,30 @@ void main() {
   group('toggleSubscription — subscribing', () {
     // isSubscribed=false means we're subscribing (toggling TO subscribed)
 
-    test('reads keepLatestN from settingsDao when subscribing', () async {
-      final setting = makeSetting(keepLatestN: 10);
-      when(mockSettingsDao.getOne()).thenAnswer((_) async => setting);
+    test('uses autoDownloadEpisodeCount when subscribing', () async {
+      provider.autoDownloadEpisodeCount = 7;
       when(mockSubsDao.toggleSubscribe(
         podcastId: anyNamed('podcastId'),
         active: anyNamed('active'),
         autoDownloadN: anyNamed('autoDownloadN'),
       )).thenAnswer((_) async {});
       when(mockSubsDao.getById('pod-1'))
-          .thenAnswer((_) async => makeSub('pod-1', autoDownloadN: 10));
-      when(mockDownloadProvider.autodownloadPodcast('pod-1'))
+          .thenAnswer((_) async => makeSub('pod-1', autoDownloadN: 7));
+      when(mockDownloadProvider.autodownloadPodcast('pod-1', globalAutoDownloadN: 7))
           .thenAnswer((_) async => 3);
 
       await provider.toggleSubscription('pod-1', false);
 
-      verify(mockSettingsDao.getOne()).called(1);
       verify(mockSubsDao.toggleSubscribe(
         podcastId: 'pod-1',
         active: true,
-        autoDownloadN: 10,
+        autoDownloadN: 7,
       )).called(1);
     });
 
-    test('falls back to defaultAutoDownloadCount when settings is null',
+    test('falls back to defaultAutoDownloadCount when autoDownloadEpisodeCount is null',
         () async {
-      when(mockSettingsDao.getOne()).thenAnswer((_) async => null);
+      provider.autoDownloadEpisodeCount = null;
       when(mockSubsDao.toggleSubscribe(
         podcastId: anyNamed('podcastId'),
         active: anyNamed('active'),
@@ -20193,7 +20214,7 @@ void main() {
       )).thenAnswer((_) async {});
       when(mockSubsDao.getById('pod-1'))
           .thenAnswer((_) async => makeSub('pod-1'));
-      when(mockDownloadProvider.autodownloadPodcast('pod-1'))
+      when(mockDownloadProvider.autodownloadPodcast('pod-1', globalAutoDownloadN: anyNamed('globalAutoDownloadN')))
           .thenAnswer((_) async => 2);
 
       await provider.toggleSubscription('pod-1', false);
@@ -20205,11 +20226,9 @@ void main() {
       )).called(1);
     });
 
-    test(
-        'falls back to defaultAutoDownloadCount when keepLatestN is null in settings',
+    test('uses autoDownloadEpisodeCount over defaultAutoDownloadCount',
         () async {
-      final setting = makeSetting(keepLatestN: null);
-      when(mockSettingsDao.getOne()).thenAnswer((_) async => setting);
+      provider.autoDownloadEpisodeCount = 8;
       when(mockSubsDao.toggleSubscribe(
         podcastId: anyNamed('podcastId'),
         active: anyNamed('active'),
@@ -20217,7 +20236,7 @@ void main() {
       )).thenAnswer((_) async {});
       when(mockSubsDao.getById('pod-1'))
           .thenAnswer((_) async => makeSub('pod-1'));
-      when(mockDownloadProvider.autodownloadPodcast('pod-1'))
+      when(mockDownloadProvider.autodownloadPodcast('pod-1', globalAutoDownloadN: anyNamed('globalAutoDownloadN')))
           .thenAnswer((_) async => 2);
 
       await provider.toggleSubscription('pod-1', false);
@@ -20225,7 +20244,7 @@ void main() {
       verify(mockSubsDao.toggleSubscribe(
         podcastId: 'pod-1',
         active: true,
-        autoDownloadN: constants.defaultAutoDownloadCount,
+        autoDownloadN: 8,
       )).called(1);
     });
 
@@ -20239,12 +20258,12 @@ void main() {
       )).thenAnswer((_) async {});
       when(mockSubsDao.getById('pod-1'))
           .thenAnswer((_) async => makeSub('pod-1'));
-      when(mockDownloadProvider.autodownloadPodcast('pod-1'))
+      when(mockDownloadProvider.autodownloadPodcast('pod-1', globalAutoDownloadN: anyNamed('globalAutoDownloadN')))
           .thenAnswer((_) async => 5);
 
       await provider.toggleSubscription('pod-1', false);
 
-      verify(mockDownloadProvider.autodownloadPodcast('pod-1')).called(1);
+      verify(mockDownloadProvider.autodownloadPodcast('pod-1', globalAutoDownloadN: anyNamed('globalAutoDownloadN'))).called(1);
     });
 
     test('updates currentSubscription after subscribing', () async {
@@ -20257,7 +20276,7 @@ void main() {
         autoDownloadN: anyNamed('autoDownloadN'),
       )).thenAnswer((_) async {});
       when(mockSubsDao.getById('pod-1')).thenAnswer((_) async => updatedSub);
-      when(mockDownloadProvider.autodownloadPodcast('pod-1'))
+      when(mockDownloadProvider.autodownloadPodcast('pod-1', globalAutoDownloadN: anyNamed('globalAutoDownloadN')))
           .thenAnswer((_) async => 2);
 
       await provider.toggleSubscription('pod-1', false);
@@ -20314,7 +20333,7 @@ void main() {
 
       await provider.toggleSubscription('pod-1', true);
 
-      verifyNever(mockDownloadProvider.autodownloadPodcast(any));
+      verifyNever(mockDownloadProvider.autodownloadPodcast(any, globalAutoDownloadN: anyNamed('globalAutoDownloadN')));
     });
   });
 
@@ -20332,7 +20351,7 @@ void main() {
       )).thenAnswer((_) async {});
       when(mockSubsDao.getById('pod-1'))
           .thenAnswer((_) async => makeSub('pod-1'));
-      when(mockDownloadProvider.autodownloadPodcast('pod-1'))
+      when(mockDownloadProvider.autodownloadPodcast('pod-1', globalAutoDownloadN: anyNamed('globalAutoDownloadN')))
           .thenAnswer((_) async => 1);
 
       await provider.toggleSubscription('pod-1', false);
@@ -20352,7 +20371,7 @@ void main() {
       )).thenAnswer((_) async {});
       when(mockSubsDao.getById('pod-1'))
           .thenAnswer((_) async => makeSub('pod-1'));
-      when(mockDownloadProvider.autodownloadPodcast('pod-1'))
+      when(mockDownloadProvider.autodownloadPodcast('pod-1', globalAutoDownloadN: anyNamed('globalAutoDownloadN')))
           .thenAnswer((_) async => 1);
 
       await provider.toggleSubscription('pod-1', false);
@@ -21938,9 +21957,16 @@ class MockDownloadProvider extends _i1.Mock implements _i10.DownloadProvider {
           as _i6.Future<void>);
 
   @override
-  _i6.Future<int> autodownloadPodcast(String? podcastId) =>
+  _i6.Future<int> autodownloadPodcast(
+    String? podcastId, {
+    int? globalAutoDownloadN = 0,
+  }) =>
       (super.noSuchMethod(
-            Invocation.method(#autodownloadPodcast, [podcastId]),
+            Invocation.method(
+              #autodownloadPodcast,
+              [podcastId],
+              {#globalAutoDownloadN: globalAutoDownloadN},
+            ),
             returnValue: _i6.Future<int>.value(0),
           )
           as _i6.Future<int>);

@@ -9,7 +9,7 @@ void main() {
       expect(p.id, 'user-1');
       expect(p.languageCode, 'de');
       expect(p.playbackSpeed, 1.0);
-      expect(p.maxAutoDownload, 10);
+      expect(p.autoDownloadEpisodeCount, 2);
       expect(p.subscribedPodcastIds, isEmpty);
       expect(p.favouriteEpisodeIds, isEmpty);
       expect(p.recentlyPlayed, isEmpty);
@@ -27,7 +27,7 @@ void main() {
         'id': 'u1',
         'languageCode': 'en',
         'playbackSpeed': 1.5,
-        'maxAutoDownload': 5,
+        'autoDownloadEpisodeCount': 5,
         'subscribedPodcastIds': ['p1', 'p2'],
         'favouriteEpisodeIds': ['e1'],
         'recentlyPlayed': [
@@ -41,7 +41,7 @@ void main() {
       expect(p.id, 'u1');
       expect(p.languageCode, 'en');
       expect(p.playbackSpeed, 1.5);
-      expect(p.maxAutoDownload, 5);
+      expect(p.autoDownloadEpisodeCount, 5);
       expect(p.subscribedPodcastIds, {'p1', 'p2'});
       expect(p.favouriteEpisodeIds, {'e1'});
       expect(p.recentlyPlayed.length, 1);
@@ -52,7 +52,7 @@ void main() {
 
       expect(p.languageCode, 'de');
       expect(p.playbackSpeed, 1.0);
-      expect(p.maxAutoDownload, 10);
+      expect(p.autoDownloadEpisodeCount, 2);
       expect(p.subscribedPodcastIds, isEmpty);
       expect(p.favouriteEpisodeIds, isEmpty);
       expect(p.recentlyPlayed, isEmpty);
@@ -70,7 +70,7 @@ void main() {
         id: 'u1',
         languageCode: 'hu',
         playbackSpeed: 1.25,
-        maxAutoDownload: 3,
+        autoDownloadEpisodeCount: 3,
         subscribedPodcastIds: {'p1', 'p2'},
         favouriteEpisodeIds: {'e1', 'e2'},
         recentlyPlayed: const [],
@@ -82,7 +82,7 @@ void main() {
       expect(restored.id, original.id);
       expect(restored.languageCode, original.languageCode);
       expect(restored.playbackSpeed, original.playbackSpeed);
-      expect(restored.maxAutoDownload, original.maxAutoDownload);
+      expect(restored.autoDownloadEpisodeCount, original.autoDownloadEpisodeCount);
       expect(restored.subscribedPodcastIds, original.subscribedPodcastIds);
       expect(restored.favouriteEpisodeIds, original.favouriteEpisodeIds);
     });
@@ -105,7 +105,7 @@ void main() {
       expect(copy.languageCode, 'en');
       expect(copy.playbackSpeed, 2.0);
       expect(copy.id, 'u');
-      expect(copy.maxAutoDownload, 10);
+      expect(copy.autoDownloadEpisodeCount, 2);
     });
 
     test('preserves all fields when no overrides', () {
@@ -113,7 +113,7 @@ void main() {
         id: 'u',
         languageCode: 'hu',
         playbackSpeed: 1.5,
-        maxAutoDownload: 7,
+        autoDownloadEpisodeCount: 7,
         subscribedPodcastIds: {'p1'},
         favouriteEpisodeIds: {'e1'},
         recentlyPlayed: const [],
@@ -123,7 +123,7 @@ void main() {
       expect(copy.id, original.id);
       expect(copy.languageCode, original.languageCode);
       expect(copy.playbackSpeed, original.playbackSpeed);
-      expect(copy.maxAutoDownload, original.maxAutoDownload);
+      expect(copy.autoDownloadEpisodeCount, original.autoDownloadEpisodeCount);
       expect(copy.subscribedPodcastIds, original.subscribedPodcastIds);
       expect(copy.favouriteEpisodeIds, original.favouriteEpisodeIds);
     });

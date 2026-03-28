@@ -75,7 +75,7 @@ void main() {
       subscriptionsDao: mockSubsDao,
       settingsDao: mockSettingsDao,
       downloadProvider: mockDownloadProvider,
-    );
+    )..autoDownloadEpisodeCount = 5; // default for tests
   });
 
   // ==================== loadSubscription ====================
@@ -175,32 +175,30 @@ void main() {
   group('toggleSubscription — subscribing', () {
     // isSubscribed=false means we're subscribing (toggling TO subscribed)
 
-    test('reads keepLatestN from settingsDao when subscribing', () async {
-      final setting = makeSetting(keepLatestN: 10);
-      when(mockSettingsDao.getOne()).thenAnswer((_) async => setting);
+    test('uses autoDownloadEpisodeCount when subscribing', () async {
+      provider.autoDownloadEpisodeCount = 7;
       when(mockSubsDao.toggleSubscribe(
         podcastId: anyNamed('podcastId'),
         active: anyNamed('active'),
         autoDownloadN: anyNamed('autoDownloadN'),
       )).thenAnswer((_) async {});
       when(mockSubsDao.getById('pod-1'))
-          .thenAnswer((_) async => makeSub('pod-1', autoDownloadN: 10));
-      when(mockDownloadProvider.autodownloadPodcast('pod-1'))
+          .thenAnswer((_) async => makeSub('pod-1', autoDownloadN: 7));
+      when(mockDownloadProvider.autodownloadPodcast('pod-1', globalAutoDownloadN: 7))
           .thenAnswer((_) async => 3);
 
       await provider.toggleSubscription('pod-1', false);
 
-      verify(mockSettingsDao.getOne()).called(1);
       verify(mockSubsDao.toggleSubscribe(
         podcastId: 'pod-1',
         active: true,
-        autoDownloadN: 10,
+        autoDownloadN: 7,
       )).called(1);
     });
 
-    test('falls back to defaultAutoDownloadCount when settings is null',
+    test('falls back to defaultAutoDownloadCount when autoDownloadEpisodeCount is null',
         () async {
-      when(mockSettingsDao.getOne()).thenAnswer((_) async => null);
+      provider.autoDownloadEpisodeCount = null;
       when(mockSubsDao.toggleSubscribe(
         podcastId: anyNamed('podcastId'),
         active: anyNamed('active'),
@@ -208,7 +206,7 @@ void main() {
       )).thenAnswer((_) async {});
       when(mockSubsDao.getById('pod-1'))
           .thenAnswer((_) async => makeSub('pod-1'));
-      when(mockDownloadProvider.autodownloadPodcast('pod-1'))
+      when(mockDownloadProvider.autodownloadPodcast('pod-1', globalAutoDownloadN: anyNamed('globalAutoDownloadN')))
           .thenAnswer((_) async => 2);
 
       await provider.toggleSubscription('pod-1', false);
@@ -220,11 +218,9 @@ void main() {
       )).called(1);
     });
 
-    test(
-        'falls back to defaultAutoDownloadCount when keepLatestN is null in settings',
+    test('uses autoDownloadEpisodeCount over defaultAutoDownloadCount',
         () async {
-      final setting = makeSetting(keepLatestN: null);
-      when(mockSettingsDao.getOne()).thenAnswer((_) async => setting);
+      provider.autoDownloadEpisodeCount = 8;
       when(mockSubsDao.toggleSubscribe(
         podcastId: anyNamed('podcastId'),
         active: anyNamed('active'),
@@ -232,7 +228,7 @@ void main() {
       )).thenAnswer((_) async {});
       when(mockSubsDao.getById('pod-1'))
           .thenAnswer((_) async => makeSub('pod-1'));
-      when(mockDownloadProvider.autodownloadPodcast('pod-1'))
+      when(mockDownloadProvider.autodownloadPodcast('pod-1', globalAutoDownloadN: anyNamed('globalAutoDownloadN')))
           .thenAnswer((_) async => 2);
 
       await provider.toggleSubscription('pod-1', false);
@@ -240,7 +236,7 @@ void main() {
       verify(mockSubsDao.toggleSubscribe(
         podcastId: 'pod-1',
         active: true,
-        autoDownloadN: constants.defaultAutoDownloadCount,
+        autoDownloadN: 8,
       )).called(1);
     });
 
@@ -254,12 +250,12 @@ void main() {
       )).thenAnswer((_) async {});
       when(mockSubsDao.getById('pod-1'))
           .thenAnswer((_) async => makeSub('pod-1'));
-      when(mockDownloadProvider.autodownloadPodcast('pod-1'))
+      when(mockDownloadProvider.autodownloadPodcast('pod-1', globalAutoDownloadN: anyNamed('globalAutoDownloadN')))
           .thenAnswer((_) async => 5);
 
       await provider.toggleSubscription('pod-1', false);
 
-      verify(mockDownloadProvider.autodownloadPodcast('pod-1')).called(1);
+      verify(mockDownloadProvider.autodownloadPodcast('pod-1', globalAutoDownloadN: anyNamed('globalAutoDownloadN'))).called(1);
     });
 
     test('updates currentSubscription after subscribing', () async {
@@ -272,7 +268,7 @@ void main() {
         autoDownloadN: anyNamed('autoDownloadN'),
       )).thenAnswer((_) async {});
       when(mockSubsDao.getById('pod-1')).thenAnswer((_) async => updatedSub);
-      when(mockDownloadProvider.autodownloadPodcast('pod-1'))
+      when(mockDownloadProvider.autodownloadPodcast('pod-1', globalAutoDownloadN: anyNamed('globalAutoDownloadN')))
           .thenAnswer((_) async => 2);
 
       await provider.toggleSubscription('pod-1', false);
@@ -329,7 +325,7 @@ void main() {
 
       await provider.toggleSubscription('pod-1', true);
 
-      verifyNever(mockDownloadProvider.autodownloadPodcast(any));
+      verifyNever(mockDownloadProvider.autodownloadPodcast(any, globalAutoDownloadN: anyNamed('globalAutoDownloadN')));
     });
   });
 
@@ -347,7 +343,7 @@ void main() {
       )).thenAnswer((_) async {});
       when(mockSubsDao.getById('pod-1'))
           .thenAnswer((_) async => makeSub('pod-1'));
-      when(mockDownloadProvider.autodownloadPodcast('pod-1'))
+      when(mockDownloadProvider.autodownloadPodcast('pod-1', globalAutoDownloadN: anyNamed('globalAutoDownloadN')))
           .thenAnswer((_) async => 1);
 
       await provider.toggleSubscription('pod-1', false);
@@ -367,7 +363,7 @@ void main() {
       )).thenAnswer((_) async {});
       when(mockSubsDao.getById('pod-1'))
           .thenAnswer((_) async => makeSub('pod-1'));
-      when(mockDownloadProvider.autodownloadPodcast('pod-1'))
+      when(mockDownloadProvider.autodownloadPodcast('pod-1', globalAutoDownloadN: anyNamed('globalAutoDownloadN')))
           .thenAnswer((_) async => 1);
 
       await provider.toggleSubscription('pod-1', false);

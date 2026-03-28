@@ -363,7 +363,7 @@ class ApiService {
         id: userId,
         languageCode: 'de',
         playbackSpeed: 1.0,
-        maxAutoDownload: 10,
+        autoDownloadEpisodeCount: 2,
         subscribedPodcastIds: podcasts.take(2).map((p) => p.id).toSet(),
         recentlyPlayed: episodes.take(4).toList(),
         favouriteEpisodeIds: episodes.take(3).map((e) => e.id).toSet(),

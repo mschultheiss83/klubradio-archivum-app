@@ -6,7 +6,7 @@ class UserProfile {
   final String id; // anonymous app id
   final String languageCode; // 'de' | 'en' | 'hu'
   final double playbackSpeed; // 0.5..3.0
-  final int maxAutoDownload; // z.B. 10
+  final int autoDownloadEpisodeCount; // How many episodes to auto-download per subscription (default: 2)
   final Set<String> subscribedPodcastIds;
   final Set<String> favouriteEpisodeIds;
   final List<Episode> recentlyPlayed;
@@ -15,7 +15,7 @@ class UserProfile {
     required this.id,
     required this.languageCode,
     required this.playbackSpeed,
-    required this.maxAutoDownload,
+    required this.autoDownloadEpisodeCount,
     required this.subscribedPodcastIds,
     required this.favouriteEpisodeIds,
     required this.recentlyPlayed,
@@ -25,7 +25,7 @@ class UserProfile {
     String? id,
     String? languageCode,
     double? playbackSpeed,
-    int? maxAutoDownload,
+    int? autoDownloadEpisodeCount,
     Set<String>? subscribedPodcastIds,
     List<Episode>? recentlyPlayed,
     Set<String>? favouriteEpisodeIds,
@@ -34,7 +34,7 @@ class UserProfile {
       id: id ?? this.id,
       languageCode: languageCode ?? this.languageCode,
       playbackSpeed: playbackSpeed ?? this.playbackSpeed,
-      maxAutoDownload: maxAutoDownload ?? this.maxAutoDownload,
+      autoDownloadEpisodeCount: autoDownloadEpisodeCount ?? this.autoDownloadEpisodeCount,
       subscribedPodcastIds: subscribedPodcastIds ?? this.subscribedPodcastIds,
       favouriteEpisodeIds: favouriteEpisodeIds ?? this.favouriteEpisodeIds,
       recentlyPlayed: recentlyPlayed ?? this.recentlyPlayed,
@@ -46,7 +46,7 @@ class UserProfile {
       id: id,
       languageCode: languageCode,
       playbackSpeed: 1.0,
-      maxAutoDownload: 10,
+      autoDownloadEpisodeCount: 2,
       subscribedPodcastIds: <String>{},
       favouriteEpisodeIds: <String>{},
       recentlyPlayed: const <Episode>[],
@@ -59,7 +59,9 @@ class UserProfile {
       id: json['id'] as String,
       languageCode: (json['languageCode'] ?? 'de') as String,
       playbackSpeed: (json['playbackSpeed'] as num?)?.toDouble() ?? 1.0,
-      maxAutoDownload: (json['maxAutoDownload'] as num?)?.toInt() ?? 10,
+      autoDownloadEpisodeCount: (json['autoDownloadEpisodeCount'] as num?)?.toInt()
+          ?? (json['maxAutoDownload'] as num?)?.toInt() // migration from old key
+          ?? 2,
       subscribedPodcastIds:
           (json['subscribedPodcastIds'] as List?)
               ?.map((e) => e.toString())
@@ -82,7 +84,7 @@ class UserProfile {
     'id': id,
     'languageCode': languageCode,
     'playbackSpeed': playbackSpeed,
-    'maxAutoDownload': maxAutoDownload,
+    'autoDownloadEpisodeCount': autoDownloadEpisodeCount,
     'subscribedPodcastIds': subscribedPodcastIds.toList(),
     'recentlyPlayed': recentlyPlayed.map((e) => e.toJson()).toList(),
     'favouriteEpisodeIds': favouriteEpisodeIds.toList(),

@@ -20,6 +20,7 @@ class SubscriptionProvider extends ChangeNotifier {
   final SubscriptionsDao subscriptionsDao;
   final SettingsDao settingsDao;
   DownloadProvider downloadProvider; // Make it non-final to allow updating
+  int? autoDownloadEpisodeCount; // Global default from UserProfile
 
   Subscription? _currentSubscription;
   Subscription? get currentSubscription => _currentSubscription;
@@ -70,9 +71,7 @@ class SubscriptionProvider extends ChangeNotifier {
     try {
       int? autoDownloadDefault;
       if (!currentlySubscribed) {
-        final settings = await settingsDao.getOne();
-        autoDownloadDefault =
-            settings?.keepLatestN ?? constants.defaultAutoDownloadCount;
+        autoDownloadDefault = autoDownloadEpisodeCount ?? constants.defaultAutoDownloadCount;
       }
       await subscriptionsDao.toggleSubscribe(
         podcastId: podcastId,
@@ -87,6 +86,7 @@ class SubscriptionProvider extends ChangeNotifier {
       if (!currentlySubscribed) {
         final downloadCount = await downloadProvider.autodownloadPodcast(
           podcastId,
+          globalAutoDownloadN: autoDownloadEpisodeCount ?? constants.defaultAutoDownloadCount,
         );
         debugPrint(
           'toggleSubscription: autodownload called, downloading files: $downloadCount',
