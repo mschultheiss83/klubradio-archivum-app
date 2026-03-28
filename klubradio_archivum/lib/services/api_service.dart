@@ -25,8 +25,8 @@ class ApiService {
   String get supabaseUrl => _supabaseUrl;
   String get supabaseKey => _supabaseKey;
 
-  static const Duration _timeout = Duration(seconds: 20);
-  static const Duration _longTimeout = Duration(minutes: 1);
+  static const Duration _timeout = constants.apiTimeout;
+  static const Duration _longTimeout = constants.apiLongTimeout;
 
   final http.Client _httpClient;
   final ApiCacheService _cacheService;
@@ -43,7 +43,7 @@ class ApiService {
 
   // =================== PODCAST LISTS ===================
 
-  Future<List<Podcast>> fetchLatestPodcasts({int limit = 10}) async {
+  Future<List<Podcast>> fetchLatestPodcasts({int limit = constants.podcastFetchLimit}) async {
     const String cacheKey = 'latest_podcasts';
     final cachedData = await _cacheService.get(cacheKey);
     if (cachedData != null) {
@@ -69,7 +69,7 @@ class ApiService {
 
     if (res.statusCode >= 200 && res.statusCode < 300) {
       final data = jsonDecode(res.body) as List<dynamic>;
-      await _cacheService.save(cacheKey, data, expiry: const Duration(hours: 3));
+      await _cacheService.save(cacheKey, data, expiry: constants.apiCacheTtl);
       return data
           .whereType<Map<String, dynamic>>()
           .map(Podcast.fromJson)
@@ -81,7 +81,7 @@ class ApiService {
     );
   }
 
-  Future<List<Podcast>> fetchTrendingPodcasts({int limit = 10}) async {
+  Future<List<Podcast>> fetchTrendingPodcasts({int limit = constants.podcastFetchLimit}) async {
     const String cacheKey = 'trending_podcasts';
     final cachedData = await _cacheService.get(cacheKey);
     if (cachedData != null) {
@@ -111,7 +111,7 @@ class ApiService {
 
     if (res.statusCode >= 200 && res.statusCode < 300) {
       final data = jsonDecode(res.body) as List<dynamic>;
-      await _cacheService.save(cacheKey, data, expiry: const Duration(hours: 3));
+      await _cacheService.save(cacheKey, data, expiry: constants.apiCacheTtl);
       return data
           .whereType<Map<String, dynamic>>()
           .map(Podcast.fromJson)
@@ -128,7 +128,7 @@ class ApiService {
 
   Future<List<Episode>> fetchEpisodesForPodcast(
     String podcastId, {
-    int limit = 500,
+    int limit = constants.episodeFetchLimit,
   }) async {
     final String cacheKey = 'episodes_for_podcast_$podcastId';
     // Try to get from cache first
@@ -157,7 +157,7 @@ class ApiService {
     if (res.statusCode >= 200 && res.statusCode < 300) {
       final data = jsonDecode(res.body) as List<dynamic>;
       // Save to cache with a 2-4 hour expiry (e.g., 3 hours)
-      await _cacheService.save(cacheKey, data, expiry: const Duration(hours: 3));
+      await _cacheService.save(cacheKey, data, expiry: constants.apiCacheTtl);
       return data
           .whereType<Map<String, dynamic>>()
           .map(Episode.fromJson)
@@ -196,7 +196,7 @@ class ApiService {
 
     if (res.statusCode >= 200 && res.statusCode < 300) {
       final data = jsonDecode(res.body) as List<dynamic>;
-      await _cacheService.save(cacheKey, data, expiry: const Duration(hours: 3));
+      await _cacheService.save(cacheKey, data, expiry: constants.apiCacheTtl);
       return data
           .whereType<Map<String, dynamic>>()
           .map(Episode.fromJson)
@@ -313,7 +313,7 @@ class ApiService {
     if (res.statusCode >= 200 && res.statusCode < 300) {
       final data = jsonDecode(res.body) as List<dynamic>;
       // Save to cache with a daily expiry
-      await _cacheService.save(cacheKey, data, expiry: const Duration(days: 1));
+      await _cacheService.save(cacheKey, data, expiry: constants.topShowsCacheTtl);
       return data
           .whereType<Map<String, dynamic>>()
           .map(ShowData.fromJson)
@@ -340,7 +340,7 @@ class ApiService {
     if (res.statusCode >= 200 && res.statusCode < 300) {
       final data = jsonDecode(res.body) as List<dynamic>;
       if (data.isNotEmpty) {
-        await _cacheService.save(cacheKey, data.first, expiry: const Duration(hours: 3));
+        await _cacheService.save(cacheKey, data.first, expiry: constants.apiCacheTtl);
         return Podcast.fromJson(data.first as Map<String, dynamic>);
       }
     }
@@ -381,7 +381,7 @@ class ApiService {
     if (res.statusCode >= 200 && res.statusCode < 300) {
       final data = jsonDecode(res.body) as List<dynamic>;
       if (data.isEmpty) throw ApiException('Profile not found for $userId');
-      await _cacheService.save(cacheKey, data.first, expiry: const Duration(hours: 3));
+      await _cacheService.save(cacheKey, data.first, expiry: constants.apiCacheTtl);
       return UserProfile.fromJson(data.first as Map<String, dynamic>);
     }
     throw ApiException('Unable to fetch user profile ($userId)');

@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import '../models/user_profile.dart';
 import '../models/episode.dart';
 import '../repositories/profile_repository.dart';
+import '../screens/utils/constants.dart' as constants;
 
 class ProfileProvider extends ChangeNotifier {
   ProfileProvider({ProfileRepository? repo})
@@ -76,7 +77,7 @@ class ProfileProvider extends ChangeNotifier {
     final updated = List<Episode>.from(p.recentlyPlayed);
     updated.removeWhere((e) => e.id == episode.id);
     updated.insert(0, episode);
-    if (updated.length > 10) {
+    if (updated.length > constants.maxRecentlyPlayed) {
       updated.removeLast();
     }
     _profile = p.copyWith(recentlyPlayed: updated);

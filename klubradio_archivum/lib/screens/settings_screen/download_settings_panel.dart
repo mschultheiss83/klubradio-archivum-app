@@ -7,6 +7,7 @@ import 'package:klubradio_archivum/db/app_database.dart';
 import 'package:klubradio_archivum/db/daos.dart';
 import 'package:klubradio_archivum/models/retention_mode.dart';
 import 'package:klubradio_archivum/providers/profile_provider.dart';
+import 'package:klubradio_archivum/screens/utils/constants.dart' as constants;
 import 'package:klubradio_archivum/screens/widgets/stateless/platform_utils.dart'; // Import PlatformUtils
 
 class DownloadSettingsPanel extends StatefulWidget {
@@ -98,7 +99,7 @@ class _DownloadSettingsPanelState extends State<DownloadSettingsPanel> {
                 Builder(
                   builder: (context) {
                     final profileProv = context.watch<ProfileProvider>();
-                    final count = profileProv.profileOrNull?.autoDownloadEpisodeCount ?? 2;
+                    final count = profileProv.profileOrNull?.autoDownloadEpisodeCount ?? constants.defaultAutoDownloadCount;
                     return _StepperRow(
                       label: l10n.profileScreenAutoDownloadsTitle,
                       hint: l10n.profileScreenAutoDownloadsSubtitle(count),
@@ -106,7 +107,7 @@ class _DownloadSettingsPanelState extends State<DownloadSettingsPanel> {
                       onMinus: count > 0
                           ? () => profileProv.setAutoDownloadEpisodeCount(count - 1)
                           : null,
-                      onPlus: count < 50
+                      onPlus: count < constants.maxAutoDownloadEpisodeCount
                           ? () => profileProv.setAutoDownloadEpisodeCount(count + 1)
                           : null,
                       cs: cs,
@@ -154,7 +155,7 @@ class _DownloadSettingsPanelState extends State<DownloadSettingsPanel> {
                         // wenn aktivieren und noch 0/null → auf 5 setzen als Startwert
                         final next = (s.keepLatestN ?? 0) > 0
                             ? s.keepLatestN
-                            : 5;
+                            : constants.defaultKeepLatestN;
                         await _dao.setDeleteAfterHours(null);
                         await _dao.setKeepLatestN(next);
                       },
@@ -166,7 +167,7 @@ class _DownloadSettingsPanelState extends State<DownloadSettingsPanel> {
                       onSelected: () async {
                         final next = (s.deleteAfterHours ?? 0) > 0
                             ? s.deleteAfterHours
-                            : 24;
+                            : constants.defaultDeleteAfterHours;
                         await _dao.setKeepLatestN(null);
                         await _dao.setDeleteAfterHours(next);
                       },

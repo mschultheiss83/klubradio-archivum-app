@@ -2,14 +2,15 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
+import 'package:klubradio_archivum/screens/utils/constants.dart' as constants;
 
 class HttpRequester {
   HttpRequester({
     http.Client? client,
     required this.defaultHeaders,
-    this.connectTimeout = const Duration(seconds: 5),
-    this.requestTimeout = const Duration(seconds: 12),
-    this.maxRetries = 2,
+    this.connectTimeout = constants.httpConnectTimeout,
+    this.requestTimeout = constants.httpRequestTimeout,
+    this.maxRetries = constants.httpMaxRetries,
   }) : _client = client ?? http.Client();
 
   final http.Client _client;
@@ -53,7 +54,7 @@ class HttpRequester {
   Future<void> dispose() async => _client.close();
 
   Future<void> _backoff(int attempt) =>
-      Future.delayed(Duration(milliseconds: 300 * (1 << (attempt - 1))));
+      Future.delayed(Duration(milliseconds: constants.httpBackoffBase.inMilliseconds * (1 << (attempt - 1))));
 
   void _log(Object o) {
     // ignore: avoid_print

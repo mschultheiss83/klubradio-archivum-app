@@ -13,6 +13,7 @@ import 'package:klubradio_archivum/db/app_database.dart';
 import 'package:klubradio_archivum/db/daos.dart';
 import 'package:klubradio_archivum/models/episode.dart' as model;
 import 'package:klubradio_archivum/providers/episode_provider.dart';
+import 'package:klubradio_archivum/screens/utils/constants.dart' as constants;
 import 'package:klubradio_archivum/services/api_service.dart';
 
 class _EpisodeMetaLite {
@@ -140,7 +141,7 @@ class DownloadService {
     await _downloader.start();
 
     _autodownloadTimer = Timer.periodic(
-      const Duration(seconds: 15),
+      constants.autodownloadCheckInterval,
       (_) => checkAutodownloads(),
     );
 

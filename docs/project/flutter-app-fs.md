@@ -652,7 +652,7 @@ class EpisodeApi {
   /// The [limit] parameter controls the maximum number of episodes returned.
   Future<List<Map<String, dynamic>>> forPodcast(
     String podcastId, {
-    int limit = 500,
+    int limit = constants.episodeFetchLimit,
   }) async {
     final url =
         '$baseUrl/rest/v1/${constants.episodesTable}?select=*&podcastId=eq.$podcastId&limit=$limit';
@@ -664,7 +664,7 @@ class EpisodeApi {
   ///
   /// Returns raw JSON data ordered by ID descending (most recent first).
   /// The [limit] parameter controls the maximum number of episodes returned.
-  Future<List<Map<String, dynamic>>> recent({int limit = 8}) async {
+  Future<List<Map<String, dynamic>>> recent({int limit = constants.recentEpisodesFetchLimit}) async {
     final url =
         '$baseUrl/rest/v1/${constants.episodesTable}?select=*&order=id.desc&limit=$limit';
     final json = await _requester.getJson(url);
@@ -706,7 +706,7 @@ class PodcastApi {
   ///
   /// Returns raw JSON data that can be parsed into Podcast models.
   /// The [limit] parameter controls the maximum number of podcasts returned.
-  Future<List<Map<String, dynamic>>> latest({int limit = 10}) async {
+  Future<List<Map<String, dynamic>>> latest({int limit = constants.podcastFetchLimit}) async {
     final url =
         '$baseUrl/rest/v1/${constants.podcastsTable}?select=*&order=last_updated.desc&limit=$limit';
     debugPrint('latest url: $url');
@@ -717,7 +717,7 @@ class PodcastApi {
   /// Fetches trending podcasts.
   ///
   /// Returns raw JSON data that can be parsed into Podcast models.
-  Future<List<Map<String, dynamic>>> trending({int limit = 10}) async {
+  Future<List<Map<String, dynamic>>> trending({int limit = constants.podcastFetchLimit}) async {
     final url =
         '$baseUrl/rest/v1/${constants.podcastsTable}?select=*&order=id.desc&limit=$limit';
     debugPrint('trending url: $url');
@@ -729,7 +729,7 @@ class PodcastApi {
   ///
   /// Returns raw JSON data that can be parsed into Episode models.
   /// Note: This method may be moved to EpisodeApi in the future.
-  Future<List<Map<String, dynamic>>> recentEpisodes({int limit = 8}) async {
+  Future<List<Map<String, dynamic>>> recentEpisodes({int limit = constants.recentEpisodesFetchLimit}) async {
     final url =
         '$baseUrl/rest/v1/${constants.episodesTable}?select=*&order=id.desc&limit=$limit';
     debugPrint('recentEpisodes url: $url');
@@ -9412,6 +9412,7 @@ import 'package:klubradio_archivum/db/daos.dart';
 import 'package:klubradio_archivum/models/episode.dart' as model;
 import 'package:klubradio_archivum/services/api_service.dart';
 import 'package:klubradio_archivum/services/audio_player_service.dart';
+import 'package:klubradio_archivum/screens/utils/constants.dart' as constants;
 import 'package:klubradio_archivum/utils/episode_cache_reader.dart';
 
 class EpisodeProvider extends ChangeNotifier {
@@ -9431,9 +9432,7 @@ class EpisodeProvider extends ChangeNotifier {
     _bufferingSubscription = _audioPlayerService.bufferingStream.listen(
       _onBufferingChanged,
     );
-    _errorSubscription = _audioPlayerService.errorStream.listen(
-      _onAudioError,
-    );
+    _errorSubscription = _audioPlayerService.errorStream.listen(_onAudioError);
   }
 
   late db.AppDatabase _db;
@@ -9445,8 +9444,9 @@ class EpisodeProvider extends ChangeNotifier {
   StreamSubscription<bool>? _bufferingSubscription;
   StreamSubscription<String?>? _errorSubscription;
 
-  final ValueNotifier<Duration> _positionNotifier =
-      ValueNotifier<Duration>(Duration.zero);
+  final ValueNotifier<Duration> _positionNotifier = ValueNotifier<Duration>(
+    Duration.zero,
+  );
 
   model.Episode? _currentEpisode;
   List<model.Episode> _queue = <model.Episode>[];
@@ -9497,10 +9497,9 @@ class EpisodeProvider extends ChangeNotifier {
   }
 
   /// Tracks when each podcast's episodes were last loaded into DB.
-  /// Entries expire after [_cacheMaxAge] so new episodes are picked up
+  /// Entries expire after [episodeCacheMaxAge] so new episodes are picked up
   /// without requiring an app restart.
   final Map<String, DateTime> _loadedPodcasts = {};
-  static const Duration _cacheMaxAge = Duration(minutes: 5);
 
   /// Clears the loaded-podcasts cache so the next call to
   /// [loadEpisodesIntoDb] will fetch fresh data from the API.
@@ -9509,30 +9508,37 @@ class EpisodeProvider extends ChangeNotifier {
   }
 
   /// Fetches episodes from the API and upserts them into the local DB.
-  /// Skips if already loaded within [_cacheMaxAge]. The StreamBuilder in
+  /// Skips if already loaded within [episodeCacheMaxAge]. The StreamBuilder in
   /// PodcastDetailScreen will reactively update.
-  Future<void> loadEpisodesIntoDb(String podcastId, {bool forceRefresh = false}) async {
+  Future<void> loadEpisodesIntoDb(
+    String podcastId, {
+    bool forceRefresh = false,
+  }) async {
     if (!forceRefresh) {
       final loadedAt = _loadedPodcasts[podcastId];
       if (loadedAt != null &&
-          DateTime.now().difference(loadedAt) < _cacheMaxAge) {
+          DateTime.now().difference(loadedAt) < constants.episodeCacheMaxAge) {
         return;
       }
     }
     _loadedPodcasts[podcastId] = DateTime.now();
     try {
       final episodes = await _apiService.fetchEpisodesForPodcast(podcastId);
-      final companions = episodes.map((ep) => db.EpisodesCompanion(
-        id: Value(ep.id),
-        podcastId: Value(ep.podcastId),
-        title: Value(ep.title),
-        audioUrl: Value(ep.audioUrl),
-        publishedAt: Value(ep.publishedAt),
-        durationSeconds: Value(ep.duration.inSeconds),
-        description: Value(ep.description),
-        showDate: Value(ep.showDate),
-        imageUrl: Value(ep.imageUrl),
-      )).toList();
+      final companions = episodes
+          .map(
+            (ep) => db.EpisodesCompanion(
+              id: Value(ep.id),
+              podcastId: Value(ep.podcastId),
+              title: Value(ep.title),
+              audioUrl: Value(ep.audioUrl),
+              publishedAt: Value(ep.publishedAt),
+              durationSeconds: Value(ep.duration.inSeconds),
+              description: Value(ep.description),
+              showDate: Value(ep.showDate),
+              imageUrl: Value(ep.imageUrl),
+            ),
+          )
+          .toList();
       if (companions.isNotEmpty) {
         await EpisodesDao(_db).upsertAll(companions);
       }
@@ -9704,7 +9710,9 @@ class EpisodeProvider extends ChangeNotifier {
     if (_audioPlayerService.currentEpisode == null) {
       _currentEpisode = null;
       _positionNotifier.value = Duration.zero;
-      debugPrint('EpisodeProvider: cleared stale episode after audio error: $errorMessage');
+      debugPrint(
+        'EpisodeProvider: cleared stale episode after audio error: $errorMessage',
+      );
     }
     notifyListeners();
   }
@@ -10059,6 +10067,7 @@ import 'package:flutter/foundation.dart';
 import '../models/user_profile.dart';
 import '../models/episode.dart';
 import '../repositories/profile_repository.dart';
+import '../screens/utils/constants.dart' as constants;
 
 class ProfileProvider extends ChangeNotifier {
   ProfileProvider({ProfileRepository? repo})
@@ -10132,7 +10141,7 @@ class ProfileProvider extends ChangeNotifier {
     final updated = List<Episode>.from(p.recentlyPlayed);
     updated.removeWhere((e) => e.id == episode.id);
     updated.insert(0, episode);
-    if (updated.length > 10) {
+    if (updated.length > constants.maxRecentlyPlayed) {
       updated.removeLast();
     }
     _profile = p.copyWith(recentlyPlayed: updated);
@@ -13393,6 +13402,7 @@ import 'package:klubradio_archivum/db/app_database.dart';
 import 'package:klubradio_archivum/db/daos.dart';
 import 'package:klubradio_archivum/models/retention_mode.dart';
 import 'package:klubradio_archivum/providers/profile_provider.dart';
+import 'package:klubradio_archivum/screens/utils/constants.dart' as constants;
 import 'package:klubradio_archivum/screens/widgets/stateless/platform_utils.dart'; // Import PlatformUtils
 
 class DownloadSettingsPanel extends StatefulWidget {
@@ -13484,7 +13494,7 @@ class _DownloadSettingsPanelState extends State<DownloadSettingsPanel> {
                 Builder(
                   builder: (context) {
                     final profileProv = context.watch<ProfileProvider>();
-                    final count = profileProv.profileOrNull?.autoDownloadEpisodeCount ?? 2;
+                    final count = profileProv.profileOrNull?.autoDownloadEpisodeCount ?? constants.defaultAutoDownloadCount;
                     return _StepperRow(
                       label: l10n.profileScreenAutoDownloadsTitle,
                       hint: l10n.profileScreenAutoDownloadsSubtitle(count),
@@ -13492,7 +13502,7 @@ class _DownloadSettingsPanelState extends State<DownloadSettingsPanel> {
                       onMinus: count > 0
                           ? () => profileProv.setAutoDownloadEpisodeCount(count - 1)
                           : null,
-                      onPlus: count < 50
+                      onPlus: count < constants.maxAutoDownloadEpisodeCount
                           ? () => profileProv.setAutoDownloadEpisodeCount(count + 1)
                           : null,
                       cs: cs,
@@ -13540,7 +13550,7 @@ class _DownloadSettingsPanelState extends State<DownloadSettingsPanel> {
                         // wenn aktivieren und noch 0/null → auf 5 setzen als Startwert
                         final next = (s.keepLatestN ?? 0) > 0
                             ? s.keepLatestN
-                            : 5;
+                            : constants.defaultKeepLatestN;
                         await _dao.setDeleteAfterHours(null);
                         await _dao.setKeepLatestN(next);
                       },
@@ -13552,7 +13562,7 @@ class _DownloadSettingsPanelState extends State<DownloadSettingsPanel> {
                       onSelected: () async {
                         final next = (s.deleteAfterHours ?? 0) > 0
                             ? s.deleteAfterHours
-                            : 24;
+                            : constants.defaultDeleteAfterHours;
                         await _dao.setKeepLatestN(null);
                         await _dao.setDeleteAfterHours(next);
                       },
@@ -13990,26 +14000,67 @@ class _ThemeOption {
 
 ### Inhalt von `klubradio_archivum/lib/screens/utils/constants.dart`
 ```dart
+// lib/screens/utils/constants.dart
+//
+// Central configuration constants for the app.
+// Grouped by domain to keep things discoverable.
+
+// ── Supabase Table Names ──────────────────────────────────────────
+
 const String podcastsTable = 'podcasts';
 const String episodesTable = 'episodes';
 const String userProfilesTable = 'user_profiles';
 const String playbackEventsTable = 'playback_events';
 const String topShowsTable = 'top_shows_this_year';
 
-const String problematicEpisodeImageUrl =
-    'https://www.klubradio.hu/data/sound-speaker-radio-microphone_focuspoint_340x340.jpg';
-const String defaultEpisodeImageUrl = 'assets/app_icon/app_icon.png';
+// ── API / Network ─────────────────────────────────────────────────
 
-const int defaultAutoDownloadCount = 2;
+const Duration apiTimeout = Duration(seconds: 20);
+const Duration apiLongTimeout = Duration(minutes: 1);
+const Duration apiCacheTtl = Duration(hours: 3);
+const int episodeFetchLimit = 500;
+const int podcastFetchLimit = 10;
+const int recentEpisodesFetchLimit = 8;
+const Duration httpConnectTimeout = Duration(seconds: 5);
+const Duration httpRequestTimeout = Duration(seconds: 12);
+const int httpMaxRetries = 2;
+const Duration httpBackoffBase = Duration(milliseconds: 300);
+const Duration topShowsCacheTtl = Duration(days: 1);
+
+// ── Search ────────────────────────────────────────────────────────
+
 const int maxRecentSearches = 10;
 const int minSearchLength = 3;
 const int searchResultsLimit = 50;
 const Duration searchDebounce = Duration(milliseconds: 400);
-const int maxRecentlyPlayed = 20;
 
-const String demoUserId = 'guest-user';
+// ── Downloads & Subscriptions ─────────────────────────────────────
+
+const int defaultAutoDownloadCount = 2;
+const int defaultMaxParallel = 2;
+const int maxAutoDownloadEpisodeCount = 50;
+const int defaultKeepLatestN = 5;
+const int defaultDeleteAfterHours = 24;
+const Duration autodownloadCheckInterval = Duration(seconds: 15);
+
+// ── Playback ──────────────────────────────────────────────────────
 
 const List<double> playbackSpeeds = <double>[0.5, 0.75, 1.0, 1.25, 1.5];
+const int maxRecentlyPlayed = 20;
+
+// ── Episode Cache ─────────────────────────────────────────────────
+
+const Duration episodeCacheMaxAge = Duration(minutes: 5);
+
+// ── Images / Assets ───────────────────────────────────────────────
+
+const String problematicEpisodeImageUrl =
+    'https://www.klubradio.hu/data/sound-speaker-radio-microphone_focuspoint_340x340.jpg';
+const String defaultEpisodeImageUrl = 'assets/app_icon/app_icon.png';
+
+// ── User / Auth ───────────────────────────────────────────────────
+
+const String demoUserId = 'guest-user';
 ```
 
 ### Inhalt von `klubradio_archivum/lib/screens/utils/helpers.dart`
@@ -15205,8 +15256,8 @@ class ApiService {
   String get supabaseUrl => _supabaseUrl;
   String get supabaseKey => _supabaseKey;
 
-  static const Duration _timeout = Duration(seconds: 20);
-  static const Duration _longTimeout = Duration(minutes: 1);
+  static const Duration _timeout = constants.apiTimeout;
+  static const Duration _longTimeout = constants.apiLongTimeout;
 
   final http.Client _httpClient;
   final ApiCacheService _cacheService;
@@ -15223,7 +15274,7 @@ class ApiService {
 
   // =================== PODCAST LISTS ===================
 
-  Future<List<Podcast>> fetchLatestPodcasts({int limit = 10}) async {
+  Future<List<Podcast>> fetchLatestPodcasts({int limit = constants.podcastFetchLimit}) async {
     const String cacheKey = 'latest_podcasts';
     final cachedData = await _cacheService.get(cacheKey);
     if (cachedData != null) {
@@ -15249,7 +15300,7 @@ class ApiService {
 
     if (res.statusCode >= 200 && res.statusCode < 300) {
       final data = jsonDecode(res.body) as List<dynamic>;
-      await _cacheService.save(cacheKey, data, expiry: const Duration(hours: 3));
+      await _cacheService.save(cacheKey, data, expiry: constants.apiCacheTtl);
       return data
           .whereType<Map<String, dynamic>>()
           .map(Podcast.fromJson)
@@ -15261,7 +15312,7 @@ class ApiService {
     );
   }
 
-  Future<List<Podcast>> fetchTrendingPodcasts({int limit = 10}) async {
+  Future<List<Podcast>> fetchTrendingPodcasts({int limit = constants.podcastFetchLimit}) async {
     const String cacheKey = 'trending_podcasts';
     final cachedData = await _cacheService.get(cacheKey);
     if (cachedData != null) {
@@ -15291,7 +15342,7 @@ class ApiService {
 
     if (res.statusCode >= 200 && res.statusCode < 300) {
       final data = jsonDecode(res.body) as List<dynamic>;
-      await _cacheService.save(cacheKey, data, expiry: const Duration(hours: 3));
+      await _cacheService.save(cacheKey, data, expiry: constants.apiCacheTtl);
       return data
           .whereType<Map<String, dynamic>>()
           .map(Podcast.fromJson)
@@ -15308,7 +15359,7 @@ class ApiService {
 
   Future<List<Episode>> fetchEpisodesForPodcast(
     String podcastId, {
-    int limit = 500,
+    int limit = constants.episodeFetchLimit,
   }) async {
     final String cacheKey = 'episodes_for_podcast_$podcastId';
     // Try to get from cache first
@@ -15337,7 +15388,7 @@ class ApiService {
     if (res.statusCode >= 200 && res.statusCode < 300) {
       final data = jsonDecode(res.body) as List<dynamic>;
       // Save to cache with a 2-4 hour expiry (e.g., 3 hours)
-      await _cacheService.save(cacheKey, data, expiry: const Duration(hours: 3));
+      await _cacheService.save(cacheKey, data, expiry: constants.apiCacheTtl);
       return data
           .whereType<Map<String, dynamic>>()
           .map(Episode.fromJson)
@@ -15376,7 +15427,7 @@ class ApiService {
 
     if (res.statusCode >= 200 && res.statusCode < 300) {
       final data = jsonDecode(res.body) as List<dynamic>;
-      await _cacheService.save(cacheKey, data, expiry: const Duration(hours: 3));
+      await _cacheService.save(cacheKey, data, expiry: constants.apiCacheTtl);
       return data
           .whereType<Map<String, dynamic>>()
           .map(Episode.fromJson)
@@ -15493,7 +15544,7 @@ class ApiService {
     if (res.statusCode >= 200 && res.statusCode < 300) {
       final data = jsonDecode(res.body) as List<dynamic>;
       // Save to cache with a daily expiry
-      await _cacheService.save(cacheKey, data, expiry: const Duration(days: 1));
+      await _cacheService.save(cacheKey, data, expiry: constants.topShowsCacheTtl);
       return data
           .whereType<Map<String, dynamic>>()
           .map(ShowData.fromJson)
@@ -15520,7 +15571,7 @@ class ApiService {
     if (res.statusCode >= 200 && res.statusCode < 300) {
       final data = jsonDecode(res.body) as List<dynamic>;
       if (data.isNotEmpty) {
-        await _cacheService.save(cacheKey, data.first, expiry: const Duration(hours: 3));
+        await _cacheService.save(cacheKey, data.first, expiry: constants.apiCacheTtl);
         return Podcast.fromJson(data.first as Map<String, dynamic>);
       }
     }
@@ -15561,7 +15612,7 @@ class ApiService {
     if (res.statusCode >= 200 && res.statusCode < 300) {
       final data = jsonDecode(res.body) as List<dynamic>;
       if (data.isEmpty) throw ApiException('Profile not found for $userId');
-      await _cacheService.save(cacheKey, data.first, expiry: const Duration(hours: 3));
+      await _cacheService.save(cacheKey, data.first, expiry: constants.apiCacheTtl);
       return UserProfile.fromJson(data.first as Map<String, dynamic>);
     }
     throw ApiException('Unable to fetch user profile ($userId)');
@@ -15859,6 +15910,7 @@ import 'package:klubradio_archivum/db/app_database.dart';
 import 'package:klubradio_archivum/db/daos.dart';
 import 'package:klubradio_archivum/models/episode.dart' as model;
 import 'package:klubradio_archivum/providers/episode_provider.dart';
+import 'package:klubradio_archivum/screens/utils/constants.dart' as constants;
 import 'package:klubradio_archivum/services/api_service.dart';
 
 class _EpisodeMetaLite {
@@ -15986,7 +16038,7 @@ class DownloadService {
     await _downloader.start();
 
     _autodownloadTimer = Timer.periodic(
-      const Duration(seconds: 15),
+      constants.autodownloadCheckInterval,
       (_) => checkAutodownloads(),
     );
 
@@ -16389,14 +16441,15 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
+import 'package:klubradio_archivum/screens/utils/constants.dart' as constants;
 
 class HttpRequester {
   HttpRequester({
     http.Client? client,
     required this.defaultHeaders,
-    this.connectTimeout = const Duration(seconds: 5),
-    this.requestTimeout = const Duration(seconds: 12),
-    this.maxRetries = 2,
+    this.connectTimeout = constants.httpConnectTimeout,
+    this.requestTimeout = constants.httpRequestTimeout,
+    this.maxRetries = constants.httpMaxRetries,
   }) : _client = client ?? http.Client();
 
   final http.Client _client;
@@ -16440,7 +16493,7 @@ class HttpRequester {
   Future<void> dispose() async => _client.close();
 
   Future<void> _backoff(int attempt) =>
-      Future.delayed(Duration(milliseconds: 300 * (1 << (attempt - 1))));
+      Future.delayed(Duration(milliseconds: constants.httpBackoffBase.inMilliseconds * (1 << (attempt - 1))));
 
   void _log(Object o) {
     // ignore: avoid_print

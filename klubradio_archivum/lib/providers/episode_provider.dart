@@ -9,6 +9,7 @@ import 'package:klubradio_archivum/db/daos.dart';
 import 'package:klubradio_archivum/models/episode.dart' as model;
 import 'package:klubradio_archivum/services/api_service.dart';
 import 'package:klubradio_archivum/services/audio_player_service.dart';
+import 'package:klubradio_archivum/screens/utils/constants.dart' as constants;
 import 'package:klubradio_archivum/utils/episode_cache_reader.dart';
 
 class EpisodeProvider extends ChangeNotifier {
@@ -28,9 +29,7 @@ class EpisodeProvider extends ChangeNotifier {
     _bufferingSubscription = _audioPlayerService.bufferingStream.listen(
       _onBufferingChanged,
     );
-    _errorSubscription = _audioPlayerService.errorStream.listen(
-      _onAudioError,
-    );
+    _errorSubscription = _audioPlayerService.errorStream.listen(_onAudioError);
   }
 
   late db.AppDatabase _db;
@@ -42,8 +41,9 @@ class EpisodeProvider extends ChangeNotifier {
   StreamSubscription<bool>? _bufferingSubscription;
   StreamSubscription<String?>? _errorSubscription;
 
-  final ValueNotifier<Duration> _positionNotifier =
-      ValueNotifier<Duration>(Duration.zero);
+  final ValueNotifier<Duration> _positionNotifier = ValueNotifier<Duration>(
+    Duration.zero,
+  );
 
   model.Episode? _currentEpisode;
   List<model.Episode> _queue = <model.Episode>[];
@@ -94,10 +94,9 @@ class EpisodeProvider extends ChangeNotifier {
   }
 
   /// Tracks when each podcast's episodes were last loaded into DB.
-  /// Entries expire after [_cacheMaxAge] so new episodes are picked up
+  /// Entries expire after [episodeCacheMaxAge] so new episodes are picked up
   /// without requiring an app restart.
   final Map<String, DateTime> _loadedPodcasts = {};
-  static const Duration _cacheMaxAge = Duration(minutes: 5);
 
   /// Clears the loaded-podcasts cache so the next call to
   /// [loadEpisodesIntoDb] will fetch fresh data from the API.
@@ -106,30 +105,37 @@ class EpisodeProvider extends ChangeNotifier {
   }
 
   /// Fetches episodes from the API and upserts them into the local DB.
-  /// Skips if already loaded within [_cacheMaxAge]. The StreamBuilder in
+  /// Skips if already loaded within [episodeCacheMaxAge]. The StreamBuilder in
   /// PodcastDetailScreen will reactively update.
-  Future<void> loadEpisodesIntoDb(String podcastId, {bool forceRefresh = false}) async {
+  Future<void> loadEpisodesIntoDb(
+    String podcastId, {
+    bool forceRefresh = false,
+  }) async {
     if (!forceRefresh) {
       final loadedAt = _loadedPodcasts[podcastId];
       if (loadedAt != null &&
-          DateTime.now().difference(loadedAt) < _cacheMaxAge) {
+          DateTime.now().difference(loadedAt) < constants.episodeCacheMaxAge) {
         return;
       }
     }
     _loadedPodcasts[podcastId] = DateTime.now();
     try {
       final episodes = await _apiService.fetchEpisodesForPodcast(podcastId);
-      final companions = episodes.map((ep) => db.EpisodesCompanion(
-        id: Value(ep.id),
-        podcastId: Value(ep.podcastId),
-        title: Value(ep.title),
-        audioUrl: Value(ep.audioUrl),
-        publishedAt: Value(ep.publishedAt),
-        durationSeconds: Value(ep.duration.inSeconds),
-        description: Value(ep.description),
-        showDate: Value(ep.showDate),
-        imageUrl: Value(ep.imageUrl),
-      )).toList();
+      final companions = episodes
+          .map(
+            (ep) => db.EpisodesCompanion(
+              id: Value(ep.id),
+              podcastId: Value(ep.podcastId),
+              title: Value(ep.title),
+              audioUrl: Value(ep.audioUrl),
+              publishedAt: Value(ep.publishedAt),
+              durationSeconds: Value(ep.duration.inSeconds),
+              description: Value(ep.description),
+              showDate: Value(ep.showDate),
+              imageUrl: Value(ep.imageUrl),
+            ),
+          )
+          .toList();
       if (companions.isNotEmpty) {
         await EpisodesDao(_db).upsertAll(companions);
       }
@@ -301,7 +307,9 @@ class EpisodeProvider extends ChangeNotifier {
     if (_audioPlayerService.currentEpisode == null) {
       _currentEpisode = null;
       _positionNotifier.value = Duration.zero;
-      debugPrint('EpisodeProvider: cleared stale episode after audio error: $errorMessage');
+      debugPrint(
+        'EpisodeProvider: cleared stale episode after audio error: $errorMessage',
+      );
     }
     notifyListeners();
   }

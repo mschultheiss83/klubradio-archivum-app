@@ -29,7 +29,7 @@ class EpisodeApi {
   /// The [limit] parameter controls the maximum number of episodes returned.
   Future<List<Map<String, dynamic>>> forPodcast(
     String podcastId, {
-    int limit = 500,
+    int limit = constants.episodeFetchLimit,
   }) async {
     final url =
         '$baseUrl/rest/v1/${constants.episodesTable}?select=*&podcastId=eq.$podcastId&limit=$limit';
@@ -41,7 +41,7 @@ class EpisodeApi {
   ///
   /// Returns raw JSON data ordered by ID descending (most recent first).
   /// The [limit] parameter controls the maximum number of episodes returned.
-  Future<List<Map<String, dynamic>>> recent({int limit = 8}) async {
+  Future<List<Map<String, dynamic>>> recent({int limit = constants.recentEpisodesFetchLimit}) async {
     final url =
         '$baseUrl/rest/v1/${constants.episodesTable}?select=*&order=id.desc&limit=$limit';
     final json = await _requester.getJson(url);
