@@ -63,6 +63,10 @@ class SubscriptionProvider extends ChangeNotifier {
 
   Future<void> toggleSubscription(String podcastId, bool currentlySubscribed) async {
     if (!_isSubscriptionsSupported) return; // No-op for unsupported platforms
+    if (_busy) {
+      debugPrint('toggleSubscription: already busy, ignoring duplicate call');
+      return;
+    }
     debugPrint(
       'toggleSubscription: podcastId=$podcastId, currentlySubscribed=$currentlySubscribed, busy=true',
     );
@@ -84,13 +88,22 @@ class SubscriptionProvider extends ChangeNotifier {
       );
 
       if (!currentlySubscribed) {
-        final downloadCount = await downloadProvider.autodownloadPodcast(
-          podcastId,
-          globalAutoDownloadN: autoDownloadEpisodeCount ?? constants.defaultAutoDownloadCount,
-        );
-        debugPrint(
-          'toggleSubscription: autodownload called, downloading files: $downloadCount',
-        );
+        // Only auto-download if autodownloadSubscribed is enabled in settings
+        final settings = await settingsDao.getOne();
+        final autodownloadEnabled = settings?.autodownloadSubscribed ?? false;
+        if (autodownloadEnabled) {
+          final downloadCount = await downloadProvider.autodownloadPodcast(
+            podcastId,
+            globalAutoDownloadN: autoDownloadEpisodeCount ?? constants.defaultAutoDownloadCount,
+          );
+          debugPrint(
+            'toggleSubscription: autodownload called, downloading files: $downloadCount',
+          );
+        } else {
+          debugPrint(
+            'toggleSubscription: autodownloadSubscribed=false, skipping auto-download',
+          );
+        }
       }
     } catch (e) {
       debugPrint('toggleSubscription: Error: $e');

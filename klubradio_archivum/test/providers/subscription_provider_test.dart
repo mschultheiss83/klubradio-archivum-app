@@ -49,13 +49,17 @@ void main() {
       );
 
   /// Creates a minimal Setting data object.
-  Setting makeSetting({int? keepLatestN}) => Setting(
+  Setting makeSetting({
+    int? keepLatestN,
+    bool autodownloadSubscribed = true,
+  }) =>
+      Setting(
         id: 1,
         wifiOnly: false,
         maxParallel: 2,
         deleteAfterHours: null,
         keepLatestN: keepLatestN,
-        autodownloadSubscribed: false,
+        autodownloadSubscribed: autodownloadSubscribed,
         playOrder: 'newest',
       );
 
@@ -70,6 +74,12 @@ void main() {
     mockSubsDao = MockSubscriptionsDao();
     mockSettingsDao = MockSettingsDao();
     mockDownloadProvider = MockDownloadProvider();
+
+    // Default: settingsDao returns autodownloadSubscribed=true so subscribe tests trigger downloads
+    when(mockSettingsDao.getOne()).thenAnswer((_) async => makeSetting(
+          keepLatestN: null,
+          autodownloadSubscribed: true,
+        ));
 
     provider = SubscriptionProvider(
       subscriptionsDao: mockSubsDao,

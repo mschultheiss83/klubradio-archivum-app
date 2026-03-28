@@ -105,6 +105,8 @@
 ├── klubradio_archivum/test/providers/episode_provider_queue_test.dart
 ├── klubradio_archivum/test/providers/episode_provider_queue_test.mocks.dart
 ├── klubradio_archivum/test/providers/podcast_provider_search_test.dart
+├── klubradio_archivum/test/providers/subscribe_download_flow_test.dart
+├── klubradio_archivum/test/providers/subscribe_download_flow_test.mocks.dart
 ├── klubradio_archivum/test/providers/subscription_provider_test.dart
 ├── klubradio_archivum/test/providers/subscription_provider_test.mocks.dart
 ├── klubradio_archivum/test/providers/theme_provider_test.dart
@@ -10206,6 +10208,10 @@ class SubscriptionProvider extends ChangeNotifier {
 
   Future<void> toggleSubscription(String podcastId, bool currentlySubscribed) async {
     if (!_isSubscriptionsSupported) return; // No-op for unsupported platforms
+    if (_busy) {
+      debugPrint('toggleSubscription: already busy, ignoring duplicate call');
+      return;
+    }
     debugPrint(
       'toggleSubscription: podcastId=$podcastId, currentlySubscribed=$currentlySubscribed, busy=true',
     );
@@ -10227,13 +10233,22 @@ class SubscriptionProvider extends ChangeNotifier {
       );
 
       if (!currentlySubscribed) {
-        final downloadCount = await downloadProvider.autodownloadPodcast(
-          podcastId,
-          globalAutoDownloadN: autoDownloadEpisodeCount ?? constants.defaultAutoDownloadCount,
-        );
-        debugPrint(
-          'toggleSubscription: autodownload called, downloading files: $downloadCount',
-        );
+        // Only auto-download if autodownloadSubscribed is enabled in settings
+        final settings = await settingsDao.getOne();
+        final autodownloadEnabled = settings?.autodownloadSubscribed ?? false;
+        if (autodownloadEnabled) {
+          final downloadCount = await downloadProvider.autodownloadPodcast(
+            podcastId,
+            globalAutoDownloadN: autoDownloadEpisodeCount ?? constants.defaultAutoDownloadCount,
+          );
+          debugPrint(
+            'toggleSubscription: autodownload called, downloading files: $downloadCount',
+          );
+        } else {
+          debugPrint(
+            'toggleSubscription: autodownloadSubscribed=false, skipping auto-download',
+          );
+        }
       }
     } catch (e) {
       debugPrint('toggleSubscription: Error: $e');
@@ -20114,6 +20129,2094 @@ void main() {
 class _FakeDownloadProvider extends Fake implements DownloadProvider {}
 ```
 
+### Inhalt von `klubradio_archivum/test/providers/subscribe_download_flow_test.dart`
+```dart
+// test/providers/subscribe_download_flow_test.dart
+//
+// Integration-style tests for the subscribe → auto-download → unsubscribe flow.
+//
+// Scenarios:
+//   1. Subscribe to "Esti gyors" → triggers 2 downloads (autoDownloadEpisodeCount=2)
+//   2. Unsubscribe (keep files) → no downloads triggered
+//   3. Delete one file, re-subscribe → only 1 new download (1 already completed)
+//   4. autodownloadSubscribed=false → subscribing should NOT trigger auto-downloads
+//   5. autodownloadSubscribed=true → subscribing triggers auto-downloads
+//
+// Uses Mockito mocks for SubscriptionsDao, SettingsDao, DownloadProvider.
+
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/annotations.dart';
+import 'package:mockito/mockito.dart';
+
+import 'package:klubradio_archivum/db/app_database.dart';
+import 'package:klubradio_archivum/db/daos.dart';
+import 'package:klubradio_archivum/providers/download_provider.dart';
+import 'package:klubradio_archivum/providers/subscription_provider.dart';
+import 'package:klubradio_archivum/screens/utils/constants.dart' as constants;
+
+import 'subscribe_download_flow_test.mocks.dart';
+
+@GenerateMocks([SubscriptionsDao, SettingsDao, DownloadProvider])
+void main() {
+  // ==================== Helpers ====================
+
+  const podcastId = 'esti-gyors';
+
+  Subscription makeSub(
+    String podcastId, {
+    bool active = true,
+    int? autoDownloadN,
+  }) =>
+      Subscription(
+        podcastId: podcastId,
+        active: active,
+        updatedAt: DateTime(2024, 1, 1),
+        subscribedAt: DateTime(2024, 1, 1),
+        autoDownloadN: autoDownloadN,
+      );
+
+  Setting makeSetting({
+    int? keepLatestN,
+    bool autodownloadSubscribed = false,
+  }) =>
+      Setting(
+        id: 1,
+        wifiOnly: false,
+        maxParallel: 2,
+        deleteAfterHours: null,
+        keepLatestN: keepLatestN,
+        autodownloadSubscribed: autodownloadSubscribed,
+        playOrder: 'newest',
+      );
+
+  // ==================== Fixtures ====================
+
+  late MockSubscriptionsDao mockSubsDao;
+  late MockSettingsDao mockSettingsDao;
+  late MockDownloadProvider mockDownloadProvider;
+  late SubscriptionProvider provider;
+
+  setUp(() {
+    mockSubsDao = MockSubscriptionsDao();
+    mockSettingsDao = MockSettingsDao();
+    mockDownloadProvider = MockDownloadProvider();
+
+    provider = SubscriptionProvider(
+      subscriptionsDao: mockSubsDao,
+      settingsDao: mockSettingsDao,
+      downloadProvider: mockDownloadProvider,
+    )..autoDownloadEpisodeCount = 2; // global default
+  });
+
+  // Helper to stub common toggle calls
+  void stubToggleSubscribe() {
+    when(mockSubsDao.toggleSubscribe(
+      podcastId: anyNamed('podcastId'),
+      active: anyNamed('active'),
+      autoDownloadN: anyNamed('autoDownloadN'),
+    )).thenAnswer((_) async {});
+  }
+
+  // ==================== Scenario 1: Subscribe triggers 2 downloads ====================
+
+  // Helper: stub settings with autodownload enabled
+  void stubSettingsAutodownloadEnabled() {
+    when(mockSettingsDao.getOne())
+        .thenAnswer((_) async => makeSetting(autodownloadSubscribed: true));
+  }
+
+  group('Scenario 1: Subscribe triggers auto-download', () {
+    test('subscribing to "$podcastId" triggers autodownloadPodcast with count=2',
+        () async {
+      stubSettingsAutodownloadEnabled();
+      stubToggleSubscribe();
+      when(mockSubsDao.getById(podcastId))
+          .thenAnswer((_) async => makeSub(podcastId, autoDownloadN: 2));
+      when(mockDownloadProvider.autodownloadPodcast(
+        podcastId,
+        globalAutoDownloadN: 2,
+      )).thenAnswer((_) async => 2);
+
+      await provider.toggleSubscription(podcastId, false);
+
+      // Verify subscribe was called with active=true and autoDownloadN=2
+      verify(mockSubsDao.toggleSubscribe(
+        podcastId: podcastId,
+        active: true,
+        autoDownloadN: 2,
+      )).called(1);
+
+      // Verify auto-download was triggered
+      verify(mockDownloadProvider.autodownloadPodcast(
+        podcastId,
+        globalAutoDownloadN: 2,
+      )).called(1);
+    });
+
+    test('autodownloadPodcast returns 2 (two episodes enqueued)', () async {
+      stubSettingsAutodownloadEnabled();
+      stubToggleSubscribe();
+      when(mockSubsDao.getById(podcastId))
+          .thenAnswer((_) async => makeSub(podcastId, autoDownloadN: 2));
+      when(mockDownloadProvider.autodownloadPodcast(
+        podcastId,
+        globalAutoDownloadN: 2,
+      )).thenAnswer((_) async => 2);
+
+      await provider.toggleSubscription(podcastId, false);
+
+      final captured = verify(mockDownloadProvider.autodownloadPodcast(
+        captureAny,
+        globalAutoDownloadN: captureAnyNamed('globalAutoDownloadN'),
+      )).captured;
+
+      expect(captured[0], podcastId);
+      expect(captured[1], 2);
+    });
+  });
+
+  // ==================== Scenario 2: Unsubscribe (keep files) ====================
+
+  group('Scenario 2: Unsubscribe keeps files, no downloads', () {
+    test('unsubscribing does NOT trigger autodownloadPodcast', () async {
+      stubToggleSubscribe();
+      when(mockSubsDao.getById(podcastId))
+          .thenAnswer((_) async => makeSub(podcastId, active: false));
+
+      await provider.toggleSubscription(podcastId, true); // true = currently subscribed
+
+      verifyNever(mockDownloadProvider.autodownloadPodcast(
+        any,
+        globalAutoDownloadN: anyNamed('globalAutoDownloadN'),
+      ));
+    });
+
+    test('unsubscribing passes active=false and autoDownloadN=null', () async {
+      stubToggleSubscribe();
+      when(mockSubsDao.getById(podcastId))
+          .thenAnswer((_) async => makeSub(podcastId, active: false));
+
+      await provider.toggleSubscription(podcastId, true);
+
+      verify(mockSubsDao.toggleSubscribe(
+        podcastId: podcastId,
+        active: false,
+        autoDownloadN: null,
+      )).called(1);
+    });
+  });
+
+  // ==================== Scenario 3: Re-subscribe after deleting 1 file ====================
+
+  group('Scenario 3: Re-subscribe after deleting one file', () {
+    test('re-subscribe triggers autodownload; service returns 1 (only missing file)',
+        () async {
+      stubSettingsAutodownloadEnabled();
+      stubToggleSubscribe();
+      when(mockSubsDao.getById(podcastId))
+          .thenAnswer((_) async => makeSub(podcastId, autoDownloadN: 2));
+      // Simulate: 1 episode already completed, so only 1 new download
+      when(mockDownloadProvider.autodownloadPodcast(
+        podcastId,
+        globalAutoDownloadN: 2,
+      )).thenAnswer((_) async => 1);
+
+      await provider.toggleSubscription(podcastId, false);
+
+      verify(mockDownloadProvider.autodownloadPodcast(
+        podcastId,
+        globalAutoDownloadN: 2,
+      )).called(1);
+    });
+  });
+
+  // ==================== Scenario 4: BUG — autodownloadSubscribed=false ====================
+
+  group('Scenario 4: autodownloadSubscribed setting check', () {
+    test(
+      'subscribing does NOT trigger auto-download when autodownloadSubscribed=false',
+      () async {
+        when(mockSettingsDao.getOne())
+            .thenAnswer((_) async => makeSetting(autodownloadSubscribed: false));
+        stubToggleSubscribe();
+        when(mockSubsDao.getById(podcastId))
+            .thenAnswer((_) async => makeSub(podcastId, autoDownloadN: 2));
+
+        await provider.toggleSubscription(podcastId, false);
+
+        // Subscription row should still be created
+        verify(mockSubsDao.toggleSubscribe(
+          podcastId: podcastId,
+          active: true,
+          autoDownloadN: 2,
+        )).called(1);
+
+        // But no downloads should be triggered
+        verifyNever(mockDownloadProvider.autodownloadPodcast(
+          any,
+          globalAutoDownloadN: anyNamed('globalAutoDownloadN'),
+        ));
+      },
+    );
+
+    test(
+      'subscribing when autodownloadSubscribed=true triggers auto-downloads',
+      () async {
+        stubSettingsAutodownloadEnabled();
+        stubToggleSubscribe();
+        when(mockSubsDao.getById(podcastId))
+            .thenAnswer((_) async => makeSub(podcastId, autoDownloadN: 2));
+        when(mockDownloadProvider.autodownloadPodcast(
+          podcastId,
+          globalAutoDownloadN: 2,
+        )).thenAnswer((_) async => 2);
+
+        await provider.toggleSubscription(podcastId, false);
+
+        verify(mockDownloadProvider.autodownloadPodcast(
+          podcastId,
+          globalAutoDownloadN: 2,
+        )).called(1);
+      },
+    );
+  });
+
+  // ==================== Scenario 5: Full lifecycle ====================
+
+  group('Scenario 5: Full subscribe → unsubscribe → re-subscribe lifecycle', () {
+    test('complete flow: subscribe(2 DL) → unsub(keep) → re-sub(1 DL)', () async {
+      stubSettingsAutodownloadEnabled();
+      stubToggleSubscribe();
+
+      // --- Step 1: Subscribe → 2 downloads ---
+      when(mockSubsDao.getById(podcastId))
+          .thenAnswer((_) async => makeSub(podcastId, autoDownloadN: 2));
+      when(mockDownloadProvider.autodownloadPodcast(
+        podcastId,
+        globalAutoDownloadN: 2,
+      )).thenAnswer((_) async => 2);
+
+      await provider.toggleSubscription(podcastId, false);
+
+      verify(mockDownloadProvider.autodownloadPodcast(
+        podcastId,
+        globalAutoDownloadN: 2,
+      )).called(1);
+      expect(provider.currentSubscription?.active, true);
+
+      // --- Step 2: Unsubscribe (keep files) ---
+      when(mockSubsDao.getById(podcastId))
+          .thenAnswer((_) async => makeSub(podcastId, active: false));
+
+      await provider.toggleSubscription(podcastId, true);
+
+      expect(provider.currentSubscription?.active, false);
+
+      // --- Step 3: Re-subscribe after deleting 1 file → only 1 new download ---
+      when(mockSubsDao.getById(podcastId))
+          .thenAnswer((_) async => makeSub(podcastId, autoDownloadN: 2));
+      when(mockDownloadProvider.autodownloadPodcast(
+        podcastId,
+        globalAutoDownloadN: 2,
+      )).thenAnswer((_) async => 1); // only 1 missing
+
+      await provider.toggleSubscription(podcastId, false);
+
+      // Total autodownload calls: 2 (step 1 + step 3), not 3
+      verify(mockDownloadProvider.autodownloadPodcast(
+        podcastId,
+        globalAutoDownloadN: 2,
+      )).called(1); // this verify only counts since last reset
+    });
+  });
+
+  // ==================== Scenario 6: autoDownloadEpisodeCount=0 ====================
+
+  group('Scenario 6: Edge cases', () {
+    test('autoDownloadEpisodeCount=0 should not trigger downloads', () async {
+      provider.autoDownloadEpisodeCount = 0;
+      stubSettingsAutodownloadEnabled();
+      stubToggleSubscribe();
+      when(mockSubsDao.getById(podcastId))
+          .thenAnswer((_) async => makeSub(podcastId));
+      when(mockDownloadProvider.autodownloadPodcast(
+        podcastId,
+        globalAutoDownloadN: 0,
+      )).thenAnswer((_) async => 0);
+
+      await provider.toggleSubscription(podcastId, false);
+
+      // autodownloadPodcast IS called but with globalAutoDownloadN=0
+      // The service itself should return 0 downloads
+      verify(mockDownloadProvider.autodownloadPodcast(
+        podcastId,
+        globalAutoDownloadN: 0,
+      )).called(1);
+    });
+
+    test('autoDownloadEpisodeCount=null falls back to defaultAutoDownloadCount', () async {
+      provider.autoDownloadEpisodeCount = null;
+      stubSettingsAutodownloadEnabled();
+      stubToggleSubscribe();
+      when(mockSubsDao.getById(podcastId))
+          .thenAnswer((_) async => makeSub(podcastId));
+      when(mockDownloadProvider.autodownloadPodcast(
+        podcastId,
+        globalAutoDownloadN: constants.defaultAutoDownloadCount,
+      )).thenAnswer((_) async => 2);
+
+      await provider.toggleSubscription(podcastId, false);
+
+      verify(mockSubsDao.toggleSubscribe(
+        podcastId: podcastId,
+        active: true,
+        autoDownloadN: constants.defaultAutoDownloadCount,
+      )).called(1);
+
+      verify(mockDownloadProvider.autodownloadPodcast(
+        podcastId,
+        globalAutoDownloadN: constants.defaultAutoDownloadCount,
+      )).called(1);
+    });
+  });
+
+  // ==================== Scenario 7: Double-click guard ====================
+
+  group('Scenario 7: Double-click / busy guard', () {
+    test('second toggleSubscription call is ignored while busy', () async {
+      stubSettingsAutodownloadEnabled();
+      stubToggleSubscribe();
+      when(mockSubsDao.getById(podcastId))
+          .thenAnswer((_) async => makeSub(podcastId, autoDownloadN: 2));
+      when(mockDownloadProvider.autodownloadPodcast(
+        podcastId,
+        globalAutoDownloadN: 2,
+      )).thenAnswer((_) async => 2);
+
+      // Fire two calls concurrently
+      final first = provider.toggleSubscription(podcastId, false);
+      final second = provider.toggleSubscription(podcastId, false);
+
+      await Future.wait([first, second]);
+
+      // Only ONE toggleSubscribe call should have happened
+      verify(mockSubsDao.toggleSubscribe(
+        podcastId: podcastId,
+        active: true,
+        autoDownloadN: 2,
+      )).called(1);
+
+      // Only ONE autodownloadPodcast call
+      verify(mockDownloadProvider.autodownloadPodcast(
+        podcastId,
+        globalAutoDownloadN: 2,
+      )).called(1);
+    });
+
+    test('can toggle again after first completes', () async {
+      stubSettingsAutodownloadEnabled();
+      stubToggleSubscribe();
+      when(mockSubsDao.getById(podcastId))
+          .thenAnswer((_) async => makeSub(podcastId, autoDownloadN: 2));
+      when(mockDownloadProvider.autodownloadPodcast(
+        podcastId,
+        globalAutoDownloadN: 2,
+      )).thenAnswer((_) async => 2);
+
+      // First call completes
+      await provider.toggleSubscription(podcastId, false);
+      expect(provider.busy, false);
+
+      // Second call should work (not blocked)
+      when(mockSubsDao.getById(podcastId))
+          .thenAnswer((_) async => makeSub(podcastId, active: false));
+      await provider.toggleSubscription(podcastId, true);
+
+      // Both toggleSubscribe calls happened
+      verify(mockSubsDao.toggleSubscribe(
+        podcastId: podcastId,
+        active: true,
+        autoDownloadN: 2,
+      )).called(1);
+      verify(mockSubsDao.toggleSubscribe(
+        podcastId: podcastId,
+        active: false,
+        autoDownloadN: null,
+      )).called(1);
+    });
+  });
+
+  // ==================== Scenario 8: Subscribe → Unsub (keep) → Re-Sub ====================
+
+  group('Scenario 8: Abo → Deabo (behalten) → Re-Abo', () {
+    test('re-subscribe after unsub(keep) only downloads missing files', () async {
+      stubSettingsAutodownloadEnabled();
+      stubToggleSubscribe();
+
+      // Step 1: Subscribe → 2 downloads
+      when(mockSubsDao.getById(podcastId))
+          .thenAnswer((_) async => makeSub(podcastId, active: true, autoDownloadN: 2));
+      when(mockDownloadProvider.autodownloadPodcast(
+        podcastId,
+        globalAutoDownloadN: 2,
+      )).thenAnswer((_) async => 2);
+
+      await provider.toggleSubscription(podcastId, false);
+      expect(provider.busy, false);
+
+      verify(mockDownloadProvider.autodownloadPodcast(
+        podcastId,
+        globalAutoDownloadN: 2,
+      )).called(1);
+
+      // Step 2: Unsubscribe (keep files)
+      when(mockSubsDao.getById(podcastId))
+          .thenAnswer((_) async => makeSub(podcastId, active: false, autoDownloadN: 2));
+
+      await provider.toggleSubscription(podcastId, true);
+      expect(provider.busy, false);
+
+      // No download on unsub
+      verifyNever(mockDownloadProvider.autodownloadPodcast(
+        podcastId,
+        globalAutoDownloadN: 2,
+      ));
+
+      // Step 3: Delete 1 file (simulated by service returning 1 instead of 0)
+      // Re-subscribe → service sees 1 completed + 1 missing = returns 1
+      when(mockSubsDao.getById(podcastId))
+          .thenAnswer((_) async => makeSub(podcastId, active: true, autoDownloadN: 2));
+      when(mockDownloadProvider.autodownloadPodcast(
+        podcastId,
+        globalAutoDownloadN: 2,
+      )).thenAnswer((_) async => 1); // only 1 new download needed
+
+      await provider.toggleSubscription(podcastId, false);
+      expect(provider.busy, false);
+
+      // Should download only 1 (the missing one)
+      verify(mockDownloadProvider.autodownloadPodcast(
+        podcastId,
+        globalAutoDownloadN: 2,
+      )).called(1);
+    });
+
+    test('re-subscribe when all files still exist downloads 0', () async {
+      stubSettingsAutodownloadEnabled();
+      stubToggleSubscribe();
+
+      // Subscribe
+      when(mockSubsDao.getById(podcastId))
+          .thenAnswer((_) async => makeSub(podcastId, active: true, autoDownloadN: 2));
+      when(mockDownloadProvider.autodownloadPodcast(
+        podcastId,
+        globalAutoDownloadN: 2,
+      )).thenAnswer((_) async => 2);
+      await provider.toggleSubscription(podcastId, false);
+
+      // Unsubscribe (keep)
+      when(mockSubsDao.getById(podcastId))
+          .thenAnswer((_) async => makeSub(podcastId, active: false, autoDownloadN: 2));
+      await provider.toggleSubscription(podcastId, true);
+
+      // Clear interaction count from first subscribe so we only count re-subscribe
+      clearInteractions(mockDownloadProvider);
+
+      // Re-subscribe — all 2 files still completed in DB
+      when(mockSubsDao.getById(podcastId))
+          .thenAnswer((_) async => makeSub(podcastId, active: true, autoDownloadN: 2));
+      when(mockDownloadProvider.autodownloadPodcast(
+        podcastId,
+        globalAutoDownloadN: 2,
+      )).thenAnswer((_) async => 0); // all already downloaded
+
+      await provider.toggleSubscription(podcastId, false);
+
+      verify(mockDownloadProvider.autodownloadPodcast(
+        podcastId,
+        globalAutoDownloadN: 2,
+      )).called(1); // called but returned 0
+    });
+  });
+}
+```
+
+### Inhalt von `klubradio_archivum/test/providers/subscribe_download_flow_test.mocks.dart`
+```dart
+// Mocks generated by Mockito 5.4.6 from annotations
+// in klubradio_archivum/test/providers/subscribe_download_flow_test.dart.
+// Do not manually edit this file.
+
+// ignore_for_file: no_leading_underscores_for_library_prefixes
+import 'dart:async' as _i6;
+import 'dart:ui' as _i12;
+
+import 'package:drift/drift.dart' as _i3;
+import 'package:drift/src/runtime/executor/stream_queries.dart' as _i4;
+import 'package:klubradio_archivum/db/app_database.dart' as _i2;
+import 'package:klubradio_archivum/db/daos.dart' as _i5;
+import 'package:klubradio_archivum/models/episode.dart' as _i11;
+import 'package:klubradio_archivum/providers/download_provider.dart' as _i10;
+import 'package:klubradio_archivum/services/api_service.dart' as _i8;
+import 'package:klubradio_archivum/services/download_service.dart' as _i7;
+import 'package:mockito/mockito.dart' as _i1;
+import 'package:mockito/src/dummies.dart' as _i9;
+
+// ignore_for_file: type=lint
+// ignore_for_file: avoid_redundant_argument_values
+// ignore_for_file: avoid_setters_without_getters
+// ignore_for_file: comment_references
+// ignore_for_file: deprecated_member_use
+// ignore_for_file: deprecated_member_use_from_same_package
+// ignore_for_file: implementation_imports
+// ignore_for_file: invalid_use_of_visible_for_testing_member
+// ignore_for_file: must_be_immutable
+// ignore_for_file: prefer_const_constructors
+// ignore_for_file: unnecessary_parenthesis
+// ignore_for_file: camel_case_types
+// ignore_for_file: subtype_of_sealed_class
+// ignore_for_file: invalid_use_of_internal_member
+
+class _FakeAppDatabase_0 extends _i1.SmartFake implements _i2.AppDatabase {
+  _FakeAppDatabase_0(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
+}
+
+class _FakeDatabaseConnection_1 extends _i1.SmartFake
+    implements _i3.DatabaseConnection {
+  _FakeDatabaseConnection_1(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
+}
+
+class _FakeDriftDatabaseOptions_2 extends _i1.SmartFake
+    implements _i3.DriftDatabaseOptions {
+  _FakeDriftDatabaseOptions_2(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
+}
+
+class _FakeQueryExecutor_3 extends _i1.SmartFake implements _i3.QueryExecutor {
+  _FakeQueryExecutor_3(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
+}
+
+class _FakeStreamQueryStore_4 extends _i1.SmartFake
+    implements _i4.StreamQueryStore {
+  _FakeStreamQueryStore_4(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
+}
+
+class _FakeDatabaseConnectionUser_5 extends _i1.SmartFake
+    implements _i3.DatabaseConnectionUser {
+  _FakeDatabaseConnectionUser_5(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
+}
+
+class _Fake$SubscriptionsTable_6 extends _i1.SmartFake
+    implements _i2.$SubscriptionsTable {
+  _Fake$SubscriptionsTable_6(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
+}
+
+class _FakeSubscriptionsDaoManager_7 extends _i1.SmartFake
+    implements _i5.SubscriptionsDaoManager {
+  _FakeSubscriptionsDaoManager_7(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
+}
+
+class _FakeFuture_8<T1> extends _i1.SmartFake implements _i6.Future<T1> {
+  _FakeFuture_8(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
+}
+
+class _FakeInsertStatement_9<T1 extends _i3.Table, D1> extends _i1.SmartFake
+    implements _i3.InsertStatement<T1, D1> {
+  _FakeInsertStatement_9(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
+}
+
+class _FakeUpdateStatement_10<T extends _i3.Table, D> extends _i1.SmartFake
+    implements _i3.UpdateStatement<T, D> {
+  _FakeUpdateStatement_10(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
+}
+
+class _FakeSimpleSelectStatement_11<T1 extends _i3.HasResultSet, D>
+    extends _i1.SmartFake
+    implements _i3.SimpleSelectStatement<T1, D> {
+  _FakeSimpleSelectStatement_11(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
+}
+
+class _FakeJoinedSelectStatement_12<FirstT extends _i3.HasResultSet, FirstD>
+    extends _i1.SmartFake
+    implements _i3.JoinedSelectStatement<FirstT, FirstD> {
+  _FakeJoinedSelectStatement_12(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
+}
+
+class _FakeBaseSelectStatement_13<Row> extends _i1.SmartFake
+    implements _i3.BaseSelectStatement<Row> {
+  _FakeBaseSelectStatement_13(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
+}
+
+class _FakeDeleteStatement_14<T1 extends _i3.Table, D1> extends _i1.SmartFake
+    implements _i3.DeleteStatement<T1, D1> {
+  _FakeDeleteStatement_14(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
+}
+
+class _FakeSelectable_15<T> extends _i1.SmartFake implements _i3.Selectable<T> {
+  _FakeSelectable_15(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
+}
+
+class _FakeGenerationContext_16 extends _i1.SmartFake
+    implements _i3.GenerationContext {
+  _FakeGenerationContext_16(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
+}
+
+class _Fake$SettingsTable_17 extends _i1.SmartFake
+    implements _i2.$SettingsTable {
+  _Fake$SettingsTable_17(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
+}
+
+class _FakeSettingsDaoManager_18 extends _i1.SmartFake
+    implements _i5.SettingsDaoManager {
+  _FakeSettingsDaoManager_18(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
+}
+
+class _FakeDownloadService_19 extends _i1.SmartFake
+    implements _i7.DownloadService {
+  _FakeDownloadService_19(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
+}
+
+class _FakeEpisodesDao_20 extends _i1.SmartFake implements _i5.EpisodesDao {
+  _FakeEpisodesDao_20(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
+}
+
+class _FakeSubscriptionsDao_21 extends _i1.SmartFake
+    implements _i5.SubscriptionsDao {
+  _FakeSubscriptionsDao_21(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
+}
+
+class _FakeSettingsDao_22 extends _i1.SmartFake implements _i5.SettingsDao {
+  _FakeSettingsDao_22(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
+}
+
+class _FakeRetentionDao_23 extends _i1.SmartFake implements _i5.RetentionDao {
+  _FakeRetentionDao_23(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
+}
+
+class _FakeApiService_24 extends _i1.SmartFake implements _i8.ApiService {
+  _FakeApiService_24(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
+}
+
+/// A class which mocks [SubscriptionsDao].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockSubscriptionsDao extends _i1.Mock implements _i5.SubscriptionsDao {
+  MockSubscriptionsDao() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  _i2.AppDatabase get attachedDatabase =>
+      (super.noSuchMethod(
+            Invocation.getter(#attachedDatabase),
+            returnValue: _FakeAppDatabase_0(
+              this,
+              Invocation.getter(#attachedDatabase),
+            ),
+          )
+          as _i2.AppDatabase);
+
+  @override
+  _i3.DatabaseConnection get connection =>
+      (super.noSuchMethod(
+            Invocation.getter(#connection),
+            returnValue: _FakeDatabaseConnection_1(
+              this,
+              Invocation.getter(#connection),
+            ),
+          )
+          as _i3.DatabaseConnection);
+
+  @override
+  _i3.DriftDatabaseOptions get options =>
+      (super.noSuchMethod(
+            Invocation.getter(#options),
+            returnValue: _FakeDriftDatabaseOptions_2(
+              this,
+              Invocation.getter(#options),
+            ),
+          )
+          as _i3.DriftDatabaseOptions);
+
+  @override
+  _i3.SqlTypes get typeMapping =>
+      (super.noSuchMethod(
+            Invocation.getter(#typeMapping),
+            returnValue: _i9.dummyValue<_i3.SqlTypes>(
+              this,
+              Invocation.getter(#typeMapping),
+            ),
+          )
+          as _i3.SqlTypes);
+
+  @override
+  _i3.QueryExecutor get executor =>
+      (super.noSuchMethod(
+            Invocation.getter(#executor),
+            returnValue: _FakeQueryExecutor_3(
+              this,
+              Invocation.getter(#executor),
+            ),
+          )
+          as _i3.QueryExecutor);
+
+  @override
+  _i4.StreamQueryStore get streamQueries =>
+      (super.noSuchMethod(
+            Invocation.getter(#streamQueries),
+            returnValue: _FakeStreamQueryStore_4(
+              this,
+              Invocation.getter(#streamQueries),
+            ),
+          )
+          as _i4.StreamQueryStore);
+
+  @override
+  _i3.DatabaseConnectionUser get resolvedEngine =>
+      (super.noSuchMethod(
+            Invocation.getter(#resolvedEngine),
+            returnValue: _FakeDatabaseConnectionUser_5(
+              this,
+              Invocation.getter(#resolvedEngine),
+            ),
+          )
+          as _i3.DatabaseConnectionUser);
+
+  @override
+  _i2.$SubscriptionsTable get subscriptions =>
+      (super.noSuchMethod(
+            Invocation.getter(#subscriptions),
+            returnValue: _Fake$SubscriptionsTable_6(
+              this,
+              Invocation.getter(#subscriptions),
+            ),
+          )
+          as _i2.$SubscriptionsTable);
+
+  @override
+  _i5.SubscriptionsDaoManager get managers =>
+      (super.noSuchMethod(
+            Invocation.getter(#managers),
+            returnValue: _FakeSubscriptionsDaoManager_7(
+              this,
+              Invocation.getter(#managers),
+            ),
+          )
+          as _i5.SubscriptionsDaoManager);
+
+  @override
+  _i6.Future<void> upsert(_i2.SubscriptionsCompanion? data) =>
+      (super.noSuchMethod(
+            Invocation.method(#upsert, [data]),
+            returnValue: _i6.Future<void>.value(),
+            returnValueForMissingStub: _i6.Future<void>.value(),
+          )
+          as _i6.Future<void>);
+
+  @override
+  _i6.Future<_i2.Subscription?> getById(String? podcastId) =>
+      (super.noSuchMethod(
+            Invocation.method(#getById, [podcastId]),
+            returnValue: _i6.Future<_i2.Subscription?>.value(),
+          )
+          as _i6.Future<_i2.Subscription?>);
+
+  @override
+  _i6.Stream<_i2.Subscription?> watchOne(String? podcastId) =>
+      (super.noSuchMethod(
+            Invocation.method(#watchOne, [podcastId]),
+            returnValue: _i6.Stream<_i2.Subscription?>.empty(),
+          )
+          as _i6.Stream<_i2.Subscription?>);
+
+  @override
+  _i6.Stream<List<_i2.Subscription>> watchAllActive() =>
+      (super.noSuchMethod(
+            Invocation.method(#watchAllActive, []),
+            returnValue: _i6.Stream<List<_i2.Subscription>>.empty(),
+          )
+          as _i6.Stream<List<_i2.Subscription>>);
+
+  @override
+  _i6.Future<bool> isSubscribed(String? podcastId) =>
+      (super.noSuchMethod(
+            Invocation.method(#isSubscribed, [podcastId]),
+            returnValue: _i6.Future<bool>.value(false),
+          )
+          as _i6.Future<bool>);
+
+  @override
+  _i6.Future<void> toggleSubscribe({
+    required String? podcastId,
+    bool? active,
+    int? autoDownloadN,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(#toggleSubscribe, [], {
+              #podcastId: podcastId,
+              #active: active,
+              #autoDownloadN: autoDownloadN,
+            }),
+            returnValue: _i6.Future<void>.value(),
+            returnValueForMissingStub: _i6.Future<void>.value(),
+          )
+          as _i6.Future<void>);
+
+  @override
+  _i6.Future<int> setAutoDownloadN(String? podcastId, int? n) =>
+      (super.noSuchMethod(
+            Invocation.method(#setAutoDownloadN, [podcastId, n]),
+            returnValue: _i6.Future<int>.value(0),
+          )
+          as _i6.Future<int>);
+
+  @override
+  _i6.Future<int> setLastHeard(String? podcastId, String? episodeId) =>
+      (super.noSuchMethod(
+            Invocation.method(#setLastHeard, [podcastId, episodeId]),
+            returnValue: _i6.Future<int>.value(0),
+          )
+          as _i6.Future<int>);
+
+  @override
+  _i6.Future<int> setLastDownloaded(String? podcastId, String? episodeId) =>
+      (super.noSuchMethod(
+            Invocation.method(#setLastDownloaded, [podcastId, episodeId]),
+            returnValue: _i6.Future<int>.value(0),
+          )
+          as _i6.Future<int>);
+
+  @override
+  _i6.Stream<T> createStream<T extends Object>(
+    _i4.QueryStreamFetcher<T>? stmt,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#createStream, [stmt]),
+            returnValue: _i6.Stream<T>.empty(),
+          )
+          as _i6.Stream<T>);
+
+  @override
+  T alias<T, D>(_i3.ResultSetImplementation<T, D>? table, String? alias) =>
+      (super.noSuchMethod(
+            Invocation.method(#alias, [table, alias]),
+            returnValue: _i9.dummyValue<T>(
+              this,
+              Invocation.method(#alias, [table, alias]),
+            ),
+          )
+          as T);
+
+  @override
+  void markTablesUpdated(Iterable<_i3.TableInfo<_i3.Table, dynamic>>? tables) =>
+      super.noSuchMethod(
+        Invocation.method(#markTablesUpdated, [tables]),
+        returnValueForMissingStub: null,
+      );
+
+  @override
+  void notifyUpdates(Set<_i3.TableUpdate>? updates) => super.noSuchMethod(
+    Invocation.method(#notifyUpdates, [updates]),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  _i6.Stream<Set<_i3.TableUpdate>> tableUpdates([
+    _i3.TableUpdateQuery? query = const _i3.TableUpdateQuery.any(),
+  ]) =>
+      (super.noSuchMethod(
+            Invocation.method(#tableUpdates, [query]),
+            returnValue: _i6.Stream<Set<_i3.TableUpdate>>.empty(),
+          )
+          as _i6.Stream<Set<_i3.TableUpdate>>);
+
+  @override
+  _i6.Future<T> doWhenOpened<T>(
+    _i6.FutureOr<T> Function(_i3.QueryExecutor)? fn,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#doWhenOpened, [fn]),
+            returnValue:
+                _i9.ifNotNull(
+                  _i9.dummyValueOrNull<T>(
+                    this,
+                    Invocation.method(#doWhenOpened, [fn]),
+                  ),
+                  (T v) => _i6.Future<T>.value(v),
+                ) ??
+                _FakeFuture_8<T>(this, Invocation.method(#doWhenOpened, [fn])),
+          )
+          as _i6.Future<T>);
+
+  @override
+  _i3.InsertStatement<T, D> into<T extends _i3.Table, D>(
+    _i3.TableInfo<T, D>? table,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#into, [table]),
+            returnValue: _FakeInsertStatement_9<T, D>(
+              this,
+              Invocation.method(#into, [table]),
+            ),
+          )
+          as _i3.InsertStatement<T, D>);
+
+  @override
+  _i3.UpdateStatement<Tbl, R> update<Tbl extends _i3.Table, R>(
+    _i3.TableInfo<Tbl, R>? table,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#update, [table]),
+            returnValue: _FakeUpdateStatement_10<Tbl, R>(
+              this,
+              Invocation.method(#update, [table]),
+            ),
+          )
+          as _i3.UpdateStatement<Tbl, R>);
+
+  @override
+  _i3.SimpleSelectStatement<T, R> select<T extends _i3.HasResultSet, R>(
+    _i3.ResultSetImplementation<T, R>? table, {
+    bool? distinct = false,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(#select, [table], {#distinct: distinct}),
+            returnValue: _FakeSimpleSelectStatement_11<T, R>(
+              this,
+              Invocation.method(#select, [table], {#distinct: distinct}),
+            ),
+          )
+          as _i3.SimpleSelectStatement<T, R>);
+
+  @override
+  _i3.JoinedSelectStatement<T, R> selectOnly<T extends _i3.HasResultSet, R>(
+    _i3.ResultSetImplementation<T, R>? table, {
+    bool? distinct = false,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(#selectOnly, [table], {#distinct: distinct}),
+            returnValue: _FakeJoinedSelectStatement_12<T, R>(
+              this,
+              Invocation.method(#selectOnly, [table], {#distinct: distinct}),
+            ),
+          )
+          as _i3.JoinedSelectStatement<T, R>);
+
+  @override
+  _i3.BaseSelectStatement<_i3.TypedResult> selectExpressions(
+    Iterable<_i3.Expression<Object>>? columns,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#selectExpressions, [columns]),
+            returnValue: _FakeBaseSelectStatement_13<_i3.TypedResult>(
+              this,
+              Invocation.method(#selectExpressions, [columns]),
+            ),
+          )
+          as _i3.BaseSelectStatement<_i3.TypedResult>);
+
+  @override
+  _i3.DeleteStatement<T, D> delete<T extends _i3.Table, D>(
+    _i3.TableInfo<T, D>? table,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#delete, [table]),
+            returnValue: _FakeDeleteStatement_14<T, D>(
+              this,
+              Invocation.method(#delete, [table]),
+            ),
+          )
+          as _i3.DeleteStatement<T, D>);
+
+  @override
+  _i6.Future<int> customUpdate(
+    String? query, {
+    List<_i3.Variable<Object>>? variables = const [],
+    Set<_i3.ResultSetImplementation<dynamic, dynamic>>? updates,
+    _i3.UpdateKind? updateKind,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(
+              #customUpdate,
+              [query],
+              {
+                #variables: variables,
+                #updates: updates,
+                #updateKind: updateKind,
+              },
+            ),
+            returnValue: _i6.Future<int>.value(0),
+          )
+          as _i6.Future<int>);
+
+  @override
+  _i6.Future<int> customInsert(
+    String? query, {
+    List<_i3.Variable<Object>>? variables = const [],
+    Set<_i3.ResultSetImplementation<dynamic, dynamic>>? updates,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(
+              #customInsert,
+              [query],
+              {#variables: variables, #updates: updates},
+            ),
+            returnValue: _i6.Future<int>.value(0),
+          )
+          as _i6.Future<int>);
+
+  @override
+  _i6.Future<List<_i3.QueryRow>> customWriteReturning(
+    String? query, {
+    List<_i3.Variable<Object>>? variables = const [],
+    Set<_i3.ResultSetImplementation<dynamic, dynamic>>? updates,
+    _i3.UpdateKind? updateKind,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(
+              #customWriteReturning,
+              [query],
+              {
+                #variables: variables,
+                #updates: updates,
+                #updateKind: updateKind,
+              },
+            ),
+            returnValue: _i6.Future<List<_i3.QueryRow>>.value(<_i3.QueryRow>[]),
+          )
+          as _i6.Future<List<_i3.QueryRow>>);
+
+  @override
+  _i3.Selectable<_i3.QueryRow> customSelect(
+    String? query, {
+    List<_i3.Variable<Object>>? variables = const [],
+    Set<_i3.ResultSetImplementation<dynamic, dynamic>>? readsFrom = const {},
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(
+              #customSelect,
+              [query],
+              {#variables: variables, #readsFrom: readsFrom},
+            ),
+            returnValue: _FakeSelectable_15<_i3.QueryRow>(
+              this,
+              Invocation.method(
+                #customSelect,
+                [query],
+                {#variables: variables, #readsFrom: readsFrom},
+              ),
+            ),
+          )
+          as _i3.Selectable<_i3.QueryRow>);
+
+  @override
+  _i3.Selectable<_i3.QueryRow> customSelectQuery(
+    String? query, {
+    List<_i3.Variable<Object>>? variables = const [],
+    Set<_i3.ResultSetImplementation<dynamic, dynamic>>? readsFrom = const {},
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(
+              #customSelectQuery,
+              [query],
+              {#variables: variables, #readsFrom: readsFrom},
+            ),
+            returnValue: _FakeSelectable_15<_i3.QueryRow>(
+              this,
+              Invocation.method(
+                #customSelectQuery,
+                [query],
+                {#variables: variables, #readsFrom: readsFrom},
+              ),
+            ),
+          )
+          as _i3.Selectable<_i3.QueryRow>);
+
+  @override
+  _i6.Future<void> customStatement(String? statement, [List<dynamic>? args]) =>
+      (super.noSuchMethod(
+            Invocation.method(#customStatement, [statement, args]),
+            returnValue: _i6.Future<void>.value(),
+            returnValueForMissingStub: _i6.Future<void>.value(),
+          )
+          as _i6.Future<void>);
+
+  @override
+  _i6.Future<T> transaction<T>(
+    _i6.Future<T> Function()? action, {
+    bool? requireNew = false,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(
+              #transaction,
+              [action],
+              {#requireNew: requireNew},
+            ),
+            returnValue:
+                _i9.ifNotNull(
+                  _i9.dummyValueOrNull<T>(
+                    this,
+                    Invocation.method(
+                      #transaction,
+                      [action],
+                      {#requireNew: requireNew},
+                    ),
+                  ),
+                  (T v) => _i6.Future<T>.value(v),
+                ) ??
+                _FakeFuture_8<T>(
+                  this,
+                  Invocation.method(
+                    #transaction,
+                    [action],
+                    {#requireNew: requireNew},
+                  ),
+                ),
+          )
+          as _i6.Future<T>);
+
+  @override
+  _i6.Future<T> exclusively<T>(_i6.Future<T> Function()? action) =>
+      (super.noSuchMethod(
+            Invocation.method(#exclusively, [action]),
+            returnValue:
+                _i9.ifNotNull(
+                  _i9.dummyValueOrNull<T>(
+                    this,
+                    Invocation.method(#exclusively, [action]),
+                  ),
+                  (T v) => _i6.Future<T>.value(v),
+                ) ??
+                _FakeFuture_8<T>(
+                  this,
+                  Invocation.method(#exclusively, [action]),
+                ),
+          )
+          as _i6.Future<T>);
+
+  @override
+  _i6.Future<void> batch(_i6.FutureOr<void> Function(_i3.Batch)? runInBatch) =>
+      (super.noSuchMethod(
+            Invocation.method(#batch, [runInBatch]),
+            returnValue: _i6.Future<void>.value(),
+            returnValueForMissingStub: _i6.Future<void>.value(),
+          )
+          as _i6.Future<void>);
+
+  @override
+  _i6.Future<T> runWithInterceptor<T>(
+    _i6.Future<T> Function()? action, {
+    required _i3.QueryInterceptor? interceptor,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(
+              #runWithInterceptor,
+              [action],
+              {#interceptor: interceptor},
+            ),
+            returnValue:
+                _i9.ifNotNull(
+                  _i9.dummyValueOrNull<T>(
+                    this,
+                    Invocation.method(
+                      #runWithInterceptor,
+                      [action],
+                      {#interceptor: interceptor},
+                    ),
+                  ),
+                  (T v) => _i6.Future<T>.value(v),
+                ) ??
+                _FakeFuture_8<T>(
+                  this,
+                  Invocation.method(
+                    #runWithInterceptor,
+                    [action],
+                    {#interceptor: interceptor},
+                  ),
+                ),
+          )
+          as _i6.Future<T>);
+
+  @override
+  _i3.GenerationContext $write(
+    _i3.Component? component, {
+    bool? hasMultipleTables,
+    int? startIndex,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(
+              #$write,
+              [component],
+              {#hasMultipleTables: hasMultipleTables, #startIndex: startIndex},
+            ),
+            returnValue: _FakeGenerationContext_16(
+              this,
+              Invocation.method(
+                #$write,
+                [component],
+                {
+                  #hasMultipleTables: hasMultipleTables,
+                  #startIndex: startIndex,
+                },
+              ),
+            ),
+          )
+          as _i3.GenerationContext);
+
+  @override
+  _i3.GenerationContext $writeInsertable(
+    _i3.TableInfo<_i3.Table, dynamic>? table,
+    _i3.Insertable<dynamic>? insertable, {
+    int? startIndex,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(
+              #$writeInsertable,
+              [table, insertable],
+              {#startIndex: startIndex},
+            ),
+            returnValue: _FakeGenerationContext_16(
+              this,
+              Invocation.method(
+                #$writeInsertable,
+                [table, insertable],
+                {#startIndex: startIndex},
+              ),
+            ),
+          )
+          as _i3.GenerationContext);
+
+  @override
+  String $expandVar(int? start, int? amount) =>
+      (super.noSuchMethod(
+            Invocation.method(#$expandVar, [start, amount]),
+            returnValue: _i9.dummyValue<String>(
+              this,
+              Invocation.method(#$expandVar, [start, amount]),
+            ),
+          )
+          as String);
+
+  @override
+  _i6.Future<void> close() =>
+      (super.noSuchMethod(
+            Invocation.method(#close, []),
+            returnValue: _i6.Future<void>.value(),
+            returnValueForMissingStub: _i6.Future<void>.value(),
+          )
+          as _i6.Future<void>);
+}
+
+/// A class which mocks [SettingsDao].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockSettingsDao extends _i1.Mock implements _i5.SettingsDao {
+  MockSettingsDao() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  _i2.AppDatabase get attachedDatabase =>
+      (super.noSuchMethod(
+            Invocation.getter(#attachedDatabase),
+            returnValue: _FakeAppDatabase_0(
+              this,
+              Invocation.getter(#attachedDatabase),
+            ),
+          )
+          as _i2.AppDatabase);
+
+  @override
+  _i3.DatabaseConnection get connection =>
+      (super.noSuchMethod(
+            Invocation.getter(#connection),
+            returnValue: _FakeDatabaseConnection_1(
+              this,
+              Invocation.getter(#connection),
+            ),
+          )
+          as _i3.DatabaseConnection);
+
+  @override
+  _i3.DriftDatabaseOptions get options =>
+      (super.noSuchMethod(
+            Invocation.getter(#options),
+            returnValue: _FakeDriftDatabaseOptions_2(
+              this,
+              Invocation.getter(#options),
+            ),
+          )
+          as _i3.DriftDatabaseOptions);
+
+  @override
+  _i3.SqlTypes get typeMapping =>
+      (super.noSuchMethod(
+            Invocation.getter(#typeMapping),
+            returnValue: _i9.dummyValue<_i3.SqlTypes>(
+              this,
+              Invocation.getter(#typeMapping),
+            ),
+          )
+          as _i3.SqlTypes);
+
+  @override
+  _i3.QueryExecutor get executor =>
+      (super.noSuchMethod(
+            Invocation.getter(#executor),
+            returnValue: _FakeQueryExecutor_3(
+              this,
+              Invocation.getter(#executor),
+            ),
+          )
+          as _i3.QueryExecutor);
+
+  @override
+  _i4.StreamQueryStore get streamQueries =>
+      (super.noSuchMethod(
+            Invocation.getter(#streamQueries),
+            returnValue: _FakeStreamQueryStore_4(
+              this,
+              Invocation.getter(#streamQueries),
+            ),
+          )
+          as _i4.StreamQueryStore);
+
+  @override
+  _i3.DatabaseConnectionUser get resolvedEngine =>
+      (super.noSuchMethod(
+            Invocation.getter(#resolvedEngine),
+            returnValue: _FakeDatabaseConnectionUser_5(
+              this,
+              Invocation.getter(#resolvedEngine),
+            ),
+          )
+          as _i3.DatabaseConnectionUser);
+
+  @override
+  _i2.$SettingsTable get settings =>
+      (super.noSuchMethod(
+            Invocation.getter(#settings),
+            returnValue: _Fake$SettingsTable_17(
+              this,
+              Invocation.getter(#settings),
+            ),
+          )
+          as _i2.$SettingsTable);
+
+  @override
+  _i5.SettingsDaoManager get managers =>
+      (super.noSuchMethod(
+            Invocation.getter(#managers),
+            returnValue: _FakeSettingsDaoManager_18(
+              this,
+              Invocation.getter(#managers),
+            ),
+          )
+          as _i5.SettingsDaoManager);
+
+  @override
+  _i6.Future<_i2.Setting?> getOne() =>
+      (super.noSuchMethod(
+            Invocation.method(#getOne, []),
+            returnValue: _i6.Future<_i2.Setting?>.value(),
+          )
+          as _i6.Future<_i2.Setting?>);
+
+  @override
+  _i6.Future<void> ensureDefaults() =>
+      (super.noSuchMethod(
+            Invocation.method(#ensureDefaults, []),
+            returnValue: _i6.Future<void>.value(),
+            returnValueForMissingStub: _i6.Future<void>.value(),
+          )
+          as _i6.Future<void>);
+
+  @override
+  _i6.Future<int> setWifiOnly(bool? v) =>
+      (super.noSuchMethod(
+            Invocation.method(#setWifiOnly, [v]),
+            returnValue: _i6.Future<int>.value(0),
+          )
+          as _i6.Future<int>);
+
+  @override
+  _i6.Future<int> setMaxParallel(int? n) =>
+      (super.noSuchMethod(
+            Invocation.method(#setMaxParallel, [n]),
+            returnValue: _i6.Future<int>.value(0),
+          )
+          as _i6.Future<int>);
+
+  @override
+  _i6.Future<int> setDeleteAfterHours(int? h) =>
+      (super.noSuchMethod(
+            Invocation.method(#setDeleteAfterHours, [h]),
+            returnValue: _i6.Future<int>.value(0),
+          )
+          as _i6.Future<int>);
+
+  @override
+  _i6.Future<int> setKeepLatestN(int? n) =>
+      (super.noSuchMethod(
+            Invocation.method(#setKeepLatestN, [n]),
+            returnValue: _i6.Future<int>.value(0),
+          )
+          as _i6.Future<int>);
+
+  @override
+  _i6.Future<int> setAutodownloadSubscribed(bool? v) =>
+      (super.noSuchMethod(
+            Invocation.method(#setAutodownloadSubscribed, [v]),
+            returnValue: _i6.Future<int>.value(0),
+          )
+          as _i6.Future<int>);
+
+  @override
+  _i6.Future<int> setPlayOrder(String? order) =>
+      (super.noSuchMethod(
+            Invocation.method(#setPlayOrder, [order]),
+            returnValue: _i6.Future<int>.value(0),
+          )
+          as _i6.Future<int>);
+
+  @override
+  _i6.Stream<T> createStream<T extends Object>(
+    _i4.QueryStreamFetcher<T>? stmt,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#createStream, [stmt]),
+            returnValue: _i6.Stream<T>.empty(),
+          )
+          as _i6.Stream<T>);
+
+  @override
+  T alias<T, D>(_i3.ResultSetImplementation<T, D>? table, String? alias) =>
+      (super.noSuchMethod(
+            Invocation.method(#alias, [table, alias]),
+            returnValue: _i9.dummyValue<T>(
+              this,
+              Invocation.method(#alias, [table, alias]),
+            ),
+          )
+          as T);
+
+  @override
+  void markTablesUpdated(Iterable<_i3.TableInfo<_i3.Table, dynamic>>? tables) =>
+      super.noSuchMethod(
+        Invocation.method(#markTablesUpdated, [tables]),
+        returnValueForMissingStub: null,
+      );
+
+  @override
+  void notifyUpdates(Set<_i3.TableUpdate>? updates) => super.noSuchMethod(
+    Invocation.method(#notifyUpdates, [updates]),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  _i6.Stream<Set<_i3.TableUpdate>> tableUpdates([
+    _i3.TableUpdateQuery? query = const _i3.TableUpdateQuery.any(),
+  ]) =>
+      (super.noSuchMethod(
+            Invocation.method(#tableUpdates, [query]),
+            returnValue: _i6.Stream<Set<_i3.TableUpdate>>.empty(),
+          )
+          as _i6.Stream<Set<_i3.TableUpdate>>);
+
+  @override
+  _i6.Future<T> doWhenOpened<T>(
+    _i6.FutureOr<T> Function(_i3.QueryExecutor)? fn,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#doWhenOpened, [fn]),
+            returnValue:
+                _i9.ifNotNull(
+                  _i9.dummyValueOrNull<T>(
+                    this,
+                    Invocation.method(#doWhenOpened, [fn]),
+                  ),
+                  (T v) => _i6.Future<T>.value(v),
+                ) ??
+                _FakeFuture_8<T>(this, Invocation.method(#doWhenOpened, [fn])),
+          )
+          as _i6.Future<T>);
+
+  @override
+  _i3.InsertStatement<T, D> into<T extends _i3.Table, D>(
+    _i3.TableInfo<T, D>? table,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#into, [table]),
+            returnValue: _FakeInsertStatement_9<T, D>(
+              this,
+              Invocation.method(#into, [table]),
+            ),
+          )
+          as _i3.InsertStatement<T, D>);
+
+  @override
+  _i3.UpdateStatement<Tbl, R> update<Tbl extends _i3.Table, R>(
+    _i3.TableInfo<Tbl, R>? table,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#update, [table]),
+            returnValue: _FakeUpdateStatement_10<Tbl, R>(
+              this,
+              Invocation.method(#update, [table]),
+            ),
+          )
+          as _i3.UpdateStatement<Tbl, R>);
+
+  @override
+  _i3.SimpleSelectStatement<T, R> select<T extends _i3.HasResultSet, R>(
+    _i3.ResultSetImplementation<T, R>? table, {
+    bool? distinct = false,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(#select, [table], {#distinct: distinct}),
+            returnValue: _FakeSimpleSelectStatement_11<T, R>(
+              this,
+              Invocation.method(#select, [table], {#distinct: distinct}),
+            ),
+          )
+          as _i3.SimpleSelectStatement<T, R>);
+
+  @override
+  _i3.JoinedSelectStatement<T, R> selectOnly<T extends _i3.HasResultSet, R>(
+    _i3.ResultSetImplementation<T, R>? table, {
+    bool? distinct = false,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(#selectOnly, [table], {#distinct: distinct}),
+            returnValue: _FakeJoinedSelectStatement_12<T, R>(
+              this,
+              Invocation.method(#selectOnly, [table], {#distinct: distinct}),
+            ),
+          )
+          as _i3.JoinedSelectStatement<T, R>);
+
+  @override
+  _i3.BaseSelectStatement<_i3.TypedResult> selectExpressions(
+    Iterable<_i3.Expression<Object>>? columns,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#selectExpressions, [columns]),
+            returnValue: _FakeBaseSelectStatement_13<_i3.TypedResult>(
+              this,
+              Invocation.method(#selectExpressions, [columns]),
+            ),
+          )
+          as _i3.BaseSelectStatement<_i3.TypedResult>);
+
+  @override
+  _i3.DeleteStatement<T, D> delete<T extends _i3.Table, D>(
+    _i3.TableInfo<T, D>? table,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#delete, [table]),
+            returnValue: _FakeDeleteStatement_14<T, D>(
+              this,
+              Invocation.method(#delete, [table]),
+            ),
+          )
+          as _i3.DeleteStatement<T, D>);
+
+  @override
+  _i6.Future<int> customUpdate(
+    String? query, {
+    List<_i3.Variable<Object>>? variables = const [],
+    Set<_i3.ResultSetImplementation<dynamic, dynamic>>? updates,
+    _i3.UpdateKind? updateKind,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(
+              #customUpdate,
+              [query],
+              {
+                #variables: variables,
+                #updates: updates,
+                #updateKind: updateKind,
+              },
+            ),
+            returnValue: _i6.Future<int>.value(0),
+          )
+          as _i6.Future<int>);
+
+  @override
+  _i6.Future<int> customInsert(
+    String? query, {
+    List<_i3.Variable<Object>>? variables = const [],
+    Set<_i3.ResultSetImplementation<dynamic, dynamic>>? updates,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(
+              #customInsert,
+              [query],
+              {#variables: variables, #updates: updates},
+            ),
+            returnValue: _i6.Future<int>.value(0),
+          )
+          as _i6.Future<int>);
+
+  @override
+  _i6.Future<List<_i3.QueryRow>> customWriteReturning(
+    String? query, {
+    List<_i3.Variable<Object>>? variables = const [],
+    Set<_i3.ResultSetImplementation<dynamic, dynamic>>? updates,
+    _i3.UpdateKind? updateKind,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(
+              #customWriteReturning,
+              [query],
+              {
+                #variables: variables,
+                #updates: updates,
+                #updateKind: updateKind,
+              },
+            ),
+            returnValue: _i6.Future<List<_i3.QueryRow>>.value(<_i3.QueryRow>[]),
+          )
+          as _i6.Future<List<_i3.QueryRow>>);
+
+  @override
+  _i3.Selectable<_i3.QueryRow> customSelect(
+    String? query, {
+    List<_i3.Variable<Object>>? variables = const [],
+    Set<_i3.ResultSetImplementation<dynamic, dynamic>>? readsFrom = const {},
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(
+              #customSelect,
+              [query],
+              {#variables: variables, #readsFrom: readsFrom},
+            ),
+            returnValue: _FakeSelectable_15<_i3.QueryRow>(
+              this,
+              Invocation.method(
+                #customSelect,
+                [query],
+                {#variables: variables, #readsFrom: readsFrom},
+              ),
+            ),
+          )
+          as _i3.Selectable<_i3.QueryRow>);
+
+  @override
+  _i3.Selectable<_i3.QueryRow> customSelectQuery(
+    String? query, {
+    List<_i3.Variable<Object>>? variables = const [],
+    Set<_i3.ResultSetImplementation<dynamic, dynamic>>? readsFrom = const {},
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(
+              #customSelectQuery,
+              [query],
+              {#variables: variables, #readsFrom: readsFrom},
+            ),
+            returnValue: _FakeSelectable_15<_i3.QueryRow>(
+              this,
+              Invocation.method(
+                #customSelectQuery,
+                [query],
+                {#variables: variables, #readsFrom: readsFrom},
+              ),
+            ),
+          )
+          as _i3.Selectable<_i3.QueryRow>);
+
+  @override
+  _i6.Future<void> customStatement(String? statement, [List<dynamic>? args]) =>
+      (super.noSuchMethod(
+            Invocation.method(#customStatement, [statement, args]),
+            returnValue: _i6.Future<void>.value(),
+            returnValueForMissingStub: _i6.Future<void>.value(),
+          )
+          as _i6.Future<void>);
+
+  @override
+  _i6.Future<T> transaction<T>(
+    _i6.Future<T> Function()? action, {
+    bool? requireNew = false,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(
+              #transaction,
+              [action],
+              {#requireNew: requireNew},
+            ),
+            returnValue:
+                _i9.ifNotNull(
+                  _i9.dummyValueOrNull<T>(
+                    this,
+                    Invocation.method(
+                      #transaction,
+                      [action],
+                      {#requireNew: requireNew},
+                    ),
+                  ),
+                  (T v) => _i6.Future<T>.value(v),
+                ) ??
+                _FakeFuture_8<T>(
+                  this,
+                  Invocation.method(
+                    #transaction,
+                    [action],
+                    {#requireNew: requireNew},
+                  ),
+                ),
+          )
+          as _i6.Future<T>);
+
+  @override
+  _i6.Future<T> exclusively<T>(_i6.Future<T> Function()? action) =>
+      (super.noSuchMethod(
+            Invocation.method(#exclusively, [action]),
+            returnValue:
+                _i9.ifNotNull(
+                  _i9.dummyValueOrNull<T>(
+                    this,
+                    Invocation.method(#exclusively, [action]),
+                  ),
+                  (T v) => _i6.Future<T>.value(v),
+                ) ??
+                _FakeFuture_8<T>(
+                  this,
+                  Invocation.method(#exclusively, [action]),
+                ),
+          )
+          as _i6.Future<T>);
+
+  @override
+  _i6.Future<void> batch(_i6.FutureOr<void> Function(_i3.Batch)? runInBatch) =>
+      (super.noSuchMethod(
+            Invocation.method(#batch, [runInBatch]),
+            returnValue: _i6.Future<void>.value(),
+            returnValueForMissingStub: _i6.Future<void>.value(),
+          )
+          as _i6.Future<void>);
+
+  @override
+  _i6.Future<T> runWithInterceptor<T>(
+    _i6.Future<T> Function()? action, {
+    required _i3.QueryInterceptor? interceptor,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(
+              #runWithInterceptor,
+              [action],
+              {#interceptor: interceptor},
+            ),
+            returnValue:
+                _i9.ifNotNull(
+                  _i9.dummyValueOrNull<T>(
+                    this,
+                    Invocation.method(
+                      #runWithInterceptor,
+                      [action],
+                      {#interceptor: interceptor},
+                    ),
+                  ),
+                  (T v) => _i6.Future<T>.value(v),
+                ) ??
+                _FakeFuture_8<T>(
+                  this,
+                  Invocation.method(
+                    #runWithInterceptor,
+                    [action],
+                    {#interceptor: interceptor},
+                  ),
+                ),
+          )
+          as _i6.Future<T>);
+
+  @override
+  _i3.GenerationContext $write(
+    _i3.Component? component, {
+    bool? hasMultipleTables,
+    int? startIndex,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(
+              #$write,
+              [component],
+              {#hasMultipleTables: hasMultipleTables, #startIndex: startIndex},
+            ),
+            returnValue: _FakeGenerationContext_16(
+              this,
+              Invocation.method(
+                #$write,
+                [component],
+                {
+                  #hasMultipleTables: hasMultipleTables,
+                  #startIndex: startIndex,
+                },
+              ),
+            ),
+          )
+          as _i3.GenerationContext);
+
+  @override
+  _i3.GenerationContext $writeInsertable(
+    _i3.TableInfo<_i3.Table, dynamic>? table,
+    _i3.Insertable<dynamic>? insertable, {
+    int? startIndex,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(
+              #$writeInsertable,
+              [table, insertable],
+              {#startIndex: startIndex},
+            ),
+            returnValue: _FakeGenerationContext_16(
+              this,
+              Invocation.method(
+                #$writeInsertable,
+                [table, insertable],
+                {#startIndex: startIndex},
+              ),
+            ),
+          )
+          as _i3.GenerationContext);
+
+  @override
+  String $expandVar(int? start, int? amount) =>
+      (super.noSuchMethod(
+            Invocation.method(#$expandVar, [start, amount]),
+            returnValue: _i9.dummyValue<String>(
+              this,
+              Invocation.method(#$expandVar, [start, amount]),
+            ),
+          )
+          as String);
+
+  @override
+  _i6.Future<void> close() =>
+      (super.noSuchMethod(
+            Invocation.method(#close, []),
+            returnValue: _i6.Future<void>.value(),
+            returnValueForMissingStub: _i6.Future<void>.value(),
+          )
+          as _i6.Future<void>);
+}
+
+/// A class which mocks [DownloadProvider].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockDownloadProvider extends _i1.Mock implements _i10.DownloadProvider {
+  MockDownloadProvider() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  _i7.DownloadService get service =>
+      (super.noSuchMethod(
+            Invocation.getter(#service),
+            returnValue: _FakeDownloadService_19(
+              this,
+              Invocation.getter(#service),
+            ),
+          )
+          as _i7.DownloadService);
+
+  @override
+  _i5.EpisodesDao get episodesDao =>
+      (super.noSuchMethod(
+            Invocation.getter(#episodesDao),
+            returnValue: _FakeEpisodesDao_20(
+              this,
+              Invocation.getter(#episodesDao),
+            ),
+          )
+          as _i5.EpisodesDao);
+
+  @override
+  _i5.SubscriptionsDao get subscriptionsDao =>
+      (super.noSuchMethod(
+            Invocation.getter(#subscriptionsDao),
+            returnValue: _FakeSubscriptionsDao_21(
+              this,
+              Invocation.getter(#subscriptionsDao),
+            ),
+          )
+          as _i5.SubscriptionsDao);
+
+  @override
+  _i5.SettingsDao get settingsDao =>
+      (super.noSuchMethod(
+            Invocation.getter(#settingsDao),
+            returnValue: _FakeSettingsDao_22(
+              this,
+              Invocation.getter(#settingsDao),
+            ),
+          )
+          as _i5.SettingsDao);
+
+  @override
+  _i5.RetentionDao get retentionDao =>
+      (super.noSuchMethod(
+            Invocation.getter(#retentionDao),
+            returnValue: _FakeRetentionDao_23(
+              this,
+              Invocation.getter(#retentionDao),
+            ),
+          )
+          as _i5.RetentionDao);
+
+  @override
+  _i8.ApiService get apiService =>
+      (super.noSuchMethod(
+            Invocation.getter(#apiService),
+            returnValue: _FakeApiService_24(
+              this,
+              Invocation.getter(#apiService),
+            ),
+          )
+          as _i8.ApiService);
+
+  @override
+  set service(_i7.DownloadService? svc) => super.noSuchMethod(
+    Invocation.setter(#service, svc),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  bool get hasListeners =>
+      (super.noSuchMethod(Invocation.getter(#hasListeners), returnValue: false)
+          as bool);
+
+  @override
+  _i6.Future<void> enqueue(_i11.Episode? ep) =>
+      (super.noSuchMethod(
+            Invocation.method(#enqueue, [ep]),
+            returnValue: _i6.Future<void>.value(),
+            returnValueForMissingStub: _i6.Future<void>.value(),
+          )
+          as _i6.Future<void>);
+
+  @override
+  _i6.Future<void> pause(String? episodeId) =>
+      (super.noSuchMethod(
+            Invocation.method(#pause, [episodeId]),
+            returnValue: _i6.Future<void>.value(),
+            returnValueForMissingStub: _i6.Future<void>.value(),
+          )
+          as _i6.Future<void>);
+
+  @override
+  _i6.Future<void> resume(String? episodeId) =>
+      (super.noSuchMethod(
+            Invocation.method(#resume, [episodeId]),
+            returnValue: _i6.Future<void>.value(),
+            returnValueForMissingStub: _i6.Future<void>.value(),
+          )
+          as _i6.Future<void>);
+
+  @override
+  _i6.Future<void> cancel(String? episodeId) =>
+      (super.noSuchMethod(
+            Invocation.method(#cancel, [episodeId]),
+            returnValue: _i6.Future<void>.value(),
+            returnValueForMissingStub: _i6.Future<void>.value(),
+          )
+          as _i6.Future<void>);
+
+  @override
+  _i6.Future<void> removeLocalFile(String? episodeId) =>
+      (super.noSuchMethod(
+            Invocation.method(#removeLocalFile, [episodeId]),
+            returnValue: _i6.Future<void>.value(),
+            returnValueForMissingStub: _i6.Future<void>.value(),
+          )
+          as _i6.Future<void>);
+
+  @override
+  _i6.Future<void> deleteEpisodesForPodcast(String? podcastId) =>
+      (super.noSuchMethod(
+            Invocation.method(#deleteEpisodesForPodcast, [podcastId]),
+            returnValue: _i6.Future<void>.value(),
+            returnValueForMissingStub: _i6.Future<void>.value(),
+          )
+          as _i6.Future<void>);
+
+  @override
+  _i6.Future<int> autodownloadPodcast(
+    String? podcastId, {
+    int? globalAutoDownloadN = 0,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(
+              #autodownloadPodcast,
+              [podcastId],
+              {#globalAutoDownloadN: globalAutoDownloadN},
+            ),
+            returnValue: _i6.Future<int>.value(0),
+          )
+          as _i6.Future<int>);
+
+  @override
+  _i6.Future<void> autoEnqueueLatestN(
+    String? podcastId,
+    int? n,
+    List<_i11.Episode>? candidates,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#autoEnqueueLatestN, [podcastId, n, candidates]),
+            returnValue: _i6.Future<void>.value(),
+            returnValueForMissingStub: _i6.Future<void>.value(),
+          )
+          as _i6.Future<void>);
+
+  @override
+  void dispose() => super.noSuchMethod(
+    Invocation.method(#dispose, []),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void addListener(_i12.VoidCallback? listener) => super.noSuchMethod(
+    Invocation.method(#addListener, [listener]),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void removeListener(_i12.VoidCallback? listener) => super.noSuchMethod(
+    Invocation.method(#removeListener, [listener]),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void notifyListeners() => super.noSuchMethod(
+    Invocation.method(#notifyListeners, []),
+    returnValueForMissingStub: null,
+  );
+}
+```
+
 ### Inhalt von `klubradio_archivum/test/providers/subscription_provider_test.dart`
 ```dart
 // test/providers/subscription_provider_test.dart
@@ -20167,13 +22270,17 @@ void main() {
       );
 
   /// Creates a minimal Setting data object.
-  Setting makeSetting({int? keepLatestN}) => Setting(
+  Setting makeSetting({
+    int? keepLatestN,
+    bool autodownloadSubscribed = true,
+  }) =>
+      Setting(
         id: 1,
         wifiOnly: false,
         maxParallel: 2,
         deleteAfterHours: null,
         keepLatestN: keepLatestN,
-        autodownloadSubscribed: false,
+        autodownloadSubscribed: autodownloadSubscribed,
         playOrder: 'newest',
       );
 
@@ -20188,6 +22295,12 @@ void main() {
     mockSubsDao = MockSubscriptionsDao();
     mockSettingsDao = MockSettingsDao();
     mockDownloadProvider = MockDownloadProvider();
+
+    // Default: settingsDao returns autodownloadSubscribed=true so subscribe tests trigger downloads
+    when(mockSettingsDao.getOne()).thenAnswer((_) async => makeSetting(
+          keepLatestN: null,
+          autodownloadSubscribed: true,
+        ));
 
     provider = SubscriptionProvider(
       subscriptionsDao: mockSubsDao,
