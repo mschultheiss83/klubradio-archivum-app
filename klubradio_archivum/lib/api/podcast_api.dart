@@ -29,10 +29,12 @@ class PodcastApi {
   ///
   /// Returns raw JSON data that can be parsed into Podcast models.
   /// The [limit] parameter controls the maximum number of podcasts returned.
-  Future<List<Map<String, dynamic>>> latest({int limit = constants.podcastFetchLimit}) async {
+  Future<List<Map<String, dynamic>>> latest({
+    int limit = constants.podcastFetchLimit,
+  }) async {
     final url =
         '$baseUrl/rest/v1/${constants.podcastsTable}?select=*&order=last_updated.desc&limit=$limit';
-    debugPrint('latest url: $url');
+    // debugPrint('latest url: $url');
     final json = await _requester.getJson(url);
     return (json as List).cast<Map<String, dynamic>>();
   }
@@ -40,10 +42,12 @@ class PodcastApi {
   /// Fetches trending podcasts.
   ///
   /// Returns raw JSON data that can be parsed into Podcast models.
-  Future<List<Map<String, dynamic>>> trending({int limit = constants.podcastFetchLimit}) async {
+  Future<List<Map<String, dynamic>>> trending({
+    int limit = constants.podcastFetchLimit,
+  }) async {
     final url =
         '$baseUrl/rest/v1/${constants.podcastsTable}?select=*&order=id.desc&limit=$limit';
-    debugPrint('trending url: $url');
+    // debugPrint('trending url: $url');
     final json = await _requester.getJson(url);
     return (json as List).cast<Map<String, dynamic>>();
   }
@@ -52,10 +56,12 @@ class PodcastApi {
   ///
   /// Returns raw JSON data that can be parsed into Episode models.
   /// Note: This method may be moved to EpisodeApi in the future.
-  Future<List<Map<String, dynamic>>> recentEpisodes({int limit = constants.recentEpisodesFetchLimit}) async {
+  Future<List<Map<String, dynamic>>> recentEpisodes({
+    int limit = constants.recentEpisodesFetchLimit,
+  }) async {
     final url =
         '$baseUrl/rest/v1/${constants.episodesTable}?select=*&order=id.desc&limit=$limit';
-    debugPrint('recentEpisodes url: $url');
+    // debugPrint('recentEpisodes url: $url');
     final json = await _requester.getJson(url);
     return (json as List).cast<Map<String, dynamic>>();
   }
