@@ -53,7 +53,20 @@ class PodcastListItem extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    Text(podcast.title, style: theme.textTheme.titleMedium),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(podcast.title, style: theme.textTheme.titleMedium),
+                        ),
+                        if (podcast.episodeCount > 0)
+                          Text(
+                            '${podcast.episodeCount}',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.outline,
+                            ),
+                          ),
+                      ],
+                    ),
                     const SizedBox(height: 4),
                     Text(subtitle, style: theme.textTheme.bodyMedium),
                     const SizedBox(height: 4),

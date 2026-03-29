@@ -675,8 +675,6 @@ class EpisodeApi {
 
 ### Inhalt von `klubradio_archivum/lib/api/podcast_api.dart`
 ```dart
-import 'package:flutter/foundation.dart'; // Import for kIsWeb and debugPrint
-
 import 'package:klubradio_archivum/services/http_requester.dart';
 import 'package:klubradio_archivum/screens/utils/constants.dart' as constants;
 
@@ -793,15 +791,16 @@ class SearchApi {
     required this.baseUrl,
     required String apiKey,
     HttpRequester? requester,
-  }) : _requester = requester ??
-            HttpRequester(
-              defaultHeaders: {
-                'apikey': apiKey,
-                'Authorization': 'Bearer $apiKey',
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-              },
-            );
+  }) : _requester =
+           requester ??
+           HttpRequester(
+             defaultHeaders: {
+               'apikey': apiKey,
+               'Authorization': 'Bearer $apiKey',
+               'Content-Type': 'application/json',
+               'Accept': 'application/json',
+             },
+           );
 
   final String baseUrl;
   final HttpRequester _requester;
@@ -818,7 +817,7 @@ class SearchApi {
     // Escape single quotes for SQL ILIKE query
     final encoded = query.replaceAll("'", "''");
     final url =
-        '$baseUrl/rest/v1/${constants.podcastsTable}?select=*&title=ilike.%25$encoded%25';
+        '$baseUrl/rest/v1/${constants.podcastsTable}?select=*&title=ilike.%25$encoded%25&order=last_updated.desc';
     final json = await _requester.getJson(url);
     return (json as List).cast<Map<String, dynamic>>();
   }
@@ -835,7 +834,7 @@ class SearchApi {
     // Escape single quotes for SQL ILIKE query
     final encoded = query.replaceAll("'", "''");
     final url =
-        '$baseUrl/rest/v1/${constants.episodesTable}?select=*&title=ilike.%25$encoded%25';
+        '$baseUrl/rest/v1/${constants.episodesTable}?select=*&title=ilike.%25$encoded%25&order=id.desc';
     final json = await _requester.getJson(url);
     return (json as List).cast<Map<String, dynamic>>();
   }
@@ -15059,7 +15058,20 @@ class PodcastListItem extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    Text(podcast.title, style: theme.textTheme.titleMedium),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(podcast.title, style: theme.textTheme.titleMedium),
+                        ),
+                        if (podcast.episodeCount > 0)
+                          Text(
+                            '${podcast.episodeCount}',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.outline,
+                            ),
+                          ),
+                      ],
+                    ),
                     const SizedBox(height: 4),
                     Text(subtitle, style: theme.textTheme.bodyMedium),
                     const SizedBox(height: 4),
@@ -17113,7 +17125,7 @@ void main() {
         expect(result, hasLength(2));
         expect(result.first['title'], 'A lényeg');
         verify(mockRequester.getJson(
-          '$baseUrl/rest/v1/${constants.podcastsTable}?select=*&title=ilike.%25lényeg%25',
+          '$baseUrl/rest/v1/${constants.podcastsTable}?select=*&title=ilike.%25lényeg%25&order=last_updated.desc',
         )).called(1);
       });
 
@@ -17123,7 +17135,7 @@ void main() {
         await searchApi.podcasts("O'Connor");
 
         verify(mockRequester.getJson(
-          "$baseUrl/rest/v1/${constants.podcastsTable}?select=*&title=ilike.%25O''Connor%25",
+          "$baseUrl/rest/v1/${constants.podcastsTable}?select=*&title=ilike.%25O''Connor%25&order=last_updated.desc",
         )).called(1);
       });
 
@@ -17133,7 +17145,7 @@ void main() {
         await searchApi.podcasts("it's a 'test'");
 
         verify(mockRequester.getJson(
-          "$baseUrl/rest/v1/${constants.podcastsTable}?select=*&title=ilike.%25it''s a ''test''%25",
+          "$baseUrl/rest/v1/${constants.podcastsTable}?select=*&title=ilike.%25it''s a ''test''%25&order=last_updated.desc",
         )).called(1);
       });
 
@@ -17182,7 +17194,7 @@ void main() {
         expect(result, hasLength(1));
         expect(result.first['id'], '100');
         verify(mockRequester.getJson(
-          '$baseUrl/rest/v1/${constants.episodesTable}?select=*&title=ilike.%25lényeg%25',
+          '$baseUrl/rest/v1/${constants.episodesTable}?select=*&title=ilike.%25lényeg%25&order=id.desc',
         )).called(1);
       });
 
@@ -17192,7 +17204,7 @@ void main() {
         await searchApi.episodes("host's show");
 
         verify(mockRequester.getJson(
-          "$baseUrl/rest/v1/${constants.episodesTable}?select=*&title=ilike.%25host''s show%25",
+          "$baseUrl/rest/v1/${constants.episodesTable}?select=*&title=ilike.%25host''s show%25&order=id.desc",
         )).called(1);
       });
 

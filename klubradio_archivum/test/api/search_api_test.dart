@@ -48,7 +48,7 @@ void main() {
         expect(result, hasLength(2));
         expect(result.first['title'], 'A lényeg');
         verify(mockRequester.getJson(
-          '$baseUrl/rest/v1/${constants.podcastsTable}?select=*&title=ilike.%25lényeg%25',
+          '$baseUrl/rest/v1/${constants.podcastsTable}?select=*&title=ilike.%25lényeg%25&order=last_updated.desc',
         )).called(1);
       });
 
@@ -58,7 +58,7 @@ void main() {
         await searchApi.podcasts("O'Connor");
 
         verify(mockRequester.getJson(
-          "$baseUrl/rest/v1/${constants.podcastsTable}?select=*&title=ilike.%25O''Connor%25",
+          "$baseUrl/rest/v1/${constants.podcastsTable}?select=*&title=ilike.%25O''Connor%25&order=last_updated.desc",
         )).called(1);
       });
 
@@ -68,7 +68,7 @@ void main() {
         await searchApi.podcasts("it's a 'test'");
 
         verify(mockRequester.getJson(
-          "$baseUrl/rest/v1/${constants.podcastsTable}?select=*&title=ilike.%25it''s a ''test''%25",
+          "$baseUrl/rest/v1/${constants.podcastsTable}?select=*&title=ilike.%25it''s a ''test''%25&order=last_updated.desc",
         )).called(1);
       });
 
@@ -117,7 +117,7 @@ void main() {
         expect(result, hasLength(1));
         expect(result.first['id'], '100');
         verify(mockRequester.getJson(
-          '$baseUrl/rest/v1/${constants.episodesTable}?select=*&title=ilike.%25lényeg%25',
+          '$baseUrl/rest/v1/${constants.episodesTable}?select=*&title=ilike.%25lényeg%25&order=id.desc',
         )).called(1);
       });
 
@@ -127,7 +127,7 @@ void main() {
         await searchApi.episodes("host's show");
 
         verify(mockRequester.getJson(
-          "$baseUrl/rest/v1/${constants.episodesTable}?select=*&title=ilike.%25host''s show%25",
+          "$baseUrl/rest/v1/${constants.episodesTable}?select=*&title=ilike.%25host''s show%25&order=id.desc",
         )).called(1);
       });
 

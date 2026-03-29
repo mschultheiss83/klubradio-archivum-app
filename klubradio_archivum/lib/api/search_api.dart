@@ -10,15 +10,16 @@ class SearchApi {
     required this.baseUrl,
     required String apiKey,
     HttpRequester? requester,
-  }) : _requester = requester ??
-            HttpRequester(
-              defaultHeaders: {
-                'apikey': apiKey,
-                'Authorization': 'Bearer $apiKey',
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-              },
-            );
+  }) : _requester =
+           requester ??
+           HttpRequester(
+             defaultHeaders: {
+               'apikey': apiKey,
+               'Authorization': 'Bearer $apiKey',
+               'Content-Type': 'application/json',
+               'Accept': 'application/json',
+             },
+           );
 
   final String baseUrl;
   final HttpRequester _requester;
@@ -35,7 +36,7 @@ class SearchApi {
     // Escape single quotes for SQL ILIKE query
     final encoded = query.replaceAll("'", "''");
     final url =
-        '$baseUrl/rest/v1/${constants.podcastsTable}?select=*&title=ilike.%25$encoded%25';
+        '$baseUrl/rest/v1/${constants.podcastsTable}?select=*&title=ilike.%25$encoded%25&order=last_updated.desc';
     final json = await _requester.getJson(url);
     return (json as List).cast<Map<String, dynamic>>();
   }
@@ -52,7 +53,7 @@ class SearchApi {
     // Escape single quotes for SQL ILIKE query
     final encoded = query.replaceAll("'", "''");
     final url =
-        '$baseUrl/rest/v1/${constants.episodesTable}?select=*&title=ilike.%25$encoded%25';
+        '$baseUrl/rest/v1/${constants.episodesTable}?select=*&title=ilike.%25$encoded%25&order=id.desc';
     final json = await _requester.getJson(url);
     return (json as List).cast<Map<String, dynamic>>();
   }
