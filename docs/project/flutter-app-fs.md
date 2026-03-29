@@ -4475,16 +4475,16 @@ Future<QueryExecutor> openConnection() async {
 
 ### Inhalt von `klubradio_archivum/lib/db/connection/connection_web.dart`
 ```dart
+// Uses the legacy drift/web.dart (localStorage-based) instead of drift/wasm.dart
+// to avoid requiring sqlite3.wasm and drift_worker.js files in the web build.
+// The DB is barely used on web (downloads/subscriptions are disabled via
+// PlatformUtils guards), so the deprecation trade-off is acceptable.
+// ignore_for_file: deprecated_member_use
 import 'package:drift/drift.dart';
-import 'package:drift/wasm.dart';
+import 'package:drift/web.dart';
 
 Future<QueryExecutor> openConnection() async {
-  final db = await WasmDatabase.open(
-    databaseName: 'klubradio_archivum',
-    sqlite3Uri: Uri.parse('sqlite3.wasm'),
-    driftWorkerUri: Uri.parse('drift_worker.js'),
-  );
-  return db.resolvedExecutor;
+  return WebDatabase('klubradio_archivum');
 }
 ```
 
@@ -8531,8 +8531,7 @@ class AppLocalizationsRo extends AppLocalizations {
 
 ### Inhalt von `klubradio_archivum/lib/main.dart`
 ```dart
-import 'dart:io' show Platform;
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart' show TargetPlatform, defaultTargetPlatform, kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -8560,7 +8559,7 @@ import 'repositories/profile_repository.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  if (!kIsWeb && Platform.isLinux) {
+  if (!kIsWeb && defaultTargetPlatform == TargetPlatform.linux) {
     JustAudioMediaKit.ensureInitialized();
   }
   await Hive.initFlutter();
