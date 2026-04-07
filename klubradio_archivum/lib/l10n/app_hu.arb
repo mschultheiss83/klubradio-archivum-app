@@ -72,7 +72,7 @@
   "@aboutScreenCommunityProjectInfo": {
     "description": "Információ a projekt közösségi jellegéről és a tartalom elérhetőségéről"
   },
-  "aboutScreenContactInfo": "Kapcsolat: info@klubradio.hu (tartalom), multilevelstudios@gmail.com (fejlesztői elérhetőség)",
+  "aboutScreenContactInfo": "Kapcsolat: info@klubradio.hu (tartalom), servus@multilevelstudios.de (fejlesztői elérhetőség)",
   "@aboutScreenContactInfo": {
     "description": "Kapcsolatfelvételi információk"
   },

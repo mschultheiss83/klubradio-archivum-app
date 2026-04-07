@@ -62,7 +62,7 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get aboutScreenContactInfo =>
-      'Kapcsolat: info@klubradio.hu (tartalom), multilevelstudios@gmail.com (fejlesztői elérhetőség)';
+      'Kapcsolat: info@klubradio.hu (tartalom), servus@multilevelstudios.de (fejlesztői elérhetőség)';
 
   @override
   String get settingsTitle => 'Beállítások';

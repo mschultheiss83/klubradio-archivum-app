@@ -57,6 +57,6 @@
 ## 6. Contact / Kapcsolat / Kontakt
 
 - **Content / Tartalom:** info@klubradio.hu
-- **App / Fejlesztő / Entwickler:** multilevelstudios@gmail.com
+- **App / Fejlesztő / Entwickler:** servus@multilevelstudios.de
 
 _Last updated: 2025-09-29_

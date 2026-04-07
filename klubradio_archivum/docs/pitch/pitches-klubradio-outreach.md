@@ -7,7 +7,7 @@
 - Signature to close mails: Best regards / Mit freundlichen Grüßen / Üdvözlettel — Martin Schultheiß.
 - Monetization options to float: paid/member tier with proceeds to Klubrádió, or free with respectful ads that fund my work (subject to agreement).
 - Impresszum (2024-11 fetch): Klubrádió Szolgáltató Zrt., 1068 Budapest, Benczur u. 45; switchboard +36 1 240-69-53 / +36 1 240-79-53; SMS +36 30 303-09-53; listener phones (Ezita Forum 12–13, Megbeszeljuk 16–18) +36 1 387-84-52 / +36 1 387-84-53; advertising contact Horvath Robert `horvath.robert@klubradio.hu`; key roles: Elnok Arato Andras, CEO dr. Stock Richard, Foszerkeszto Desi Janos, Produkcios igazgato Dozsa Mariann, online lead Wilk Valentin, muszaki igazgato Gothar Zsolt (helyettes Rozsahegyi Gabor).
-- Rückfragen: `mschulteiss83@gmail.com`, +49 163 795 3456 (bitte erst ab 12:00 Uhr).
+- Rückfragen: `servus@multilevelstudios.de`, +49 163 795 3456 (bitte erst ab 12:00 Uhr).
 
 ## 1) Personal (listener-to-listener)
 
@@ -59,21 +59,21 @@ Apukám régóta hallgatja a Klubrádiót, és elkészítettem a HU/DE/EN Klubr�
 **EN**
 Dear György Bolgár,  
 My dad has long followed your program, and I built the HU/DE/EN Klubrádió Archivum app so listeners can search, stream, and download episodes (Romanian available but not yet validated; I don’t speak it). I’d value your personal support to keep this fan-built app true to your show. Could we have a brief call to ensure rights, brand use, and listener safety match your expectations? Happy to present a live walkthrough or share a preview build so you can see it firsthand.  
-You can reach me after 12:00 CET at `mschulteiss83@gmail.com` or +49 163 795 3456.  
+You can reach me after 12:00 CET at `servus@multilevelstudios.de` or +49 163 795 3456.  
 Best regards,  
 Martin Schultheiß
 
 **DE**
 Lieber György Bolgár,  
 mein Vater folgt Ihrer Sendung seit Langem, und ich habe die HU/DE/EN Klubrádió Archivum App gebaut, damit Hörer Folgen suchen, streamen und herunterladen können (Rumänisch ist verfügbar, aber noch nicht geprüft; ich spreche es nicht). Ich würde mich über Ihre persönliche Unterstützung freuen, damit die Fan-App im Geist Ihrer Sendung bleibt. Können wir kurz sprechen, um sicherzustellen, dass ich Rechte, Marke und Hörersicherheit so behandle, wie Sie es erwarten? Gern präsentieren wir die App live oder schicken einen Vorab-Build, damit Sie sie direkt sehen.  
-Erreichbar bin ich ab 12:00 Uhr unter `mschulteiss83@gmail.com` oder +49 163 795 3456.  
+Erreichbar bin ich ab 12:00 Uhr unter `servus@multilevelstudios.de` oder +49 163 795 3456.  
 Mit freundlichen Grüßen,  
 Martin Schultheiß
 
 **HU**
 Kedves Bolgár György,  
 Apukám régóta követi a műsorát, és elkészítettem a HU/DE/EN Klubrádió Archívum appot, hogy a hallgatók keresni, streamelni és letölteni tudjanak (a román nyelv elérhető, de még nincs validálva; nem beszélem). Nagyon számítana a személyes támogatása, hogy a rajongói app a műsor szellemével összhangban maradjon. Beszélhetünk röviden, hogyan kezeljem a jogokat, márkát és a hallgatók biztonságát az Ön elvárása szerint? Szívesen bemutatjuk élőben, vagy megosztunk egy előzetes verziót, hogy közvetlenül lássa.  
-12:00 után elér: `mschulteiss83@gmail.com`, +49 163 795 3456.  
+12:00 után elér: `servus@multilevelstudios.de`, +49 163 795 3456.  
 Üdvözlettel,  
 Martin Schultheiß
 
@@ -82,20 +82,20 @@ Martin Schultheiß
 **EN**
 Dear András Arató,  
 I’m preparing to deploy the HU/DE/EN cross-platform Klubrádió Archivum app so listeners can search, stream, and download your archives (RO available but not yet validated; I don’t speak RO). I’d like a lightweight agreement for rights, brand alignment, and validation of the Romanian translation. Should we route this via Horváth Róbert or directly? If Klubrádió prefers revenue, we can add a paid/ad-free tier or keep it free with light ads and agree together where proceeds land. Happy to present a live demo or send a preview build so you can see the current state.  
-You can reach me after 12:00 CET at `mschulteiss83@gmail.com` or +49 163 795 3456.  
+You can reach me after 12:00 CET at `servus@multilevelstudios.de` or +49 163 795 3456.  
 Best regards,  
 Martin Schultheiß
 
 **DE**
 Guten Tag, András Arató,  
 ich bereite die plattformübergreifende HU/DE/EN Klubrádió Archivum App vor, damit Hörer eure Archive suchen, streamen und herunterladen können (Rumänisch ist verfügbar, aber noch nicht geprüft; ich spreche es nicht). Ich würde gern ein schlankes Agreement klären: Rechte, Markenabstimmung und Validierung der rumänischen Übersetzung. Soll diese Zusammenarbeit über Horváth Róbert laufen oder direkt? Falls Einnahmen gewünscht sind: Wir können einen bezahlten/werbefreien Tarif oder dezente Werbung nutzen und gemeinsam festlegen, wohin die Erlöse fließen. Gern präsentieren wir die App live oder schicken einen Vorab-Build, damit Sie den Stand sehen.  
-Erreichbar bin ich ab 12:00 Uhr unter `mschulteiss83@gmail.com` oder +49 163 795 3456.  
+Erreichbar bin ich ab 12:00 Uhr unter `servus@multilevelstudios.de` oder +49 163 795 3456.  
 Mit freundlichen Grüßen,  
 Martin Schultheiß
 
 **HU**
 Tisztelt Arató András,  
 Most készítem elő a többplatformos HU/DE/EN Klubrádió Archívum app bevezetését, hogy a hallgatók keresni, streamelni és letölteni tudják az archívumot (a román nyelv elérhető, de még nincs validálva; nem beszélem). Egy rugalmas megállapodást szeretnék: jogok, márka-használat és a román fordítás validálása. Ön szerint Horváth Róberten keresztül vagy közvetlenül egyeztessünk? Ha bevétel kell, lehet fizetős/werbefreies csomag vagy visszafogott reklám, és közösen dönthetünk, hova kerüljenek a bevételek. Szívesen bemutatjuk élőben, vagy megosztunk egy előzetes verziót, hogy közvetlenül lássa az aktuális állapotot.  
-12:00 után elér: `mschulteiss83@gmail.com`, +49 163 795 3456.  
+12:00 után elér: `servus@multilevelstudios.de`, +49 163 795 3456.  
 Üdvözlettel,  
 Martin Schultheiß

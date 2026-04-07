@@ -73,7 +73,7 @@
   "@aboutScreenCommunityProjectInfo": {
     "description": "Information about the community nature of the project and content availability"
   },
-  "aboutScreenContactInfo": "Contact: info@klubradio.hu (content), multilevelstudios@gmail.com (developer contact)",
+  "aboutScreenContactInfo": "Contact: info@klubradio.hu (content), servus@multilevelstudios.de (developer contact)",
   "@aboutScreenContactInfo": {
     "description": "Contact information"
   },

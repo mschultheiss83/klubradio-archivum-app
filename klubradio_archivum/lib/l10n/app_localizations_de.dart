@@ -62,7 +62,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get aboutScreenContactInfo =>
-      'Kontakt: info@klubradio.hu (Inhalt), multilevelstudios@gmail.com (Entwicklerkontakt)';
+      'Kontakt: info@klubradio.hu (Inhalt), servus@multilevelstudios.de (Entwicklerkontakt)';
 
   @override
   String get settingsTitle => 'Einstellungen';

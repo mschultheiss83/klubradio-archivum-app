@@ -201,7 +201,7 @@ abstract class AppLocalizations {
   /// Contact information
   ///
   /// In en, this message translates to:
-  /// **'Contact: info@klubradio.hu (content), multilevelstudios@gmail.com (developer contact)'**
+  /// **'Contact: info@klubradio.hu (content), servus@multilevelstudios.de (developer contact)'**
   String get aboutScreenContactInfo;
 
   /// Title for the settings screen
