@@ -317,7 +317,7 @@ class SettingsDao extends DatabaseAccessor<AppDatabase>
       (select(settings)..where((s) => s.id.equals(1))).getSingleOrNull();
 
   Future<void> ensureDefaults() async {
-    final wifiDefault = Platform.isAndroid || Platform.isIOS ? true : false;
+    final wifiDefault = !kIsWeb && (Platform.isAndroid || Platform.isIOS);
     await into(settings).insert(
       SettingsCompanion(
         id: const Value(1),

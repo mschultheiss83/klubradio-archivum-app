@@ -36,7 +36,7 @@
       "Read(*)",
       "WebSearch",
       "Wait",
-      "WebFetch(domain:*)",
+      "WebFetch(domain:*.multilevelstudios.de)",
       "Bash(find . -type f -name \"*.html \")",
       "Read(./**)",
       "Bash(gh run:*)"

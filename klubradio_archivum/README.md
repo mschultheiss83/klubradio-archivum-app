@@ -94,8 +94,12 @@ flutter drive -d windows --driver=test_driver/integration_test.dart --target=int
 `dart run flutter_launcher_icons`
 
 ### Rebuild if DB schema changes
+
 `dart run build_runner build --delete-conflicting-outputs`
 
+### web build
+
+`flutter build web --base-href "/" --wasm`
 
 ### Setup Note:
 For a podcast app, ensure you configure the storage location to a directory

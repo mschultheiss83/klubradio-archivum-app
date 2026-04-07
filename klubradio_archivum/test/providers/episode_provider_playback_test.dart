@@ -18,11 +18,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:mockito/mockito.dart';
 
-import 'package:klubradio_archivum/db/app_database.dart' as db;
 import 'package:klubradio_archivum/models/episode.dart';
 import 'package:klubradio_archivum/providers/episode_provider.dart';
-import 'package:klubradio_archivum/services/api_service.dart';
-import 'package:klubradio_archivum/services/audio_player_service.dart';
 
 // Reuse the generated mocks from the queue test file.
 import 'episode_provider_queue_test.mocks.dart';
@@ -32,16 +29,16 @@ void main() {
 
   /// Creates a minimal Episode with the given [id].
   Episode ep(String id, {String title = '', String? localPath}) => Episode(
-        id: id,
-        podcastId: 'pod-1',
-        title: title.isEmpty ? 'Episode $id' : title,
-        description: 'Desc',
-        audioUrl: 'https://example.com/$id.mp3',
-        publishedAt: DateTime(2024, 1, 1),
-        showDate: '2024-01-01',
-        duration: const Duration(minutes: 30),
-        localFilePath: localPath,
-      );
+    id: id,
+    podcastId: 'pod-1',
+    title: title.isEmpty ? 'Episode $id' : title,
+    description: 'Desc',
+    audioUrl: 'https://example.com/$id.mp3',
+    publishedAt: DateTime(2024, 1, 1),
+    showDate: '2024-01-01',
+    duration: const Duration(minutes: 30),
+    localFilePath: localPath,
+  );
 
   // ==================== Test fixtures ====================
 
@@ -66,8 +63,7 @@ void main() {
 
     // Stub streams required by EpisodeProvider constructor
     when(mockAudio.positionStream).thenAnswer((_) => positionCtrl.stream);
-    when(mockAudio.playerStateStream)
-        .thenAnswer((_) => playerStateCtrl.stream);
+    when(mockAudio.playerStateStream).thenAnswer((_) => playerStateCtrl.stream);
     when(mockAudio.bufferingStream).thenAnswer((_) => bufferingCtrl.stream);
     when(mockAudio.errorStream).thenAnswer((_) => errorCtrl.stream);
     when(mockAudio.isPlaying).thenReturn(false);
@@ -163,8 +159,9 @@ void main() {
 
       // Re-stub everything after reset
       when(mockAudio.positionStream).thenAnswer((_) => positionCtrl.stream);
-      when(mockAudio.playerStateStream)
-          .thenAnswer((_) => playerStateCtrl.stream);
+      when(
+        mockAudio.playerStateStream,
+      ).thenAnswer((_) => playerStateCtrl.stream);
       when(mockAudio.bufferingStream).thenAnswer((_) => bufferingCtrl.stream);
       when(mockAudio.errorStream).thenAnswer((_) => errorCtrl.stream);
       when(mockAudio.loadEpisode(any)).thenAnswer((_) async {});
@@ -201,15 +198,17 @@ void main() {
       expect(calls, greaterThan(0));
     });
 
-    test('does not update localFilePath when episode ID does not match',
-        () async {
-      final a = ep('a');
-      await provider.playEpisode(a, queue: [a]);
+    test(
+      'does not update localFilePath when episode ID does not match',
+      () async {
+        final a = ep('a');
+        await provider.playEpisode(a, queue: [a]);
 
-      await provider.onEpisodeDownloaded('b', '/downloads/b.mp3');
+        await provider.onEpisodeDownloaded('b', '/downloads/b.mp3');
 
-      expect(provider.currentEpisode?.localFilePath, isNull);
-    });
+        expect(provider.currentEpisode?.localFilePath, isNull);
+      },
+    );
 
     test('is safe when no current episode is set', () async {
       // No episode playing — should not throw
@@ -237,8 +236,7 @@ void main() {
 
   group('seekRelative', () {
     test('seeks forward by given duration', () async {
-      when(mockAudio.totalDuration)
-          .thenReturn(const Duration(minutes: 30));
+      when(mockAudio.totalDuration).thenReturn(const Duration(minutes: 30));
 
       // Simulate current position at 5 minutes via position stream
       positionCtrl.add(const Duration(minutes: 5));
@@ -251,8 +249,7 @@ void main() {
     });
 
     test('seeks backward by given duration', () async {
-      when(mockAudio.totalDuration)
-          .thenReturn(const Duration(minutes: 30));
+      when(mockAudio.totalDuration).thenReturn(const Duration(minutes: 30));
 
       positionCtrl.add(const Duration(minutes: 5));
       await Future<void>.delayed(Duration.zero);
@@ -264,8 +261,7 @@ void main() {
     });
 
     test('clamps to zero when seeking past start', () async {
-      when(mockAudio.totalDuration)
-          .thenReturn(const Duration(minutes: 30));
+      when(mockAudio.totalDuration).thenReturn(const Duration(minutes: 30));
 
       positionCtrl.add(const Duration(seconds: 10));
       await Future<void>.delayed(Duration.zero);
@@ -301,8 +297,7 @@ void main() {
     });
 
     test('updates positionNotifier optimistically before seek', () async {
-      when(mockAudio.totalDuration)
-          .thenReturn(const Duration(minutes: 30));
+      when(mockAudio.totalDuration).thenReturn(const Duration(minutes: 30));
 
       positionCtrl.add(const Duration(minutes: 5));
       await Future<void>.delayed(Duration.zero);
@@ -419,20 +414,22 @@ void main() {
       expect(provider.currentEpisode, isNull);
     });
 
-    test('error stream keeps currentEpisode when service still has one',
-        () async {
-      final a = ep('a');
-      await provider.playEpisode(a, queue: [a]);
+    test(
+      'error stream keeps currentEpisode when service still has one',
+      () async {
+        final a = ep('a');
+        await provider.playEpisode(a, queue: [a]);
 
-      // Service still considers the episode loaded
-      when(mockAudio.currentEpisode).thenReturn(a);
+        // Service still considers the episode loaded
+        when(mockAudio.currentEpisode).thenReturn(a);
 
-      errorCtrl.add('Transient error');
-      await Future<void>.delayed(Duration.zero);
+        errorCtrl.add('Transient error');
+        await Future<void>.delayed(Duration.zero);
 
-      // Provider should NOT clear its episode
-      expect(provider.currentEpisode?.id, 'a');
-    });
+        // Provider should NOT clear its episode
+        expect(provider.currentEpisode?.id, 'a');
+      },
+    );
 
     test('position stream resets to zero when error clears episode', () async {
       final a = ep('a');
@@ -457,8 +454,9 @@ void main() {
   group('fetchEpisodes', () {
     test('delegates to apiService.fetchEpisodesForPodcast', () async {
       final episodes = [ep('a'), ep('b')];
-      when(mockApi.fetchEpisodesForPodcast('pod-1'))
-          .thenAnswer((_) async => episodes);
+      when(
+        mockApi.fetchEpisodesForPodcast('pod-1'),
+      ).thenAnswer((_) async => episodes);
 
       final result = await provider.fetchEpisodes('pod-1');
 
@@ -550,8 +548,7 @@ void main() {
 
   group('totalDuration', () {
     test('delegates to audioPlayerService.totalDuration', () {
-      when(mockAudio.totalDuration)
-          .thenReturn(const Duration(minutes: 45));
+      when(mockAudio.totalDuration).thenReturn(const Duration(minutes: 45));
       expect(provider.totalDuration, const Duration(minutes: 45));
 
       when(mockAudio.totalDuration).thenReturn(null);

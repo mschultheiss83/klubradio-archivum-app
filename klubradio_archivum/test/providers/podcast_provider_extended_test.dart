@@ -25,35 +25,31 @@ import 'package:klubradio_archivum/providers/download_provider.dart';
 import 'package:klubradio_archivum/providers/profile_provider.dart';
 import 'package:klubradio_archivum/services/api_service.dart';
 import 'package:klubradio_archivum/services/api_cache_service.dart';
-import 'package:klubradio_archivum/screens/utils/constants.dart' as constants;
 
 // ==================== Helpers ====================
 
 Episode _ep(String id) => Episode(
-      id: id,
-      podcastId: 'pod-1',
-      title: 'Ep $id',
-      description: '',
-      audioUrl: 'https://x.com/$id.mp3',
-      publishedAt: DateTime(2024),
-      showDate: '2024-01-01',
-      duration: const Duration(minutes: 30),
-    );
+  id: id,
+  podcastId: 'pod-1',
+  title: 'Ep $id',
+  description: '',
+  audioUrl: 'https://x.com/$id.mp3',
+  publishedAt: DateTime(2024),
+  showDate: '2024-01-01',
+  duration: const Duration(minutes: 30),
+);
 
 Podcast _pod(String id, {String title = ''}) => Podcast(
-      id: id,
-      title: title.isEmpty ? 'Pod $id' : title,
-      description: '',
-      coverImageUrl: '',
-      episodeCount: 0,
-      hosts: const [],
-    );
+  id: id,
+  title: title.isEmpty ? 'Pod $id' : title,
+  description: '',
+  coverImageUrl: '',
+  episodeCount: 0,
+  hosts: const [],
+);
 
-ShowData _show(String id, {String title = '', int count = 10}) => ShowData(
-      id: id,
-      title: title.isEmpty ? 'Show $id' : title,
-      count: count,
-    );
+ShowData _show(String id, {String title = '', int count = 10}) =>
+    ShowData(id: id, title: title.isEmpty ? 'Show $id' : title, count: count);
 
 // ==================== Stubs ====================
 
@@ -110,8 +106,11 @@ class _StubApiService extends ApiService {
   }
 
   @override
-  Future<List<Episode>> fetchEpisodesForPodcast(String podcastId,
-      {int limit = 50, int offset = 0}) async {
+  Future<List<Episode>> fetchEpisodesForPodcast(
+    String podcastId, {
+    int limit = 50,
+    int offset = 0,
+  }) async {
     if (episodesHandler != null) return episodesHandler!(podcastId);
     return <Episode>[];
   }
@@ -365,8 +364,10 @@ void main() {
 
   group('searchEpisodes', () {
     test('delegates to apiService.searchEpisodes', () async {
-      apiService.searchEpisodesHandler =
-          (q) async => [_ep('match-1'), _ep('match-2')];
+      apiService.searchEpisodesHandler = (q) async => [
+        _ep('match-1'),
+        _ep('match-2'),
+      ];
 
       final results = await provider.searchEpisodes('test');
 
@@ -375,8 +376,8 @@ void main() {
     });
 
     test('returns empty list on error', () async {
-      apiService.searchEpisodesHandler =
-          (_) => throw ApiException('Search failed');
+      apiService.searchEpisodesHandler = (_) =>
+          throw ApiException('Search failed');
 
       final results = await provider.searchEpisodes('failing');
 
@@ -393,10 +394,7 @@ void main() {
     test('adds episode to favourites set', () {
       provider.toggleFavourite(_ep('ep-fav'));
 
-      expect(
-        provider.userProfile!.favouriteEpisodeIds,
-        contains('ep-fav'),
-      );
+      expect(provider.userProfile!.favouriteEpisodeIds, contains('ep-fav'));
     });
 
     test('removes episode from favourites set', () {
@@ -460,8 +458,7 @@ void main() {
     });
 
     test('returns null on error', () async {
-      apiService.podcastByIdHandler =
-          (_) => throw Exception('Not found');
+      apiService.podcastByIdHandler = (_) => throw Exception('Not found');
 
       final result = await provider.fetchPodcastById('bad-id');
 
@@ -516,14 +513,17 @@ void main() {
 
     test('filters podcasts by userProfile subscriptions', () async {
       // Load podcasts
-      apiService.latestHandler =
-          () async => [_pod('p1'), _pod('p2'), _pod('p3')];
+      apiService.latestHandler = () async => [
+        _pod('p1'),
+        _pod('p2'),
+        _pod('p3'),
+      ];
       await provider.loadInitialData();
 
       // Load profile with subscriptions to p1 and p3
-      final profile = UserProfile.initial('u1').copyWith(
-        subscribedPodcastIds: {'p1', 'p3'},
-      );
+      final profile = UserProfile.initial(
+        'u1',
+      ).copyWith(subscribedPodcastIds: {'p1', 'p3'});
       apiService.profileHandler = (_) async => profile;
       await provider.loadUserProfile(userId: 'u1');
 

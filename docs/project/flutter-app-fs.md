@@ -4825,7 +4825,7 @@ class SettingsDao extends DatabaseAccessor<AppDatabase>
       (select(settings)..where((s) => s.id.equals(1))).getSingleOrNull();
 
   Future<void> ensureDefaults() async {
-    final wifiDefault = Platform.isAndroid || Platform.isIOS ? true : false;
+    final wifiDefault = !kIsWeb && (Platform.isAndroid || Platform.isIOS);
     await into(settings).insert(
       SettingsCompanion(
         id: const Value(1),
@@ -11289,6 +11289,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:drift/drift.dart' as d show OrderingTerm;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -11756,6 +11757,7 @@ class _DownloadButton extends StatelessWidget {
 }
 
 Future<void> _openInFolder(String filePath) async {
+  if (kIsWeb) return;
   try {
     if (Platform.isWindows) {
       await Process.run('explorer', ['/select,', filePath]);
@@ -16700,6 +16702,7 @@ class StaticDataException implements Exception {
 // lib/utils/device_id.dart
 import 'dart:io' show Platform;
 import 'package:device_info_plus/device_info_plus.dart';
+import 'package:flutter/foundation.dart' show kIsWeb, debugPrint;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
@@ -16724,6 +16727,7 @@ class AppIdentity {
   }
 
   static Future<String> _osTag() async {
+    if (kIsWeb) return 'web-0';
     final info = DeviceInfoPlugin();
     try {
       if (Platform.isAndroid) {
@@ -16744,6 +16748,7 @@ class AppIdentity {
       }
       if (Platform.isLinux) {
         final l = await info.linuxInfo;
+        debugPrint('linuxInfo: $l');
         final ver = (l.version ?? l.prettyName).split(' ').first;
         return 'linux-$ver';
       }
@@ -19373,11 +19378,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:mockito/mockito.dart';
 
-import 'package:klubradio_archivum/db/app_database.dart' as db;
 import 'package:klubradio_archivum/models/episode.dart';
 import 'package:klubradio_archivum/providers/episode_provider.dart';
-import 'package:klubradio_archivum/services/api_service.dart';
-import 'package:klubradio_archivum/services/audio_player_service.dart';
 
 // Reuse the generated mocks from the queue test file.
 import 'episode_provider_queue_test.mocks.dart';
@@ -19387,16 +19389,16 @@ void main() {
 
   /// Creates a minimal Episode with the given [id].
   Episode ep(String id, {String title = '', String? localPath}) => Episode(
-        id: id,
-        podcastId: 'pod-1',
-        title: title.isEmpty ? 'Episode $id' : title,
-        description: 'Desc',
-        audioUrl: 'https://example.com/$id.mp3',
-        publishedAt: DateTime(2024, 1, 1),
-        showDate: '2024-01-01',
-        duration: const Duration(minutes: 30),
-        localFilePath: localPath,
-      );
+    id: id,
+    podcastId: 'pod-1',
+    title: title.isEmpty ? 'Episode $id' : title,
+    description: 'Desc',
+    audioUrl: 'https://example.com/$id.mp3',
+    publishedAt: DateTime(2024, 1, 1),
+    showDate: '2024-01-01',
+    duration: const Duration(minutes: 30),
+    localFilePath: localPath,
+  );
 
   // ==================== Test fixtures ====================
 
@@ -19421,8 +19423,7 @@ void main() {
 
     // Stub streams required by EpisodeProvider constructor
     when(mockAudio.positionStream).thenAnswer((_) => positionCtrl.stream);
-    when(mockAudio.playerStateStream)
-        .thenAnswer((_) => playerStateCtrl.stream);
+    when(mockAudio.playerStateStream).thenAnswer((_) => playerStateCtrl.stream);
     when(mockAudio.bufferingStream).thenAnswer((_) => bufferingCtrl.stream);
     when(mockAudio.errorStream).thenAnswer((_) => errorCtrl.stream);
     when(mockAudio.isPlaying).thenReturn(false);
@@ -19518,8 +19519,9 @@ void main() {
 
       // Re-stub everything after reset
       when(mockAudio.positionStream).thenAnswer((_) => positionCtrl.stream);
-      when(mockAudio.playerStateStream)
-          .thenAnswer((_) => playerStateCtrl.stream);
+      when(
+        mockAudio.playerStateStream,
+      ).thenAnswer((_) => playerStateCtrl.stream);
       when(mockAudio.bufferingStream).thenAnswer((_) => bufferingCtrl.stream);
       when(mockAudio.errorStream).thenAnswer((_) => errorCtrl.stream);
       when(mockAudio.loadEpisode(any)).thenAnswer((_) async {});
@@ -19556,15 +19558,17 @@ void main() {
       expect(calls, greaterThan(0));
     });
 
-    test('does not update localFilePath when episode ID does not match',
-        () async {
-      final a = ep('a');
-      await provider.playEpisode(a, queue: [a]);
+    test(
+      'does not update localFilePath when episode ID does not match',
+      () async {
+        final a = ep('a');
+        await provider.playEpisode(a, queue: [a]);
 
-      await provider.onEpisodeDownloaded('b', '/downloads/b.mp3');
+        await provider.onEpisodeDownloaded('b', '/downloads/b.mp3');
 
-      expect(provider.currentEpisode?.localFilePath, isNull);
-    });
+        expect(provider.currentEpisode?.localFilePath, isNull);
+      },
+    );
 
     test('is safe when no current episode is set', () async {
       // No episode playing — should not throw
@@ -19592,8 +19596,7 @@ void main() {
 
   group('seekRelative', () {
     test('seeks forward by given duration', () async {
-      when(mockAudio.totalDuration)
-          .thenReturn(const Duration(minutes: 30));
+      when(mockAudio.totalDuration).thenReturn(const Duration(minutes: 30));
 
       // Simulate current position at 5 minutes via position stream
       positionCtrl.add(const Duration(minutes: 5));
@@ -19606,8 +19609,7 @@ void main() {
     });
 
     test('seeks backward by given duration', () async {
-      when(mockAudio.totalDuration)
-          .thenReturn(const Duration(minutes: 30));
+      when(mockAudio.totalDuration).thenReturn(const Duration(minutes: 30));
 
       positionCtrl.add(const Duration(minutes: 5));
       await Future<void>.delayed(Duration.zero);
@@ -19619,8 +19621,7 @@ void main() {
     });
 
     test('clamps to zero when seeking past start', () async {
-      when(mockAudio.totalDuration)
-          .thenReturn(const Duration(minutes: 30));
+      when(mockAudio.totalDuration).thenReturn(const Duration(minutes: 30));
 
       positionCtrl.add(const Duration(seconds: 10));
       await Future<void>.delayed(Duration.zero);
@@ -19656,8 +19657,7 @@ void main() {
     });
 
     test('updates positionNotifier optimistically before seek', () async {
-      when(mockAudio.totalDuration)
-          .thenReturn(const Duration(minutes: 30));
+      when(mockAudio.totalDuration).thenReturn(const Duration(minutes: 30));
 
       positionCtrl.add(const Duration(minutes: 5));
       await Future<void>.delayed(Duration.zero);
@@ -19774,20 +19774,22 @@ void main() {
       expect(provider.currentEpisode, isNull);
     });
 
-    test('error stream keeps currentEpisode when service still has one',
-        () async {
-      final a = ep('a');
-      await provider.playEpisode(a, queue: [a]);
+    test(
+      'error stream keeps currentEpisode when service still has one',
+      () async {
+        final a = ep('a');
+        await provider.playEpisode(a, queue: [a]);
 
-      // Service still considers the episode loaded
-      when(mockAudio.currentEpisode).thenReturn(a);
+        // Service still considers the episode loaded
+        when(mockAudio.currentEpisode).thenReturn(a);
 
-      errorCtrl.add('Transient error');
-      await Future<void>.delayed(Duration.zero);
+        errorCtrl.add('Transient error');
+        await Future<void>.delayed(Duration.zero);
 
-      // Provider should NOT clear its episode
-      expect(provider.currentEpisode?.id, 'a');
-    });
+        // Provider should NOT clear its episode
+        expect(provider.currentEpisode?.id, 'a');
+      },
+    );
 
     test('position stream resets to zero when error clears episode', () async {
       final a = ep('a');
@@ -19812,8 +19814,9 @@ void main() {
   group('fetchEpisodes', () {
     test('delegates to apiService.fetchEpisodesForPodcast', () async {
       final episodes = [ep('a'), ep('b')];
-      when(mockApi.fetchEpisodesForPodcast('pod-1'))
-          .thenAnswer((_) async => episodes);
+      when(
+        mockApi.fetchEpisodesForPodcast('pod-1'),
+      ).thenAnswer((_) async => episodes);
 
       final result = await provider.fetchEpisodes('pod-1');
 
@@ -19905,8 +19908,7 @@ void main() {
 
   group('totalDuration', () {
     test('delegates to audioPlayerService.totalDuration', () {
-      when(mockAudio.totalDuration)
-          .thenReturn(const Duration(minutes: 45));
+      when(mockAudio.totalDuration).thenReturn(const Duration(minutes: 45));
       expect(provider.totalDuration, const Duration(minutes: 45));
 
       when(mockAudio.totalDuration).thenReturn(null);
@@ -21534,35 +21536,31 @@ import 'package:klubradio_archivum/providers/download_provider.dart';
 import 'package:klubradio_archivum/providers/profile_provider.dart';
 import 'package:klubradio_archivum/services/api_service.dart';
 import 'package:klubradio_archivum/services/api_cache_service.dart';
-import 'package:klubradio_archivum/screens/utils/constants.dart' as constants;
 
 // ==================== Helpers ====================
 
 Episode _ep(String id) => Episode(
-      id: id,
-      podcastId: 'pod-1',
-      title: 'Ep $id',
-      description: '',
-      audioUrl: 'https://x.com/$id.mp3',
-      publishedAt: DateTime(2024),
-      showDate: '2024-01-01',
-      duration: const Duration(minutes: 30),
-    );
+  id: id,
+  podcastId: 'pod-1',
+  title: 'Ep $id',
+  description: '',
+  audioUrl: 'https://x.com/$id.mp3',
+  publishedAt: DateTime(2024),
+  showDate: '2024-01-01',
+  duration: const Duration(minutes: 30),
+);
 
 Podcast _pod(String id, {String title = ''}) => Podcast(
-      id: id,
-      title: title.isEmpty ? 'Pod $id' : title,
-      description: '',
-      coverImageUrl: '',
-      episodeCount: 0,
-      hosts: const [],
-    );
+  id: id,
+  title: title.isEmpty ? 'Pod $id' : title,
+  description: '',
+  coverImageUrl: '',
+  episodeCount: 0,
+  hosts: const [],
+);
 
-ShowData _show(String id, {String title = '', int count = 10}) => ShowData(
-      id: id,
-      title: title.isEmpty ? 'Show $id' : title,
-      count: count,
-    );
+ShowData _show(String id, {String title = '', int count = 10}) =>
+    ShowData(id: id, title: title.isEmpty ? 'Show $id' : title, count: count);
 
 // ==================== Stubs ====================
 
@@ -21619,8 +21617,11 @@ class _StubApiService extends ApiService {
   }
 
   @override
-  Future<List<Episode>> fetchEpisodesForPodcast(String podcastId,
-      {int limit = 50, int offset = 0}) async {
+  Future<List<Episode>> fetchEpisodesForPodcast(
+    String podcastId, {
+    int limit = 50,
+    int offset = 0,
+  }) async {
     if (episodesHandler != null) return episodesHandler!(podcastId);
     return <Episode>[];
   }
@@ -21874,8 +21875,10 @@ void main() {
 
   group('searchEpisodes', () {
     test('delegates to apiService.searchEpisodes', () async {
-      apiService.searchEpisodesHandler =
-          (q) async => [_ep('match-1'), _ep('match-2')];
+      apiService.searchEpisodesHandler = (q) async => [
+        _ep('match-1'),
+        _ep('match-2'),
+      ];
 
       final results = await provider.searchEpisodes('test');
 
@@ -21884,8 +21887,8 @@ void main() {
     });
 
     test('returns empty list on error', () async {
-      apiService.searchEpisodesHandler =
-          (_) => throw ApiException('Search failed');
+      apiService.searchEpisodesHandler = (_) =>
+          throw ApiException('Search failed');
 
       final results = await provider.searchEpisodes('failing');
 
@@ -21902,10 +21905,7 @@ void main() {
     test('adds episode to favourites set', () {
       provider.toggleFavourite(_ep('ep-fav'));
 
-      expect(
-        provider.userProfile!.favouriteEpisodeIds,
-        contains('ep-fav'),
-      );
+      expect(provider.userProfile!.favouriteEpisodeIds, contains('ep-fav'));
     });
 
     test('removes episode from favourites set', () {
@@ -21969,8 +21969,7 @@ void main() {
     });
 
     test('returns null on error', () async {
-      apiService.podcastByIdHandler =
-          (_) => throw Exception('Not found');
+      apiService.podcastByIdHandler = (_) => throw Exception('Not found');
 
       final result = await provider.fetchPodcastById('bad-id');
 
@@ -22025,14 +22024,17 @@ void main() {
 
     test('filters podcasts by userProfile subscriptions', () async {
       // Load podcasts
-      apiService.latestHandler =
-          () async => [_pod('p1'), _pod('p2'), _pod('p3')];
+      apiService.latestHandler = () async => [
+        _pod('p1'),
+        _pod('p2'),
+        _pod('p3'),
+      ];
       await provider.loadInitialData();
 
       // Load profile with subscriptions to p1 and p3
-      final profile = UserProfile.initial('u1').copyWith(
-        subscribedPodcastIds: {'p1', 'p3'},
-      );
+      final profile = UserProfile.initial(
+        'u1',
+      ).copyWith(subscribedPodcastIds: {'p1', 'p3'});
       apiService.profileHandler = (_) async => profile;
       await provider.loadUserProfile(userId: 'u1');
 
@@ -29798,7 +29800,6 @@ void main() {
 
   // Short durations to keep tests fast.
   const fastTimeout = Duration(milliseconds: 100);
-  const tinyBackoff = Duration(milliseconds: 1);
 
   /// Create an HttpRequester with sensible test defaults.
   HttpRequester makeRequester(
@@ -29866,10 +29867,7 @@ void main() {
       });
       final requester = makeRequester(client);
 
-      await requester.getJson(
-        testUrl,
-        headers: {'X-Custom': 'value'},
-      );
+      await requester.getJson(testUrl, headers: {'X-Custom': 'value'});
 
       expect(capturedHeaders!['Authorization'], 'Bearer test-token');
       expect(capturedHeaders!['X-Custom'], 'value');
@@ -29884,10 +29882,7 @@ void main() {
       });
       final requester = makeRequester(client);
 
-      expect(
-        () => requester.getJson(testUrl),
-        throwsA(isA<HttpException>()),
-      );
+      expect(() => requester.getJson(testUrl), throwsA(isA<HttpException>()));
 
       // Allow the future to complete before checking call count.
       try {
@@ -29923,10 +29918,7 @@ void main() {
       // maxRetries=1 means: attempt 1 fails, attempt 2 (retry) fails, then throw.
       final requester = makeRequester(client, maxRetries: 1);
 
-      expect(
-        () => requester.getJson(testUrl),
-        throwsA(isA<HttpException>()),
-      );
+      expect(() => requester.getJson(testUrl), throwsA(isA<HttpException>()));
       await expectLater(
         requester.getJson(testUrl),
         throwsA(isA<HttpException>()),
@@ -30031,10 +30023,7 @@ class _CloseTrackingClient extends http.BaseClient {
 
   @override
   Future<http.StreamedResponse> send(http.BaseRequest request) async {
-    return http.StreamedResponse(
-      Stream.value([]),
-      200,
-    );
+    return http.StreamedResponse(Stream.value([]), 200);
   }
 
   @override
@@ -30272,8 +30261,8 @@ void main() {
       'duration': 1800,
       'showDate': '2025-06-15',
       'hosts': ['Host A', 'Host B'],
-      if (cachedImageFile != null) 'cachedImageFile': cachedImageFile,
-      if (mp3File != null) 'mp3File': mp3File,
+      'cachedImageFile': ?cachedImageFile,
+      'mp3File': ?mp3File,
     };
   }
 
@@ -30411,15 +30400,17 @@ void main() {
       expect(episode!.localFilePath, isNull);
     });
 
-    test('sets cachedImagePath to null when image file does not exist',
-        () async {
-      final json = validCompleteJson(cachedImageFile: 'missing_cover.jpg');
-      final path = writeJsonFile('missing_img.json', json);
-      final episode = await readEpisodeFromCacheJson(path);
+    test(
+      'sets cachedImagePath to null when image file does not exist',
+      () async {
+        final json = validCompleteJson(cachedImageFile: 'missing_cover.jpg');
+        final path = writeJsonFile('missing_img.json', json);
+        final episode = await readEpisodeFromCacheJson(path);
 
-      expect(episode, isNotNull);
-      expect(episode!.cachedImagePath, isNull);
-    });
+        expect(episode, isNotNull);
+        expect(episode!.cachedImagePath, isNull);
+      },
+    );
 
     test('falls back to createdAt when publishedAt is missing', () async {
       final json = validMinimalJson()

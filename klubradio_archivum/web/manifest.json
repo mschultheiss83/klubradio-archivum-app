@@ -1,11 +1,11 @@
 {
-    "name": "klubradio_archivum",
-    "short_name": "klubradio_archivum",
+    "name": "Klubrádió Archívum App",
+    "short_name": "Klubrádió Archívum App",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#ffffff",
     "theme_color": "#b00020",
-    "description": "A new Flutter project.",
+    "description": "Klubrádió Archívum App",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

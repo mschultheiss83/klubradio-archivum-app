@@ -58,8 +58,8 @@ void main() {
       'duration': 1800,
       'showDate': '2025-06-15',
       'hosts': ['Host A', 'Host B'],
-      if (cachedImageFile != null) 'cachedImageFile': cachedImageFile,
-      if (mp3File != null) 'mp3File': mp3File,
+      'cachedImageFile': ?cachedImageFile,
+      'mp3File': ?mp3File,
     };
   }
 
@@ -197,15 +197,17 @@ void main() {
       expect(episode!.localFilePath, isNull);
     });
 
-    test('sets cachedImagePath to null when image file does not exist',
-        () async {
-      final json = validCompleteJson(cachedImageFile: 'missing_cover.jpg');
-      final path = writeJsonFile('missing_img.json', json);
-      final episode = await readEpisodeFromCacheJson(path);
+    test(
+      'sets cachedImagePath to null when image file does not exist',
+      () async {
+        final json = validCompleteJson(cachedImageFile: 'missing_cover.jpg');
+        final path = writeJsonFile('missing_img.json', json);
+        final episode = await readEpisodeFromCacheJson(path);
 
-      expect(episode, isNotNull);
-      expect(episode!.cachedImagePath, isNull);
-    });
+        expect(episode, isNotNull);
+        expect(episode!.cachedImagePath, isNull);
+      },
+    );
 
     test('falls back to createdAt when publishedAt is missing', () async {
       final json = validMinimalJson()

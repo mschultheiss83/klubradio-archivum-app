@@ -1,6 +1,7 @@
 // lib/utils/device_id.dart
 import 'dart:io' show Platform;
 import 'package:device_info_plus/device_info_plus.dart';
+import 'package:flutter/foundation.dart' show kIsWeb, debugPrint;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
@@ -25,6 +26,7 @@ class AppIdentity {
   }
 
   static Future<String> _osTag() async {
+    if (kIsWeb) return 'web-0';
     final info = DeviceInfoPlugin();
     try {
       if (Platform.isAndroid) {
@@ -45,6 +47,7 @@ class AppIdentity {
       }
       if (Platform.isLinux) {
         final l = await info.linuxInfo;
+        debugPrint('linuxInfo: $l');
         final ver = (l.version ?? l.prettyName).split(' ').first;
         return 'linux-$ver';
       }

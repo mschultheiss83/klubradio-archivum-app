@@ -12,7 +12,6 @@ void main() {
 
   // Short durations to keep tests fast.
   const fastTimeout = Duration(milliseconds: 100);
-  const tinyBackoff = Duration(milliseconds: 1);
 
   /// Create an HttpRequester with sensible test defaults.
   HttpRequester makeRequester(
@@ -80,10 +79,7 @@ void main() {
       });
       final requester = makeRequester(client);
 
-      await requester.getJson(
-        testUrl,
-        headers: {'X-Custom': 'value'},
-      );
+      await requester.getJson(testUrl, headers: {'X-Custom': 'value'});
 
       expect(capturedHeaders!['Authorization'], 'Bearer test-token');
       expect(capturedHeaders!['X-Custom'], 'value');
@@ -98,10 +94,7 @@ void main() {
       });
       final requester = makeRequester(client);
 
-      expect(
-        () => requester.getJson(testUrl),
-        throwsA(isA<HttpException>()),
-      );
+      expect(() => requester.getJson(testUrl), throwsA(isA<HttpException>()));
 
       // Allow the future to complete before checking call count.
       try {
@@ -137,10 +130,7 @@ void main() {
       // maxRetries=1 means: attempt 1 fails, attempt 2 (retry) fails, then throw.
       final requester = makeRequester(client, maxRetries: 1);
 
-      expect(
-        () => requester.getJson(testUrl),
-        throwsA(isA<HttpException>()),
-      );
+      expect(() => requester.getJson(testUrl), throwsA(isA<HttpException>()));
       await expectLater(
         requester.getJson(testUrl),
         throwsA(isA<HttpException>()),
@@ -245,10 +235,7 @@ class _CloseTrackingClient extends http.BaseClient {
 
   @override
   Future<http.StreamedResponse> send(http.BaseRequest request) async {
-    return http.StreamedResponse(
-      Stream.value([]),
-      200,
-    );
+    return http.StreamedResponse(Stream.value([]), 200);
   }
 
   @override

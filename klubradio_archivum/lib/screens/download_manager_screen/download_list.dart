@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:drift/drift.dart' as d show OrderingTerm;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -469,6 +470,7 @@ class _DownloadButton extends StatelessWidget {
 }
 
 Future<void> _openInFolder(String filePath) async {
+  if (kIsWeb) return;
   try {
     if (Platform.isWindows) {
       await Process.run('explorer', ['/select,', filePath]);
