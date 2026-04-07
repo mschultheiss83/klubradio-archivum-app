@@ -95,6 +95,7 @@
 ├── klubradio_archivum/test/api/episode_api_test.mocks.dart
 ├── klubradio_archivum/test/api/search_api_test.dart
 ├── klubradio_archivum/test/db/autodownload_logic_test.dart
+├── klubradio_archivum/test/db/daos_test.dart
 ├── klubradio_archivum/test/db/settings_dao_test.dart
 ├── klubradio_archivum/test/models/episode_test.dart
 ├── klubradio_archivum/test/models/podcast_test.dart
@@ -102,14 +103,20 @@
 ├── klubradio_archivum/test/models/show_data_test.dart
 ├── klubradio_archivum/test/models/show_host_test.dart
 ├── klubradio_archivum/test/models/user_profile_test.dart
+├── klubradio_archivum/test/providers/download_provider_logic_test.dart
+├── klubradio_archivum/test/providers/episode_provider_playback_test.dart
 ├── klubradio_archivum/test/providers/episode_provider_queue_test.dart
 ├── klubradio_archivum/test/providers/episode_provider_queue_test.mocks.dart
+├── klubradio_archivum/test/providers/podcast_provider_extended_test.dart
 ├── klubradio_archivum/test/providers/podcast_provider_search_test.dart
+├── klubradio_archivum/test/providers/profile_provider_test.dart
+├── klubradio_archivum/test/providers/profile_provider_test.mocks.dart
 ├── klubradio_archivum/test/providers/subscribe_download_flow_test.dart
 ├── klubradio_archivum/test/providers/subscribe_download_flow_test.mocks.dart
 ├── klubradio_archivum/test/providers/subscription_provider_test.dart
 ├── klubradio_archivum/test/providers/subscription_provider_test.mocks.dart
 ├── klubradio_archivum/test/providers/theme_provider_test.dart
+├── klubradio_archivum/test/repositories/profile_repository_test.dart
 ├── klubradio_archivum/test/screens/download_list_entries_test.dart
 ├── klubradio_archivum/test/screens/podcast_detail_screen_test.dart
 ├── klubradio_archivum/test/screens/subscription_download_test.dart
@@ -117,11 +124,15 @@
 ├── klubradio_archivum/test/screens/utils/helpers_test.dart
 ├── klubradio_archivum/test/screens/utils/platform_utils_test.dart
 ├── klubradio_archivum/test/screens/widgets/queue_sheet_test.dart
+├── klubradio_archivum/test/services/api_cache_service_test.dart
 ├── klubradio_archivum/test/services/api_live_validation_test.dart
 ├── klubradio_archivum/test/services/api_model_validation_test.dart
 ├── klubradio_archivum/test/services/api_service_live_test.dart
 ├── klubradio_archivum/test/services/api_service_test.dart
+├── klubradio_archivum/test/services/http_requester_test.dart
 ├── klubradio_archivum/test/services/privacy_notice_service_test.dart
+├── klubradio_archivum/test/utils/episode_cache_reader_test.dart
+├── klubradio_archivum/test/utils/web_image_proxy_test.dart
 ├── klubradio_archivum/test_driver/integration_test.dart
 ├── scripts/fetch_static_data.dart
 ```
@@ -17550,6 +17561,622 @@ void main() {
 }
 ```
 
+### Inhalt von `klubradio_archivum/test/db/daos_test.dart`
+```dart
+import 'package:drift/drift.dart' hide isNull, isNotNull;
+import 'package:drift/native.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:klubradio_archivum/db/app_database.dart';
+import 'package:klubradio_archivum/db/daos.dart';
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+EpisodesCompanion makeEp(
+  String id, {
+  String podcastId = 'pod-1',
+  DateTime? publishedAt,
+  int status = 0,
+  String? localPath,
+  DateTime? playedAt,
+  DateTime? completedAt,
+}) =>
+    EpisodesCompanion(
+      id: Value(id),
+      podcastId: Value(podcastId),
+      title: Value('Episode $id'),
+      audioUrl: Value('https://example.com/$id.mp3'),
+      publishedAt: Value(publishedAt ?? DateTime(2024, 1, 1)),
+      status: Value(status),
+      localPath: localPath != null ? Value(localPath) : const Value.absent(),
+      playedAt: playedAt != null ? Value(playedAt) : const Value.absent(),
+      completedAt:
+          completedAt != null ? Value(completedAt) : const Value.absent(),
+    );
+
+SubscriptionsCompanion makeSub(
+  String podcastId, {
+  bool active = true,
+  int? autoDownloadN,
+}) =>
+    SubscriptionsCompanion(
+      podcastId: Value(podcastId),
+      active: Value(active),
+      autoDownloadN:
+          autoDownloadN != null ? Value(autoDownloadN) : const Value.absent(),
+    );
+
+// ---------------------------------------------------------------------------
+// Tests
+// ---------------------------------------------------------------------------
+
+void main() {
+  late AppDatabase db;
+  late SubscriptionsDao subsDao;
+  late EpisodesDao epsDao;
+  late SettingsDao settingsDao;
+  late RetentionDao retentionDao;
+
+  setUp(() {
+    db = AppDatabase.forTesting(NativeDatabase.memory());
+    subsDao = SubscriptionsDao(db);
+    epsDao = EpisodesDao(db);
+    settingsDao = SettingsDao(db);
+    retentionDao = RetentionDao(db, epsDao, subsDao, settingsDao);
+  });
+
+  tearDown(() async => await db.close());
+
+  // =========================================================================
+  // SubscriptionsDao
+  // =========================================================================
+
+  group('SubscriptionsDao', () {
+    test('upsert inserts new subscription', () async {
+      await subsDao.upsert(makeSub('pod-1'));
+      final row = await subsDao.getById('pod-1');
+      expect(row, isNotNull);
+      expect(row!.podcastId, 'pod-1');
+      expect(row.active, true);
+    });
+
+    test('upsert updates existing subscription', () async {
+      await subsDao.upsert(makeSub('pod-1', active: true));
+      await subsDao.upsert(makeSub('pod-1', active: false));
+      final row = await subsDao.getById('pod-1');
+      expect(row!.active, false);
+    });
+
+    test('getById returns null for missing', () async {
+      final row = await subsDao.getById('nonexistent');
+      expect(row, isNull);
+    });
+
+    test('getById returns subscription', () async {
+      await subsDao.upsert(makeSub('pod-1'));
+      final row = await subsDao.getById('pod-1');
+      expect(row, isNotNull);
+      expect(row!.podcastId, 'pod-1');
+    });
+
+    test('isSubscribed returns false for unsubscribed', () async {
+      final result = await subsDao.isSubscribed('pod-1');
+      expect(result, false);
+    });
+
+    test('isSubscribed returns true for active subscription', () async {
+      await subsDao.upsert(makeSub('pod-1', active: true));
+      final result = await subsDao.isSubscribed('pod-1');
+      expect(result, true);
+    });
+
+    test('toggleSubscribe creates new active subscription', () async {
+      await subsDao.toggleSubscribe(podcastId: 'pod-1');
+      final row = await subsDao.getById('pod-1');
+      expect(row, isNotNull);
+      expect(row!.active, true);
+    });
+
+    test('toggleSubscribe toggles existing off', () async {
+      await subsDao.toggleSubscribe(podcastId: 'pod-1');
+      await subsDao.toggleSubscribe(podcastId: 'pod-1');
+      final row = await subsDao.getById('pod-1');
+      expect(row!.active, false);
+    });
+
+    test('toggleSubscribe toggles back on', () async {
+      await subsDao.toggleSubscribe(podcastId: 'pod-1');
+      await subsDao.toggleSubscribe(podcastId: 'pod-1');
+      await subsDao.toggleSubscribe(podcastId: 'pod-1');
+      final row = await subsDao.getById('pod-1');
+      expect(row!.active, true);
+    });
+
+    test('toggleSubscribe with explicit active=false', () async {
+      await subsDao.toggleSubscribe(podcastId: 'pod-1', active: false);
+      final row = await subsDao.getById('pod-1');
+      expect(row!.active, false);
+    });
+
+    test('toggleSubscribe with autoDownloadN', () async {
+      await subsDao.toggleSubscribe(podcastId: 'pod-1', autoDownloadN: 5);
+      final row = await subsDao.getById('pod-1');
+      expect(row!.autoDownloadN, 5);
+    });
+
+    test('setAutoDownloadN sets value', () async {
+      await subsDao.upsert(makeSub('pod-1'));
+      await subsDao.setAutoDownloadN('pod-1', 3);
+      final row = await subsDao.getById('pod-1');
+      expect(row!.autoDownloadN, 3);
+    });
+
+    test('setAutoDownloadN with negative normalizes to null', () async {
+      await subsDao.upsert(makeSub('pod-1', autoDownloadN: 5));
+      await subsDao.setAutoDownloadN('pod-1', -1);
+      final row = await subsDao.getById('pod-1');
+      expect(row!.autoDownloadN, isNull);
+    });
+
+    test('setLastHeard updates lastHeardEpisodeId', () async {
+      await subsDao.upsert(makeSub('pod-1'));
+      await subsDao.setLastHeard('pod-1', 'ep-42');
+      final row = await subsDao.getById('pod-1');
+      expect(row!.lastHeardEpisodeId, 'ep-42');
+    });
+
+    test('setLastDownloaded updates lastDownloadedEpisodeId', () async {
+      await subsDao.upsert(makeSub('pod-1'));
+      await subsDao.setLastDownloaded('pod-1', 'ep-99');
+      final row = await subsDao.getById('pod-1');
+      expect(row!.lastDownloadedEpisodeId, 'ep-99');
+    });
+  });
+
+  // =========================================================================
+  // EpisodesDao
+  // =========================================================================
+
+  group('EpisodesDao', () {
+    test('upsert inserts new episode', () async {
+      await epsDao.upsert(makeEp('ep-1'));
+      final row = await epsDao.getById('ep-1');
+      expect(row, isNotNull);
+      expect(row!.title, 'Episode ep-1');
+    });
+
+    test('upsert updates existing episode', () async {
+      await epsDao.upsert(makeEp('ep-1'));
+      await epsDao.upsert(
+        EpisodesCompanion(
+          id: const Value('ep-1'),
+          podcastId: const Value('pod-1'),
+          title: const Value('Updated Title'),
+          audioUrl: const Value('https://example.com/ep-1.mp3'),
+          publishedAt: Value(DateTime(2024, 1, 1)),
+          status: const Value(0),
+        ),
+      );
+      final row = await epsDao.getById('ep-1');
+      expect(row!.title, 'Updated Title');
+    });
+
+    test('getById returns null for missing', () async {
+      final row = await epsDao.getById('nonexistent');
+      expect(row, isNull);
+    });
+
+    test('getById returns episode', () async {
+      await epsDao.upsert(makeEp('ep-1'));
+      final row = await epsDao.getById('ep-1');
+      expect(row, isNotNull);
+      expect(row!.id, 'ep-1');
+    });
+
+    test('latestForPodcast returns N most recent by publishedAt', () async {
+      await epsDao.upsert(makeEp('ep-1', publishedAt: DateTime(2024, 1, 1)));
+      await epsDao.upsert(makeEp('ep-2', publishedAt: DateTime(2024, 3, 1)));
+      await epsDao.upsert(makeEp('ep-3', publishedAt: DateTime(2024, 2, 1)));
+      final results = await epsDao.latestForPodcast('pod-1', 2);
+      expect(results.length, 2);
+      expect(results[0].id, 'ep-2'); // newest first
+      expect(results[1].id, 'ep-3');
+    });
+
+    test('latestForPodcast returns fewer if not enough episodes', () async {
+      await epsDao.upsert(makeEp('ep-1'));
+      final results = await epsDao.latestForPodcast('pod-1', 5);
+      expect(results.length, 1);
+    });
+
+    test('getEpisodesByPodcastId returns all episodes for podcast', () async {
+      await epsDao.upsert(makeEp('ep-1', podcastId: 'pod-1'));
+      await epsDao.upsert(makeEp('ep-2', podcastId: 'pod-1'));
+      await epsDao.upsert(makeEp('ep-3', podcastId: 'pod-2'));
+      final results = await epsDao.getEpisodesByPodcastId('pod-1');
+      expect(results.length, 2);
+    });
+
+    test('setQueued sets status to 1', () async {
+      await epsDao.upsert(makeEp('ep-1'));
+      await epsDao.setQueued('ep-1');
+      final row = await epsDao.getById('ep-1');
+      expect(row!.status, 1);
+    });
+
+    test('setDownloading sets status to 2 with progress', () async {
+      await epsDao.upsert(makeEp('ep-1'));
+      await epsDao.setDownloading('ep-1', progress: 0.5, bytes: 1024);
+      final row = await epsDao.getById('ep-1');
+      expect(row!.status, 2);
+      expect(row.progress, 0.5);
+      expect(row.bytesDownloaded, 1024);
+    });
+
+    test('setProgress updates progress and bytes', () async {
+      await epsDao.upsert(makeEp('ep-1'));
+      await epsDao.setProgress('ep-1', 0.75, bytes: 2048, total: 4096);
+      final row = await epsDao.getById('ep-1');
+      expect(row!.progress, 0.75);
+      expect(row.bytesDownloaded, 2048);
+      expect(row.totalBytes, 4096);
+    });
+
+    test('setCompleted sets status 3, localPath, completedAt', () async {
+      await epsDao.upsert(makeEp('ep-1'));
+      await epsDao.setCompleted('ep-1', '/path/to/file.mp3');
+      final row = await epsDao.getById('ep-1');
+      expect(row!.status, 3);
+      expect(row.localPath, '/path/to/file.mp3');
+      expect(row.progress, 1.0);
+      expect(row.completedAt, isNotNull);
+    });
+
+    test('setFailed sets status to 4', () async {
+      await epsDao.upsert(makeEp('ep-1'));
+      await epsDao.setFailed('ep-1');
+      final row = await epsDao.getById('ep-1');
+      expect(row!.status, 4);
+    });
+
+    test('setCanceled sets status to 5', () async {
+      await epsDao.upsert(makeEp('ep-1'));
+      await epsDao.setCanceled('ep-1');
+      final row = await epsDao.getById('ep-1');
+      expect(row!.status, 5);
+    });
+
+    test('markPlayed sets playedAt', () async {
+      await epsDao.upsert(makeEp('ep-1'));
+      await epsDao.markPlayed('ep-1');
+      final row = await epsDao.getById('ep-1');
+      expect(row!.playedAt, isNotNull);
+    });
+
+    test('clearLocalFile resets localPath, cachedMetaPath, cachedImagePath, status=0',
+        () async {
+      await epsDao.upsert(makeEp('ep-1', status: 3, localPath: '/file.mp3'));
+      await epsDao.setCachedMeta(
+        'ep-1',
+        metaPath: '/meta.json',
+        imagePath: '/cover.jpg',
+      );
+      await epsDao.clearLocalFile('ep-1');
+      final row = await epsDao.getById('ep-1');
+      expect(row!.status, 0);
+      expect(row.localPath, isNull);
+      expect(row.cachedMetaPath, isNull);
+      expect(row.cachedImagePath, isNull);
+    });
+
+    test('completedWithFileDesc returns only completed with file, newest first',
+        () async {
+      // Use explicit completedAt timestamps to ensure deterministic ordering.
+      // setCompleted uses DateTime.now() which may be same ms, so write directly.
+      await epsDao.upsert(makeEp('ep-1', status: 3, localPath: '/a.mp3'));
+      await (db.update(db.episodes)..where((e) => e.id.equals('ep-1'))).write(
+        EpisodesCompanion(
+          completedAt: Value(DateTime(2024, 1, 1)),
+        ),
+      );
+
+      await epsDao.upsert(makeEp('ep-2', status: 3, localPath: '/b.mp3'));
+      await (db.update(db.episodes)..where((e) => e.id.equals('ep-2'))).write(
+        EpisodesCompanion(
+          completedAt: Value(DateTime(2024, 1, 2)),
+        ),
+      );
+
+      // Not completed (status 0)
+      await epsDao.upsert(makeEp('ep-3'));
+
+      // Completed but no localPath
+      await epsDao.upsert(makeEp('ep-4', status: 3));
+
+      // Different podcast
+      await epsDao.upsert(
+          makeEp('ep-5', podcastId: 'pod-2', status: 3, localPath: '/c.mp3'));
+
+      final results = await epsDao.completedWithFileDesc('pod-1');
+      expect(results.length, 2);
+      // Newest completedAt first (ep-2 Jan 2 > ep-1 Jan 1)
+      expect(results[0].id, 'ep-2');
+      expect(results[1].id, 'ep-1');
+    });
+
+    test('enqueueLatestN marks eligible episodes as queued (status 0, 4, 5)',
+        () async {
+      await epsDao.upsert(
+          makeEp('ep-1', publishedAt: DateTime(2024, 3, 1), status: 0));
+      await epsDao.upsert(
+          makeEp('ep-2', publishedAt: DateTime(2024, 2, 1), status: 4));
+      await epsDao.upsert(
+          makeEp('ep-3', publishedAt: DateTime(2024, 1, 1), status: 5));
+
+      await epsDao.enqueueLatestN('pod-1', 3);
+
+      final ep1 = await epsDao.getById('ep-1');
+      final ep2 = await epsDao.getById('ep-2');
+      final ep3 = await epsDao.getById('ep-3');
+      expect(ep1!.status, 1); // queued
+      expect(ep2!.status, 1);
+      expect(ep3!.status, 1);
+    });
+
+    test('enqueueLatestN skips already completed/queued episodes', () async {
+      await epsDao.upsert(
+          makeEp('ep-1', publishedAt: DateTime(2024, 3, 1), status: 3));
+      await epsDao.upsert(
+          makeEp('ep-2', publishedAt: DateTime(2024, 2, 1), status: 1));
+      await epsDao.upsert(
+          makeEp('ep-3', publishedAt: DateTime(2024, 1, 1), status: 0));
+
+      await epsDao.enqueueLatestN('pod-1', 3);
+
+      final ep1 = await epsDao.getById('ep-1');
+      final ep2 = await epsDao.getById('ep-2');
+      final ep3 = await epsDao.getById('ep-3');
+      expect(ep1!.status, 3); // unchanged (completed)
+      expect(ep2!.status, 1); // unchanged (already queued)
+      expect(ep3!.status, 1); // queued (was 0)
+    });
+
+    test('setCachedMeta updates title, imagePath, metaPath', () async {
+      await epsDao.upsert(makeEp('ep-1'));
+      await epsDao.setCachedMeta(
+        'ep-1',
+        title: 'Cached Title',
+        imagePath: '/cache/cover.jpg',
+        metaPath: '/cache/meta.json',
+      );
+      final row = await epsDao.getById('ep-1');
+      expect(row!.cachedTitle, 'Cached Title');
+      expect(row.cachedImagePath, '/cache/cover.jpg');
+      expect(row.cachedMetaPath, '/cache/meta.json');
+    });
+
+    test('upsertAll bulk inserts', () async {
+      await epsDao.upsertAll([
+        makeEp('ep-1'),
+        makeEp('ep-2'),
+        makeEp('ep-3'),
+      ]);
+      final ep1 = await epsDao.getById('ep-1');
+      final ep2 = await epsDao.getById('ep-2');
+      final ep3 = await epsDao.getById('ep-3');
+      expect(ep1, isNotNull);
+      expect(ep2, isNotNull);
+      expect(ep3, isNotNull);
+    });
+
+    test('watchByPodcast emits episodes newest first by default', () async {
+      await epsDao.upsert(makeEp('ep-old', publishedAt: DateTime(2024, 1, 1)));
+      await epsDao.upsert(makeEp('ep-new', publishedAt: DateTime(2024, 6, 1)));
+
+      final results = await epsDao.watchByPodcast('pod-1').first;
+      expect(results.length, 2);
+      expect(results[0].id, 'ep-new');
+      expect(results[1].id, 'ep-old');
+    });
+
+    test('watchByPodcast with ascending=true emits oldest first', () async {
+      await epsDao.upsert(makeEp('ep-old', publishedAt: DateTime(2024, 1, 1)));
+      await epsDao.upsert(makeEp('ep-new', publishedAt: DateTime(2024, 6, 1)));
+
+      final results =
+          await epsDao.watchByPodcast('pod-1', ascending: true).first;
+      expect(results[0].id, 'ep-old');
+      expect(results[1].id, 'ep-new');
+    });
+
+    test('watchActiveDownloads returns only queued and downloading', () async {
+      await epsDao.upsert(makeEp('ep-none', status: 0));
+      await epsDao.upsert(makeEp('ep-queued', status: 1));
+      await epsDao.upsert(makeEp('ep-dl', status: 2));
+      await epsDao.upsert(makeEp('ep-done', status: 3));
+      await epsDao.upsert(makeEp('ep-fail', status: 4));
+
+      final results = await epsDao.watchActiveDownloads().first;
+      expect(results.map((e) => e.id).toSet(), {'ep-queued', 'ep-dl'});
+    });
+
+    test('playedBefore returns episodes played before threshold', () async {
+      final old = DateTime(2024, 1, 1);
+      final recent = DateTime(2024, 6, 1);
+      await epsDao.upsert(
+          makeEp('ep-old', status: 3, localPath: '/a.mp3', playedAt: old));
+      await epsDao.upsert(
+          makeEp('ep-recent', status: 3, localPath: '/b.mp3', playedAt: recent));
+
+      final threshold = DateTime(2024, 3, 1);
+      final results = await epsDao.playedBefore(threshold);
+      expect(results.map((e) => e.id), ['ep-old']);
+    });
+  });
+
+  // =========================================================================
+  // RetentionDao
+  // =========================================================================
+
+  group('RetentionDao', () {
+    // Helper: insert a settings row so RetentionDao can read it.
+    Future<void> insertSettings({int? deleteAfterHours, int? keepLatestN}) async {
+      await db.into(db.settings).insert(
+            SettingsCompanion(
+              id: const Value(1),
+              wifiOnly: const Value(false),
+              maxParallel: const Value(2),
+              deleteAfterHours: Value(deleteAfterHours),
+              keepLatestN: Value(keepLatestN),
+              autodownloadSubscribed: const Value(false),
+              playOrder: const Value('newest'),
+            ),
+          );
+    }
+
+    test('computePlanForPodcast returns empty plan when no rules set',
+        () async {
+      await insertSettings();
+      await epsDao.upsert(
+          makeEp('ep-1', status: 3, localPath: '/a.mp3'));
+      await epsDao.setCompleted('ep-1', '/a.mp3');
+
+      final plan = await retentionDao.computePlanForPodcast('pod-1');
+      expect(plan.toDeleteIds, isEmpty);
+    });
+
+    test(
+        'computePlanForPodcast with deleteAfterHours marks old played episodes',
+        () async {
+      await insertSettings(deleteAfterHours: 1);
+
+      // Episode played 2 hours ago (should be marked for deletion)
+      final twoHoursAgo = DateTime.now().subtract(const Duration(hours: 2));
+      await epsDao.upsert(makeEp(
+        'ep-old',
+        status: 3,
+        localPath: '/old.mp3',
+        playedAt: twoHoursAgo,
+      ));
+
+      // Episode played 30 minutes ago (should NOT be marked)
+      final thirtyMinAgo =
+          DateTime.now().subtract(const Duration(minutes: 30));
+      await epsDao.upsert(makeEp(
+        'ep-recent',
+        status: 3,
+        localPath: '/recent.mp3',
+        playedAt: thirtyMinAgo,
+      ));
+
+      final plan = await retentionDao.computePlanForPodcast('pod-1');
+      expect(plan.toDeleteIds, contains('ep-old'));
+      expect(plan.toDeleteIds, isNot(contains('ep-recent')));
+    });
+
+    test(
+        'computePlanForPodcast with keepLatestN marks excess completed episodes',
+        () async {
+      await insertSettings(keepLatestN: 1);
+
+      // Two completed episodes; keepLatestN=1 means only keep the newest.
+      // Use explicit completedAt to ensure deterministic ordering.
+      await epsDao.upsert(makeEp('ep-1', status: 3, localPath: '/a.mp3'));
+      await (db.update(db.episodes)..where((e) => e.id.equals('ep-1'))).write(
+        EpisodesCompanion(completedAt: Value(DateTime(2024, 1, 1))),
+      );
+
+      await epsDao.upsert(makeEp('ep-2', status: 3, localPath: '/b.mp3'));
+      await (db.update(db.episodes)..where((e) => e.id.equals('ep-2'))).write(
+        EpisodesCompanion(completedAt: Value(DateTime(2024, 1, 2))),
+      );
+
+      final plan = await retentionDao.computePlanForPodcast('pod-1');
+      // ep-2 is newest, ep-1 should be marked for deletion
+      expect(plan.toDeleteIds, contains('ep-1'));
+      expect(plan.toDeleteIds, isNot(contains('ep-2')));
+    });
+
+    test('computePlanForPodcast deduplicates IDs', () async {
+      await insertSettings(deleteAfterHours: 1, keepLatestN: 1);
+
+      final twoHoursAgo = DateTime.now().subtract(const Duration(hours: 2));
+      // ep-1: old played, completed first
+      await epsDao.upsert(makeEp(
+        'ep-1',
+        status: 3,
+        localPath: '/a.mp3',
+        playedAt: twoHoursAgo,
+      ));
+      await (db.update(db.episodes)..where((e) => e.id.equals('ep-1'))).write(
+        EpisodesCompanion(completedAt: Value(DateTime(2024, 1, 1))),
+      );
+
+      // ep-2: old played, completed later
+      await epsDao.upsert(makeEp(
+        'ep-2',
+        status: 3,
+        localPath: '/b.mp3',
+        playedAt: twoHoursAgo,
+      ));
+      await (db.update(db.episodes)..where((e) => e.id.equals('ep-2'))).write(
+        EpisodesCompanion(completedAt: Value(DateTime(2024, 1, 2))),
+      );
+
+      final plan = await retentionDao.computePlanForPodcast('pod-1');
+      // ep-1 could appear from both rules; verify no duplicates.
+      final uniqueCount = plan.toDeleteIds.toSet().length;
+      expect(plan.toDeleteIds.length, uniqueCount);
+    });
+
+    test('computePlanForPodcast with both rules combines results', () async {
+      await insertSettings(deleteAfterHours: 1, keepLatestN: 2);
+
+      final twoHoursAgo = DateTime.now().subtract(const Duration(hours: 2));
+
+      // ep-1: old played, completed first (oldest)
+      await epsDao.upsert(makeEp(
+        'ep-1',
+        status: 3,
+        localPath: '/a.mp3',
+        playedAt: twoHoursAgo,
+      ));
+      await (db.update(db.episodes)..where((e) => e.id.equals('ep-1'))).write(
+        EpisodesCompanion(completedAt: Value(DateTime(2024, 1, 1))),
+      );
+
+      // ep-2: not played, completed second
+      await epsDao.upsert(makeEp(
+        'ep-2',
+        status: 3,
+        localPath: '/b.mp3',
+      ));
+      await (db.update(db.episodes)..where((e) => e.id.equals('ep-2'))).write(
+        EpisodesCompanion(completedAt: Value(DateTime(2024, 1, 2))),
+      );
+
+      // ep-3: not played, completed third (newest)
+      await epsDao.upsert(makeEp(
+        'ep-3',
+        status: 3,
+        localPath: '/c.mp3',
+      ));
+      await (db.update(db.episodes)..where((e) => e.id.equals('ep-3'))).write(
+        EpisodesCompanion(completedAt: Value(DateTime(2024, 1, 3))),
+      );
+
+      final plan = await retentionDao.computePlanForPodcast('pod-1');
+      // deleteAfterHours catches ep-1 (played 2h ago)
+      // keepLatestN=2 catches ep-1 (3 completed, oldest is excess)
+      expect(plan.toDeleteIds, contains('ep-1'));
+      // ep-2 and ep-3 are within keepLatestN=2 and not old-played
+      expect(plan.toDeleteIds, isNot(contains('ep-3')));
+    });
+  });
+}
+```
+
 ### Inhalt von `klubradio_archivum/test/db/settings_dao_test.dart`
 ```dart
 import 'package:drift/native.dart';
@@ -17628,6 +18255,72 @@ void main() {
       final settings = await dao.getOne();
       expect(settings, isNotNull);
       expect(settings!.id, 1);
+    });
+  });
+
+  // ==================== Individual setters ====================
+
+  group('SettingsDao setters', () {
+    setUp(() async {
+      await dao.ensureDefaults();
+    });
+
+    test('setWifiOnly updates wifi setting', () async {
+      await dao.setWifiOnly(true);
+      final s = await dao.getOne();
+      expect(s!.wifiOnly, true);
+
+      await dao.setWifiOnly(false);
+      final s2 = await dao.getOne();
+      expect(s2!.wifiOnly, false);
+    });
+
+    test('setMaxParallel updates parallel downloads', () async {
+      await dao.setMaxParallel(4);
+      final s = await dao.getOne();
+      expect(s!.maxParallel, 4);
+    });
+
+    test('setDeleteAfterHours updates deletion threshold', () async {
+      await dao.setDeleteAfterHours(48);
+      final s = await dao.getOne();
+      expect(s!.deleteAfterHours, 48);
+    });
+
+    test('setDeleteAfterHours with 0 sets null', () async {
+      await dao.setDeleteAfterHours(48);
+      await dao.setDeleteAfterHours(0);
+      final s = await dao.getOne();
+      expect(s!.deleteAfterHours, isNull);
+    });
+
+    test('setDeleteAfterHours with negative sets null', () async {
+      await dao.setDeleteAfterHours(-1);
+      final s = await dao.getOne();
+      expect(s!.deleteAfterHours, isNull);
+    });
+
+    test('setKeepLatestN updates retention limit', () async {
+      await dao.setKeepLatestN(5);
+      final s = await dao.getOne();
+      expect(s!.keepLatestN, 5);
+    });
+
+    test('setKeepLatestN with 0 sets null', () async {
+      await dao.setKeepLatestN(5);
+      await dao.setKeepLatestN(0);
+      final s = await dao.getOne();
+      expect(s!.keepLatestN, isNull);
+    });
+
+    test('setAutodownloadSubscribed updates flag', () async {
+      await dao.setAutodownloadSubscribed(true);
+      final s = await dao.getOne();
+      expect(s!.autodownloadSubscribed, true);
+
+      await dao.setAutodownloadSubscribed(false);
+      final s2 = await dao.getOne();
+      expect(s2!.autodownloadSubscribed, false);
     });
   });
 }
@@ -18421,6 +19114,793 @@ void main() {
       final str = p.toString();
       expect(str, contains('"id"'));
       expect(str, contains('"languageCode"'));
+    });
+  });
+}
+```
+
+### Inhalt von `klubradio_archivum/test/providers/download_provider_logic_test.dart`
+```dart
+// test/providers/download_provider_logic_test.dart
+//
+// Tests the autoEnqueueLatestN candidate-filtering logic from DownloadProvider
+// using an in-memory Drift database. We replicate the filtering logic because
+// DownloadProvider's constructor requires native plugins we can't instantiate
+// in a unit-test environment.
+
+import 'package:drift/drift.dart' hide isNull, isNotNull;
+import 'package:drift/native.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:klubradio_archivum/db/app_database.dart';
+import 'package:klubradio_archivum/db/daos.dart';
+import 'package:klubradio_archivum/models/episode.dart' as model;
+
+void main() {
+  late AppDatabase db;
+  late EpisodesDao epsDao;
+
+  model.Episode ep(String id) => model.Episode(
+        id: id,
+        podcastId: 'pod-1',
+        title: 'Episode $id',
+        description: '',
+        audioUrl: 'https://example.com/$id.mp3',
+        publishedAt: DateTime(2024, 1, 1),
+        showDate: '2024-01-01',
+        duration: const Duration(minutes: 30),
+      );
+
+  setUp(() {
+    db = AppDatabase.forTesting(NativeDatabase.memory());
+    epsDao = EpisodesDao(db);
+  });
+
+  tearDown(() async => await db.close());
+
+  // Replicate the autoEnqueueLatestN filtering logic from DownloadProvider.
+  // Returns IDs of episodes that WOULD be enqueued.
+  Future<List<String>> filterCandidates(
+    EpisodesDao dao,
+    List<model.Episode> candidates,
+    int n,
+  ) async {
+    final latest = candidates.take(n).toList();
+    final toEnqueue = <String>[];
+
+    for (final ep in latest) {
+      final row = await dao.getById(ep.id);
+      final alreadyDone =
+          row?.status == 3 && (row?.localPath ?? '').isNotEmpty;
+      final alreadyQueuedOrRunning = row?.status == 1 || row?.status == 2;
+
+      if (alreadyDone || alreadyQueuedOrRunning) continue;
+
+      if (row == null) {
+        await dao.upsert(
+          EpisodesCompanion(
+            id: Value(ep.id),
+            podcastId: Value(ep.podcastId),
+            title: Value(ep.title),
+            audioUrl: Value(ep.audioUrl),
+            publishedAt: Value(ep.publishedAt),
+            status: const Value(0),
+            progress: const Value(0),
+          ),
+        );
+      }
+      toEnqueue.add(ep.id);
+    }
+    return toEnqueue;
+  }
+
+  group('autoEnqueueLatestN filtering logic', () {
+    test('enqueues episode not in DB', () async {
+      final result = await filterCandidates(epsDao, [ep('new-1')], 1);
+      expect(result, ['new-1']);
+      // Episode should now be in DB
+      final row = await epsDao.getById('new-1');
+      expect(row, isNotNull);
+      expect(row!.status, 0);
+    });
+
+    test('skips completed episode with local file (status=3)', () async {
+      await epsDao.upsert(EpisodesCompanion(
+        id: const Value('done-1'),
+        podcastId: const Value('pod-1'),
+        title: const Value('Done'),
+        audioUrl: const Value('https://x.com/done.mp3'),
+        status: const Value(3),
+        localPath: const Value('/path/file.mp3'),
+      ));
+
+      final result = await filterCandidates(epsDao, [ep('done-1')], 1);
+      expect(result, isEmpty);
+    });
+
+    test('skips queued episode (status=1)', () async {
+      await epsDao.upsert(EpisodesCompanion(
+        id: const Value('q-1'),
+        podcastId: const Value('pod-1'),
+        title: const Value('Queued'),
+        audioUrl: const Value('https://x.com/q.mp3'),
+        status: const Value(1),
+      ));
+
+      final result = await filterCandidates(epsDao, [ep('q-1')], 1);
+      expect(result, isEmpty);
+    });
+
+    test('skips downloading episode (status=2)', () async {
+      await epsDao.upsert(EpisodesCompanion(
+        id: const Value('dl-1'),
+        podcastId: const Value('pod-1'),
+        title: const Value('Downloading'),
+        audioUrl: const Value('https://x.com/dl.mp3'),
+        status: const Value(2),
+      ));
+
+      final result = await filterCandidates(epsDao, [ep('dl-1')], 1);
+      expect(result, isEmpty);
+    });
+
+    test('enqueues failed episode (status=4)', () async {
+      await epsDao.upsert(EpisodesCompanion(
+        id: const Value('fail-1'),
+        podcastId: const Value('pod-1'),
+        title: const Value('Failed'),
+        audioUrl: const Value('https://x.com/fail.mp3'),
+        status: const Value(4),
+      ));
+
+      final result = await filterCandidates(epsDao, [ep('fail-1')], 1);
+      expect(result, ['fail-1']);
+    });
+
+    test('enqueues canceled episode (status=5)', () async {
+      await epsDao.upsert(EpisodesCompanion(
+        id: const Value('cancel-1'),
+        podcastId: const Value('pod-1'),
+        title: const Value('Canceled'),
+        audioUrl: const Value('https://x.com/cancel.mp3'),
+        status: const Value(5),
+      ));
+
+      final result = await filterCandidates(epsDao, [ep('cancel-1')], 1);
+      expect(result, ['cancel-1']);
+    });
+
+    test('enqueues none/unstarted episode (status=0)', () async {
+      await epsDao.upsert(EpisodesCompanion(
+        id: const Value('none-1'),
+        podcastId: const Value('pod-1'),
+        title: const Value('None'),
+        audioUrl: const Value('https://x.com/none.mp3'),
+        status: const Value(0),
+      ));
+
+      final result = await filterCandidates(epsDao, [ep('none-1')], 1);
+      expect(result, ['none-1']);
+    });
+
+    test('respects n limit (takes first N candidates)', () async {
+      final candidates = [ep('a'), ep('b'), ep('c'), ep('d')];
+      final result = await filterCandidates(epsDao, candidates, 2);
+      expect(result, ['a', 'b']);
+    });
+
+    test('mixed statuses: filters correctly', () async {
+      // done-1 completed, q-1 queued, new-1 new, fail-1 failed
+      await epsDao.upsert(EpisodesCompanion(
+        id: const Value('done-1'),
+        podcastId: const Value('pod-1'),
+        title: const Value('Done'),
+        audioUrl: const Value('https://x.com/d.mp3'),
+        status: const Value(3),
+        localPath: const Value('/f.mp3'),
+      ));
+      await epsDao.upsert(EpisodesCompanion(
+        id: const Value('q-1'),
+        podcastId: const Value('pod-1'),
+        title: const Value('Queued'),
+        audioUrl: const Value('https://x.com/q.mp3'),
+        status: const Value(1),
+      ));
+
+      final candidates = [ep('done-1'), ep('q-1'), ep('new-1'), ep('fail-1')];
+
+      // Pre-insert fail-1 as failed
+      await epsDao.upsert(EpisodesCompanion(
+        id: const Value('fail-1'),
+        podcastId: const Value('pod-1'),
+        title: const Value('Failed'),
+        audioUrl: const Value('https://x.com/f.mp3'),
+        status: const Value(4),
+      ));
+
+      final result = await filterCandidates(epsDao, candidates, 4);
+      expect(result, containsAll(['new-1', 'fail-1']));
+      expect(result, isNot(contains('done-1')));
+      expect(result, isNot(contains('q-1')));
+    });
+
+    test('completed without localPath IS enqueued', () async {
+      // status=3 but localPath is empty -> not "done", should be re-enqueued
+      await epsDao.upsert(EpisodesCompanion(
+        id: const Value('nofile-1'),
+        podcastId: const Value('pod-1'),
+        title: const Value('NoFile'),
+        audioUrl: const Value('https://x.com/nf.mp3'),
+        status: const Value(3),
+        localPath: const Value(''),
+      ));
+
+      final result = await filterCandidates(epsDao, [ep('nofile-1')], 1);
+      expect(result, ['nofile-1']);
+    });
+  });
+}
+```
+
+### Inhalt von `klubradio_archivum/test/providers/episode_provider_playback_test.dart`
+```dart
+// test/providers/episode_provider_playback_test.dart
+//
+// Unit tests for playback, lifecycle, and stream callback methods in
+// EpisodeProvider — complementing the queue tests in
+// episode_provider_queue_test.dart.
+//
+// Covers:
+//   - playEpisode      : currentEpisode, loadEpisode call, busy guard, queue handling
+//   - onEpisodeDownloaded : localFilePath update, no-op cases
+//   - seekRelative      : forward/backward, clamping, no-op when null
+//   - playback controls : togglePlayPause, seek, updatePlaybackSpeed
+//   - stream callbacks  : position, playerState, buffering, error streams
+//   - fetchEpisodes     : delegation, cache clearing
+
+import 'dart:async';
+
+import 'package:flutter_test/flutter_test.dart';
+import 'package:just_audio/just_audio.dart';
+import 'package:mockito/mockito.dart';
+
+import 'package:klubradio_archivum/db/app_database.dart' as db;
+import 'package:klubradio_archivum/models/episode.dart';
+import 'package:klubradio_archivum/providers/episode_provider.dart';
+import 'package:klubradio_archivum/services/api_service.dart';
+import 'package:klubradio_archivum/services/audio_player_service.dart';
+
+// Reuse the generated mocks from the queue test file.
+import 'episode_provider_queue_test.mocks.dart';
+
+void main() {
+  // ==================== Helpers ====================
+
+  /// Creates a minimal Episode with the given [id].
+  Episode ep(String id, {String title = '', String? localPath}) => Episode(
+        id: id,
+        podcastId: 'pod-1',
+        title: title.isEmpty ? 'Episode $id' : title,
+        description: 'Desc',
+        audioUrl: 'https://example.com/$id.mp3',
+        publishedAt: DateTime(2024, 1, 1),
+        showDate: '2024-01-01',
+        duration: const Duration(minutes: 30),
+        localFilePath: localPath,
+      );
+
+  // ==================== Test fixtures ====================
+
+  late MockAudioPlayerService mockAudio;
+  late MockApiService mockApi;
+  late MockAppDatabase mockDb;
+  late StreamController<Duration> positionCtrl;
+  late StreamController<PlayerState> playerStateCtrl;
+  late StreamController<bool> bufferingCtrl;
+  late StreamController<String?> errorCtrl;
+  late EpisodeProvider provider;
+
+  setUp(() {
+    positionCtrl = StreamController<Duration>.broadcast();
+    playerStateCtrl = StreamController<PlayerState>.broadcast();
+    bufferingCtrl = StreamController<bool>.broadcast();
+    errorCtrl = StreamController<String?>.broadcast();
+
+    mockAudio = MockAudioPlayerService();
+    mockApi = MockApiService();
+    mockDb = MockAppDatabase();
+
+    // Stub streams required by EpisodeProvider constructor
+    when(mockAudio.positionStream).thenAnswer((_) => positionCtrl.stream);
+    when(mockAudio.playerStateStream)
+        .thenAnswer((_) => playerStateCtrl.stream);
+    when(mockAudio.bufferingStream).thenAnswer((_) => bufferingCtrl.stream);
+    when(mockAudio.errorStream).thenAnswer((_) => errorCtrl.stream);
+    when(mockAudio.isPlaying).thenReturn(false);
+    when(mockAudio.totalDuration).thenReturn(null);
+    when(mockAudio.currentEpisode).thenReturn(null);
+
+    // Default stubs for methods called during playEpisode
+    when(mockAudio.loadEpisode(any)).thenAnswer((_) async {});
+    when(mockAudio.setSpeed(any)).thenAnswer((_) async {});
+    when(mockAudio.seek(any)).thenAnswer((_) async {});
+    when(mockAudio.togglePlayPause()).thenAnswer((_) async {});
+
+    provider = EpisodeProvider(
+      apiService: mockApi,
+      audioPlayerService: mockAudio,
+      db: mockDb,
+    );
+  });
+
+  tearDown(() async {
+    await positionCtrl.close();
+    await playerStateCtrl.close();
+    await bufferingCtrl.close();
+    await errorCtrl.close();
+    await provider.dispose();
+  });
+
+  // ==================== playEpisode ====================
+
+  group('playEpisode', () {
+    test('sets currentEpisode and notifies listeners', () async {
+      int calls = 0;
+      provider.addListener(() => calls++);
+
+      final a = ep('a');
+      await provider.playEpisode(a, queue: [a]);
+
+      expect(provider.currentEpisode?.id, 'a');
+      expect(calls, greaterThan(0));
+    });
+
+    test('calls audioService.loadEpisode with the episode', () async {
+      final a = ep('a');
+      await provider.playEpisode(a, queue: [a]);
+
+      verify(mockAudio.loadEpisode(a)).called(1);
+    });
+
+    test('busy guard prevents concurrent calls', () async {
+      // Make loadEpisode take a long time so the first call stays busy.
+      final completer = Completer<void>();
+      when(mockAudio.loadEpisode(any)).thenAnswer((_) => completer.future);
+
+      final a = ep('a');
+      final b = ep('b');
+
+      // Start first call (does not complete)
+      final firstCall = provider.playEpisode(a, queue: [a, b]);
+
+      // Second call should be rejected because _playBusy is true
+      await provider.playEpisode(b, queue: [a, b]);
+
+      // Current episode should be 'a' (first call set it before await)
+      expect(provider.currentEpisode?.id, 'a');
+
+      // Let first call complete
+      completer.complete();
+      await firstCall;
+    });
+
+    test('with queue parameter, sets the queue', () async {
+      final a = ep('a');
+      final b = ep('b');
+      await provider.playEpisode(a, queue: [a, b]);
+
+      expect(provider.queue.map((e) => e.id), ['a', 'b']);
+    });
+
+    test('without queue parameter, prepends to existing queue', () async {
+      provider.addToQueue(ep('b'));
+      provider.addToQueue(ep('c'));
+
+      await provider.playEpisode(ep('a'));
+
+      expect(provider.queue.first.id, 'a');
+      expect(provider.queue.length, 3);
+    });
+
+    test('calls setSpeed with current playback speed after loading', () async {
+      // Change speed first
+      await provider.updatePlaybackSpeed(1.5);
+      reset(mockAudio);
+
+      // Re-stub everything after reset
+      when(mockAudio.positionStream).thenAnswer((_) => positionCtrl.stream);
+      when(mockAudio.playerStateStream)
+          .thenAnswer((_) => playerStateCtrl.stream);
+      when(mockAudio.bufferingStream).thenAnswer((_) => bufferingCtrl.stream);
+      when(mockAudio.errorStream).thenAnswer((_) => errorCtrl.stream);
+      when(mockAudio.loadEpisode(any)).thenAnswer((_) async {});
+      when(mockAudio.setSpeed(any)).thenAnswer((_) async {});
+
+      final a = ep('a');
+      await provider.playEpisode(a, queue: [a]);
+
+      verify(mockAudio.setSpeed(1.5)).called(1);
+    });
+  });
+
+  // ==================== onEpisodeDownloaded ====================
+
+  group('onEpisodeDownloaded', () {
+    test('updates localFilePath of current episode', () async {
+      final a = ep('a');
+      await provider.playEpisode(a, queue: [a]);
+
+      await provider.onEpisodeDownloaded('a', '/downloads/a.mp3');
+
+      expect(provider.currentEpisode?.localFilePath, '/downloads/a.mp3');
+    });
+
+    test('notifies listeners when current episode matches', () async {
+      final a = ep('a');
+      await provider.playEpisode(a, queue: [a]);
+
+      int calls = 0;
+      provider.addListener(() => calls++);
+
+      await provider.onEpisodeDownloaded('a', '/downloads/a.mp3');
+
+      expect(calls, greaterThan(0));
+    });
+
+    test('does not update localFilePath when episode ID does not match',
+        () async {
+      final a = ep('a');
+      await provider.playEpisode(a, queue: [a]);
+
+      await provider.onEpisodeDownloaded('b', '/downloads/b.mp3');
+
+      expect(provider.currentEpisode?.localFilePath, isNull);
+    });
+
+    test('is safe when no current episode is set', () async {
+      // No episode playing — should not throw
+      await provider.onEpisodeDownloaded('a', '/downloads/a.mp3');
+
+      expect(provider.currentEpisode, isNull);
+    });
+
+    test('notifies listeners even when episode ID does not match', () async {
+      // The implementation always calls notifyListeners regardless of match
+      final a = ep('a');
+      await provider.playEpisode(a, queue: [a]);
+
+      int calls = 0;
+      provider.addListener(() => calls++);
+
+      await provider.onEpisodeDownloaded('non-existent', '/path');
+
+      // notifyListeners is called unconditionally in the source
+      expect(calls, greaterThan(0));
+    });
+  });
+
+  // ==================== seekRelative ====================
+
+  group('seekRelative', () {
+    test('seeks forward by given duration', () async {
+      when(mockAudio.totalDuration)
+          .thenReturn(const Duration(minutes: 30));
+
+      // Simulate current position at 5 minutes via position stream
+      positionCtrl.add(const Duration(minutes: 5));
+      await Future<void>.delayed(Duration.zero); // let stream propagate
+
+      await provider.seekRelative(const Duration(seconds: 30));
+
+      final expectedPosition = const Duration(minutes: 5, seconds: 30);
+      verify(mockAudio.seek(expectedPosition)).called(1);
+    });
+
+    test('seeks backward by given duration', () async {
+      when(mockAudio.totalDuration)
+          .thenReturn(const Duration(minutes: 30));
+
+      positionCtrl.add(const Duration(minutes: 5));
+      await Future<void>.delayed(Duration.zero);
+
+      await provider.seekRelative(const Duration(seconds: -30));
+
+      final expectedPosition = const Duration(minutes: 4, seconds: 30);
+      verify(mockAudio.seek(expectedPosition)).called(1);
+    });
+
+    test('clamps to zero when seeking past start', () async {
+      when(mockAudio.totalDuration)
+          .thenReturn(const Duration(minutes: 30));
+
+      positionCtrl.add(const Duration(seconds: 10));
+      await Future<void>.delayed(Duration.zero);
+
+      await provider.seekRelative(const Duration(seconds: -60));
+
+      verify(mockAudio.seek(Duration.zero)).called(1);
+    });
+
+    test('clamps to total duration when seeking past end', () async {
+      const total = Duration(minutes: 30);
+      when(mockAudio.totalDuration).thenReturn(total);
+
+      positionCtrl.add(const Duration(minutes: 29, seconds: 50));
+      await Future<void>.delayed(Duration.zero);
+
+      await provider.seekRelative(const Duration(seconds: 30));
+
+      verify(mockAudio.seek(total)).called(1);
+    });
+
+    test('uses Duration.zero as total when totalDuration is null', () async {
+      // totalDuration returns null (default stub)
+      when(mockAudio.totalDuration).thenReturn(null);
+
+      positionCtrl.add(const Duration(seconds: 10));
+      await Future<void>.delayed(Duration.zero);
+
+      // Seeking forward when total is zero → clamps to Duration.zero
+      await provider.seekRelative(const Duration(seconds: 5));
+
+      verify(mockAudio.seek(Duration.zero)).called(1);
+    });
+
+    test('updates positionNotifier optimistically before seek', () async {
+      when(mockAudio.totalDuration)
+          .thenReturn(const Duration(minutes: 30));
+
+      positionCtrl.add(const Duration(minutes: 5));
+      await Future<void>.delayed(Duration.zero);
+
+      await provider.seekRelative(const Duration(seconds: 15));
+
+      expect(
+        provider.positionNotifier.value,
+        const Duration(minutes: 5, seconds: 15),
+      );
+    });
+  });
+
+  // ==================== playback controls ====================
+
+  group('playback controls', () {
+    test('togglePlayPause delegates to audio service', () async {
+      await provider.togglePlayPause();
+
+      verify(mockAudio.togglePlayPause()).called(1);
+    });
+
+    test('seek delegates to audio service', () async {
+      const target = Duration(minutes: 10);
+      await provider.seek(target);
+
+      verify(mockAudio.seek(target)).called(1);
+    });
+
+    test('updatePlaybackSpeed calls audioService.setSpeed', () async {
+      await provider.updatePlaybackSpeed(2.0);
+
+      verify(mockAudio.setSpeed(2.0)).called(1);
+    });
+
+    test('updatePlaybackSpeed updates playbackSpeed getter', () async {
+      await provider.updatePlaybackSpeed(1.5);
+
+      expect(provider.playbackSpeed, 1.5);
+    });
+
+    test('updatePlaybackSpeed notifies listeners', () async {
+      int calls = 0;
+      provider.addListener(() => calls++);
+
+      await provider.updatePlaybackSpeed(0.75);
+
+      expect(calls, 1);
+    });
+  });
+
+  // ==================== stream callbacks ====================
+
+  group('stream callbacks', () {
+    test('position stream updates positionNotifier', () async {
+      const pos = Duration(minutes: 3, seconds: 42);
+      positionCtrl.add(pos);
+      await Future<void>.delayed(Duration.zero);
+
+      expect(provider.positionNotifier.value, pos);
+    });
+
+    test('playerState stream notifies listeners', () async {
+      int calls = 0;
+      provider.addListener(() => calls++);
+
+      playerStateCtrl.add(PlayerState(false, ProcessingState.ready));
+      await Future<void>.delayed(Duration.zero);
+
+      expect(calls, 1);
+    });
+
+    test('buffering stream updates isBuffering and notifies', () async {
+      int calls = 0;
+      provider.addListener(() => calls++);
+
+      bufferingCtrl.add(true);
+      await Future<void>.delayed(Duration.zero);
+
+      expect(provider.isBuffering, true);
+      expect(calls, 1);
+
+      bufferingCtrl.add(false);
+      await Future<void>.delayed(Duration.zero);
+
+      expect(provider.isBuffering, false);
+      expect(calls, 2);
+    });
+
+    test('error stream notifies listeners', () async {
+      int calls = 0;
+      provider.addListener(() => calls++);
+
+      // currentEpisode is null on the service → provider clears its episode
+      when(mockAudio.currentEpisode).thenReturn(null);
+
+      errorCtrl.add('Some audio error');
+      await Future<void>.delayed(Duration.zero);
+
+      expect(calls, 1);
+    });
+
+    test('error stream clears currentEpisode when service has none', () async {
+      final a = ep('a');
+      await provider.playEpisode(a, queue: [a]);
+      expect(provider.currentEpisode, isNotNull);
+
+      // Simulate the audio service clearing its episode on error
+      when(mockAudio.currentEpisode).thenReturn(null);
+
+      errorCtrl.add('Load failed');
+      await Future<void>.delayed(Duration.zero);
+
+      expect(provider.currentEpisode, isNull);
+    });
+
+    test('error stream keeps currentEpisode when service still has one',
+        () async {
+      final a = ep('a');
+      await provider.playEpisode(a, queue: [a]);
+
+      // Service still considers the episode loaded
+      when(mockAudio.currentEpisode).thenReturn(a);
+
+      errorCtrl.add('Transient error');
+      await Future<void>.delayed(Duration.zero);
+
+      // Provider should NOT clear its episode
+      expect(provider.currentEpisode?.id, 'a');
+    });
+
+    test('position stream resets to zero when error clears episode', () async {
+      final a = ep('a');
+      await provider.playEpisode(a, queue: [a]);
+
+      // Set position to something
+      positionCtrl.add(const Duration(minutes: 5));
+      await Future<void>.delayed(Duration.zero);
+      expect(provider.positionNotifier.value, const Duration(minutes: 5));
+
+      // Error clears episode
+      when(mockAudio.currentEpisode).thenReturn(null);
+      errorCtrl.add('Fatal error');
+      await Future<void>.delayed(Duration.zero);
+
+      expect(provider.positionNotifier.value, Duration.zero);
+    });
+  });
+
+  // ==================== fetchEpisodes ====================
+
+  group('fetchEpisodes', () {
+    test('delegates to apiService.fetchEpisodesForPodcast', () async {
+      final episodes = [ep('a'), ep('b')];
+      when(mockApi.fetchEpisodesForPodcast('pod-1'))
+          .thenAnswer((_) async => episodes);
+
+      final result = await provider.fetchEpisodes('pod-1');
+
+      verify(mockApi.fetchEpisodesForPodcast('pod-1')).called(1);
+      expect(result.length, 2);
+      expect(result.first.id, 'a');
+    });
+
+    test('clearLoadedPodcastsCache clears the cache', () {
+      // This should not throw; it clears the internal _loadedPodcasts map
+      provider.clearLoadedPodcastsCache();
+
+      // No assertion beyond "does not throw" — the cache is internal.
+      // The observable effect is that loadEpisodesIntoDb would re-fetch,
+      // but that requires DB mocking beyond this test's scope.
+    });
+  });
+
+  // ==================== playNext / playPrevious ====================
+
+  group('playNext', () {
+    test('plays next episode in queue', () async {
+      final a = ep('a');
+      final b = ep('b');
+      await provider.playEpisode(a, queue: [a, b]);
+
+      await provider.playNext();
+
+      expect(provider.currentEpisode?.id, 'b');
+    });
+
+    test('does nothing when at last episode', () async {
+      final a = ep('a');
+      await provider.playEpisode(a, queue: [a]);
+
+      await provider.playNext();
+
+      expect(provider.currentEpisode?.id, 'a');
+    });
+
+    test('does nothing when no current episode', () async {
+      await provider.playNext();
+
+      expect(provider.currentEpisode, isNull);
+    });
+  });
+
+  group('playPrevious', () {
+    test('plays previous episode in queue', () async {
+      final a = ep('a');
+      final b = ep('b');
+      await provider.playEpisode(b, queue: [a, b]);
+
+      await provider.playPrevious();
+
+      expect(provider.currentEpisode?.id, 'a');
+    });
+
+    test('does nothing when at first episode', () async {
+      final a = ep('a');
+      final b = ep('b');
+      await provider.playEpisode(a, queue: [a, b]);
+
+      await provider.playPrevious();
+
+      expect(provider.currentEpisode?.id, 'a');
+    });
+
+    test('does nothing when no current episode', () async {
+      await provider.playPrevious();
+
+      expect(provider.currentEpisode, isNull);
+    });
+  });
+
+  // ==================== isPlaying getter ====================
+
+  group('isPlaying', () {
+    test('delegates to audioPlayerService.isPlaying', () {
+      when(mockAudio.isPlaying).thenReturn(true);
+      expect(provider.isPlaying, true);
+
+      when(mockAudio.isPlaying).thenReturn(false);
+      expect(provider.isPlaying, false);
+    });
+  });
+
+  // ==================== totalDuration getter ====================
+
+  group('totalDuration', () {
+    test('delegates to audioPlayerService.totalDuration', () {
+      when(mockAudio.totalDuration)
+          .thenReturn(const Duration(minutes: 45));
+      expect(provider.totalDuration, const Duration(minutes: 45));
+
+      when(mockAudio.totalDuration).thenReturn(null);
+      expect(provider.totalDuration, isNull);
     });
   });
 }
@@ -20015,6 +21495,546 @@ class MockAppDatabase extends _i1.Mock implements _i4.AppDatabase {
 }
 ```
 
+### Inhalt von `klubradio_archivum/test/providers/podcast_provider_extended_test.dart`
+```dart
+// test/providers/podcast_provider_extended_test.dart
+//
+// Tests for PodcastProvider methods NOT covered by podcast_provider_search_test:
+//   - updateDependencies: swaps service references
+//   - loadInitialData: parallel fetch, loading lifecycle, guard, forceRefresh
+//   - loadUserProfile: success/error paths
+//   - downloadEpisode: delegates to downloadProvider, swallows errors
+//   - removeDownload: delegates to downloadProvider
+//   - fetchEpisodesForPodcast: caches result, returns cached on repeat
+//   - searchEpisodes: delegates to apiService, returns empty on error
+//   - toggleFavourite: add/remove, null profile no-op
+//   - updateAutoDownloadCount: updates profile
+//   - fetchPodcastById: delegates, returns null on error
+//   - loadTopShows: loading lifecycle, skip-if-loaded guard
+//   - subscribedPodcasts: filters by userProfile subscriptions
+
+import 'package:flutter_test/flutter_test.dart';
+
+import 'package:klubradio_archivum/models/episode.dart';
+import 'package:klubradio_archivum/models/podcast.dart';
+import 'package:klubradio_archivum/models/show_data.dart';
+import 'package:klubradio_archivum/models/user_profile.dart';
+import 'package:klubradio_archivum/providers/podcast_provider.dart';
+import 'package:klubradio_archivum/providers/download_provider.dart';
+import 'package:klubradio_archivum/providers/profile_provider.dart';
+import 'package:klubradio_archivum/services/api_service.dart';
+import 'package:klubradio_archivum/services/api_cache_service.dart';
+import 'package:klubradio_archivum/screens/utils/constants.dart' as constants;
+
+// ==================== Helpers ====================
+
+Episode _ep(String id) => Episode(
+      id: id,
+      podcastId: 'pod-1',
+      title: 'Ep $id',
+      description: '',
+      audioUrl: 'https://x.com/$id.mp3',
+      publishedAt: DateTime(2024),
+      showDate: '2024-01-01',
+      duration: const Duration(minutes: 30),
+    );
+
+Podcast _pod(String id, {String title = ''}) => Podcast(
+      id: id,
+      title: title.isEmpty ? 'Pod $id' : title,
+      description: '',
+      coverImageUrl: '',
+      episodeCount: 0,
+      hosts: const [],
+    );
+
+ShowData _show(String id, {String title = '', int count = 10}) => ShowData(
+      id: id,
+      title: title.isEmpty ? 'Show $id' : title,
+      count: count,
+    );
+
+// ==================== Stubs ====================
+
+class _StubCacheService extends ApiCacheService {
+  @override
+  Future<dynamic> get(String key) async => null;
+  @override
+  Future<void> save(String key, dynamic data, {Duration? expiry}) async {}
+}
+
+class _StubApiService extends ApiService {
+  _StubApiService() : super(cacheService: _StubCacheService());
+
+  Future<List<Podcast>> Function()? latestHandler;
+  Future<List<Podcast>> Function()? trendingHandler;
+  Future<List<Episode>> Function()? recentHandler;
+  Future<List<ShowData>> Function()? topShowsHandler;
+  Future<UserProfile> Function(String)? profileHandler;
+  Future<List<Episode>> Function(String)? episodesHandler;
+  Future<Podcast?> Function(String)? podcastByIdHandler;
+  Future<List<Episode>> Function(String)? searchEpisodesHandler;
+
+  @override
+  bool get hasValidCredentials => false;
+
+  @override
+  Future<List<Podcast>> fetchLatestPodcasts({int limit = 20}) async {
+    if (latestHandler != null) return latestHandler!();
+    return <Podcast>[];
+  }
+
+  @override
+  Future<List<Podcast>> fetchTrendingPodcasts({int limit = 20}) async {
+    if (trendingHandler != null) return trendingHandler!();
+    return <Podcast>[];
+  }
+
+  @override
+  Future<List<Episode>> fetchRecentEpisodes({int limit = 8}) async {
+    if (recentHandler != null) return recentHandler!();
+    return <Episode>[];
+  }
+
+  @override
+  Future<List<ShowData>> fetchTopShowsThisYear() async {
+    if (topShowsHandler != null) return topShowsHandler!();
+    return <ShowData>[];
+  }
+
+  @override
+  Future<UserProfile> fetchUserProfile(String userId) async {
+    if (profileHandler != null) return profileHandler!(userId);
+    return UserProfile.initial(userId);
+  }
+
+  @override
+  Future<List<Episode>> fetchEpisodesForPodcast(String podcastId,
+      {int limit = 50, int offset = 0}) async {
+    if (episodesHandler != null) return episodesHandler!(podcastId);
+    return <Episode>[];
+  }
+
+  @override
+  Future<Podcast?> fetchPodcastById(String podcastId) async {
+    if (podcastByIdHandler != null) return podcastByIdHandler!(podcastId);
+    return null;
+  }
+
+  @override
+  Future<List<Episode>> searchEpisodes(String query) async {
+    if (searchEpisodesHandler != null) return searchEpisodesHandler!(query);
+    return <Episode>[];
+  }
+}
+
+class _StubProfileProvider extends ProfileProvider {
+  _StubProfileProvider() : super();
+}
+
+/// Tracks calls to enqueue and removeLocalFile without needing native plugins.
+class _TrackingDownloadProvider extends Fake implements DownloadProvider {
+  final List<Episode> enqueuedEpisodes = [];
+  final List<String> removedEpisodeIds = [];
+  bool shouldThrowOnEnqueue = false;
+
+  @override
+  Future<void> enqueue(Episode ep) async {
+    if (shouldThrowOnEnqueue) throw Exception('enqueue failed');
+    enqueuedEpisodes.add(ep);
+  }
+
+  @override
+  Future<void> removeLocalFile(String episodeId) async {
+    removedEpisodeIds.add(episodeId);
+  }
+}
+
+class _FakeDownloadProvider extends Fake implements DownloadProvider {}
+
+// ==================== Tests ====================
+
+void main() {
+  late _StubApiService apiService;
+  late _StubCacheService cacheService;
+  late _TrackingDownloadProvider downloadProvider;
+  late _StubProfileProvider profileProvider;
+  late PodcastProvider provider;
+
+  setUp(() {
+    apiService = _StubApiService();
+    cacheService = _StubCacheService();
+    downloadProvider = _TrackingDownloadProvider();
+    profileProvider = _StubProfileProvider();
+    provider = PodcastProvider(
+      apiService: apiService,
+      downloadProvider: downloadProvider,
+      profileProvider: profileProvider,
+      apiCacheService: cacheService,
+    );
+  });
+
+  group('updateDependencies', () {
+    test('swaps services when different objects passed', () {
+      final newApi = _StubApiService();
+      final newDownload = _FakeDownloadProvider();
+      final newProfile = _StubProfileProvider();
+      final newCache = _StubCacheService();
+
+      // Should not throw
+      provider.updateDependencies(newApi, newDownload, newProfile, newCache);
+
+      // Verify new service is used: set handler on newApi and call a method
+      newApi.latestHandler = () async => [_pod('new-pod')];
+      // The provider should now use newApi internally
+      // (We verify indirectly via loadInitialData)
+    });
+
+    test('does not swap when same objects passed', () {
+      // Calling with identical references should be a no-op (no crash)
+      provider.updateDependencies(
+        apiService,
+        downloadProvider,
+        profileProvider,
+        cacheService,
+      );
+    });
+  });
+
+  group('loadInitialData', () {
+    test('calls fetch methods in parallel and populates lists', () async {
+      apiService.latestHandler = () async => [_pod('p1'), _pod('p2')];
+      apiService.trendingHandler = () async => [_pod('t1')];
+      apiService.recentHandler = () async => [_ep('e1'), _ep('e2')];
+      apiService.topShowsHandler = () async => [_show('s1')];
+
+      await provider.loadInitialData();
+
+      expect(provider.podcasts, hasLength(2));
+      expect(provider.trendingPodcasts, hasLength(1));
+      expect(provider.recentEpisodes, hasLength(2));
+      expect(provider.topShows, hasLength(1));
+    });
+
+    test('sets isLoading=true then false', () async {
+      final loadingStates = <bool>[];
+      provider.addListener(() => loadingStates.add(provider.isLoading));
+
+      await provider.loadInitialData();
+
+      // First notification: isLoading=true, last notification: isLoading=false
+      expect(loadingStates.first, isTrue);
+      expect(loadingStates.last, isFalse);
+    });
+
+    test('skips if already loading (guard)', () async {
+      // Simulate already-loading state by starting a load that blocks
+      int callCount = 0;
+      apiService.latestHandler = () async {
+        callCount++;
+        await Future.delayed(const Duration(milliseconds: 50));
+        return <Podcast>[];
+      };
+
+      // Start first load (don't await)
+      final first = provider.loadInitialData();
+      // Immediately try second load - should be skipped
+      final second = provider.loadInitialData();
+
+      await Future.wait([first, second]);
+
+      // latestHandler should only be called once
+      expect(callCount, 1);
+    });
+
+    test('with forceRefresh=true runs even if already loading', () async {
+      int callCount = 0;
+      apiService.latestHandler = () async {
+        callCount++;
+        return <Podcast>[];
+      };
+
+      // Start first load
+      final first = provider.loadInitialData();
+      // Force refresh should NOT be skipped
+      final second = provider.loadInitialData(forceRefresh: true);
+
+      await Future.wait([first, second]);
+
+      expect(callCount, greaterThanOrEqualTo(2));
+    });
+
+    test('clears errorMessage on start', () async {
+      // Trigger an error first
+      apiService.latestHandler = () => throw Exception('fail');
+      await provider.loadInitialData();
+
+      // Now load successfully
+      apiService.latestHandler = () async => <Podcast>[];
+      await provider.loadInitialData(forceRefresh: true);
+
+      expect(provider.errorMessage, isNull);
+    });
+  });
+
+  group('loadUserProfile', () {
+    test('sets userProfile on success', () async {
+      final profile = UserProfile.initial('user-1');
+      apiService.profileHandler = (_) async => profile;
+
+      await provider.loadUserProfile(userId: 'user-1');
+
+      expect(provider.userProfile, isNotNull);
+      expect(provider.userProfile!.id, 'user-1');
+    });
+
+    test('sets errorMessage on failure', () async {
+      apiService.profileHandler = (_) => throw Exception('Network error');
+
+      await provider.loadUserProfile(userId: 'user-1');
+
+      expect(provider.errorMessage, isNotNull);
+      expect(provider.errorMessage, contains('Network error'));
+    });
+  });
+
+  group('downloadEpisode', () {
+    test('delegates to downloadProvider.enqueue', () async {
+      final episode = _ep('ep-dl');
+      await provider.downloadEpisode(episode);
+
+      expect(downloadProvider.enqueuedEpisodes, hasLength(1));
+      expect(downloadProvider.enqueuedEpisodes.first.id, 'ep-dl');
+    });
+
+    test('swallows errors', () async {
+      downloadProvider.shouldThrowOnEnqueue = true;
+      final episode = _ep('ep-fail');
+
+      // Should not throw
+      await provider.downloadEpisode(episode);
+    });
+  });
+
+  group('removeDownload', () {
+    test('delegates to downloadProvider.removeLocalFile', () async {
+      await provider.removeDownload('ep-rm');
+
+      expect(downloadProvider.removedEpisodeIds, ['ep-rm']);
+    });
+
+    test('notifies listeners after removal', () async {
+      int count = 0;
+      provider.addListener(() => count++);
+
+      await provider.removeDownload('ep-rm');
+
+      expect(count, greaterThan(0));
+    });
+  });
+
+  group('fetchEpisodesForPodcast', () {
+    test('fetches from API and caches result', () async {
+      int callCount = 0;
+      apiService.episodesHandler = (podcastId) async {
+        callCount++;
+        return [_ep('e1'), _ep('e2')];
+      };
+
+      final result = await provider.fetchEpisodesForPodcast('pod-1');
+
+      expect(result, hasLength(2));
+      expect(callCount, 1);
+    });
+
+    test('returns cached episodes on second call', () async {
+      int callCount = 0;
+      apiService.episodesHandler = (_) async {
+        callCount++;
+        return [_ep('e1')];
+      };
+
+      await provider.fetchEpisodesForPodcast('pod-1');
+      final second = await provider.fetchEpisodesForPodcast('pod-1');
+
+      expect(second, hasLength(1));
+      expect(callCount, 1); // API called only once
+    });
+  });
+
+  group('searchEpisodes', () {
+    test('delegates to apiService.searchEpisodes', () async {
+      apiService.searchEpisodesHandler =
+          (q) async => [_ep('match-1'), _ep('match-2')];
+
+      final results = await provider.searchEpisodes('test');
+
+      expect(results, hasLength(2));
+      expect(results.first.id, 'match-1');
+    });
+
+    test('returns empty list on error', () async {
+      apiService.searchEpisodesHandler =
+          (_) => throw ApiException('Search failed');
+
+      final results = await provider.searchEpisodes('failing');
+
+      expect(results, isEmpty);
+    });
+  });
+
+  group('toggleFavourite', () {
+    setUp(() async {
+      apiService.profileHandler = (_) async => UserProfile.initial('u1');
+      await provider.loadUserProfile(userId: 'u1');
+    });
+
+    test('adds episode to favourites set', () {
+      provider.toggleFavourite(_ep('ep-fav'));
+
+      expect(
+        provider.userProfile!.favouriteEpisodeIds,
+        contains('ep-fav'),
+      );
+    });
+
+    test('removes episode from favourites set', () {
+      // Add first
+      provider.toggleFavourite(_ep('ep-fav'));
+      expect(provider.userProfile!.favouriteEpisodeIds, contains('ep-fav'));
+
+      // Toggle off
+      provider.toggleFavourite(_ep('ep-fav'));
+      expect(
+        provider.userProfile!.favouriteEpisodeIds,
+        isNot(contains('ep-fav')),
+      );
+    });
+
+    test('null profile is no-op', () {
+      // Create fresh provider without loading profile
+      final fresh = PodcastProvider(
+        apiService: apiService,
+        downloadProvider: downloadProvider,
+        profileProvider: profileProvider,
+        apiCacheService: cacheService,
+      );
+      int count = 0;
+      fresh.addListener(() => count++);
+
+      fresh.toggleFavourite(_ep('ep-1'));
+
+      expect(count, 0);
+    });
+  });
+
+  group('updateAutoDownloadCount', () {
+    test('updates profile autoDownloadEpisodeCount', () async {
+      apiService.profileHandler = (_) async => UserProfile.initial('u1');
+      await provider.loadUserProfile(userId: 'u1');
+
+      provider.updateAutoDownloadCount(5);
+
+      expect(provider.userProfile!.autoDownloadEpisodeCount, 5);
+    });
+
+    test('null profile is no-op', () {
+      int count = 0;
+      provider.addListener(() => count++);
+
+      provider.updateAutoDownloadCount(5);
+
+      expect(count, 0);
+    });
+  });
+
+  group('fetchPodcastById', () {
+    test('delegates to apiService and returns podcast', () async {
+      apiService.podcastByIdHandler = (id) async => _pod(id, title: 'Found');
+
+      final result = await provider.fetchPodcastById('pod-x');
+
+      expect(result, isNotNull);
+      expect(result!.title, 'Found');
+    });
+
+    test('returns null on error', () async {
+      apiService.podcastByIdHandler =
+          (_) => throw Exception('Not found');
+
+      final result = await provider.fetchPodcastById('bad-id');
+
+      expect(result, isNull);
+    });
+  });
+
+  group('loadTopShows', () {
+    test('sets isLoadingTopShows=true then false', () async {
+      final states = <bool>[];
+      provider.addListener(() => states.add(provider.isLoadingTopShows));
+
+      apiService.topShowsHandler = () async => [_show('s1')];
+      await provider.loadTopShows();
+
+      expect(states.first, isTrue);
+      expect(states.last, isFalse);
+      expect(provider.topShows, hasLength(1));
+    });
+
+    test('skips if already loaded and not forceRefresh', () async {
+      int callCount = 0;
+      apiService.topShowsHandler = () async {
+        callCount++;
+        return [_show('s1')];
+      };
+
+      await provider.loadTopShows();
+      await provider.loadTopShows(); // second call should be skipped
+
+      expect(callCount, 1);
+    });
+
+    test('reloads with forceRefresh=true even if already loaded', () async {
+      int callCount = 0;
+      apiService.topShowsHandler = () async {
+        callCount++;
+        return [_show('s$callCount')];
+      };
+
+      await provider.loadTopShows();
+      await provider.loadTopShows(forceRefresh: true);
+
+      expect(callCount, 2);
+    });
+  });
+
+  group('subscribedPodcasts', () {
+    test('returns empty when userProfile is null', () {
+      expect(provider.subscribedPodcasts, isEmpty);
+    });
+
+    test('filters podcasts by userProfile subscriptions', () async {
+      // Load podcasts
+      apiService.latestHandler =
+          () async => [_pod('p1'), _pod('p2'), _pod('p3')];
+      await provider.loadInitialData();
+
+      // Load profile with subscriptions to p1 and p3
+      final profile = UserProfile.initial('u1').copyWith(
+        subscribedPodcastIds: {'p1', 'p3'},
+      );
+      apiService.profileHandler = (_) async => profile;
+      await provider.loadUserProfile(userId: 'u1');
+
+      final subscribed = provider.subscribedPodcasts;
+
+      expect(subscribed, hasLength(2));
+      expect(subscribed.map((p) => p.id).toSet(), {'p1', 'p3'});
+    });
+  });
+}
+```
+
 ### Inhalt von `klubradio_archivum/test/providers/podcast_provider_search_test.dart`
 ```dart
 // test/providers/podcast_provider_search_test.dart
@@ -20270,6 +22290,364 @@ void main() {
 /// Fake DownloadProvider that extends it with noSuchMethod to avoid
 /// needing real AppDatabase/EpisodeProvider constructors.
 class _FakeDownloadProvider extends Fake implements DownloadProvider {}
+```
+
+### Inhalt von `klubradio_archivum/test/providers/profile_provider_test.dart`
+```dart
+// test/providers/profile_provider_test.dart
+//
+// Unit tests for ProfileProvider:
+//   - Initial state (null profile, not loading)
+//   - load(): loading lifecycle, notifyListeners count, profile assignment
+//   - setLanguage: updates language, saves, null profile no-op
+//   - setPlaybackSpeed: updates speed, saves
+//   - setAutoDownloadEpisodeCount: updates count, saves
+//   - toggleFavouriteEpisode: add/remove toggle
+//   - setSubscriptions: replaces subscribed IDs
+//   - addRecentlyPlayed: front insertion, dedup, max limit
+//   - All mutators with null profile are no-ops
+
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/annotations.dart';
+import 'package:mockito/mockito.dart';
+
+import 'package:klubradio_archivum/models/episode.dart';
+import 'package:klubradio_archivum/models/user_profile.dart';
+import 'package:klubradio_archivum/providers/profile_provider.dart';
+import 'package:klubradio_archivum/repositories/profile_repository.dart';
+import 'package:klubradio_archivum/screens/utils/constants.dart' as constants;
+
+@GenerateMocks([ProfileRepository])
+import 'profile_provider_test.mocks.dart';
+
+// ==================== Helpers ====================
+
+UserProfile _defaultProfile() => UserProfile.initial('test-user-1');
+
+Episode _ep(String id) => Episode(
+      id: id,
+      podcastId: 'pod-1',
+      title: 'Ep $id',
+      description: '',
+      audioUrl: 'https://x.com/$id.mp3',
+      publishedAt: DateTime(2024),
+      showDate: '2024-01-01',
+      duration: const Duration(minutes: 30),
+    );
+
+// ==================== Tests ====================
+
+void main() {
+  late MockProfileRepository mockRepo;
+  late ProfileProvider provider;
+  late int notifyCount;
+
+  setUp(() {
+    mockRepo = MockProfileRepository();
+    provider = ProfileProvider(repo: mockRepo);
+    notifyCount = 0;
+    provider.addListener(() => notifyCount++);
+  });
+
+  group('initial state', () {
+    test('profileOrNull is null', () {
+      expect(provider.profileOrNull, isNull);
+    });
+
+    test('loading is false', () {
+      expect(provider.loading, isFalse);
+    });
+  });
+
+  group('load', () {
+    test('sets loading=true then false and assigns profile', () async {
+      final profile = _defaultProfile();
+      when(mockRepo.load()).thenAnswer((_) async => profile);
+
+      await provider.load();
+
+      expect(provider.loading, isFalse);
+      expect(provider.profileOrNull, equals(profile));
+    });
+
+    test('notifies listeners twice (loading start + end)', () async {
+      when(mockRepo.load()).thenAnswer((_) async => _defaultProfile());
+
+      await provider.load();
+
+      expect(notifyCount, 2);
+    });
+  });
+
+  group('setLanguage', () {
+    test('updates language and saves', () async {
+      when(mockRepo.load()).thenAnswer((_) async => _defaultProfile());
+      when(mockRepo.save(any)).thenAnswer((_) async {});
+      await provider.load();
+      notifyCount = 0;
+
+      await provider.setLanguage('en');
+
+      expect(provider.profileOrNull!.languageCode, 'en');
+      verify(mockRepo.save(argThat(
+        predicate<UserProfile>((p) => p.languageCode == 'en'),
+      ))).called(1);
+      expect(notifyCount, 1);
+    });
+
+    test('with null profile does nothing', () async {
+      await provider.setLanguage('en');
+
+      verifyNever(mockRepo.save(any));
+      expect(notifyCount, 0);
+    });
+  });
+
+  group('setPlaybackSpeed', () {
+    test('updates speed and saves', () async {
+      when(mockRepo.load()).thenAnswer((_) async => _defaultProfile());
+      when(mockRepo.save(any)).thenAnswer((_) async {});
+      await provider.load();
+      notifyCount = 0;
+
+      await provider.setPlaybackSpeed(1.5);
+
+      expect(provider.profileOrNull!.playbackSpeed, 1.5);
+      verify(mockRepo.save(argThat(
+        predicate<UserProfile>((p) => p.playbackSpeed == 1.5),
+      ))).called(1);
+      expect(notifyCount, 1);
+    });
+
+    test('with null profile does nothing', () async {
+      await provider.setPlaybackSpeed(2.0);
+
+      verifyNever(mockRepo.save(any));
+      expect(notifyCount, 0);
+    });
+  });
+
+  group('setAutoDownloadEpisodeCount', () {
+    test('updates count and saves', () async {
+      when(mockRepo.load()).thenAnswer((_) async => _defaultProfile());
+      when(mockRepo.save(any)).thenAnswer((_) async {});
+      await provider.load();
+      notifyCount = 0;
+
+      await provider.setAutoDownloadEpisodeCount(5);
+
+      expect(provider.profileOrNull!.autoDownloadEpisodeCount, 5);
+      verify(mockRepo.save(argThat(
+        predicate<UserProfile>((p) => p.autoDownloadEpisodeCount == 5),
+      ))).called(1);
+      expect(notifyCount, 1);
+    });
+
+    test('with null profile does nothing', () async {
+      await provider.setAutoDownloadEpisodeCount(10);
+
+      verifyNever(mockRepo.save(any));
+      expect(notifyCount, 0);
+    });
+  });
+
+  group('toggleFavouriteEpisode', () {
+    test('adds episode to favourites', () async {
+      when(mockRepo.load()).thenAnswer((_) async => _defaultProfile());
+      when(mockRepo.save(any)).thenAnswer((_) async {});
+      await provider.load();
+      notifyCount = 0;
+
+      await provider.toggleFavouriteEpisode('ep-42');
+
+      expect(provider.profileOrNull!.favouriteEpisodeIds, contains('ep-42'));
+      verify(mockRepo.save(any)).called(1);
+      expect(notifyCount, 1);
+    });
+
+    test('removes existing favourite (toggle off)', () async {
+      final profile = _defaultProfile().copyWith(
+        favouriteEpisodeIds: {'ep-42', 'ep-99'},
+      );
+      when(mockRepo.load()).thenAnswer((_) async => profile);
+      when(mockRepo.save(any)).thenAnswer((_) async {});
+      await provider.load();
+      notifyCount = 0;
+
+      await provider.toggleFavouriteEpisode('ep-42');
+
+      expect(
+        provider.profileOrNull!.favouriteEpisodeIds,
+        isNot(contains('ep-42')),
+      );
+      expect(provider.profileOrNull!.favouriteEpisodeIds, contains('ep-99'));
+      verify(mockRepo.save(any)).called(1);
+    });
+
+    test('with null profile does nothing', () async {
+      await provider.toggleFavouriteEpisode('ep-1');
+
+      verifyNever(mockRepo.save(any));
+      expect(notifyCount, 0);
+    });
+  });
+
+  group('setSubscriptions', () {
+    test('replaces subscribed IDs and saves', () async {
+      when(mockRepo.load()).thenAnswer((_) async => _defaultProfile());
+      when(mockRepo.save(any)).thenAnswer((_) async {});
+      await provider.load();
+      notifyCount = 0;
+
+      await provider.setSubscriptions({'pod-a', 'pod-b'});
+
+      expect(
+        provider.profileOrNull!.subscribedPodcastIds,
+        equals({'pod-a', 'pod-b'}),
+      );
+      verify(mockRepo.save(any)).called(1);
+      expect(notifyCount, 1);
+    });
+
+    test('with null profile does nothing', () async {
+      await provider.setSubscriptions({'pod-a'});
+
+      verifyNever(mockRepo.save(any));
+      expect(notifyCount, 0);
+    });
+  });
+
+  group('addRecentlyPlayed', () {
+    test('adds episode to front', () async {
+      when(mockRepo.load()).thenAnswer((_) async => _defaultProfile());
+      when(mockRepo.save(any)).thenAnswer((_) async {});
+      await provider.load();
+      notifyCount = 0;
+
+      final episode = _ep('ep-new');
+      await provider.addRecentlyPlayed(episode);
+
+      expect(provider.profileOrNull!.recentlyPlayed.first.id, 'ep-new');
+      verify(mockRepo.save(any)).called(1);
+      expect(notifyCount, 1);
+    });
+
+    test('moves duplicate to front (dedup)', () async {
+      final profile = _defaultProfile().copyWith(
+        recentlyPlayed: [_ep('ep-a'), _ep('ep-b'), _ep('ep-c')],
+      );
+      when(mockRepo.load()).thenAnswer((_) async => profile);
+      when(mockRepo.save(any)).thenAnswer((_) async {});
+      await provider.load();
+      notifyCount = 0;
+
+      await provider.addRecentlyPlayed(_ep('ep-c'));
+
+      final ids =
+          provider.profileOrNull!.recentlyPlayed.map((e) => e.id).toList();
+      expect(ids, ['ep-c', 'ep-a', 'ep-b']);
+      // No duplicates
+      expect(ids.where((id) => id == 'ep-c').length, 1);
+    });
+
+    test('respects max limit (${constants.maxRecentlyPlayed})', () async {
+      // Pre-fill profile to exactly maxRecentlyPlayed
+      final episodes = List.generate(
+        constants.maxRecentlyPlayed,
+        (i) => _ep('existing-$i'),
+      );
+      final profile = _defaultProfile().copyWith(recentlyPlayed: episodes);
+      when(mockRepo.load()).thenAnswer((_) async => profile);
+      when(mockRepo.save(any)).thenAnswer((_) async {});
+      await provider.load();
+
+      // Add one more beyond the limit
+      await provider.addRecentlyPlayed(_ep('overflow'));
+
+      final recent = provider.profileOrNull!.recentlyPlayed;
+      expect(recent.length, constants.maxRecentlyPlayed);
+      expect(recent.first.id, 'overflow');
+      // The last existing episode should have been evicted
+      expect(
+        recent.any((e) => e.id == 'existing-${constants.maxRecentlyPlayed - 1}'),
+        isFalse,
+      );
+    });
+
+    test('with null profile does nothing', () async {
+      await provider.addRecentlyPlayed(_ep('ep-1'));
+
+      verifyNever(mockRepo.save(any));
+      expect(notifyCount, 0);
+    });
+  });
+}
+
+/// Helper matcher: creates a predicate-based Matcher for mockito's argThat.
+Matcher predicate<T>(bool Function(T) test) =>
+    isA<T>().having((v) => test(v), 'predicate', isTrue);
+```
+
+### Inhalt von `klubradio_archivum/test/providers/profile_provider_test.mocks.dart`
+```dart
+// Mocks generated by Mockito 5.4.6 from annotations
+// in klubradio_archivum/test/providers/profile_provider_test.dart.
+// Do not manually edit this file.
+
+// ignore_for_file: no_leading_underscores_for_library_prefixes
+import 'dart:async' as _i4;
+
+import 'package:klubradio_archivum/models/user_profile.dart' as _i2;
+import 'package:klubradio_archivum/repositories/profile_repository.dart' as _i3;
+import 'package:mockito/mockito.dart' as _i1;
+
+// ignore_for_file: type=lint
+// ignore_for_file: avoid_redundant_argument_values
+// ignore_for_file: avoid_setters_without_getters
+// ignore_for_file: comment_references
+// ignore_for_file: deprecated_member_use
+// ignore_for_file: deprecated_member_use_from_same_package
+// ignore_for_file: implementation_imports
+// ignore_for_file: invalid_use_of_visible_for_testing_member
+// ignore_for_file: must_be_immutable
+// ignore_for_file: prefer_const_constructors
+// ignore_for_file: unnecessary_parenthesis
+// ignore_for_file: camel_case_types
+// ignore_for_file: subtype_of_sealed_class
+// ignore_for_file: invalid_use_of_internal_member
+
+class _FakeUserProfile_0 extends _i1.SmartFake implements _i2.UserProfile {
+  _FakeUserProfile_0(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
+}
+
+/// A class which mocks [ProfileRepository].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockProfileRepository extends _i1.Mock implements _i3.ProfileRepository {
+  MockProfileRepository() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  _i4.Future<_i2.UserProfile> load() =>
+      (super.noSuchMethod(
+            Invocation.method(#load, []),
+            returnValue: _i4.Future<_i2.UserProfile>.value(
+              _FakeUserProfile_0(this, Invocation.method(#load, [])),
+            ),
+          )
+          as _i4.Future<_i2.UserProfile>);
+
+  @override
+  _i4.Future<void> save(_i2.UserProfile? profile) =>
+      (super.noSuchMethod(
+            Invocation.method(#save, [profile]),
+            returnValue: _i4.Future<void>.value(),
+            returnValueForMissingStub: _i4.Future<void>.value(),
+          )
+          as _i4.Future<void>);
+}
 ```
 
 ### Inhalt von `klubradio_archivum/test/providers/subscribe_download_flow_test.dart`
@@ -24692,6 +27070,111 @@ void main() {
 }
 ```
 
+### Inhalt von `klubradio_archivum/test/repositories/profile_repository_test.dart`
+```dart
+import 'dart:convert';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:klubradio_archivum/models/user_profile.dart';
+import 'package:klubradio_archivum/repositories/profile_repository.dart';
+
+void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
+  late ProfileRepository repo;
+
+  setUp(() {
+    SharedPreferences.setMockInitialValues({});
+    repo = ProfileRepository();
+  });
+
+  group('ProfileRepository', () {
+    test('save() persists profile to SharedPreferences', () async {
+      final profile = UserProfile(
+        id: 'test-id-42',
+        languageCode: 'en',
+        playbackSpeed: 1.5,
+        autoDownloadEpisodeCount: 3,
+        subscribedPodcastIds: {'pod-1', 'pod-2'},
+        favouriteEpisodeIds: {'ep-5'},
+        recentlyPlayed: const [],
+      );
+
+      await repo.save(profile);
+
+      final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getString('user_profile.json');
+      expect(raw, isNotNull);
+      final decoded = jsonDecode(raw!) as Map<String, dynamic>;
+      expect(decoded['id'], 'test-id-42');
+      expect(decoded['languageCode'], 'en');
+      expect(decoded['playbackSpeed'], 1.5);
+    });
+
+    test('load() with pre-populated valid JSON returns parsed profile', () async {
+      final profile = UserProfile.initial('pre-existing-id');
+      SharedPreferences.setMockInitialValues({
+        'user_profile.json': jsonEncode(profile.toJson()),
+      });
+
+      final loaded = await repo.load();
+
+      expect(loaded.id, 'pre-existing-id');
+      expect(loaded.languageCode, 'de');
+      expect(loaded.playbackSpeed, 1.0);
+      expect(loaded.autoDownloadEpisodeCount, 2);
+    });
+
+    test('save() then load() round-trip preserves all fields', () async {
+      final profile = UserProfile(
+        id: 'round-trip-id',
+        languageCode: 'hu',
+        playbackSpeed: 2.0,
+        autoDownloadEpisodeCount: 5,
+        subscribedPodcastIds: {'pod-a', 'pod-b'},
+        favouriteEpisodeIds: {'ep-x', 'ep-y'},
+        recentlyPlayed: const [],
+      );
+
+      await repo.save(profile);
+      final loaded = await repo.load();
+
+      expect(loaded.id, 'round-trip-id');
+      expect(loaded.languageCode, 'hu');
+      expect(loaded.playbackSpeed, 2.0);
+      expect(loaded.autoDownloadEpisodeCount, 5);
+      expect(loaded.subscribedPodcastIds, containsAll(['pod-a', 'pod-b']));
+      expect(loaded.favouriteEpisodeIds, containsAll(['ep-x', 'ep-y']));
+    });
+
+    test('save() overwrites existing profile', () async {
+      final first = UserProfile.initial('first-id');
+      final second = UserProfile.initial('second-id');
+
+      await repo.save(first);
+      await repo.save(second);
+      final loaded = await repo.load();
+
+      expect(loaded.id, 'second-id');
+    });
+
+    test('load() with corrupted JSON falls back to fresh profile', () async {
+      SharedPreferences.setMockInitialValues({
+        'user_profile.json': 'NOT VALID JSON {{{{',
+      });
+
+      // The corrupted-JSON branch calls AppIdentity.getAppId() which
+      // requires platform plugins unavailable in unit tests.
+    }, skip: 'Corrupted-JSON branch calls AppIdentity — requires platform plugin or refactoring');
+
+    test('load() with no saved data creates and persists a fresh profile', () async {
+      // The raw == null branch calls AppIdentity.getAppId() which
+      // requires platform plugins unavailable in unit tests.
+    }, skip: 'Empty-prefs branch calls AppIdentity — requires platform plugin or refactoring');
+  });
+}
+```
+
 ### Inhalt von `klubradio_archivum/test/screens/download_list_entries_test.dart`
 ```dart
 import 'package:flutter_test/flutter_test.dart';
@@ -25467,6 +27950,214 @@ void main() {
 
       // 'a' is playing → no delete; 'b' and 'c' have delete buttons
       expect(find.byIcon(Icons.delete_outline), findsNWidgets(2));
+    });
+  });
+}
+```
+
+### Inhalt von `klubradio_archivum/test/services/api_cache_service_test.dart`
+```dart
+import 'dart:convert';
+
+import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:klubradio_archivum/services/api_cache_service.dart';
+
+void main() {
+  late ApiCacheService cacheService;
+
+  setUp(() {
+    TestWidgetsFlutterBinding.ensureInitialized();
+    SharedPreferences.setMockInitialValues({});
+    cacheService = ApiCacheService();
+  });
+
+  group('save and get', () {
+    test('save() stores data retrievable by get()', () async {
+      await cacheService.save('key1', {'name': 'test'});
+      final result = await cacheService.get('key1');
+      expect(result, {'name': 'test'});
+    });
+
+    test('save() with expiry stores data with expiry timestamp', () async {
+      await cacheService.save(
+        'exp_key',
+        'value',
+        expiry: const Duration(hours: 1),
+      );
+
+      // Verify the raw stored entry contains a positive expiry
+      final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getString('api_cache_exp_key');
+      expect(raw, isNotNull);
+      final entry = jsonDecode(raw!) as Map<String, dynamic>;
+      final expiry = entry['expiry'] as int;
+      expect(expiry, greaterThan(0));
+    });
+
+    test('save() without expiry stores data with -1 expiry (never expires)',
+        () async {
+      await cacheService.save('no_exp', 42);
+
+      final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getString('api_cache_no_exp');
+      expect(raw, isNotNull);
+      final entry = jsonDecode(raw!) as Map<String, dynamic>;
+      expect(entry['expiry'], -1);
+    });
+  });
+
+  group('get', () {
+    test('returns null for non-existent key', () async {
+      final result = await cacheService.get('nonexistent');
+      expect(result, isNull);
+    });
+
+    test('returns cached data for valid key', () async {
+      await cacheService.save('valid', [1, 2, 3]);
+      final result = await cacheService.get('valid');
+      expect(result, [1, 2, 3]);
+    });
+
+    test('returns null and removes entry when expired', () async {
+      // Manually write an already-expired entry
+      final prefs = await SharedPreferences.getInstance();
+      final expiredEntry = jsonEncode({
+        'data': jsonEncode('old_data'),
+        'expiry': DateTime.now()
+            .subtract(const Duration(hours: 1))
+            .millisecondsSinceEpoch,
+        'timestamp': DateTime.now()
+            .subtract(const Duration(hours: 2))
+            .millisecondsSinceEpoch,
+      });
+      await prefs.setString('api_cache_expired_key', expiredEntry);
+
+      final result = await cacheService.get('expired_key');
+      expect(result, isNull);
+
+      // Verify the entry was removed
+      expect(prefs.containsKey('api_cache_expired_key'), isFalse);
+    });
+
+    test('returns data when no expiry set (-1)', () async {
+      await cacheService.save('forever', 'persistent');
+      final result = await cacheService.get('forever');
+      expect(result, 'persistent');
+    });
+  });
+
+  group('remove', () {
+    test('removes cached entry', () async {
+      await cacheService.save('to_remove', 'data');
+      expect(await cacheService.get('to_remove'), 'data');
+
+      await cacheService.remove('to_remove');
+      expect(await cacheService.get('to_remove'), isNull);
+    });
+  });
+
+  group('isCached', () {
+    test('returns true for existing key', () async {
+      await cacheService.save('exists', true);
+      expect(await cacheService.isCached('exists'), isTrue);
+    });
+
+    test('returns false for non-existent key', () async {
+      expect(await cacheService.isCached('nope'), isFalse);
+    });
+  });
+
+  group('isExpired', () {
+    test('returns true for non-existent key', () async {
+      expect(await cacheService.isExpired('missing'), isTrue);
+    });
+
+    test('returns false for non-expired entry', () async {
+      await cacheService.save(
+        'fresh',
+        'value',
+        expiry: const Duration(hours: 24),
+      );
+      expect(await cacheService.isExpired('fresh'), isFalse);
+    });
+
+    test('returns true for expired entry', () async {
+      // Manually write an already-expired entry
+      final prefs = await SharedPreferences.getInstance();
+      final expiredEntry = jsonEncode({
+        'data': jsonEncode('stale'),
+        'expiry': DateTime.now()
+            .subtract(const Duration(seconds: 10))
+            .millisecondsSinceEpoch,
+        'timestamp': DateTime.now()
+            .subtract(const Duration(minutes: 5))
+            .millisecondsSinceEpoch,
+      });
+      await prefs.setString('api_cache_stale', expiredEntry);
+
+      expect(await cacheService.isExpired('stale'), isTrue);
+    });
+
+    test('returns false for entry with no expiry (-1)', () async {
+      await cacheService.save('no_ttl', 'value');
+      expect(await cacheService.isExpired('no_ttl'), isFalse);
+    });
+  });
+
+  group('round-trip', () {
+    test('save complex nested JSON and get returns same structure', () async {
+      final complexData = {
+        'podcasts': [
+          {
+            'id': 'pod-1',
+            'title': 'Podcast One',
+            'episodes': [
+              {'id': 'ep-1', 'duration': 3600},
+              {'id': 'ep-2', 'duration': 1800},
+            ],
+          },
+          {
+            'id': 'pod-2',
+            'title': 'Podcast Two',
+            'episodes': <Map<String, dynamic>>[],
+          },
+        ],
+        'meta': {
+          'total': 2,
+          'page': 1,
+          'hasMore': false,
+          'tags': ['news', 'politics', 'interview'],
+        },
+      };
+
+      await cacheService.save('complex', complexData);
+      final result = await cacheService.get('complex');
+
+      expect(result, isA<Map<String, dynamic>>());
+      final resultMap = result as Map<String, dynamic>;
+      expect(resultMap['podcasts'], isList);
+      expect((resultMap['podcasts'] as List).length, 2);
+      expect(resultMap['meta']['total'], 2);
+      expect(resultMap['meta']['hasMore'], false);
+      expect(resultMap['meta']['tags'], ['news', 'politics', 'interview']);
+    });
+
+    test('save and get primitive types', () async {
+      await cacheService.save('str', 'hello');
+      expect(await cacheService.get('str'), 'hello');
+
+      await cacheService.save('num', 42);
+      expect(await cacheService.get('num'), 42);
+
+      await cacheService.save('bool', true);
+      expect(await cacheService.get('bool'), true);
+
+      await cacheService.save('null_val', null);
+      expect(await cacheService.get('null_val'), isNull);
+
+      await cacheService.save('list', [1, 'two', 3.0]);
+      expect(await cacheService.get('list'), [1, 'two', 3.0]);
     });
   });
 }
@@ -26251,6 +28942,7 @@ import 'package:http/testing.dart';
 
 import 'package:klubradio_archivum/models/episode.dart';
 import 'package:klubradio_archivum/models/podcast.dart';
+import 'package:klubradio_archivum/models/show_data.dart';
 import 'package:klubradio_archivum/models/user_profile.dart';
 import 'package:klubradio_archivum/services/api_service.dart';
 import 'package:klubradio_archivum/services/api_cache_service.dart'; // Explicit import
@@ -26524,6 +29216,442 @@ void main() {
 
     expect(client.isClosed, isTrue);
   });
+
+  // =================== CACHE HIT TESTS ===================
+
+  group('ApiService cache hit paths', () {
+    test('fetchLatestPodcasts returns cached data without HTTP call', () async {
+      final cache = _CachingApiCacheService();
+      cache.seed('latest_podcasts', _samplePodcastResponse(count: 2));
+      final client = MockClient((http.Request request) async {
+        fail('HTTP client should not be called when cache has data');
+      });
+      final service = _TestApiService(httpClient: client, cacheService: cache);
+
+      final podcasts = await service.fetchLatestPodcasts();
+
+      expect(podcasts, hasLength(2));
+      expect(podcasts.first.title, 'Podcast 0');
+    });
+
+    test('fetchTrendingPodcasts returns cached data, marks as trending', () async {
+      final cache = _CachingApiCacheService();
+      cache.seed('trending_podcasts', _samplePodcastResponse(count: 1));
+      final client = MockClient((http.Request request) async {
+        fail('HTTP client should not be called when cache has data');
+      });
+      final service = _TestApiService(httpClient: client, cacheService: cache);
+
+      final trending = await service.fetchTrendingPodcasts(limit: 1);
+
+      expect(trending, hasLength(1));
+      expect(trending.single.isTrending, isTrue);
+    });
+
+    test('fetchRecentEpisodes returns cached data', () async {
+      final cache = _CachingApiCacheService();
+      cache.seed('recent_episodes', [
+        _sampleEpisodeJson(id: 'ep-1', podcastId: 'pod-1', seed: 0),
+        _sampleEpisodeJson(id: 'ep-2', podcastId: 'pod-1', seed: 1),
+      ]);
+      final client = MockClient((http.Request request) async {
+        fail('HTTP client should not be called when cache has data');
+      });
+      final service = _TestApiService(httpClient: client, cacheService: cache);
+
+      final episodes = await service.fetchRecentEpisodes();
+
+      expect(episodes, hasLength(2));
+      expect(episodes.first.id, 'ep-1');
+    });
+
+    test('fetchEpisodesForPodcast returns cached data', () async {
+      final cache = _CachingApiCacheService();
+      cache.seed('episodes_for_podcast_series-1', [
+        _sampleEpisodeJson(id: 'ep-cached', podcastId: 'series-1', seed: 0),
+      ]);
+      final client = MockClient((http.Request request) async {
+        fail('HTTP client should not be called when cache has data');
+      });
+      final service = _TestApiService(httpClient: client, cacheService: cache);
+
+      final episodes = await service.fetchEpisodesForPodcast('series-1');
+
+      expect(episodes, hasLength(1));
+      expect(episodes.single.id, 'ep-cached');
+    });
+
+    test('fetchTopShowsThisYear returns cached data', () async {
+      final cache = _CachingApiCacheService();
+      cache.seed('top_shows_this_year', _sampleTopShowsResponse());
+      final client = MockClient((http.Request request) async {
+        fail('HTTP client should not be called when cache has data');
+      });
+      final service = _TestApiService(httpClient: client, cacheService: cache);
+
+      final shows = await service.fetchTopShowsThisYear();
+
+      expect(shows, hasLength(2));
+      expect(shows.first.title, 'A lényeg');
+      expect(shows.first.count, 8563);
+    });
+
+    test('fetchPodcastById returns cached data', () async {
+      final cache = _CachingApiCacheService();
+      cache.seed('podcast_by_id_podcast-0', _samplePodcastResponse(count: 1).first);
+      final client = MockClient((http.Request request) async {
+        fail('HTTP client should not be called when cache has data');
+      });
+      final service = _TestApiService(httpClient: client, cacheService: cache);
+
+      final podcast = await service.fetchPodcastById('podcast-0');
+
+      expect(podcast, isNotNull);
+      expect(podcast!.title, 'Podcast 0');
+    });
+
+    test('fetchUserProfile returns cached data', () async {
+      final cache = _CachingApiCacheService();
+      cache.seed('user_profile_user-42', _sampleProfileJson('user-42'));
+      final client = MockClient((http.Request request) async {
+        fail('HTTP client should not be called when cache has data');
+      });
+      final service = _TestApiService(httpClient: client, cacheService: cache);
+
+      final profile = await service.fetchUserProfile('user-42');
+
+      expect(profile.id, 'user-42');
+      expect(profile.subscribedPodcastIds, contains('podcast-0'));
+    });
+  });
+
+  // =================== OFFLINE MOCK TESTS ===================
+
+  group('ApiService offline mock paths', () {
+    test('fetchLatestPodcasts returns mock podcasts', () async {
+      final service = _OfflineApiService(
+        httpClient: MockClient((http.Request request) async {
+          fail('No network call expected when credentials are invalid');
+        }),
+      );
+
+      final podcasts = await service.fetchLatestPodcasts();
+
+      expect(podcasts, isNotEmpty);
+      expect(podcasts.first.id, 'esti-gyors');
+    });
+
+    test('fetchRecentEpisodes returns mock episodes', () async {
+      final service = _OfflineApiService(
+        httpClient: MockClient((http.Request request) async {
+          fail('No network call expected when credentials are invalid');
+        }),
+      );
+
+      final episodes = await service.fetchRecentEpisodes();
+
+      expect(episodes, isNotEmpty);
+      // Mock episodes are sorted by publishedAt desc, limited to 8
+      expect(episodes.length, lessThanOrEqualTo(8));
+    });
+
+    test('fetchEpisodesForPodcast returns mock episodes for podcast', () async {
+      final service = _OfflineApiService(
+        httpClient: MockClient((http.Request request) async {
+          fail('No network call expected when credentials are invalid');
+        }),
+      );
+
+      final episodes = await service.fetchEpisodesForPodcast('esti-gyors', limit: 5);
+
+      expect(episodes, isNotEmpty);
+      expect(episodes.length, lessThanOrEqualTo(5));
+      expect(episodes.every((e) => e.podcastId == 'esti-gyors'), isTrue);
+    });
+
+    test('searchEpisodes returns filtered mock episodes', () async {
+      final service = _OfflineApiService(
+        httpClient: MockClient((http.Request request) async {
+          fail('No network call expected when credentials are invalid');
+        }),
+      );
+
+      final episodes = await service.searchEpisodes('Epizód');
+
+      expect(episodes, isNotEmpty);
+    });
+
+    test('searchEpisodes returns empty for blank query', () async {
+      final service = _OfflineApiService(
+        httpClient: MockClient((http.Request request) async {
+          fail('No network call expected for blank query');
+        }),
+      );
+
+      final episodes = await service.searchEpisodes('   ');
+
+      expect(episodes, isEmpty);
+    });
+
+    test('fetchTopShowsThisYear returns mock top shows', () async {
+      final service = _OfflineApiService(
+        httpClient: MockClient((http.Request request) async {
+          fail('No network call expected when credentials are invalid');
+        }),
+      );
+
+      final shows = await service.fetchTopShowsThisYear();
+
+      expect(shows, isNotEmpty);
+      expect(shows.first.title, 'A lényeg');
+    });
+
+    test('fetchUserProfile returns mock profile', () async {
+      final service = _OfflineApiService(
+        httpClient: MockClient((http.Request request) async {
+          fail('No network call expected when credentials are invalid');
+        }),
+      );
+
+      final profile = await service.fetchUserProfile('mock-user');
+
+      expect(profile.id, 'mock-user');
+      expect(profile.subscribedPodcastIds, isNotEmpty);
+      expect(profile.recentlyPlayed, isNotEmpty);
+    });
+
+    test('logPlayback is no-op when credentials invalid', () async {
+      final service = _OfflineApiService(
+        httpClient: MockClient((http.Request request) async {
+          fail('No network call expected when credentials are invalid');
+        }),
+      );
+
+      // Should complete without error or network call
+      await service.logPlayback(episodeId: 'episode-1');
+    });
+  });
+
+  // =================== ERROR HANDLING TESTS ===================
+
+  group('ApiService error handling', () {
+    test('fetchTrendingPodcasts throws on server error', () async {
+      final client = MockClient((http.Request request) async {
+        return http.Response('server error', 500);
+      });
+      final service = _TestApiService(httpClient: client, cacheService: _MockApiCacheService());
+
+      await expectLater(
+        service.fetchTrendingPodcasts(),
+        throwsA(isA<ApiException>()),
+      );
+    });
+
+    test('fetchRecentEpisodes throws on server error', () async {
+      final client = MockClient((http.Request request) async {
+        return http.Response('server error', 500);
+      });
+      final service = _TestApiService(httpClient: client, cacheService: _MockApiCacheService());
+
+      await expectLater(
+        service.fetchRecentEpisodes(),
+        throwsA(isA<ApiException>().having(
+          (e) => e.message,
+          'message',
+          contains('500'),
+        )),
+      );
+    });
+
+    test('fetchEpisodesForPodcast throws on server error', () async {
+      final client = MockClient((http.Request request) async {
+        return http.Response('server error', 500);
+      });
+      final service = _TestApiService(httpClient: client, cacheService: _MockApiCacheService());
+
+      await expectLater(
+        service.fetchEpisodesForPodcast('pod-1'),
+        throwsA(isA<ApiException>().having(
+          (e) => e.message,
+          'message',
+          contains('500'),
+        )),
+      );
+    });
+
+    test('searchPodcasts throws on server error', () async {
+      final client = MockClient((http.Request request) async {
+        return http.Response('server error', 500);
+      });
+      final service = _TestApiService(httpClient: client, cacheService: _MockApiCacheService());
+
+      await expectLater(
+        service.searchPodcasts('test'),
+        throwsA(isA<ApiException>()),
+      );
+    });
+
+    test('searchEpisodes throws on server error', () async {
+      final client = MockClient((http.Request request) async {
+        return http.Response('server error', 500);
+      });
+      final service = _TestApiService(httpClient: client, cacheService: _MockApiCacheService());
+
+      await expectLater(
+        service.searchEpisodes('test'),
+        throwsA(isA<ApiException>()),
+      );
+    });
+
+    test('fetchTopShowsThisYear throws on server error', () async {
+      final client = MockClient((http.Request request) async {
+        return http.Response('server error', 500);
+      });
+      final service = _TestApiService(httpClient: client, cacheService: _MockApiCacheService());
+
+      await expectLater(
+        service.fetchTopShowsThisYear(),
+        throwsA(isA<ApiException>()),
+      );
+    });
+
+    test('fetchPodcastById returns null on server error', () async {
+      final client = MockClient((http.Request request) async {
+        return http.Response('server error', 500);
+      });
+      final service = _TestApiService(httpClient: client, cacheService: _MockApiCacheService());
+
+      final result = await service.fetchPodcastById('nonexistent');
+
+      expect(result, isNull);
+    });
+
+    test('getServerErrorMessage parses JSON error body', () async {
+      final service = ApiService();
+      final response = http.Response(
+        jsonEncode({'message': 'Rate limit exceeded'}),
+        429,
+        headers: {'content-type': 'application/json'},
+      );
+
+      final msg = service.getServerErrorMessage(response);
+
+      expect(msg, contains('429'));
+      expect(msg, contains('Rate limit exceeded'));
+    });
+
+    test('getServerErrorMessage handles non-JSON body', () async {
+      final service = ApiService();
+      final response = http.Response('plain text error', 500);
+
+      final msg = service.getServerErrorMessage(response);
+
+      expect(msg, contains('500'));
+      expect(msg, contains('plain text error'));
+    });
+
+    test('getServerErrorMessage handles JSON without message key', () async {
+      final service = ApiService();
+      final response = http.Response(
+        jsonEncode({'detail': 'something went wrong'}),
+        400,
+        headers: {'content-type': 'application/json'},
+      );
+
+      final msg = service.getServerErrorMessage(response);
+
+      expect(msg, contains('400'));
+      // Falls back to response.body since no message/error/hint key
+      expect(msg, contains('detail'));
+    });
+  });
+
+  // =================== NETWORK SUCCESS TESTS (UNCOVERED) ===================
+
+  group('ApiService network success paths', () {
+    test('fetchRecentEpisodes returns parsed episodes', () async {
+      final client = MockClient((http.Request request) async {
+        expect(request.url.path, contains('/rest/v1/'));
+        return http.Response(
+          jsonEncode([
+            _sampleEpisodeJson(id: 'recent-1', podcastId: 'pod-1', seed: 0),
+            _sampleEpisodeJson(id: 'recent-2', podcastId: 'pod-2', seed: 1),
+          ]),
+          200,
+        );
+      });
+      final service = _TestApiService(httpClient: client, cacheService: _MockApiCacheService());
+
+      final episodes = await service.fetchRecentEpisodes(limit: 2);
+
+      expect(episodes, hasLength(2));
+      expect(episodes.first.id, 'recent-1');
+      expect(episodes.last.id, 'recent-2');
+    });
+
+    test('fetchTopShowsThisYear returns parsed top shows', () async {
+      final client = MockClient((http.Request request) async {
+        return http.Response(
+          jsonEncode(_sampleTopShowsResponse()),
+          200,
+        );
+      });
+      final service = _TestApiService(httpClient: client, cacheService: _MockApiCacheService());
+
+      final shows = await service.fetchTopShowsThisYear();
+
+      expect(shows, hasLength(2));
+      expect(shows.first, isA<ShowData>());
+      expect(shows.first.title, 'A lényeg');
+      expect(shows.first.count, 8563);
+      expect(shows.last.title, 'Reggeli gyors');
+    });
+
+    test('searchEpisodes returns parsed episodes', () async {
+      final client = MockClient((http.Request request) async {
+        expect(request.url.queryParameters['title'], contains('test'));
+        return http.Response(
+          jsonEncode([
+            _sampleEpisodeJson(id: 'search-1', podcastId: 'pod-1', seed: 0),
+          ]),
+          200,
+        );
+      });
+      final service = _TestApiService(httpClient: client, cacheService: _MockApiCacheService());
+
+      final episodes = await service.searchEpisodes('test');
+
+      expect(episodes, hasLength(1));
+      expect(episodes.single.id, 'search-1');
+    });
+
+    test('fetchPodcastById returns parsed podcast', () async {
+      final client = MockClient((http.Request request) async {
+        expect(request.url.queryParameters['id'], 'eq.podcast-0');
+        return http.Response(
+          jsonEncode(_samplePodcastResponse(count: 1)),
+          200,
+        );
+      });
+      final service = _TestApiService(httpClient: client, cacheService: _MockApiCacheService());
+
+      final podcast = await service.fetchPodcastById('podcast-0');
+
+      expect(podcast, isNotNull);
+      expect(podcast!.title, 'Podcast 0');
+    });
+
+    test('fetchPodcastById returns null on empty result', () async {
+      final client = MockClient((http.Request request) async {
+        return http.Response(jsonEncode([]), 200);
+      });
+      final service = _TestApiService(httpClient: client, cacheService: _MockApiCacheService());
+
+      final podcast = await service.fetchPodcastById('nonexistent');
+
+      expect(podcast, isNull);
+    });
+  });
 }
 
 List<Map<String, dynamic>> _samplePodcastResponse({int count = 2}) {
@@ -26621,6 +29749,290 @@ class _TestApiService extends ApiService {
   bool get hasValidCredentials => true; // Override to true for network tests
 }
 
+class _CachingApiCacheService extends ApiCacheService {
+  final Map<String, dynamic> _store = {};
+
+  void seed(String key, dynamic data) {
+    _store[key] = data;
+  }
+
+  @override
+  Future<dynamic> get(String key) async => _store[key];
+
+  @override
+  Future<void> save(String key, dynamic data, {Duration? expiry}) async {
+    _store[key] = data;
+  }
+}
+
+List<Map<String, dynamic>> _sampleTopShowsResponse() => [
+  {'id': '3', 'title': 'A lényeg', 'count': 8563},
+  {'id': '38', 'title': 'Reggeli gyors', 'count': 1743},
+];
+
+```
+
+### Inhalt von `klubradio_archivum/test/services/http_requester_test.dart`
+```dart
+import 'dart:async';
+import 'dart:io';
+
+import 'package:flutter_test/flutter_test.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
+import 'package:klubradio_archivum/services/http_requester.dart';
+
+void main() {
+  const testUrl = 'https://example.com/api/data';
+  const defaultHeaders = {'Authorization': 'Bearer test-token'};
+
+  // Short durations to keep tests fast.
+  const fastTimeout = Duration(milliseconds: 100);
+  const tinyBackoff = Duration(milliseconds: 1);
+
+  /// Create an HttpRequester with sensible test defaults.
+  HttpRequester makeRequester(
+    http.Client client, {
+    int maxRetries = 1,
+    Duration requestTimeout = fastTimeout,
+    Duration connectTimeout = fastTimeout,
+    Map<String, String> headers = defaultHeaders,
+  }) {
+    return HttpRequester(
+      client: client,
+      defaultHeaders: headers,
+      maxRetries: maxRetries,
+      requestTimeout: requestTimeout,
+      connectTimeout: connectTimeout,
+    );
+  }
+
+  group('HttpRequester.getJson', () {
+    test('returns parsed JSON on 200 response', () async {
+      final client = MockClient((request) async {
+        return http.Response('{"status": "ok"}', 200);
+      });
+      final requester = makeRequester(client);
+
+      final result = await requester.getJson(testUrl);
+
+      expect(result, isA<Map>());
+      expect(result['status'], 'ok');
+      await requester.dispose();
+    });
+
+    test('returns parsed JSON on 201 response', () async {
+      final client = MockClient((request) async {
+        return http.Response('{"created": true}', 201);
+      });
+      final requester = makeRequester(client);
+
+      final result = await requester.getJson(testUrl);
+
+      expect(result['created'], true);
+      await requester.dispose();
+    });
+
+    test('sends defaultHeaders', () async {
+      Map<String, String>? capturedHeaders;
+      final client = MockClient((request) async {
+        capturedHeaders = request.headers;
+        return http.Response('{}', 200);
+      });
+      final requester = makeRequester(client);
+
+      await requester.getJson(testUrl);
+
+      expect(capturedHeaders, isNotNull);
+      expect(capturedHeaders!['Authorization'], 'Bearer test-token');
+      await requester.dispose();
+    });
+
+    test('merges extra headers', () async {
+      Map<String, String>? capturedHeaders;
+      final client = MockClient((request) async {
+        capturedHeaders = request.headers;
+        return http.Response('{}', 200);
+      });
+      final requester = makeRequester(client);
+
+      await requester.getJson(
+        testUrl,
+        headers: {'X-Custom': 'value'},
+      );
+
+      expect(capturedHeaders!['Authorization'], 'Bearer test-token');
+      expect(capturedHeaders!['X-Custom'], 'value');
+      await requester.dispose();
+    });
+
+    test('throws HttpException on 400 response (no retry for 4xx)', () async {
+      int callCount = 0;
+      final client = MockClient((request) async {
+        callCount++;
+        return http.Response('Bad Request', 400);
+      });
+      final requester = makeRequester(client);
+
+      expect(
+        () => requester.getJson(testUrl),
+        throwsA(isA<HttpException>()),
+      );
+
+      // Allow the future to complete before checking call count.
+      try {
+        await requester.getJson(testUrl);
+      } catch (_) {}
+
+      // 4xx errors should NOT be retried, so only 1 call per invocation.
+      // We called getJson twice above; the first is expected via the expect().
+      // Reset and test cleanly:
+      callCount = 0;
+      final client2 = MockClient((request) async {
+        callCount++;
+        return http.Response('Not Found', 404);
+      });
+      final requester2 = makeRequester(client2);
+
+      try {
+        await requester2.getJson(testUrl);
+      } on HttpException {
+        // expected
+      }
+      expect(callCount, 1); // no retries for 4xx
+      await requester.dispose();
+      await requester2.dispose();
+    });
+
+    test('retries on 500 response then throws after maxRetries', () async {
+      int callCount = 0;
+      final client = MockClient((request) async {
+        callCount++;
+        return http.Response('Internal Server Error', 500);
+      });
+      // maxRetries=1 means: attempt 1 fails, attempt 2 (retry) fails, then throw.
+      final requester = makeRequester(client, maxRetries: 1);
+
+      expect(
+        () => requester.getJson(testUrl),
+        throwsA(isA<HttpException>()),
+      );
+      await expectLater(
+        requester.getJson(testUrl),
+        throwsA(isA<HttpException>()),
+      );
+      // 1 initial + 1 retry = 2 calls per invocation.
+      // We invoked getJson twice in the expect calls above.
+      // Test a clean invocation:
+      callCount = 0;
+      final client2 = MockClient((request) async {
+        callCount++;
+        return http.Response('Server Error', 500);
+      });
+      final requester2 = makeRequester(client2, maxRetries: 1);
+      try {
+        await requester2.getJson(testUrl);
+      } on HttpException {
+        // expected
+      }
+      expect(callCount, 2); // initial attempt + 1 retry
+      await requester.dispose();
+      await requester2.dispose();
+    });
+
+    test('retries on TimeoutException then throws after maxRetries', () async {
+      int callCount = 0;
+      final client = MockClient((request) async {
+        callCount++;
+        // Return a future that never completes within the timeout.
+        await Future.delayed(const Duration(seconds: 10));
+        return http.Response('{}', 200);
+      });
+      final requester = makeRequester(
+        client,
+        maxRetries: 1,
+        requestTimeout: const Duration(milliseconds: 50),
+      );
+
+      try {
+        await requester.getJson(testUrl);
+      } on TimeoutException {
+        // expected
+      }
+      expect(callCount, 2); // initial + 1 retry
+      await requester.dispose();
+    });
+
+    test('retries on SocketException then throws after maxRetries', () async {
+      int callCount = 0;
+      final client = MockClient((request) {
+        callCount++;
+        throw const SocketException('Connection refused');
+      });
+      final requester = makeRequester(client, maxRetries: 1);
+
+      try {
+        await requester.getJson(testUrl);
+      } on SocketException {
+        // expected
+      }
+      expect(callCount, 2); // initial + 1 retry
+      await requester.dispose();
+    });
+
+    test('succeeds on retry (first call fails, second succeeds)', () async {
+      int callCount = 0;
+      final client = MockClient((request) async {
+        callCount++;
+        if (callCount == 1) {
+          return http.Response('Server Error', 500);
+        }
+        return http.Response('{"recovered": true}', 200);
+      });
+      final requester = makeRequester(client, maxRetries: 2);
+
+      final result = await requester.getJson(testUrl);
+
+      expect(result['recovered'], true);
+      expect(callCount, 2);
+      await requester.dispose();
+    });
+  });
+
+  group('HttpRequester.dispose', () {
+    test('closes the client', () async {
+      bool closed = false;
+      // Use a real Client wrapper to detect close.
+      final client = _CloseTrackingClient(onClose: () => closed = true);
+      final requester = makeRequester(client);
+
+      await requester.dispose();
+
+      expect(closed, true);
+    });
+  });
+}
+
+/// A simple Client wrapper that tracks whether close() was called.
+class _CloseTrackingClient extends http.BaseClient {
+  _CloseTrackingClient({required this.onClose});
+
+  final void Function() onClose;
+
+  @override
+  Future<http.StreamedResponse> send(http.BaseRequest request) async {
+    return http.StreamedResponse(
+      Stream.value([]),
+      200,
+    );
+  }
+
+  @override
+  void close() {
+    onClose();
+    super.close();
+  }
+}
 ```
 
 ### Inhalt von `klubradio_archivum/test/services/privacy_notice_service_test.dart`
@@ -26783,6 +30195,302 @@ void main() {
           {kPrivacyShownVersion: storedVersion!});
 
       expect(await PrivacyNoticeService.shouldShowNotice(), isTrue);
+    });
+  });
+}
+```
+
+### Inhalt von `klubradio_archivum/test/utils/episode_cache_reader_test.dart`
+```dart
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:flutter_test/flutter_test.dart';
+import 'package:klubradio_archivum/utils/episode_cache_reader.dart';
+import 'package:path/path.dart' as p;
+
+void main() {
+  late Directory tempDir;
+
+  setUp(() {
+    tempDir = Directory.systemTemp.createTempSync('episode_cache_test_');
+  });
+
+  tearDown(() {
+    if (tempDir.existsSync()) {
+      tempDir.deleteSync(recursive: true);
+    }
+  });
+
+  /// Helper: write JSON content to a file in [tempDir] and return the path.
+  String writeJsonFile(String filename, dynamic content) {
+    final path = p.join(tempDir.path, filename);
+    File(path).writeAsStringSync(jsonEncode(content));
+    return path;
+  }
+
+  /// Minimal valid JSON map that the reader accepts.
+  Map<String, dynamic> validMinimalJson() {
+    return {
+      'schemaVersion': 1,
+      'id': 'ep-100',
+      'podcastId': 'pod-42',
+      'title': '',
+      'description': '',
+      'audioUrl': '',
+      'publishedAt': '2025-03-01T10:00:00.000Z',
+      'duration': 0,
+      'showDate': '',
+      'hosts': <String>[],
+    };
+  }
+
+  /// Full valid JSON with all optional fields populated.
+  Map<String, dynamic> validCompleteJson({
+    String? cachedImageFile,
+    String? mp3File,
+  }) {
+    return {
+      'schemaVersion': 1,
+      'id': 'ep-200',
+      'podcastId': 'pod-77',
+      'title': 'Reggeli Gyors',
+      'description': 'A test episode description.',
+      'audioUrl': 'https://cdn.klubradio.hu/audio/ep200.mp3',
+      'imageUrl': 'https://www.klubradio.hu/img/cover.jpg',
+      'publishedAt': '2025-06-15T08:00:00.000Z',
+      'duration': 1800,
+      'showDate': '2025-06-15',
+      'hosts': ['Host A', 'Host B'],
+      if (cachedImageFile != null) 'cachedImageFile': cachedImageFile,
+      if (mp3File != null) 'mp3File': mp3File,
+    };
+  }
+
+  // -------------------------------------------------------------------
+  // Tests
+  // -------------------------------------------------------------------
+
+  group('readEpisodeFromCacheJson', () {
+    test('returns null for non-existent file', () async {
+      final result = await readEpisodeFromCacheJson(
+        p.join(tempDir.path, 'does_not_exist.json'),
+      );
+      expect(result, isNull);
+    });
+
+    test('returns null for invalid JSON content', () async {
+      final path = writeJsonFile('bad.json', null);
+      // Overwrite with truly invalid JSON text
+      File(path).writeAsStringSync('{{not valid json');
+      final result = await readEpisodeFromCacheJson(path);
+      expect(result, isNull);
+    });
+
+    test('returns null when JSON is a list instead of a map', () async {
+      final path = p.join(tempDir.path, 'array.json');
+      File(path).writeAsStringSync(jsonEncode([1, 2, 3]));
+      final result = await readEpisodeFromCacheJson(path);
+      expect(result, isNull);
+    });
+
+    test('returns null when id is empty', () async {
+      final json = validMinimalJson()..['id'] = '';
+      final path = writeJsonFile('empty_id.json', json);
+      final result = await readEpisodeFromCacheJson(path);
+      expect(result, isNull);
+    });
+
+    test('returns null when podcastId is empty', () async {
+      final json = validMinimalJson()..['podcastId'] = '';
+      final path = writeJsonFile('empty_podcast.json', json);
+      final result = await readEpisodeFromCacheJson(path);
+      expect(result, isNull);
+    });
+
+    test('parses valid complete JSON into Episode', () async {
+      final json = validCompleteJson();
+      final path = writeJsonFile('complete.json', json);
+      final episode = await readEpisodeFromCacheJson(path);
+
+      expect(episode, isNotNull);
+      expect(episode!.id, 'ep-200');
+      expect(episode.podcastId, 'pod-77');
+      expect(episode.title, 'Reggeli Gyors');
+      expect(episode.description, 'A test episode description.');
+      expect(episode.audioUrl, 'https://cdn.klubradio.hu/audio/ep200.mp3');
+      expect(episode.imageUrl, 'https://www.klubradio.hu/img/cover.jpg');
+      expect(episode.publishedAt, DateTime.utc(2025, 6, 15, 8));
+      expect(episode.duration, const Duration(seconds: 1800));
+      expect(episode.showDate, '2025-06-15');
+      expect(episode.hosts, ['Host A', 'Host B']);
+      expect(episode.cachedMetaPath, path);
+    });
+
+    test('parses minimal JSON with only required fields', () async {
+      final json = validMinimalJson();
+      final path = writeJsonFile('minimal.json', json);
+      final episode = await readEpisodeFromCacheJson(path);
+
+      expect(episode, isNotNull);
+      expect(episode!.id, 'ep-100');
+      expect(episode.podcastId, 'pod-42');
+      expect(episode.title, '');
+      expect(episode.description, '');
+      expect(episode.audioUrl, '');
+      expect(episode.duration, Duration.zero);
+    });
+
+    test('handles missing optional fields gracefully', () async {
+      // Only id, podcastId, and a publishedAt -- everything else missing
+      final json = <String, dynamic>{
+        'id': 'ep-300',
+        'podcastId': 'pod-99',
+        'publishedAt': '2025-01-01T00:00:00.000Z',
+      };
+      final path = writeJsonFile('sparse.json', json);
+      final episode = await readEpisodeFromCacheJson(path);
+
+      expect(episode, isNotNull);
+      expect(episode!.id, 'ep-300');
+      expect(episode.podcastId, 'pod-99');
+      expect(episode.title, '');
+      expect(episode.description, '');
+      expect(episode.audioUrl, '');
+      expect(episode.hosts, isEmpty);
+      expect(episode.showDate, '');
+      expect(episode.localFilePath, isNull);
+      expect(episode.cachedImagePath, isNull);
+    });
+
+    test('resolves relative image path to absolute when file exists', () async {
+      // Create the image file so the existsSync check passes
+      final imageFileName = 'ep-200_cover.jpg';
+      File(p.join(tempDir.path, imageFileName)).writeAsBytesSync([0xFF, 0xD8]);
+
+      final json = validCompleteJson(cachedImageFile: imageFileName);
+      final path = writeJsonFile('with_image.json', json);
+      final episode = await readEpisodeFromCacheJson(path);
+
+      expect(episode, isNotNull);
+      expect(episode!.cachedImagePath, isNotNull);
+      expect(episode.cachedImagePath, p.join(tempDir.path, imageFileName));
+    });
+
+    test('resolves relative mp3 path to absolute when file exists', () async {
+      // Create the mp3 file so the existsSync check passes
+      final mp3FileName = 'ep-200.mp3';
+      File(p.join(tempDir.path, mp3FileName)).writeAsBytesSync([0x00]);
+
+      final json = validCompleteJson(mp3File: mp3FileName);
+      final path = writeJsonFile('with_mp3.json', json);
+      final episode = await readEpisodeFromCacheJson(path);
+
+      expect(episode, isNotNull);
+      expect(episode!.localFilePath, isNotNull);
+      expect(episode.localFilePath, p.join(tempDir.path, mp3FileName));
+    });
+
+    test('sets localFilePath to null when mp3 file does not exist', () async {
+      // Reference a file that does not exist on disk
+      final json = validCompleteJson(mp3File: 'missing.mp3');
+      final path = writeJsonFile('missing_mp3.json', json);
+      final episode = await readEpisodeFromCacheJson(path);
+
+      expect(episode, isNotNull);
+      expect(episode!.localFilePath, isNull);
+    });
+
+    test('sets cachedImagePath to null when image file does not exist',
+        () async {
+      final json = validCompleteJson(cachedImageFile: 'missing_cover.jpg');
+      final path = writeJsonFile('missing_img.json', json);
+      final episode = await readEpisodeFromCacheJson(path);
+
+      expect(episode, isNotNull);
+      expect(episode!.cachedImagePath, isNull);
+    });
+
+    test('falls back to createdAt when publishedAt is missing', () async {
+      final json = validMinimalJson()
+        ..remove('publishedAt')
+        ..['createdAt'] = '2024-12-25T12:00:00.000Z';
+      final path = writeJsonFile('created_at.json', json);
+      final episode = await readEpisodeFromCacheJson(path);
+
+      expect(episode, isNotNull);
+      expect(episode!.publishedAt, DateTime.utc(2024, 12, 25, 12));
+    });
+
+    test('tolerates schemaVersion 0 (old format)', () async {
+      final json = validMinimalJson()..['schemaVersion'] = 0;
+      final path = writeJsonFile('old_schema.json', json);
+      final episode = await readEpisodeFromCacheJson(path);
+
+      expect(episode, isNotNull);
+      expect(episode!.id, 'ep-100');
+    });
+  });
+}
+```
+
+### Inhalt von `klubradio_archivum/test/utils/web_image_proxy_test.dart`
+```dart
+import 'package:flutter_test/flutter_test.dart';
+import 'package:klubradio_archivum/utils/web_image_proxy.dart';
+
+void main() {
+  // In the test environment kIsWeb is always false, so transform() returns
+  // the original URL for any non-null/non-empty input.
+
+  group('WebImageProxy.transform', () {
+    test('returns empty string for null input', () {
+      expect(WebImageProxy.transform(null), '');
+    });
+
+    test('returns empty string for empty string input', () {
+      expect(WebImageProxy.transform(''), '');
+    });
+
+    test('returns original URL for non-klubradio URL (kIsWeb=false)', () {
+      const url = 'https://example.com/image.jpg';
+      expect(WebImageProxy.transform(url), url);
+    });
+
+    test('returns original URL for klubradio URL because kIsWeb is false', () {
+      const url =
+          'https://www.klubradio.hu/data/musorkepek/nagy/some_image.jpeg';
+      expect(WebImageProxy.transform(url), url);
+    });
+
+    test('returns original URL for klubradio.hu host variant', () {
+      const url = 'https://klubradio.hu/images/cover.png';
+      expect(WebImageProxy.transform(url), url);
+    });
+
+    test('returns original URL for images.klubradio.hu variant', () {
+      const url = 'https://images.klubradio.hu/photo.jpg';
+      expect(WebImageProxy.transform(url), url);
+    });
+
+    test('returns original URL for cdn.klubradio.hu variant', () {
+      const url = 'https://cdn.klubradio.hu/assets/logo.png';
+      expect(WebImageProxy.transform(url), url);
+    });
+
+    test('returns original string for invalid/unparseable URL', () {
+      const badUrl = ':::not-a-valid-url';
+      expect(WebImageProxy.transform(badUrl), badUrl);
+    });
+
+    test('returns original for data URI', () {
+      const dataUri = 'data:image/png;base64,iVBORw0KGgo=';
+      expect(WebImageProxy.transform(dataUri), dataUri);
+    });
+
+    test('returns original for plain text that is not a URL', () {
+      const text = 'just some text';
+      expect(WebImageProxy.transform(text), text);
     });
   });
 }

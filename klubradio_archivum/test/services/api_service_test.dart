@@ -7,6 +7,7 @@ import 'package:http/testing.dart';
 
 import 'package:klubradio_archivum/models/episode.dart';
 import 'package:klubradio_archivum/models/podcast.dart';
+import 'package:klubradio_archivum/models/show_data.dart';
 import 'package:klubradio_archivum/models/user_profile.dart';
 import 'package:klubradio_archivum/services/api_service.dart';
 import 'package:klubradio_archivum/services/api_cache_service.dart'; // Explicit import
@@ -280,6 +281,442 @@ void main() {
 
     expect(client.isClosed, isTrue);
   });
+
+  // =================== CACHE HIT TESTS ===================
+
+  group('ApiService cache hit paths', () {
+    test('fetchLatestPodcasts returns cached data without HTTP call', () async {
+      final cache = _CachingApiCacheService();
+      cache.seed('latest_podcasts', _samplePodcastResponse(count: 2));
+      final client = MockClient((http.Request request) async {
+        fail('HTTP client should not be called when cache has data');
+      });
+      final service = _TestApiService(httpClient: client, cacheService: cache);
+
+      final podcasts = await service.fetchLatestPodcasts();
+
+      expect(podcasts, hasLength(2));
+      expect(podcasts.first.title, 'Podcast 0');
+    });
+
+    test('fetchTrendingPodcasts returns cached data, marks as trending', () async {
+      final cache = _CachingApiCacheService();
+      cache.seed('trending_podcasts', _samplePodcastResponse(count: 1));
+      final client = MockClient((http.Request request) async {
+        fail('HTTP client should not be called when cache has data');
+      });
+      final service = _TestApiService(httpClient: client, cacheService: cache);
+
+      final trending = await service.fetchTrendingPodcasts(limit: 1);
+
+      expect(trending, hasLength(1));
+      expect(trending.single.isTrending, isTrue);
+    });
+
+    test('fetchRecentEpisodes returns cached data', () async {
+      final cache = _CachingApiCacheService();
+      cache.seed('recent_episodes', [
+        _sampleEpisodeJson(id: 'ep-1', podcastId: 'pod-1', seed: 0),
+        _sampleEpisodeJson(id: 'ep-2', podcastId: 'pod-1', seed: 1),
+      ]);
+      final client = MockClient((http.Request request) async {
+        fail('HTTP client should not be called when cache has data');
+      });
+      final service = _TestApiService(httpClient: client, cacheService: cache);
+
+      final episodes = await service.fetchRecentEpisodes();
+
+      expect(episodes, hasLength(2));
+      expect(episodes.first.id, 'ep-1');
+    });
+
+    test('fetchEpisodesForPodcast returns cached data', () async {
+      final cache = _CachingApiCacheService();
+      cache.seed('episodes_for_podcast_series-1', [
+        _sampleEpisodeJson(id: 'ep-cached', podcastId: 'series-1', seed: 0),
+      ]);
+      final client = MockClient((http.Request request) async {
+        fail('HTTP client should not be called when cache has data');
+      });
+      final service = _TestApiService(httpClient: client, cacheService: cache);
+
+      final episodes = await service.fetchEpisodesForPodcast('series-1');
+
+      expect(episodes, hasLength(1));
+      expect(episodes.single.id, 'ep-cached');
+    });
+
+    test('fetchTopShowsThisYear returns cached data', () async {
+      final cache = _CachingApiCacheService();
+      cache.seed('top_shows_this_year', _sampleTopShowsResponse());
+      final client = MockClient((http.Request request) async {
+        fail('HTTP client should not be called when cache has data');
+      });
+      final service = _TestApiService(httpClient: client, cacheService: cache);
+
+      final shows = await service.fetchTopShowsThisYear();
+
+      expect(shows, hasLength(2));
+      expect(shows.first.title, 'A lényeg');
+      expect(shows.first.count, 8563);
+    });
+
+    test('fetchPodcastById returns cached data', () async {
+      final cache = _CachingApiCacheService();
+      cache.seed('podcast_by_id_podcast-0', _samplePodcastResponse(count: 1).first);
+      final client = MockClient((http.Request request) async {
+        fail('HTTP client should not be called when cache has data');
+      });
+      final service = _TestApiService(httpClient: client, cacheService: cache);
+
+      final podcast = await service.fetchPodcastById('podcast-0');
+
+      expect(podcast, isNotNull);
+      expect(podcast!.title, 'Podcast 0');
+    });
+
+    test('fetchUserProfile returns cached data', () async {
+      final cache = _CachingApiCacheService();
+      cache.seed('user_profile_user-42', _sampleProfileJson('user-42'));
+      final client = MockClient((http.Request request) async {
+        fail('HTTP client should not be called when cache has data');
+      });
+      final service = _TestApiService(httpClient: client, cacheService: cache);
+
+      final profile = await service.fetchUserProfile('user-42');
+
+      expect(profile.id, 'user-42');
+      expect(profile.subscribedPodcastIds, contains('podcast-0'));
+    });
+  });
+
+  // =================== OFFLINE MOCK TESTS ===================
+
+  group('ApiService offline mock paths', () {
+    test('fetchLatestPodcasts returns mock podcasts', () async {
+      final service = _OfflineApiService(
+        httpClient: MockClient((http.Request request) async {
+          fail('No network call expected when credentials are invalid');
+        }),
+      );
+
+      final podcasts = await service.fetchLatestPodcasts();
+
+      expect(podcasts, isNotEmpty);
+      expect(podcasts.first.id, 'esti-gyors');
+    });
+
+    test('fetchRecentEpisodes returns mock episodes', () async {
+      final service = _OfflineApiService(
+        httpClient: MockClient((http.Request request) async {
+          fail('No network call expected when credentials are invalid');
+        }),
+      );
+
+      final episodes = await service.fetchRecentEpisodes();
+
+      expect(episodes, isNotEmpty);
+      // Mock episodes are sorted by publishedAt desc, limited to 8
+      expect(episodes.length, lessThanOrEqualTo(8));
+    });
+
+    test('fetchEpisodesForPodcast returns mock episodes for podcast', () async {
+      final service = _OfflineApiService(
+        httpClient: MockClient((http.Request request) async {
+          fail('No network call expected when credentials are invalid');
+        }),
+      );
+
+      final episodes = await service.fetchEpisodesForPodcast('esti-gyors', limit: 5);
+
+      expect(episodes, isNotEmpty);
+      expect(episodes.length, lessThanOrEqualTo(5));
+      expect(episodes.every((e) => e.podcastId == 'esti-gyors'), isTrue);
+    });
+
+    test('searchEpisodes returns filtered mock episodes', () async {
+      final service = _OfflineApiService(
+        httpClient: MockClient((http.Request request) async {
+          fail('No network call expected when credentials are invalid');
+        }),
+      );
+
+      final episodes = await service.searchEpisodes('Epizód');
+
+      expect(episodes, isNotEmpty);
+    });
+
+    test('searchEpisodes returns empty for blank query', () async {
+      final service = _OfflineApiService(
+        httpClient: MockClient((http.Request request) async {
+          fail('No network call expected for blank query');
+        }),
+      );
+
+      final episodes = await service.searchEpisodes('   ');
+
+      expect(episodes, isEmpty);
+    });
+
+    test('fetchTopShowsThisYear returns mock top shows', () async {
+      final service = _OfflineApiService(
+        httpClient: MockClient((http.Request request) async {
+          fail('No network call expected when credentials are invalid');
+        }),
+      );
+
+      final shows = await service.fetchTopShowsThisYear();
+
+      expect(shows, isNotEmpty);
+      expect(shows.first.title, 'A lényeg');
+    });
+
+    test('fetchUserProfile returns mock profile', () async {
+      final service = _OfflineApiService(
+        httpClient: MockClient((http.Request request) async {
+          fail('No network call expected when credentials are invalid');
+        }),
+      );
+
+      final profile = await service.fetchUserProfile('mock-user');
+
+      expect(profile.id, 'mock-user');
+      expect(profile.subscribedPodcastIds, isNotEmpty);
+      expect(profile.recentlyPlayed, isNotEmpty);
+    });
+
+    test('logPlayback is no-op when credentials invalid', () async {
+      final service = _OfflineApiService(
+        httpClient: MockClient((http.Request request) async {
+          fail('No network call expected when credentials are invalid');
+        }),
+      );
+
+      // Should complete without error or network call
+      await service.logPlayback(episodeId: 'episode-1');
+    });
+  });
+
+  // =================== ERROR HANDLING TESTS ===================
+
+  group('ApiService error handling', () {
+    test('fetchTrendingPodcasts throws on server error', () async {
+      final client = MockClient((http.Request request) async {
+        return http.Response('server error', 500);
+      });
+      final service = _TestApiService(httpClient: client, cacheService: _MockApiCacheService());
+
+      await expectLater(
+        service.fetchTrendingPodcasts(),
+        throwsA(isA<ApiException>()),
+      );
+    });
+
+    test('fetchRecentEpisodes throws on server error', () async {
+      final client = MockClient((http.Request request) async {
+        return http.Response('server error', 500);
+      });
+      final service = _TestApiService(httpClient: client, cacheService: _MockApiCacheService());
+
+      await expectLater(
+        service.fetchRecentEpisodes(),
+        throwsA(isA<ApiException>().having(
+          (e) => e.message,
+          'message',
+          contains('500'),
+        )),
+      );
+    });
+
+    test('fetchEpisodesForPodcast throws on server error', () async {
+      final client = MockClient((http.Request request) async {
+        return http.Response('server error', 500);
+      });
+      final service = _TestApiService(httpClient: client, cacheService: _MockApiCacheService());
+
+      await expectLater(
+        service.fetchEpisodesForPodcast('pod-1'),
+        throwsA(isA<ApiException>().having(
+          (e) => e.message,
+          'message',
+          contains('500'),
+        )),
+      );
+    });
+
+    test('searchPodcasts throws on server error', () async {
+      final client = MockClient((http.Request request) async {
+        return http.Response('server error', 500);
+      });
+      final service = _TestApiService(httpClient: client, cacheService: _MockApiCacheService());
+
+      await expectLater(
+        service.searchPodcasts('test'),
+        throwsA(isA<ApiException>()),
+      );
+    });
+
+    test('searchEpisodes throws on server error', () async {
+      final client = MockClient((http.Request request) async {
+        return http.Response('server error', 500);
+      });
+      final service = _TestApiService(httpClient: client, cacheService: _MockApiCacheService());
+
+      await expectLater(
+        service.searchEpisodes('test'),
+        throwsA(isA<ApiException>()),
+      );
+    });
+
+    test('fetchTopShowsThisYear throws on server error', () async {
+      final client = MockClient((http.Request request) async {
+        return http.Response('server error', 500);
+      });
+      final service = _TestApiService(httpClient: client, cacheService: _MockApiCacheService());
+
+      await expectLater(
+        service.fetchTopShowsThisYear(),
+        throwsA(isA<ApiException>()),
+      );
+    });
+
+    test('fetchPodcastById returns null on server error', () async {
+      final client = MockClient((http.Request request) async {
+        return http.Response('server error', 500);
+      });
+      final service = _TestApiService(httpClient: client, cacheService: _MockApiCacheService());
+
+      final result = await service.fetchPodcastById('nonexistent');
+
+      expect(result, isNull);
+    });
+
+    test('getServerErrorMessage parses JSON error body', () async {
+      final service = ApiService();
+      final response = http.Response(
+        jsonEncode({'message': 'Rate limit exceeded'}),
+        429,
+        headers: {'content-type': 'application/json'},
+      );
+
+      final msg = service.getServerErrorMessage(response);
+
+      expect(msg, contains('429'));
+      expect(msg, contains('Rate limit exceeded'));
+    });
+
+    test('getServerErrorMessage handles non-JSON body', () async {
+      final service = ApiService();
+      final response = http.Response('plain text error', 500);
+
+      final msg = service.getServerErrorMessage(response);
+
+      expect(msg, contains('500'));
+      expect(msg, contains('plain text error'));
+    });
+
+    test('getServerErrorMessage handles JSON without message key', () async {
+      final service = ApiService();
+      final response = http.Response(
+        jsonEncode({'detail': 'something went wrong'}),
+        400,
+        headers: {'content-type': 'application/json'},
+      );
+
+      final msg = service.getServerErrorMessage(response);
+
+      expect(msg, contains('400'));
+      // Falls back to response.body since no message/error/hint key
+      expect(msg, contains('detail'));
+    });
+  });
+
+  // =================== NETWORK SUCCESS TESTS (UNCOVERED) ===================
+
+  group('ApiService network success paths', () {
+    test('fetchRecentEpisodes returns parsed episodes', () async {
+      final client = MockClient((http.Request request) async {
+        expect(request.url.path, contains('/rest/v1/'));
+        return http.Response(
+          jsonEncode([
+            _sampleEpisodeJson(id: 'recent-1', podcastId: 'pod-1', seed: 0),
+            _sampleEpisodeJson(id: 'recent-2', podcastId: 'pod-2', seed: 1),
+          ]),
+          200,
+        );
+      });
+      final service = _TestApiService(httpClient: client, cacheService: _MockApiCacheService());
+
+      final episodes = await service.fetchRecentEpisodes(limit: 2);
+
+      expect(episodes, hasLength(2));
+      expect(episodes.first.id, 'recent-1');
+      expect(episodes.last.id, 'recent-2');
+    });
+
+    test('fetchTopShowsThisYear returns parsed top shows', () async {
+      final client = MockClient((http.Request request) async {
+        return http.Response(
+          jsonEncode(_sampleTopShowsResponse()),
+          200,
+        );
+      });
+      final service = _TestApiService(httpClient: client, cacheService: _MockApiCacheService());
+
+      final shows = await service.fetchTopShowsThisYear();
+
+      expect(shows, hasLength(2));
+      expect(shows.first, isA<ShowData>());
+      expect(shows.first.title, 'A lényeg');
+      expect(shows.first.count, 8563);
+      expect(shows.last.title, 'Reggeli gyors');
+    });
+
+    test('searchEpisodes returns parsed episodes', () async {
+      final client = MockClient((http.Request request) async {
+        expect(request.url.queryParameters['title'], contains('test'));
+        return http.Response(
+          jsonEncode([
+            _sampleEpisodeJson(id: 'search-1', podcastId: 'pod-1', seed: 0),
+          ]),
+          200,
+        );
+      });
+      final service = _TestApiService(httpClient: client, cacheService: _MockApiCacheService());
+
+      final episodes = await service.searchEpisodes('test');
+
+      expect(episodes, hasLength(1));
+      expect(episodes.single.id, 'search-1');
+    });
+
+    test('fetchPodcastById returns parsed podcast', () async {
+      final client = MockClient((http.Request request) async {
+        expect(request.url.queryParameters['id'], 'eq.podcast-0');
+        return http.Response(
+          jsonEncode(_samplePodcastResponse(count: 1)),
+          200,
+        );
+      });
+      final service = _TestApiService(httpClient: client, cacheService: _MockApiCacheService());
+
+      final podcast = await service.fetchPodcastById('podcast-0');
+
+      expect(podcast, isNotNull);
+      expect(podcast!.title, 'Podcast 0');
+    });
+
+    test('fetchPodcastById returns null on empty result', () async {
+      final client = MockClient((http.Request request) async {
+        return http.Response(jsonEncode([]), 200);
+      });
+      final service = _TestApiService(httpClient: client, cacheService: _MockApiCacheService());
+
+      final podcast = await service.fetchPodcastById('nonexistent');
+
+      expect(podcast, isNull);
+    });
+  });
 }
 
 List<Map<String, dynamic>> _samplePodcastResponse({int count = 2}) {
@@ -376,4 +813,25 @@ class _TestApiService extends ApiService {
   @override
   bool get hasValidCredentials => true; // Override to true for network tests
 }
+
+class _CachingApiCacheService extends ApiCacheService {
+  final Map<String, dynamic> _store = {};
+
+  void seed(String key, dynamic data) {
+    _store[key] = data;
+  }
+
+  @override
+  Future<dynamic> get(String key) async => _store[key];
+
+  @override
+  Future<void> save(String key, dynamic data, {Duration? expiry}) async {
+    _store[key] = data;
+  }
+}
+
+List<Map<String, dynamic>> _sampleTopShowsResponse() => [
+  {'id': '3', 'title': 'A lényeg', 'count': 8563},
+  {'id': '38', 'title': 'Reggeli gyors', 'count': 1743},
+];
 
