@@ -1,4 +1,4 @@
-Beim Start unter Linux, bekomme ich folgende Meldungen:
+Beim Start unter Linux bekomme ich folgende Meldungen:
 
 ./klubradio_archivum
 
