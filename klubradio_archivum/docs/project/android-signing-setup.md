@@ -14,7 +14,7 @@ Team members need **2 files** to build release APKs/AABs:
 storePassword=klubradio2026
 keyPassword=klubradio2026
 keyAlias=klubradio
-storeFile=app/klubradio-release.jks
+storeFile=klubradio-release.jks
 ```
 
 ### 2. `android/app/klubradio-release.jks`
