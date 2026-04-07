@@ -1,5 +1,5 @@
 import 'dart:io' show Platform;
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart' show kIsWeb, kReleaseMode;
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -29,6 +29,9 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   if (!kIsWeb && Platform.isLinux) {
     JustAudioMediaKit.ensureInitialized();
+  }
+  if (kReleaseMode) {
+    debugPrint = (String? message, {int? wrapWidth}) {};
   }
   await Hive.initFlutter();
   runApp(const KlubradioArchivumApp());
@@ -129,7 +132,11 @@ class _KlubradioArchivumAppState extends State<KlubradioArchivumApp> {
               ProfileProvider(repo: ctx.read<ProfileRepository>())..load(),
         ),
         // SubscriptionProvider depends on DownloadProvider + ProfileProvider
-        ChangeNotifierProxyProvider2<DownloadProvider, ProfileProvider, SubscriptionProvider>(
+        ChangeNotifierProxyProvider2<
+          DownloadProvider,
+          ProfileProvider,
+          SubscriptionProvider
+        >(
           create: (ctx) => SubscriptionProvider(
             subscriptionsDao: ctx.read<SubscriptionsDao>(),
             settingsDao: SettingsDao(ctx.read<AppDatabase>()),
@@ -138,14 +145,17 @@ class _KlubradioArchivumAppState extends State<KlubradioArchivumApp> {
           update: (context, downloadProvider, profileProvider, previous) {
             if (previous != null) {
               previous.updateDependencies(downloadProvider: downloadProvider);
-              previous.autoDownloadEpisodeCount = profileProvider.profileOrNull?.autoDownloadEpisodeCount;
+              previous.autoDownloadEpisodeCount =
+                  profileProvider.profileOrNull?.autoDownloadEpisodeCount;
               return previous;
             }
             return SubscriptionProvider(
-              subscriptionsDao: context.read<SubscriptionsDao>(),
-              settingsDao: SettingsDao(context.read<AppDatabase>()),
-              downloadProvider: downloadProvider,
-            )..autoDownloadEpisodeCount = profileProvider.profileOrNull?.autoDownloadEpisodeCount;
+                subscriptionsDao: context.read<SubscriptionsDao>(),
+                settingsDao: SettingsDao(context.read<AppDatabase>()),
+                downloadProvider: downloadProvider,
+              )
+              ..autoDownloadEpisodeCount =
+                  profileProvider.profileOrNull?.autoDownloadEpisodeCount;
           },
         ),
         ChangeNotifierProvider<LatestProvider>(

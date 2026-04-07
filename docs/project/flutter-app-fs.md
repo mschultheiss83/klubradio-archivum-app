@@ -5186,7 +5186,7 @@ abstract class AppLocalizations {
   /// Contact information
   ///
   /// In en, this message translates to:
-  /// **'Contact: info@klubradio.hu (content), multilevelstudios@gmail.com (developer contact)'**
+  /// **'Contact: info@klubradio.hu (content), servus@multilevelstudios.de (developer contact)'**
   String get aboutScreenContactInfo;
 
   /// Title for the settings screen
@@ -6231,7 +6231,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get aboutScreenContactInfo =>
-      'Kontakt: info@klubradio.hu (Inhalt), multilevelstudios@gmail.com (Entwicklerkontakt)';
+      'Kontakt: info@klubradio.hu (Inhalt), servus@multilevelstudios.de (Entwicklerkontakt)';
 
   @override
   String get settingsTitle => 'Einstellungen';
@@ -6829,7 +6829,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get aboutScreenContactInfo =>
-      'Contact: info@klubradio.hu (content), multilevelstudios@gmail.com (developer contact)';
+      'Contact: info@klubradio.hu (content), servus@multilevelstudios.de (developer contact)';
 
   @override
   String get settingsTitle => 'Settings';
@@ -7419,7 +7419,7 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get aboutScreenContactInfo =>
-      'Kapcsolat: info@klubradio.hu (tartalom), multilevelstudios@gmail.com (fejlesztői elérhetőség)';
+      'Kapcsolat: info@klubradio.hu (tartalom), servus@multilevelstudios.de (fejlesztői elérhetőség)';
 
   @override
   String get settingsTitle => 'Beállítások';
@@ -8012,7 +8012,7 @@ class AppLocalizationsRo extends AppLocalizations {
 
   @override
   String get aboutScreenContactInfo =>
-      'Contact: info@klubradio.hu (conținut), multilevelstudios@gmail.com (contact dezvoltator)';
+      'Contact: info@klubradio.hu (conținut), servus@multilevelstudios.de (contact dezvoltator)';
 
   @override
   String get settingsTitle => 'Setări';
@@ -8548,7 +8548,7 @@ class AppLocalizationsRo extends AppLocalizations {
 ### Inhalt von `klubradio_archivum/lib/main.dart`
 ```dart
 import 'dart:io' show Platform;
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart' show kIsWeb, kReleaseMode;
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -8578,6 +8578,9 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   if (!kIsWeb && Platform.isLinux) {
     JustAudioMediaKit.ensureInitialized();
+  }
+  if (kReleaseMode) {
+    debugPrint = (String? message, {int? wrapWidth}) {};
   }
   await Hive.initFlutter();
   runApp(const KlubradioArchivumApp());
@@ -8678,7 +8681,11 @@ class _KlubradioArchivumAppState extends State<KlubradioArchivumApp> {
               ProfileProvider(repo: ctx.read<ProfileRepository>())..load(),
         ),
         // SubscriptionProvider depends on DownloadProvider + ProfileProvider
-        ChangeNotifierProxyProvider2<DownloadProvider, ProfileProvider, SubscriptionProvider>(
+        ChangeNotifierProxyProvider2<
+          DownloadProvider,
+          ProfileProvider,
+          SubscriptionProvider
+        >(
           create: (ctx) => SubscriptionProvider(
             subscriptionsDao: ctx.read<SubscriptionsDao>(),
             settingsDao: SettingsDao(ctx.read<AppDatabase>()),
@@ -8687,14 +8694,17 @@ class _KlubradioArchivumAppState extends State<KlubradioArchivumApp> {
           update: (context, downloadProvider, profileProvider, previous) {
             if (previous != null) {
               previous.updateDependencies(downloadProvider: downloadProvider);
-              previous.autoDownloadEpisodeCount = profileProvider.profileOrNull?.autoDownloadEpisodeCount;
+              previous.autoDownloadEpisodeCount =
+                  profileProvider.profileOrNull?.autoDownloadEpisodeCount;
               return previous;
             }
             return SubscriptionProvider(
-              subscriptionsDao: context.read<SubscriptionsDao>(),
-              settingsDao: SettingsDao(context.read<AppDatabase>()),
-              downloadProvider: downloadProvider,
-            )..autoDownloadEpisodeCount = profileProvider.profileOrNull?.autoDownloadEpisodeCount;
+                subscriptionsDao: context.read<SubscriptionsDao>(),
+                settingsDao: SettingsDao(context.read<AppDatabase>()),
+                downloadProvider: downloadProvider,
+              )
+              ..autoDownloadEpisodeCount =
+                  profileProvider.profileOrNull?.autoDownloadEpisodeCount;
           },
         ),
         ChangeNotifierProvider<LatestProvider>(
