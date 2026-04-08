@@ -31,11 +31,13 @@ class AudioPlayerService {
   bool get isPlaying => _player.playing;
   Duration? get totalDuration => _player.duration;
 
-  // TODO: Test autoplay functionality across all platforms (web, mobile, desktop)
-  // Currently disabled due to issues on web and other platforms
-  Future<void> loadEpisode(Episode episode, {bool autoplay = false}) async {
+  Future<void> loadEpisode(Episode episode, {bool autoplay = true}) async {
     _currentEpisode = episode;
     try {
+      // Stop current playback before loading a new source.
+      // On web, just_audio keeps the previous track playing otherwise.
+      if (_player.playing) await _player.stop();
+
       final local = episode.localFilePath;
       bool loadedSuccessfully = false;
 

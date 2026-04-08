@@ -4458,7 +4458,7 @@ class $AppDatabaseManager {
 ### Inhalt von `klubradio_archivum/lib/db/connection/connection.dart`
 ```dart
 export 'connection_stub.dart'
-    if (dart.library.html) 'connection_web.dart'
+    if (dart.library.js_interop) 'connection_web.dart'
     if (dart.library.io) 'connection_native.dart';
 ```
 
@@ -10274,9 +10274,10 @@ class SubscriptionProvider extends ChangeNotifier {
         'toggleSubscription: subscriptionsDao.toggleSubscribe completed',
       );
 
-      if (!currentlySubscribed) {
+      if (!currentlySubscribed && !kIsWeb) {
         // Seed a new subscription immediately. The settings toggle only controls
         // later background checks for newly published episodes.
+        // Auto-download is not supported on web.
         final downloadCount = await downloadProvider.autodownloadPodcast(
           podcastId,
           globalAutoDownloadN:
@@ -10514,12 +10515,15 @@ class ProfileRepository {
 ### Inhalt von `klubradio_archivum/lib/screens/about_screen/about_screen.dart`
 ```dart
 import 'dart:convert';
+import 'dart:io' show Platform;
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
-import 'package:klubradio_archivum/l10n/app_localizations.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+import 'package:klubradio_archivum/l10n/app_localizations.dart';
 import 'package:klubradio_archivum/screens/about_screen/legal_screen.dart';
 import 'package:klubradio_archivum/screens/widgets/privacy_dialog.dart';
 
@@ -10548,15 +10552,16 @@ class _AboutScreenState extends State<AboutScreen> {
     setState(() {
       versionText = l10n.aboutScreenVersionFormat(
         info.version,
-        info.buildNumber,
+        (!kIsWeb && Platform.isLinux) ? info.packageName : info.buildNumber,
       );
     });
   }
 
   Future<void> _loadContributors() async {
     try {
-      final jsonString =
-          await rootBundle.loadString('assets/contributions.json');
+      final jsonString = await rootBundle.loadString(
+        'assets/contributions.json',
+      );
       final List<dynamic> data = json.decode(jsonString) as List<dynamic>;
       if (!mounted) return;
       setState(() {
@@ -10720,8 +10725,10 @@ class _AboutScreenState extends State<AboutScreen> {
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.volunteer_activism_outlined,
-                            color: cs.primary),
+                        Icon(
+                          Icons.volunteer_activism_outlined,
+                          color: cs.primary,
+                        ),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
@@ -10747,8 +10754,7 @@ class _AboutScreenState extends State<AboutScreen> {
                           padding: const EdgeInsets.symmetric(vertical: 4),
                           child: Row(
                             children: [
-                              Icon(Icons.favorite,
-                                  size: 16, color: cs.primary),
+                              Icon(Icons.favorite, size: 16, color: cs.primary),
                               const SizedBox(width: 8),
                               Text(
                                 _contributors[index],
@@ -10833,7 +10839,6 @@ class LegalScreen extends StatelessWidget {
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-// import 'package:flutter/foundation.dart'; // Import for kIsWeb -- Removed
 
 import 'package:klubradio_archivum/l10n/app_localizations.dart';
 import 'package:klubradio_archivum/providers/episode_provider.dart';
@@ -10892,7 +10897,9 @@ class _AppShellState extends State<AppShell> {
   void _restorePlaybackSpeed() {
     final profile = context.read<ProfileProvider>().profileOrNull;
     if (profile != null) {
-      context.read<EpisodeProvider>().updatePlaybackSpeed(profile.playbackSpeed);
+      context.read<EpisodeProvider>().updatePlaybackSpeed(
+        profile.playbackSpeed,
+      );
     }
   }
 
@@ -10927,12 +10934,15 @@ class _AppShellState extends State<AppShell> {
       );
     }
 
-    // Always include these
-    _navKeys.add(GlobalKey<NavigatorState>());
-    _screens.add(
-      _TabNav(key: _navKeys.last, builder: (_) => const ProfileScreen()),
-    );
+    // Conditionally add Profile/Subscriptions tab
+    if (PlatformUtils.supportsSubscriptions) {
+      _navKeys.add(GlobalKey<NavigatorState>());
+      _screens.add(
+        _TabNav(key: _navKeys.last, builder: (_) => const ProfileScreen()),
+      );
+    }
 
+    // Always include these
     _navKeys.add(GlobalKey<NavigatorState>());
     _screens.add(
       _TabNav(key: _navKeys.last, builder: (_) => const SettingsScreen()),
@@ -10982,11 +10992,12 @@ class _AppShellState extends State<AppShell> {
           Icons.download,
           l10n.bottomNavDownloads,
         ),
-      AppBottomNavigationBar.buildDestination(
-        Icons.subscriptions_outlined,
-        Icons.subscriptions,
-        l10n.bottomNavProfile,
-      ),
+      if (PlatformUtils.supportsSubscriptions)
+        AppBottomNavigationBar.buildDestination(
+          Icons.subscriptions_outlined,
+          Icons.subscriptions,
+          l10n.bottomNavProfile,
+        ),
       AppBottomNavigationBar.buildDestination(
         Icons.settings_outlined,
         Icons.settings,
@@ -11005,9 +11016,9 @@ class _AppShellState extends State<AppShell> {
               icon: const Icon(Icons.info_outline),
               tooltip: l10n.aboutScreenAppBarTitle,
               onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const AboutScreen()),
-                );
+                Navigator.of(
+                  context,
+                ).push(MaterialPageRoute(builder: (_) => const AboutScreen()));
               },
             ),
           ],
@@ -15022,7 +15033,8 @@ class PlatformUtils {
   static bool get supportsOfflinePlayback => !kIsWeb;
   static bool get supportsBackgroundAudio => !kIsWeb;
   static bool get supportsSubscriptions => !kIsWeb;
-}```
+}
+```
 
 ### Inhalt von `klubradio_archivum/lib/screens/widgets/stateless/podcast_list_item.dart`
 ```dart
@@ -15809,11 +15821,13 @@ class AudioPlayerService {
   bool get isPlaying => _player.playing;
   Duration? get totalDuration => _player.duration;
 
-  // TODO: Test autoplay functionality across all platforms (web, mobile, desktop)
-  // Currently disabled due to issues on web and other platforms
-  Future<void> loadEpisode(Episode episode, {bool autoplay = false}) async {
+  Future<void> loadEpisode(Episode episode, {bool autoplay = true}) async {
     _currentEpisode = episode;
     try {
+      // Stop current playback before loading a new source.
+      // On web, just_audio keeps the previous track playing otherwise.
+      if (_player.playing) await _player.stop();
+
       final local = episode.localFilePath;
       bool loadedSuccessfully = false;
 
@@ -15905,6 +15919,7 @@ class AudioPlayerService {
 ```dart
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:path_provider/path_provider.dart';
 
 class CacheStore {
@@ -15916,6 +15931,7 @@ class CacheStore {
   }
 
   Future<Map<String, dynamic>?> read(String name) async {
+    if (kIsWeb) return null;
     final f = await _file(name);
     if (!await f.exists()) return null;
     try {
@@ -15926,6 +15942,7 @@ class CacheStore {
   }
 
   Future<void> write(String name, List<Map<String, dynamic>> items) async {
+    if (kIsWeb) return;
     final f = await _file(name);
     final payload = jsonEncode({
       'updatedAt': DateTime.now().toIso8601String(),
@@ -16752,6 +16769,13 @@ class AppIdentity {
         final ver = (l.version ?? l.prettyName).split(' ').first;
         return 'linux-$ver';
       }
+      debugPrint(
+        'Platform: isLinux: ${Platform.isLinux}'
+        ' isMacOS: ${Platform.isMacOS}'
+        ' isWindows: ${Platform.isWindows}'
+        ' isIOS: ${Platform.isIOS}'
+        ' isAndroid: ${Platform.isAndroid}',
+      );
     } catch (_) {
       /* fallthrough */
     }

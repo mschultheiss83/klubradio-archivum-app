@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-// import 'package:flutter/foundation.dart'; // Import for kIsWeb -- Removed
 
 import 'package:klubradio_archivum/l10n/app_localizations.dart';
 import 'package:klubradio_archivum/providers/episode_provider.dart';
@@ -60,7 +59,9 @@ class _AppShellState extends State<AppShell> {
   void _restorePlaybackSpeed() {
     final profile = context.read<ProfileProvider>().profileOrNull;
     if (profile != null) {
-      context.read<EpisodeProvider>().updatePlaybackSpeed(profile.playbackSpeed);
+      context.read<EpisodeProvider>().updatePlaybackSpeed(
+        profile.playbackSpeed,
+      );
     }
   }
 
@@ -95,12 +96,15 @@ class _AppShellState extends State<AppShell> {
       );
     }
 
-    // Always include these
-    _navKeys.add(GlobalKey<NavigatorState>());
-    _screens.add(
-      _TabNav(key: _navKeys.last, builder: (_) => const ProfileScreen()),
-    );
+    // Conditionally add Profile/Subscriptions tab
+    if (PlatformUtils.supportsSubscriptions) {
+      _navKeys.add(GlobalKey<NavigatorState>());
+      _screens.add(
+        _TabNav(key: _navKeys.last, builder: (_) => const ProfileScreen()),
+      );
+    }
 
+    // Always include these
     _navKeys.add(GlobalKey<NavigatorState>());
     _screens.add(
       _TabNav(key: _navKeys.last, builder: (_) => const SettingsScreen()),
@@ -150,11 +154,12 @@ class _AppShellState extends State<AppShell> {
           Icons.download,
           l10n.bottomNavDownloads,
         ),
-      AppBottomNavigationBar.buildDestination(
-        Icons.subscriptions_outlined,
-        Icons.subscriptions,
-        l10n.bottomNavProfile,
-      ),
+      if (PlatformUtils.supportsSubscriptions)
+        AppBottomNavigationBar.buildDestination(
+          Icons.subscriptions_outlined,
+          Icons.subscriptions,
+          l10n.bottomNavProfile,
+        ),
       AppBottomNavigationBar.buildDestination(
         Icons.settings_outlined,
         Icons.settings,
@@ -173,9 +178,9 @@ class _AppShellState extends State<AppShell> {
               icon: const Icon(Icons.info_outline),
               tooltip: l10n.aboutScreenAppBarTitle,
               onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const AboutScreen()),
-                );
+                Navigator.of(
+                  context,
+                ).push(MaterialPageRoute(builder: (_) => const AboutScreen()));
               },
             ),
           ],

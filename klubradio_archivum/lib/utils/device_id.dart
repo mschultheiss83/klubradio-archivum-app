@@ -51,6 +51,13 @@ class AppIdentity {
         final ver = (l.version ?? l.prettyName).split(' ').first;
         return 'linux-$ver';
       }
+      debugPrint(
+        'Platform: isLinux: ${Platform.isLinux}'
+        ' isMacOS: ${Platform.isMacOS}'
+        ' isWindows: ${Platform.isWindows}'
+        ' isIOS: ${Platform.isIOS}'
+        ' isAndroid: ${Platform.isAndroid}',
+      );
     } catch (_) {
       /* fallthrough */
     }

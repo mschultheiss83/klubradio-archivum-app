@@ -87,9 +87,10 @@ class SubscriptionProvider extends ChangeNotifier {
         'toggleSubscription: subscriptionsDao.toggleSubscribe completed',
       );
 
-      if (!currentlySubscribed) {
+      if (!currentlySubscribed && !kIsWeb) {
         // Seed a new subscription immediately. The settings toggle only controls
         // later background checks for newly published episodes.
+        // Auto-download is not supported on web.
         final downloadCount = await downloadProvider.autodownloadPodcast(
           podcastId,
           globalAutoDownloadN:

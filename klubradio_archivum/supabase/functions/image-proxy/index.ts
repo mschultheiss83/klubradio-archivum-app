@@ -10,23 +10,26 @@ const ALLOWED_HOSTS = [
   'cdn.klubradio.hu',
 ]
 
+const CORS_HEADERS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type',
+}
+
 Deno.serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response(null, {
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type',
-      },
-    })
+    return new Response(null, { headers: CORS_HEADERS })
   }
 
   const url = new URL(req.url).searchParams.get('url')
 
   // Validate URL parameter
   if (!url) {
-    return new Response('Missing url parameter', { status: 400 })
+    return new Response('Missing url parameter', {
+      status: 400,
+      headers: CORS_HEADERS,
+    })
   }
 
   // Parse and validate target URL
@@ -34,12 +37,15 @@ Deno.serve(async (req) => {
   try {
     targetUrl = new URL(url)
   } catch {
-    return new Response('Invalid URL', { status: 400 })
+    return new Response('Invalid URL', { status: 400, headers: CORS_HEADERS })
   }
 
   // Only allow klubradio.hu domains
   if (!ALLOWED_HOSTS.includes(targetUrl.host.toLowerCase())) {
-    return new Response(`Domain not allowed: ${targetUrl.host}`, { status: 403 })
+    return new Response(`Domain not allowed: ${targetUrl.host}`, {
+      status: 403,
+      headers: CORS_HEADERS,
+    })
   }
 
   // Fetch the image from klubradio.hu
@@ -50,6 +56,7 @@ Deno.serve(async (req) => {
       console.error(`Upstream error: ${response.status} for ${targetUrl}`)
       return new Response(`Upstream error: ${response.status}`, {
         status: response.status,
+        headers: CORS_HEADERS,
       })
     }
 
@@ -58,21 +65,24 @@ Deno.serve(async (req) => {
 
     return new Response(blob, {
       headers: {
+        ...CORS_HEADERS,
         'Content-Type': contentType,
-        'Access-Control-Allow-Origin': '*',
         'Cache-Control': 'public, max-age=31536000', // Cache for 1 year
       },
     })
   } catch (error) {
     console.error('Error fetching image:', error)
-    return new Response('Error fetching image', { status: 500 })
+    return new Response('Error fetching image', {
+      status: 500,
+      headers: CORS_HEADERS,
+    })
   }
 })
 
 /* To invoke:
 
   Production:
-  https://arakbotxgwpyyqyxjhhl.supabase.co/functions/v1/image-proxy?url=https://www.klubradio.hu/data/musorkepek/example.jpeg
+  https://arakbotxgwpyyqyxjhhl.supabase.co/functions/v1/image-proxy?url=https://www.klubradio.hu/data/sound-speaker-radio-microphone_focuspoint_340x340.jpg
 
   Local testing:
   1. Run `supabase start`

@@ -1,10 +1,13 @@
 import 'dart:convert';
+import 'dart:io' show Platform;
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
-import 'package:klubradio_archivum/l10n/app_localizations.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+import 'package:klubradio_archivum/l10n/app_localizations.dart';
 import 'package:klubradio_archivum/screens/about_screen/legal_screen.dart';
 import 'package:klubradio_archivum/screens/widgets/privacy_dialog.dart';
 
@@ -33,15 +36,16 @@ class _AboutScreenState extends State<AboutScreen> {
     setState(() {
       versionText = l10n.aboutScreenVersionFormat(
         info.version,
-        info.buildNumber,
+        (!kIsWeb && Platform.isLinux) ? info.packageName : info.buildNumber,
       );
     });
   }
 
   Future<void> _loadContributors() async {
     try {
-      final jsonString =
-          await rootBundle.loadString('assets/contributions.json');
+      final jsonString = await rootBundle.loadString(
+        'assets/contributions.json',
+      );
       final List<dynamic> data = json.decode(jsonString) as List<dynamic>;
       if (!mounted) return;
       setState(() {
@@ -205,8 +209,10 @@ class _AboutScreenState extends State<AboutScreen> {
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.volunteer_activism_outlined,
-                            color: cs.primary),
+                        Icon(
+                          Icons.volunteer_activism_outlined,
+                          color: cs.primary,
+                        ),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
@@ -232,8 +238,7 @@ class _AboutScreenState extends State<AboutScreen> {
                           padding: const EdgeInsets.symmetric(vertical: 4),
                           child: Row(
                             children: [
-                              Icon(Icons.favorite,
-                                  size: 16, color: cs.primary),
+                              Icon(Icons.favorite, size: 16, color: cs.primary),
                               const SizedBox(width: 8),
                               Text(
                                 _contributors[index],

@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:path_provider/path_provider.dart';
 
 class CacheStore {
@@ -11,6 +12,7 @@ class CacheStore {
   }
 
   Future<Map<String, dynamic>?> read(String name) async {
+    if (kIsWeb) return null;
     final f = await _file(name);
     if (!await f.exists()) return null;
     try {
@@ -21,6 +23,7 @@ class CacheStore {
   }
 
   Future<void> write(String name, List<Map<String, dynamic>> items) async {
+    if (kIsWeb) return;
     final f = await _file(name);
     final payload = jsonEncode({
       'updatedAt': DateTime.now().toIso8601String(),
