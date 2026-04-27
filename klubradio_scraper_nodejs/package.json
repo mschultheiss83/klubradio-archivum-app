@@ -17,7 +17,7 @@
     "dotenv": "*",
     "music-metadata": "*",
     "pino": "*",
-    "puppeteer": "^24.40.0",
+    "puppeteer": "^24.41.0",
     "rss": "*",
     "rss-parser": "*",
     "winston": "^3.19.0"
