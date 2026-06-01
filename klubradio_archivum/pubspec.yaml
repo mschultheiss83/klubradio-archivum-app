@@ -34,7 +34,7 @@ dependencies:
   sqlite3_flutter_libs: ^0.6.0+eol
   url_launcher: ^6.3.2
   uuid: ^4.5.1
-  xml: ^6.6.1
+  xml: ^7.0.1
 
 dev_dependencies:
   build_runner: ^2.9.0
