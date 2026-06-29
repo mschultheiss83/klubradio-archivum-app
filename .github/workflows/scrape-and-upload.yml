@@ -48,7 +48,7 @@ jobs:
             libpango-1.0-0 libcups2
 
       - name: Cache Puppeteer Chromium
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ~/.cache/puppeteer
           key: puppeteer-${{ runner.os }}-chromium
